@@ -1,0 +1,219 @@
+---
+import { type Lang, useTranslations } from '../i18n/ui';
+
+/**
+ * Campo de suscripción — una regla, nunca una caja.
+ *
+ * PENDIENTE (bloquea el lanzamiento): todavía no hay proveedor de correo
+ * conectado. El formulario envía a `PUBLIC_NEWSLETTER_ENDPOINT` cuando esa
+ * variable existe. Si no existe:
+ *   · en desarrollo, simula el envío para poder revisar el diseño;
+ *   · en producción, muestra el error en vez de mentirle a quien se suscribe.
+ */
+interface Props {
+  lang: Lang;
+  id: string;
+}
+const { lang, id } = Astro.props;
+const t = useTranslations(lang);
+
+const endpoint = import.meta.env.PUBLIC_NEWSLETTER_ENDPOINT ?? '';
+const inputId = `${id}-email`;
+const statusId = `${id}-status`;
+---
+
+<div class="subscribe row" id={id}>
+  <div class="row__num" aria-hidden="true"></div>
+  <div class="row__body">
+    <form
+      class="subscribe__form"
+      data-subscribe
+      data-endpoint={endpoint}
+      data-dev={import.meta.env.DEV ? 'true' : 'false'}
+      data-done={t('form.done')}
+      data-invalid={t('form.error')}
+      data-failed={t('form.failed')}
+      action={endpoint || undefined}
+      method="post"
+      novalidate
+    >
+      <label class="subscribe__label" for={inputId}>{t('form.label')}</label>
+      <input
+        class="subscribe__input"
+        id={inputId}
+        name="email"
+        type="email"
+        autocomplete="email"
+        required
+        placeholder={t('form.placeholder')}
+        aria-describedby={statusId}
+      />
+      <button class="subscribe__cta mono" type="submit">{t('form.cta')}</button>
+    </form>
+
+    <p class="subscribe__status mono" id={statusId} role="status" data-status hidden></p>
+  </div>
+</div>
+
+<style>
+  .subscribe {
+    padding-top: var(--space-4);
+  }
+
+  .subscribe__form {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-3);
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: var(--space-1);
+  }
+
+  .subscribe__form[hidden] {
+    display: none;
+  }
+
+  /* La etiqueta existe para el lector de pantalla, no para la pantalla. */
+  .subscribe__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .subscribe__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    font-family: var(--font-body);
+    font-size: 1.25rem; /* 20 px */
+    line-height: var(--leading-body);
+    color: var(--ink);
+  }
+
+  .subscribe__input::placeholder {
+    color: var(--ink-soft);
+    opacity: 1;
+  }
+
+  .subscribe__input:focus-visible {
+    outline: 0;
+  }
+
+  /* Con el campo enfocado la regla engorda: el foco se ve sin romper la
+     promesa de «una regla, nunca una caja». */
+  .subscribe__form:focus-within {
+    box-shadow: 0 1px 0 0 var(--ink);
+  }
+
+  .subscribe__cta {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    color: var(--ink);
+    white-space: nowrap;
+    font-family: var(--font-mono);
+    font-size: var(--text-mono);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+  }
+
+  .subscribe__cta:hover {
+    color: var(--ink-soft);
+  }
+
+  .subscribe__status {
+    margin-top: var(--space-1);
+    color: var(--ink-soft);
+  }
+
+  /* El acuse de recibo reemplaza al campo, con su propia regla. */
+  .subscribe__status.is-done {
+    margin-top: 0;
+    padding-bottom: var(--space-1);
+    border-bottom: 1px solid var(--rule);
+    animation: subscribe-in 0.4s var(--ease-reveal);
+  }
+
+  @keyframes subscribe-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .subscribe__status.is-done {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLFormElement>('form[data-subscribe]').forEach((form) => {
+    const input = form.querySelector<HTMLInputElement>('input[name="email"]');
+    const status = form.parentElement?.querySelector<HTMLElement>('[data-status]');
+    if (!input || !status) return;
+
+    const endpoint = form.dataset.endpoint ?? '';
+    const isDev = form.dataset.dev === 'true';
+    const doneCopy = form.dataset.done ?? '';
+    const invalidCopy = form.dataset.invalid ?? '';
+    const failedCopy = form.dataset.failed ?? '';
+
+    const say = (message: string) => {
+      status.textContent = message;
+      status.hidden = false;
+    };
+
+    const succeed = () => {
+      form.hidden = true;
+      status.classList.add('is-done');
+      say(doneCopy);
+    };
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      if (!input.checkValidity() || !input.value.trim()) {
+        say(invalidCopy);
+        input.focus();
+        return;
+      }
+
+      // Sin proveedor conectado: en desarrollo se simula para poder revisar
+      // el diseño; en producción no se finge un alta que no ha ocurrido.
+      if (!endpoint) {
+        if (isDev) {
+          console.warn(
+            '[suscripción] PUBLIC_NEWSLETTER_ENDPOINT no está definido: envío simulado.',
+          );
+          succeed();
+        } else {
+          say(failedCopy);
+        }
+        return;
+      }
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ email: input.value.trim() }),
+        });
+        if (!response.ok) throw new Error(String(response.status));
+        succeed();
+      } catch {
+        say(failedCopy);
+      }
+    });
+  });
+</script>

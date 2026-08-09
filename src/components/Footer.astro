@@ -1,0 +1,83 @@
+---
+import { type Lang, useTranslations, localizePath } from '../i18n/ui';
+import LangSwitch from './LangSwitch.astro';
+
+interface Props {
+  lang: Lang;
+  path?: string;
+}
+const { lang, path = '/' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<footer class="footer">
+  <div class="footer__inner">
+    <div>
+      <div class="signature footer__mark">{t('site.name')}</div>
+      <a class="mono-plain soft footer__email" href={`mailto:${t('footer.email')}`}>
+        {t('footer.email')}
+      </a>
+    </div>
+
+    <nav class="footer__nav mono" aria-label={t('site.name')}>
+      <a class="footer__link" href="https://instagram.com/" rel="me noopener">
+        {t('footer.instagram')}
+      </a>
+      <a class="footer__link" href="https://youtube.com/" rel="me noopener">
+        {t('footer.youtube')}
+      </a>
+      {/* «Sobre mí» llega en el PR siguiente; hasta entonces no enlaza a un 404. */}
+      <span class="footer__link soft" aria-disabled="true">{t('nav.about')}</span>
+      <LangSwitch lang={lang} hrefEs={localizePath(path, 'es')} hrefEn={localizePath(path, 'en')} />
+    </nav>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--rule);
+    margin-top: var(--space-16);
+  }
+
+  .footer__inner {
+    max-width: var(--width-full);
+    margin-inline: auto;
+    padding: var(--space-6) var(--space-3);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .footer__mark {
+    font-size: 2.5rem; /* 40 px */
+    line-height: 1;
+  }
+
+  .footer__email {
+    display: inline-block;
+    margin-top: var(--space-1);
+    border-bottom-color: transparent;
+  }
+
+  .footer__email:hover {
+    color: var(--ink);
+    border-bottom-color: currentColor;
+  }
+
+  .footer__nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .footer__link {
+    border-bottom: 0;
+  }
+
+  .footer__link:hover {
+    color: var(--ink-soft);
+  }
+</style>

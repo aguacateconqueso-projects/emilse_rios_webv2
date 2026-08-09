@@ -1,0 +1,220 @@
+---
+import { type Lang, useTranslations } from '../i18n/ui';
+import { getHomeCopy } from '../data/home';
+import SubscribeForm from './SubscribeForm.astro';
+import EmailArchive from './EmailArchive.astro';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const { blocks } = getHomeCopy(lang);
+---
+
+{
+  blocks.map((block) => {
+    switch (block.k) {
+      case 'hero':
+        return (
+          <section class="row hero">
+            <div class="row__num hero__num" aria-hidden="true">
+              {block.n}
+            </div>
+            <div class="row__body">
+              <h1 class="hero__title">{block.title}</h1>
+              <p class="mono soft hero__eyebrow">{block.eyebrow}</p>
+              <p class="hero__lead">{block.lead}</p>
+            </div>
+          </section>
+        );
+
+      case 'runs':
+        return (
+          <section class="row block">
+            <div class="row__num" aria-hidden="true">
+              {block.n}
+            </div>
+            <div class="row__body prose">
+              <p>
+                {block.runs.map((run) =>
+                  run.mono ? <span class="inline-mono">{run.text}</span> : run.text,
+                )}
+              </p>
+            </div>
+          </section>
+        );
+
+      case 'h2':
+        return (
+          <section class="row block">
+            <div class="row__num row__num--h2" aria-hidden="true">
+              {block.n}
+            </div>
+            <div class="row__body">
+              <h2 class="section-title">{block.text}</h2>
+            </div>
+          </section>
+        );
+
+      case 'prose':
+        return (
+          <div class="row block">
+            <div class="row__num" aria-hidden="true">
+              {block.n ?? ''}
+            </div>
+            <div class="row__body prose">
+              {block.paras.map((para) => (
+                <p>{para}</p>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 'anchor':
+        return (
+          <div class="anchor reveal">
+            {block.num && <div class="mono-plain soft anchor__num">{block.num}</div>}
+            <p class="anchor__text">{block.text}</p>
+          </div>
+        );
+
+      case 'form':
+        return <SubscribeForm lang={lang} id={block.id} />;
+
+      case 'cards':
+        return (
+          <div class="block">
+            <EmailArchive lang={lang} n={block.n} label={block.label} />
+          </div>
+        );
+
+      case 'closing':
+        return (
+          <section class="closing on-ink">
+            <div class="mono-plain closing__num">{block.num}</div>
+            <p class="closing__text">{block.text}</p>
+            <a class="mono closing__link" href="#suscribete">
+              {block.link}
+            </a>
+          </section>
+        );
+    }
+  })
+}
+
+<style>
+  /* Separación entre bloques mayores: 96 px. */
+  .block {
+    margin-top: var(--space-12);
+  }
+
+  /* --- Hero -------------------------------------------------------------- */
+  .hero {
+    padding-top: var(--space-3);
+  }
+
+  .hero__num {
+    padding-top: var(--space-3);
+  }
+
+  .hero__title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--text-hero);
+    line-height: var(--leading-hero);
+    letter-spacing: var(--tracking-hero);
+  }
+
+  .hero__eyebrow {
+    margin-top: var(--space-3);
+  }
+
+  .hero__lead {
+    margin-top: var(--space-4);
+    text-wrap: pretty;
+  }
+
+  /* --- Títulos de sección ------------------------------------------------ */
+  .section-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--text-section);
+    line-height: var(--leading-section);
+    letter-spacing: var(--tracking-section);
+    text-wrap: pretty;
+  }
+
+  /* Alinea el número con la mayúscula del título, sin salirse de la rejilla. */
+  .row__num--h2 {
+    padding-top: var(--space-1);
+  }
+
+  /* Los minutos del video, en mono dentro del cuerpo. */
+  .inline-mono {
+    font-family: var(--font-mono);
+    font-size: 0.82em;
+    letter-spacing: 0.04em;
+  }
+
+  /* --- Frase-ancla ------------------------------------------------------- */
+  .anchor {
+    max-width: 65rem; /* 1040 px */
+    margin: var(--space-12) auto;
+    padding-inline: var(--space-3);
+    text-align: center;
+  }
+
+  .anchor__num {
+    margin-bottom: var(--space-4);
+  }
+
+  .anchor__text {
+    max-width: 56.25rem; /* 900 px */
+    margin-inline: auto;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--text-anchor);
+    line-height: var(--leading-anchor);
+    letter-spacing: var(--tracking-section);
+    text-wrap: balance;
+  }
+
+  /* --- Cierre en negro --------------------------------------------------- */
+  .closing {
+    margin-top: var(--space-16);
+    padding: clamp(var(--space-12), 14vw, 11rem) var(--space-3);
+    background: var(--ink);
+    color: var(--paper);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 70vh;
+  }
+
+  .closing__num {
+    color: var(--paper-soft);
+  }
+
+  .closing__text {
+    margin-top: var(--space-6);
+    max-width: 56.25rem; /* 900 px */
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 4.4vw, 3rem); /* 28 → 48 px */
+    line-height: 1.24;
+    text-wrap: pretty;
+  }
+
+  .closing__link {
+    margin-top: var(--space-8);
+    color: var(--paper);
+    border-bottom: 1px solid var(--paper-rule);
+    padding-bottom: var(--space-1);
+  }
+
+  .closing__link:hover {
+    border-bottom-color: var(--paper);
+  }
+</style>
