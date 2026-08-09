@@ -1,6 +1,6 @@
 ---
 import { Font } from 'astro:assets';
-import { type Lang, useTranslations, localizePath } from '../i18n/ui';
+import { type Lang, type Route, useTranslations, routePath } from '../i18n/ui';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Intro from '../components/Intro.astro';
@@ -11,17 +11,17 @@ interface Props {
   lang: Lang;
   title: string;
   description: string;
-  /** Ruta sin prefijo de idioma, para las alternativas hreflang. */
-  path?: string;
+  /** Página actual, para canonical y alternativas hreflang. */
+  route?: Route;
   /** La entrada solo se reproduce en la Home. */
   intro?: boolean;
 }
-const { lang, title, description, path = '/', intro = false } = Astro.props;
+const { lang, title, description, route = 'home', intro = false } = Astro.props;
 const t = useTranslations(lang);
 
-const canonical = new URL(localizePath(path, lang), Astro.site);
-const altEs = new URL(localizePath(path, 'es'), Astro.site);
-const altEn = new URL(localizePath(path, 'en'), Astro.site);
+const canonical = new URL(routePath(route, lang), Astro.site);
+const altEs = new URL(routePath(route, 'es'), Astro.site);
+const altEn = new URL(routePath(route, 'en'), Astro.site);
 ---
 
 <!doctype html>
@@ -78,13 +78,13 @@ const altEn = new URL(localizePath(path, 'en'), Astro.site);
     <a class="skip-link mono" href="#contenido">{t('nav.skip')}</a>
     {intro && <Intro name={t('site.name')} />}
 
-    <Header lang={lang} path={path} />
+    <Header lang={lang} route={route} />
 
     <main id="contenido" class="main">
       <slot />
     </main>
 
-    <Footer lang={lang} path={path} />
+    <Footer lang={lang} route={route} />
 
     {/* Revelado de las frases-ancla. La segunda y última animación. */}
     <script>

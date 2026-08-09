@@ -1,0 +1,299 @@
+---
+import { type Lang, useTranslations } from '../i18n/ui';
+import { getAboutCopy } from '../data/about';
+import SubscribeForm from './SubscribeForm.astro';
+import MediaSlot from './MediaSlot.astro';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const { blocks } = getAboutCopy(lang);
+---
+
+{
+  blocks.map((block) => {
+    switch (block.k) {
+      case 'ahero':
+        return (
+          <section class="ahero">
+            <div class="ahero__text">
+              <div class="ahero__inner">
+                <div class="mono-plain soft">{block.num}</div>
+                <h1 class="ahero__title">{block.title}</h1>
+                {block.paras.map((para) => (
+                  <p class="ahero__para">{para}</p>
+                ))}
+              </div>
+            </div>
+            <div class="ahero__media">
+              <MediaSlot
+                placeholder={t('media.portrait')}
+                alt={t('media.portraitAlt')}
+                width={900}
+              />
+            </div>
+          </section>
+        );
+
+      case 'prose':
+        return (
+          <div class="row block">
+            <div class="row__num" aria-hidden="true">
+              {block.n ?? ''}
+            </div>
+            <div class="row__body prose">
+              {block.paras.map((para) => (
+                <p>{para}</p>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 'anchor':
+        return (
+          <div class="anchor reveal">
+            {block.num && <div class="mono-plain soft anchor__num">{block.num}</div>}
+            <p class="anchor__text">{block.text}</p>
+          </div>
+        );
+
+      case 'facts':
+        return (
+          <section class="row row--wide block">
+            <div class="row__num facts__num" aria-hidden="true">
+              {block.n}
+            </div>
+            <div class="row__body">
+              <dl class="facts">
+                {block.items.map((fact) => (
+                  <div class="facts__row">
+                    <dt class="mono soft facts__label">{fact.label}</dt>
+                    <dd class="facts__text">{fact.text}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </section>
+        );
+
+      case 'video':
+        return (
+          <section class="row block">
+            <div class="row__num" aria-hidden="true">
+              {block.n}
+            </div>
+            <div class="row__body">
+              <figure class="video">
+                <MediaSlot placeholder={t('media.still')} ratio="3 / 4" width={400} />
+                <figcaption class="video__meta mono soft">
+                  <span>{block.caption}</span>
+                  <span>{block.dur}</span>
+                </figcaption>
+                {/*
+                  El video todavía no existe. Se deja apagado en lugar de
+                  enlazar a ninguna parte; cuando llegue el archivo, esto pasa
+                  a ser un enlace de verdad.
+                */}
+                <span class="video__play mono soft" aria-disabled="true" title={t('media.playSoon')}>
+                  {t('media.play')}
+                </span>
+              </figure>
+
+              <div class="prose">
+                {block.paras.map((para) => (
+                  <p>{para}</p>
+                ))}
+              </div>
+              <div class="video__clear" />
+            </div>
+          </section>
+        );
+
+      case 'form':
+        return <SubscribeForm lang={lang} id={block.id} />;
+
+      case 'testi':
+        return (
+          <section class="row row--wide block">
+            <div class="row__num facts__num" aria-hidden="true">
+              {block.n}
+            </div>
+            <div class="row__body">
+              <ul class="testi" role="list">
+                {block.items.map((item) => (
+                  <li class="testi__item">
+                    <blockquote class:list={['testi__text', item.pendiente && 'is-pending']}>
+                      {item.text}
+                    </blockquote>
+                    <p class="mono soft testi__meta">{item.meta}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        );
+    }
+  })
+}
+
+<style>
+  /* --- Hero a dos columnas ----------------------------------------------- */
+  .ahero {
+    display: flex;
+    flex-wrap: wrap-reverse;
+    align-items: stretch;
+    min-height: 35rem; /* 560 px */
+  }
+
+  .ahero__text {
+    flex: 1 1 27.5rem;
+    display: flex;
+    align-items: center;
+    padding: var(--space-12) var(--space-6) var(--space-12) max(var(--space-3), 8vw);
+  }
+
+  .ahero__inner {
+    width: 100%;
+    max-width: 37.5rem; /* 600 px */
+    margin-left: auto;
+  }
+
+  .ahero__title {
+    margin-top: var(--space-3);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(3rem, 7vw, 5.5rem); /* 48 → 88 px */
+    line-height: 1;
+    letter-spacing: var(--tracking-hero);
+  }
+
+  .ahero__para {
+    margin-top: var(--space-4);
+    max-width: 32.5rem; /* 520 px */
+    text-wrap: pretty;
+  }
+
+  .ahero__media {
+    flex: 1 1 27.5rem;
+    position: relative;
+    min-height: 27.5rem; /* 440 px */
+    border-left: 1px solid var(--rule);
+  }
+
+  /* Apilado, el retrato no necesita media pantalla ni una regla al costado. */
+  @media (max-width: 55rem) {
+    .ahero__text {
+      padding: var(--space-6) var(--space-3) var(--space-12);
+    }
+
+    .ahero__media {
+      min-height: 21rem;
+      border-left: 0;
+      border-bottom: 1px solid var(--rule);
+    }
+  }
+
+  /* --- Ficha de trayectoria ----------------------------------------------- */
+  .facts__num {
+    padding-top: var(--space-3);
+  }
+
+  .facts {
+    margin: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .facts__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--col-gap);
+    border-top: 1px solid var(--rule);
+    padding: var(--space-3) 0;
+  }
+
+  .facts__label {
+    flex: 0 0 8rem; /* 128 px */
+    margin: 0;
+    padding-top: var(--space-1);
+  }
+
+  .facts__text {
+    flex: 1 1 20rem;
+    min-width: 0;
+    margin: 0;
+    font-size: clamp(1.0625rem, 2vw, 1.25rem); /* 17 → 20 px */
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  /* --- Bloque de video ----------------------------------------------------
+     El fotograma flota a la derecha y el texto lo rodea, como en el diseño. */
+  .video {
+    float: right;
+    width: 34%;
+    min-width: 10.5rem; /* 168 px */
+    margin: 0 0 var(--space-3) var(--space-4);
+  }
+
+  .video__meta {
+    margin-top: var(--space-1);
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-1);
+  }
+
+  .video__play {
+    display: block;
+    margin-top: var(--space-1);
+    border-top: 1px solid var(--ink);
+    padding-top: var(--space-1);
+  }
+
+  .video__clear {
+    clear: both;
+  }
+
+  /* En pantallas estrechas el fotograma deja de flotar: la columna es
+     demasiado angosta para que el texto lo rodee sin romperse. */
+  @media (max-width: 34rem) {
+    .video {
+      float: none;
+      width: 100%;
+      max-width: 15rem;
+      margin: 0 0 var(--space-4);
+    }
+  }
+
+  /* --- Testimonios --------------------------------------------------------- */
+  .testi {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .testi__item {
+    border-top: 1px solid var(--rule);
+    padding: var(--space-4) 0;
+  }
+
+  .testi__text {
+    margin: 0;
+    max-width: 38.75rem; /* 620 px */
+    font-size: clamp(1.0625rem, 2vw, 1.25rem);
+    line-height: var(--leading-body);
+    text-wrap: pretty;
+  }
+
+  /* Los que aún no han llegado se ven como lo que son: un hueco. */
+  .testi__text.is-pending {
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  .testi__meta {
+    margin-top: var(--space-3);
+  }
+</style>

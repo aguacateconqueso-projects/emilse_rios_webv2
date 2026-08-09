@@ -1,12 +1,12 @@
 ---
-import { type Lang, useTranslations, localizePath } from '../i18n/ui';
+import { type Lang, type Route, useTranslations, routePath } from '../i18n/ui';
 import LangSwitch from './LangSwitch.astro';
 
 interface Props {
   lang: Lang;
-  path?: string;
+  route?: Route;
 }
-const { lang, path = '/' } = Astro.props;
+const { lang, route = 'home' } = Astro.props;
 const t = useTranslations(lang);
 ---
 
@@ -26,9 +26,8 @@ const t = useTranslations(lang);
       <a class="footer__link" href="https://youtube.com/" rel="me noopener">
         {t('footer.youtube')}
       </a>
-      {/* «Sobre mí» llega en el PR siguiente; hasta entonces no enlaza a un 404. */}
-      <span class="footer__link soft" aria-disabled="true">{t('nav.about')}</span>
-      <LangSwitch lang={lang} hrefEs={localizePath(path, 'es')} hrefEn={localizePath(path, 'en')} />
+      <a class="footer__link" href={routePath('about', lang)}>{t('nav.about')}</a>
+      <LangSwitch lang={lang} hrefEs={routePath(route, 'es')} hrefEn={routePath(route, 'en')} />
     </nav>
   </div>
 </footer>
