@@ -1,0 +1,64 @@
+---
+import { type Lang, useTranslations } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  /** Ruta equivalente en cada idioma, ya localizada. */
+  hrefEs: string;
+  hrefEn: string;
+}
+const { lang, hrefEs, hrefEn } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<div class="lang" role="group" aria-label={t('nav.langLabel')}>
+  <a
+    href={hrefEs}
+    hreflang="es"
+    lang="es"
+    class:list={['lang__link', lang === 'es' && 'is-current']}
+    aria-current={lang === 'es' ? 'true' : undefined}
+    title={t('nav.toSpanish')}>ES</a
+  >
+  <span class="lang__sep" aria-hidden="true">/</span>
+  <a
+    href={hrefEn}
+    hreflang="en"
+    lang="en"
+    class:list={['lang__link', lang === 'en' && 'is-current']}
+    aria-current={lang === 'en' ? 'true' : undefined}
+    title={t('nav.toEnglish')}>EN</a
+  >
+</div>
+
+<style>
+  .lang {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .lang__link {
+    font-family: var(--font-mono);
+    font-size: var(--text-mono);
+    letter-spacing: var(--tracking-mono);
+    color: var(--ink-soft);
+    border-bottom: 0;
+  }
+
+  .lang__link.is-current {
+    color: var(--ink);
+  }
+
+  .lang__link:hover {
+    color: var(--ink);
+  }
+
+  /* La barra es decorativa, pero se ve: va en tinta secundaria para no
+     quedarse en un gris que no llega a AA. */
+  .lang__sep {
+    font-family: var(--font-mono);
+    font-size: var(--text-mono);
+    color: var(--ink-soft);
+  }
+</style>

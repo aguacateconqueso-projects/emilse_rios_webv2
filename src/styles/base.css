@@ -1,0 +1,195 @@
+/* ==========================================================================
+   Base — reset mínimo y primitivas que se repiten en todo el sitio.
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p,
+figure,
+blockquote {
+  margin: 0;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* --- Enlaces -------------------------------------------------------------
+   Subrayado con una regla de 1 px, nunca text-decoration por defecto. */
+a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid var(--ink-soft);
+  transition: border-color 0.2s var(--ease-reveal);
+}
+
+a:hover {
+  border-bottom-color: currentColor;
+}
+
+/* --- Foco visible --------------------------------------------------------
+   El sistema no tiene color de acento, así que el foco es una regla de
+   tinta separada del elemento. */
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+}
+
+.on-ink :focus-visible {
+  outline-color: var(--paper);
+}
+
+/* --- Salto al contenido -------------------------------------------------- */
+.skip-link {
+  position: absolute;
+  left: var(--space-3);
+  top: var(--space-3);
+  z-index: 300;
+  padding: var(--space-1) var(--space-2);
+  background: var(--ink);
+  color: var(--paper);
+  border: 0;
+  transform: translateY(-200%);
+  transition: transform 0.2s var(--ease-reveal);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Primitivas tipográficas
+   ========================================================================== */
+
+/* Etiqueta mono · 12 px · tracking 0,12em · versalitas */
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono);
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+/* La misma etiqueta sin versalitas, para números de bloque (01, 02…). */
+.mono-plain {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono);
+  letter-spacing: var(--tracking-mono);
+  line-height: 1.4;
+}
+
+.soft {
+  color: var(--ink-soft);
+}
+
+/* La firma. Solo acá. */
+.signature {
+  font-family: var(--font-signature);
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+/* ==========================================================================
+   Rejilla de lectura — número en el margen, columna de 640 px
+   Por debajo de 576 px la columna se lleva el ancho completo y el número
+   pasa arriba del bloque.
+   ========================================================================== */
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--col-gap);
+  max-width: var(--width-text);
+  margin-inline: auto;
+  padding-inline: var(--space-3);
+}
+
+.row--wide {
+  max-width: var(--width-wide);
+}
+
+.row__num {
+  flex: 0 0 var(--col-gutter);
+  font-family: var(--font-mono);
+  font-size: var(--text-mono);
+  letter-spacing: var(--tracking-mono);
+  line-height: 1.4;
+  color: var(--ink-soft);
+  padding-top: var(--space-1);
+}
+
+.row__body {
+  flex: 1 1 30rem;
+  min-width: 0;
+  max-width: var(--measure);
+}
+
+.row--wide .row__body {
+  max-width: 48.25rem; /* 772 px */
+}
+
+/* Párrafo de cuerpo: 24 px entre párrafos, el último sin margen. */
+.prose > p {
+  margin-bottom: var(--space-3);
+  text-wrap: pretty;
+}
+
+.prose > p:last-child {
+  margin-bottom: 0;
+}
+
+/* ==========================================================================
+   Movimiento — el revelado de las frases-ancla.
+   Es una de las dos únicas animaciones del sitio (la otra es la entrada).
+   ========================================================================== */
+
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    opacity: 0;
+    transform: translateY(var(--space-1));
+    transition:
+      opacity var(--duration-reveal) var(--ease-reveal),
+      transform var(--duration-reveal) var(--ease-reveal);
+  }
+
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Sin JS las frases-ancla se quedan visibles, no en blanco. */
+.no-js .reveal {
+  opacity: 1;
+  transform: none;
+}

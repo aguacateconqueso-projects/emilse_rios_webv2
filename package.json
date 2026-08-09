@@ -1,0 +1,20 @@
+{
+  "name": "contrabajo-en-la-ciudad",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "audit": "node scripts/audit.mjs"
+  },
+  "dependencies": {
+    "astro": "^7.2.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1"
+  }
+}

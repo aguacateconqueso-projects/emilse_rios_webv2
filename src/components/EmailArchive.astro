@@ -1,0 +1,216 @@
+---
+import { getCollection, render } from 'astro:content';
+import { type Lang, useTranslations } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  n: string;
+  label: string;
+}
+const { lang, n, label } = Astro.props;
+const t = useTranslations(lang);
+
+const correos = (await getCollection('correos', ({ data }) => data.lang === lang)).sort(
+  (a, b) => b.data.numero - a.data.numero,
+);
+
+// El cuerpo del correo se renderiza en el servidor y viaja dentro del <dialog>.
+const entradas = await Promise.all(
+  correos.map(async (correo) => ({
+    ...correo,
+    Content: (await render(correo)).Content,
+  })),
+);
+---
+
+<section class="archive" aria-labelledby={`archive-${n}`}>
+  <div class="archive__head">
+    <div class="row__num" aria-hidden="true">{n}</div>
+    <h2 class="mono soft archive__label" id={`archive-${n}`}>{label}</h2>
+  </div>
+
+  <ul class="archive__list" role="list">
+    {
+      entradas.map(({ id, data, Content }) => (
+        <li class="archive__item">
+          <button
+            class="card"
+            type="button"
+            data-open-dialog={`dialog-${id}`}
+            aria-label={`${t('cards.open')}: ${data.asunto}`}
+          >
+            <span class="mono-plain soft card__date">{data.etiqueta}</span>
+            <span class="card__subject">{data.asunto}</span>
+            <span class="card__preview soft">{data.adelanto}</span>
+          </button>
+
+          <dialog class="dialog" id={`dialog-${id}`} aria-labelledby={`title-${id}`}>
+            <article class="dialog__panel">
+              <div class="dialog__bar">
+                <span class="mono soft">{data.etiqueta}</span>
+                <button class="mono dialog__close" type="button" data-close-dialog>
+                  {t('cards.close')}
+                </button>
+              </div>
+              <h3 class="dialog__title" id={`title-${id}`}>
+                {data.asunto}
+              </h3>
+              <div class="dialog__body prose">
+                <Content />
+              </div>
+            </article>
+          </dialog>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .archive {
+    max-width: var(--width-full);
+    margin-inline: auto;
+    padding-inline: var(--space-3);
+  }
+
+  .archive__head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--col-gap);
+  }
+
+  .archive__label {
+    flex: 1 1 30rem;
+    font-weight: 400;
+  }
+
+  /* Carrusel horizontal: las fichas mantienen su ancho y se desplazan. */
+  .archive__list {
+    display: flex;
+    gap: var(--space-4);
+    margin: var(--space-4) 0 0;
+    padding: 0 0 var(--space-2);
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+  }
+
+  .archive__item {
+    flex: 0 0 20rem; /* 320 px */
+    scroll-snap-align: start;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-top: 1px solid var(--ink);
+    padding: var(--space-2) 0 0;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    transition: opacity 0.2s var(--ease-reveal);
+  }
+
+  .card:hover {
+    opacity: 0.62;
+  }
+
+  .card__subject {
+    margin-top: var(--space-2);
+    font-family: var(--font-display);
+    font-size: 1.5rem; /* 24 px */
+    line-height: var(--leading-section);
+  }
+
+  .card__preview {
+    margin-top: var(--space-2);
+    font-size: var(--text-small);
+    line-height: var(--leading-body);
+  }
+
+  /* --- El correo abierto ------------------------------------------------- */
+  .dialog {
+    width: min(45rem, 100% - var(--space-6)); /* 720 px */
+    max-width: none;
+    max-height: calc(100dvh - var(--space-6));
+    margin: auto;
+    padding: 0;
+    border: 0;
+    overflow-y: auto;
+    background: transparent;
+    color: var(--ink);
+  }
+
+  .dialog::backdrop {
+    background: rgba(13, 13, 13, 0.55);
+  }
+
+  .dialog__panel {
+    background: var(--paper);
+    padding: clamp(var(--space-4), 6vw, var(--space-8));
+  }
+
+  .dialog__bar {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .dialog__close {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: var(--text-mono);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+  }
+
+  .dialog__close:hover {
+    color: var(--ink-soft);
+  }
+
+  .dialog__title {
+    margin-top: var(--space-4);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.75rem, 4vw, 2.5rem); /* 28 → 40 px */
+    line-height: 1.15;
+    letter-spacing: var(--tracking-section);
+  }
+
+  .dialog__body {
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--rule);
+  }
+</style>
+
+<script>
+  const openers = document.querySelectorAll<HTMLButtonElement>('[data-open-dialog]');
+
+  openers.forEach((opener) => {
+    const dialog = document.getElementById(opener.dataset.openDialog!) as HTMLDialogElement | null;
+    if (!dialog) return;
+
+    opener.addEventListener('click', () => dialog.showModal());
+
+    dialog
+      .querySelector<HTMLButtonElement>('[data-close-dialog]')
+      ?.addEventListener('click', () => dialog.close());
+
+    // Clic fuera del panel: el <dialog> ocupa toda la ventana, así que el
+    // impacto sobre él mismo (y no sobre su contenido) es el telón.
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+  });
+</script>

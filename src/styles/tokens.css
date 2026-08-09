@@ -1,0 +1,71 @@
+/* ==========================================================================
+   Contrabajo en la Ciudad — tokens del sistema de diseño
+   Blanco y negro, tres tipografías (más la firma), rejilla de 8 px.
+   Lo que no está acá no existe en el sitio.
+   ========================================================================== */
+
+:root {
+  /* --- 01 · Color ------------------------------------------------------ */
+  --paper: #fafaf8;
+  --ink: #0d0d0d;
+
+  /* Tinta secundaria — metadatos y pies.
+     El sistema la define al 55 %, pero sobre el papel eso da 4,24:1 y no
+     llega al 4,5:1 que pide WCAG AA para texto pequeño (las etiquetas mono
+     son de 12 px). Al 58 % da 4,68:1 y la diferencia no se ve. */
+  --ink-soft: rgba(13, 13, 13, 0.58);
+
+  /* Línea — reglas de 1 px. Decorativa, sin requisito de contraste. */
+  --rule: rgba(13, 13, 13, 0.12);
+
+  /* Los mismos papeles sobre fondo de tinta (cierre en negro). */
+  --paper-soft: rgba(250, 250, 248, 0.55); /* 6,01:1 sobre --ink ✓ */
+  --paper-rule: rgba(250, 250, 248, 0.35);
+
+  /* --- 02 · Tipografía -------------------------------------------------
+     Las familias las inyecta Astro como --font-display / --font-body /
+     --font-mono / --font-signature (ver astro.config.mjs). */
+
+  --text-hero: clamp(3rem, 8.5vw, 5.5rem); /* 48 → 88 px */
+  --text-anchor: clamp(2rem, 5.4vw, 3.5rem); /* 32 → 56 px */
+  --text-section: clamp(1.625rem, 3.6vw, 2rem); /* 26 → 32 px */
+  --text-body: clamp(1.125rem, 2.2vw, 1.25rem); /* 18 → 20 px */
+  --text-small: 1rem; /* 16 px */
+  --text-mono: 0.75rem; /* 12 px */
+
+  --leading-hero: 0.98;
+  --leading-anchor: 1.14;
+  --leading-section: 1.2;
+  --leading-body: 1.6;
+
+  --tracking-hero: -0.02em;
+  --tracking-section: -0.01em;
+  --tracking-mono: 0.12em;
+
+  /* --- 03 · Espaciado · rejilla de 8 px --------------------------------- */
+  --space-1: 0.5rem; /* 8 px  */
+  --space-2: 1rem; /* 16 px */
+  --space-3: 1.5rem; /* 24 px — entre párrafos, márgenes de móvil */
+  --space-4: 2rem; /* 32 px */
+  --space-6: 3rem; /* 48 px — gutter del número marginal */
+  --space-8: 4rem; /* 64 px */
+  --space-12: 6rem; /* 96 px — entre bloques mayores */
+  --space-16: 8rem; /* 128 px — entre secciones de página */
+
+  /* --- Medida y anchos -------------------------------------------------- */
+  --measure: 40rem; /* 640 px · 60–68 caracteres */
+  --col-gutter: var(--space-6); /* 48 px del número marginal */
+  --col-gap: var(--space-4); /* 32 px de separación */
+  --width-text: 48rem; /* 768 px · columna + gutter */
+  --width-wide: 56.25rem; /* 900 px · fichas y testimonios */
+  --width-full: 77.5rem; /* 1240 px · cabecera, pie, carrusel */
+
+  /* --- 04 · Formas y movimiento ----------------------------------------- */
+  --radius: 0; /* Cero. Ninguna esquina redondeada. */
+  --shadow: none; /* Cero. Las divisiones son reglas de 1 px. */
+
+  --ease-reveal: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-write: cubic-bezier(0.4, 0.05, 0.25, 1);
+  --ease-panel: cubic-bezier(0.76, 0, 0.24, 1);
+  --duration-reveal: 0.7s;
+}
