@@ -15,9 +15,15 @@ seguir trabajando sin preguntar nada.
 | **Publicado** | Sí, en Vercel. Despliega solo en cada merge a `main`. |
 | **Dominio** | Pendiente. Todavía se ve en la URL de Vercel. |
 | **Páginas** | Home y Sobre mí, las dos en español e inglés. |
+| **Identidad** | El logo de Emi, vectorizado, en cabecera, pie, entrada y favicon. |
 | **Lo que falta para lanzar** | Conectar el proveedor de correo. El formulario **no da de alta a nadie**. |
 
 Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/`
+
+Lo último que se tocó fue el fondo del contrabajo de la Home (PRs #4 a #7).
+Está cerrado y aprobado; si se retoma, es solo para mover los mandos de
+`tokens.css` — ver la receta más abajo. **Lo siguiente sin dueño es el cierre
+para producción**, en «Próximos PRs».
 
 ---
 
@@ -41,6 +47,16 @@ Astro 7, estático, sin framework de UI. No hace falta adaptador para Vercel.
   propio Pull Request a `main`. Emi lo mergea, lo mira, ajustamos, y seguimos.
 - **`main` no se toca directamente.** Solo recibió el commit inicial, porque sin
   él no existía base contra la que abrir un PR.
+- **Siempre contra `main`, nunca encadenando PRs.** El PR #5 se abrió contra la
+  rama del #4 «para que el diff se leyera solo». Esa rama ya estaba mergeada,
+  así que el reapuntado automático de GitHub no podía ocurrir: al mergear el
+  #5, su contenido fue a parar a una rama muerta y nunca llegó a `main`. Hubo
+  que reabrirlo como #6. Un diff un poco más largo se lee sin problema; una
+  rama muerta cuesta media hora y confunde a quien mergea.
+- **Antes de abrir un PR, comprobar de qué commit sale la rama.** Si `main` se
+  ha movido, traerlo primero. A mitad de esta sesión se mergeó un PR que
+  reescribía `progreso.md` entero y hubo que rehacer los cambios a mano sobre
+  la estructura nueva.
 - Este documento se actualiza **en el mismo PR** que introduce el cambio.
 
 ---
@@ -187,9 +203,8 @@ Las dos cosas raras de esa receta tienen su porqué:
 
 El encuadre es el de la foto entera **a propósito**. Al principio se usó un
 recorte cerrado sobre la efe y, aunque el efecto se entendía, parecía una
-imagen de mala resolución: 360 px de origen estirados a 512 en pantalla. Al
-abrir el encuadre hay que subir la resolución, no bajarla — se ve más campo y
-cada píxel de la foto rinde menos.
+imagen de mala resolución. Al abrir el encuadre hay que subir la resolución,
+no bajarla: se ve más campo y cada píxel de la foto rinde menos.
 
 ### Añadir una página
 
@@ -215,7 +230,7 @@ Estado en las cuatro rutas, a 1440 y a 390 px de ancho:
 ```
 CONTRASTE por debajo de AA .................. 0
 ESPACIADOS fuera de la rejilla de 8 px ...... 0
-CONTRASTE contra el fondo ya pintado ........ 0   (peor caso real, 13,2:1)
+CONTRASTE contra el fondo ya pintado ........ 0   (peor caso real, 13,4:1)
 ```
 
 **La tercera comprobación existe por el fondo del contrabajo.** Las dos
@@ -293,14 +308,13 @@ pida lo contrario.
   que el sistema prohíbe. Con él, el contrabajo emerge del papel y las efes se
   leen como un recorte.
 - **El fondo se sirve sin pasar por el optimizador.** El fichero ya viene a la
-  escala de pantalla (360 px, mateado y suavizado, 41 kB). Pasarlo por
-  `getImage` solo lo recodificaría con el canal alfa sin pérdida y lo
-  multiplicaría por ocho.
+  escala de pantalla (1200 px, mateado, 184 kB). Pasarlo por `getImage` solo lo
+  recodificaría con el canal alfa sin pérdida y lo multiplicaría por tres.
 - **Nunca escribir prefijos `-webkit-` a mano.** Poniendo `backdrop-filter` y
   `-webkit-backdrop-filter` juntos, el minificador las deduplica y se queda con
-  la prefijada — que Chrome no reconoce. El cristal estuvo semanas sin
-  esmerilar nada por eso, y la imagen se veía en crudo. Los prefijos los pone
-  el minificador según targets; escribir solo la forma sin prefijo.
+  la prefijada — que Chrome no reconoce. El cristal no esmeriló nada hasta que
+  se detectó, y la imagen se veía en crudo. Los prefijos los pone el
+  minificador según targets; escribir solo la forma sin prefijo.
 - **Las imágenes decorativas se dimensionan para densidad 2, no para 1.** El
   fondo se sirvió primero a 700 px para una banda de 512 px CSS, que parecía
   de sobra — y en una pantalla de densidad 2 esa banda son 1024 de dispositivo,
