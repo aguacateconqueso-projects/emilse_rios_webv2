@@ -17,10 +17,16 @@
  * Sin soporte de `animation-timeline`, o con `prefers-reduced-motion`, la
  * imagen se queda quieta y entera. No se pierde nada.
  *
- * El fichero ya viene preparado para lo que se ve en pantalla — 700 px de
+ * El fichero ya viene preparado para lo que se ve en pantalla — 1200 px de
  * ancho y mateado — así que se sirve tal cual: pasarlo por el optimizador solo
  * lo recodificaría con el canal alfa sin pérdida y lo multiplicaría por tres.
- * Son 175 kB. La receta está en `progreso.md`.
+ *
+ * 1200 px y no 700 porque la banda mide 512 px CSS, que en una pantalla de
+ * densidad 2 son 1024 de dispositivo: a 700 la imagen se ampliaba 1,7× y se
+ * veía blanda justo en las pantallas buenas. Con 1200 va a tamaño real en 2× y
+ * sobrada en 1×, y sigue pesando 184 kB — el truco está en la receta: el mate
+ * es una silueta, así que su canal alfa va suavizado y comprime muchísimo
+ * mejor sin que se note. Ver `progreso.md`.
  */
 import contrabajo from '../assets/img/contrabajo.webp';
 ---

@@ -69,10 +69,12 @@
   --bass-opacity: 0.45;
   --bass-saturation: 1.1;
   --glass-veil: 50%; /* cuánto papel lleva el cristal */
-  /* Bajo a propósito. Estuvo en 26 px mientras el `backdrop-filter` no
-     aplicaba —ver Backdrop.astro—, así que ese valor nunca llegó a verse. Con
-     el cristal funcionando, de 6 px para arriba la efe deja de leerse. */
-  --glass-blur: 3px;
+  /* Muy bajo a propósito, y son píxeles CSS: en una pantalla de densidad 2
+     valen el doble. Estuvo en 26 px mientras el desenfoque no aplicaba —ver
+     Backdrop.astro—, así que ese valor nunca llegó a verse; y en 3 px, con la
+     imagen a 700 px, la sumaba al emborronado de ampliarla. Con el fichero a
+     1200 px lo que hace falta es apenas un velo. */
+  --glass-blur: 1px;
 
   /* --- 04 · Formas y movimiento ----------------------------------------- */
   --radius: 0; /* Cero. Ninguna esquina redondeada. */

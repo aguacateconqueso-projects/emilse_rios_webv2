@@ -4,7 +4,7 @@ Sitio de **Emilse Ríos**, contrabajista y docente, y de su newsletter.
 Este documento es la memoria del proyecto: quien lo lea de cero debería poder
 seguir trabajando sin preguntar nada.
 
-**Última actualización:** 10 de agosto de 2026 · después del PR #5
+**Última actualización:** 10 de agosto de 2026 · después del PR #7
 
 ---
 
@@ -162,14 +162,28 @@ lo que deja pasar el cristal**: hoy `0,45 × 0,50 ≈ 22 %`.
 --bass-opacity     /* cuánta imagen. El mando principal */
 --bass-saturation  /* a esta opacidad queda poco color: se sube, no se baja */
 --glass-veil       /* cuánto papel lleva el cristal */
---glass-blur       /* cuánto esmerila. Está en 3 px: de 6 para arriba la efe
-                      deja de leerse y vuelve a parecer baja resolución */
+--glass-blur       /* cuánto esmerila. Está en 1 px, y son píxeles CSS: en una
+                      pantalla de densidad 2 valen el doble. Subirlo se lee
+                      como mala resolución, no como cristal */
 ```
 
 Para rehacer el fichero desde la foto original —está en el commit `fbff7e5`,
-en `public/doublebass_background_ref.jpg`: **sin recortar**, escalar a 700 px
-de ancho, desenfoque gaussiano de radio 0,5, alfa = `smoothstep(0,10 → 0,38)`
-sobre la luminancia, y WebP con calidad 72 y alfa 55. Son 175 kB.
+en `public/doublebass_background_ref.jpg`: **sin recortar**, escalar a 1200 px
+de ancho, alfa = `smoothstep(0,10 → 0,38)` sobre la luminancia, **suavizar solo
+el canal alfa** con un gaussiano de radio 4, y WebP con calidad 70 y alfa 40.
+Son 184 kB.
+
+Las dos cosas raras de esa receta tienen su porqué:
+
+- **1200 px, no 700.** La banda mide 512 px CSS, que en una pantalla de
+  densidad 2 son 1024 de dispositivo. A 700 la imagen se ampliaba 1,7× y se
+  veía blanda justo en las pantallas buenas. A 1200 va a tamaño real en 2× y
+  sobrada en 1×.
+- **Se suaviza el alfa, no el color.** El mate es una silueta y no necesita
+  detalle fino, pero su canal arrastraba toda la veta de la madera y era lo
+  que disparaba el peso. Suavizándolo, el fichero pasa de ~900 kB a 184 sin
+  que se note nada — casi el triple de píxeles que la versión de 700 por el
+  mismo peso. El color va sin tocar, que es lo que da la sensación de nitidez.
 
 El encuadre es el de la foto entera **a propósito**. Al principio se usó un
 recorte cerrado sobre la efe y, aunque el efecto se entendía, parecía una
@@ -287,6 +301,11 @@ pida lo contrario.
   la prefijada — que Chrome no reconoce. El cristal estuvo semanas sin
   esmerilar nada por eso, y la imagen se veía en crudo. Los prefijos los pone
   el minificador según targets; escribir solo la forma sin prefijo.
+- **Las imágenes decorativas se dimensionan para densidad 2, no para 1.** El
+  fondo se sirvió primero a 700 px para una banda de 512 px CSS, que parecía
+  de sobra — y en una pantalla de densidad 2 esa banda son 1024 de dispositivo,
+  así que se ampliaba y se veía blanda precisamente en las mejores pantallas.
+  Al comprobar cómo se ve algo, comprobarlo también a `deviceScaleFactor: 2`.
 - **El desenfoque del cristal va sobre la imagen, no sobre el cristal.** Detrás
   del cristal solo hay la imagen y papel liso, así que el resultado es el
   mismo. Pero un `backdrop-filter` a pantalla completa se recalcula en cada
