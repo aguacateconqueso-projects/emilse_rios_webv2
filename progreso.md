@@ -1,196 +1,195 @@
 # Progreso — Contrabajo en la Ciudad
 
-Bitácora del sitio de Emilse Ríos. Se actualiza en cada PR.
+Sitio de **Emilse Ríos**, contrabajista y docente, y de su newsletter.
+Este documento es la memoria del proyecto: quien lo lea de cero debería poder
+seguir trabajando sin preguntar nada.
 
-**Última actualización:** 10 de agosto de 2026 · PR #3
+**Última actualización:** 10 de agosto de 2026 · después del PR #4
+
+---
+
+## Dónde estamos
+
+| | |
+|---|---|
+| **Publicado** | Sí, en Vercel. Despliega solo en cada merge a `main`. |
+| **Dominio** | Pendiente. Todavía se ve en la URL de Vercel. |
+| **Páginas** | Home y Sobre mí, las dos en español e inglés. |
+| **Lo que falta para lanzar** | Conectar el proveedor de correo. El formulario **no da de alta a nadie**. |
+
+Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/`
+
+---
+
+## Arrancar
+
+```bash
+npm install
+npm run dev      # http://localhost:4321
+npm run build    # build de producción en ./dist
+npm run preview  # sirve el build
+npm run audit    # auditoría del diseño (necesita preview en marcha)
+```
+
+Astro 7, estático, sin framework de UI. No hace falta adaptador para Vercel.
 
 ---
 
 ## Cómo trabajamos
 
-- **Un PR por cambio, siempre.** Por mínimo que sea el cambio, va en su propia
-  rama y su propio Pull Request a `main`. Emi lo mergea, lo mira, ajustamos, y
-  seguimos.
-- **`main` no se toca directamente.** Solo recibió el commit inicial (README y
-  `.gitignore`) porque sin él no existía base contra la que abrir un PR.
-- Este documento se actualiza en el mismo PR que introduce el cambio, no después.
+- **Un PR por cambio, siempre.** Por mínimo que sea, va en su propia rama y su
+  propio Pull Request a `main`. Emi lo mergea, lo mira, ajustamos, y seguimos.
+- **`main` no se toca directamente.** Solo recibió el commit inicial, porque sin
+  él no existía base contra la que abrir un PR.
+- Este documento se actualiza **en el mismo PR** que introduce el cambio.
 
 ---
 
-## De dónde viene el diseño
+## El sistema de diseño
 
-El concepto visual ya estaba hecho en Claude Design. Llegó como export
-`.dc.html` con tres piezas: **Sistema de Diseño**, **Contrabajo en la Ciudad**
-(Home + Sobre mí) y **Animación de entrada**. Esta fase es la implementación.
-
-El sistema, tal como lo fija el diseño:
+Viene de Claude Design, ya aprobado. Llegó como export `.dc.html` en tres
+piezas: Sistema de Diseño, las dos páginas, y la animación de entrada.
+**No se inventa nada fuera de esto.**
 
 | | |
 |---|---|
-| Color | Papel `#FAFAF8`, tinta `#0D0D0D`, tinta secundaria, línea. Ningún otro. |
-| Tipografía | Instrument Serif (titulares), Newsreader (cuerpo), IBM Plex Mono (etiquetas), Mrs Saint Delafield (solo la firma) |
+| Color | Papel `#FAFAF8`, tinta `#0D0D0D`, tinta secundaria, línea. Ningún otro **en la interfaz**; las fotografías traen el suyo. |
+| Tipografía | Instrument Serif (titulares), Newsreader (cuerpo), IBM Plex Mono (etiquetas). La firma no es tipografía: es el logo. |
 | Espaciado | Rejilla de 8 px. Sin excepciones. |
 | Formas | Radios: cero. Sombras: cero. Las divisiones son reglas de 1 px. |
 | Medida | 60–68 caracteres. Columna de 640 px, número marginal de 48 px. |
 | Movimiento | Máximo tres animaciones en la Home, dos en el resto. |
 | Prohibido | Marquesinas, contadores, cursores propios, texto que se escribe letra a letra, tarjetas que se levantan, zoom automático, iconos, emojis, fondos grises de relleno. |
 
-### Enmiendas al sistema
+Todo esto está en `src/styles/tokens.css`. **Ningún valor suelto en los
+componentes**: si hace falta uno nuevo, se añade como token.
 
-El sistema es de Emi y se puede cambiar; lo que no se puede es cambiarlo sin
-dejar constancia. Hasta hoy, dos:
+### Enmiendas, con fecha
 
-- **10 ago 2026 · Se levanta la prohibición de parallax y el tope sube a tres
+El sistema es de Emi y se puede cambiar. Lo que no se puede es cambiarlo sin
+dejar constancia, porque si no la tabla de arriba deja de ser fiable. Hasta hoy
+se ha tocado dos veces, las dos en el PR #4:
+
+- **10 ago 2026 · Cae la prohibición de parallax; el tope sube a tres
   animaciones en la Home.** Lo pide el fondo del contrabajo. La prohibición
   existía contra el parallax de verdad —capas a distinta velocidad, que da
   tirones y marea— y eso sigue fuera: la imagen del fondo no se mueve ni un
-  píxel. Lo que avanza con el scroll es un revelado, de la misma familia que
-  el de las frases-ancla.
-- **10 ago 2026 · «Papel y tinta, ningún otro color» rige la interfaz, no las
-  fotografías.** Las fotos traen su color y cuentan como fotos. Vale para el
-  fondo del contrabajo y para el retrato y el video que están por llegar.
+  píxel. Lo que avanza con el scroll es un revelado, de la misma familia que el
+  de las frases-ancla.
+- **10 ago 2026 · «Ningún otro color» rige la interfaz, no las fotografías.**
+  Una foto trae su color y cuenta como foto. Vale para el fondo del contrabajo
+  y para el retrato y el video que están por llegar.
 
 ---
 
-## Hecho
+## Mapa del proyecto
 
-### PR #1 — Fundación y Home
+```
+src/
+  assets/fonts/          Las tres familias en woff2 + OFL.txt
+  assets/img/            contrabajo.webp, el fondo de la Home
+  components/
+    Header · Footer · LangSwitch   Cabecera, pie, conmutador ES/EN
+    Logo.astro                     La firma de Emi, como máscara
+    Intro.astro                    Animación de entrada (solo Home)
+    Backdrop.astro                 El contrabajo tras el cristal (solo Home)
+    Home.astro · About.astro       Los bloques de cada página
+    EmailArchive.astro             Fichas del newsletter + <dialog>
+    SubscribeForm.astro            Campo de suscripción
+    MediaSlot.astro                Hueco de imagen
+  content/correos/       Un .md por correo y por idioma
+  content.config.ts      Esquema del archivo del newsletter
+  data/home.ts           Textos de la Home (es / en)
+  data/about.ts          Textos de Sobre mí (es / en)
+  i18n/ui.ts             Cadenas de interfaz + mapa de rutas
+  layouts/Base.astro     <head>, cabecera, pie, revelado de frases-ancla
+  pages/                 index · sobre-mi · en/index · en/about
+  styles/tokens.css      Los tokens del sistema
+  styles/base.css        Reset y primitivas compartidas
+public/logo.svg          La firma vectorizada. La usa Logo.astro de máscara
+public/favicon.svg       La E del logo, recortada de la firma
+scripts/audit.mjs        Auditoría de contraste y rejilla
+```
 
-**Stack.** Astro 7, estático, sin framework de UI. Se eligió por tres razones:
-cero JavaScript por defecto (el sitio es de lectura), i18n con rutas reales, y
-colecciones de contenido en Markdown para el archivo del newsletter, que va a
-crecer.
-
-**Sistema de diseño en código**
-- `src/styles/tokens.css` — todos los tokens: color, escala tipográfica,
-  rejilla de 8 px, anchos de columna, curvas de animación.
-- `src/styles/base.css` — reset mínimo y primitivas (`.mono`, `.row`,
-  `.prose`, `.reveal`, foco visible, salto al contenido).
-
-**Tipografías autohospedadas.** Las cuatro familias viven en
-`src/assets/fonts` y se sirven desde nuestro dominio: el build no depende de la
-red y el navegador de quien lee no le pide nada a Google. Licencia OFL incluida
-en `src/assets/fonts/OFL.txt`.
-
-**Bilingüe.** Español en la raíz (`/`), inglés en `/en/`. Cadenas de interfaz en
-`src/i18n/ui.ts`, textos de página en `src/data/home.ts`. Con `hreflang`,
-`canonical` y conmutador que no te saca de la página donde estás.
-
-**Home, completa en los dos idiomas** — hero, párrafo con minutos en mono,
-frases-ancla, dos campos de suscripción, archivo de correos y cierre en negro.
-
-**Archivo del newsletter.** Colección de contenido en
-`src/content/correos/`, un Markdown por correo y por idioma
-(`042.es.md`). Para publicar uno nuevo basta con dejar caer el fichero: no hay
-que tocar código. Se abre en un `<dialog>` nativo — foco atrapado y Escape
-funcionan sin escribir nada.
-
-**Las dos animaciones, y solo dos**
-1. **La entrada** — la firma se escribe sobre negro (0–1,1 s), pausa
-   (1,1–1,4 s), el panel sale hacia arriba (1,4–2,0 s). Solo en la Home y solo
-   la primera visita de la sesión. Un script en `<head>` decide antes de pintar,
-   así que no parpadea para quien ya la vio.
-2. **El revelado de las frases-ancla** — fundido más 8 px de subida, 0,7 s, con
-   `IntersectionObserver`.
-
-Ambas se desactivan con `prefers-reduced-motion`. Sin JavaScript, las
-frases-ancla se quedan visibles y el panel negro no llega a aparecer: no se
-pierde contenido.
-
-### PR #2 — Sobre mí
-
-**La página completa en los dos idiomas** — hero a dos columnas con el retrato,
-la historia, cinco frases-ancla, la ficha de trayectoria, el bloque de video,
-el formulario y los testimonios.
-
-**Slugs por idioma.** El inglés dejó de heredar la dirección española: la
-página es `/sobre-mi/` en español y `/en/about/` en inglés. Hay un mapa de
-rutas en `src/i18n/ui.ts` (`routes`) del que salen los enlaces, el `canonical`
-y las alternativas `hreflang`. Al añadir una página se añade allí y en
-`src/pages`. El conmutador de idioma te deja en la misma página, no te manda al
-inicio.
-
-**«Sobre mí» ya enlaza.** Estaba inerte en cabecera y pie desde el PR #1 para
-no publicar un enlace roto.
-
-**Huecos de imagen.** `MediaSlot.astro` dibuja un marco con su etiqueta
-mientras no llega el archivo — una regla de 1 px y el texto en mono, nunca un
-relleno gris, que el sistema prohíbe. Para poner la foto de verdad basta con
-importarla y pasarla en `src`; el componente ya la sirve optimizada y en blanco
-y negro. El enlace «Reproducir» del video está apagado hasta que exista el
-archivo.
-
-**Menos duplicación.** Los estilos de bloque que ahora comparten las dos
-páginas — `.block`, `.anchor`, `.section-title`, `.inline-mono` — se movieron
-de `Home.astro` a `base.css`.
-
-### PR #3 — El logo y el contrabajo de fondo
-
-**La firma ya es el logo de Emi.** Llegó como PNG de 2560 × 1440, del que solo
-1631 × 487 eran trazo. Se recortó y se vectorizó con `potrace`; vive en
-`public/logo.svg` y pesa 7,8 kB.
-
-**El logo dice «Rios», sin tilde, y así se queda.** Decisión de Emi, 10 ago
-2026: la tilde vive en los textos —copias, `alt`, lo que oye un lector de
-pantalla, que siguen diciendo «Ríos»—, no en el trazo. No hace falta volver
-sobre esto.
-
-Se pinta como **máscara sobre `currentColor`**, no como `<img>`: así el mismo
-fichero sirve en tinta sobre papel (cabecera y pie) y en papel sobre tinta (la
-entrada), se cachea una vez para todo el sitio y no infla el HTML. El nombre
-viaja en texto para el lector de pantalla — y es lo que queda si la máscara no
-carga. El alto lo fija quien lo usa con `--logo-height`; nunca por `style` en
-línea, que ganaría a las media queries.
-
-De aquí salen tres cosas que estaban pendientes:
-
-- **El favicon** ya no es una «E» provisional: es la E del propio logo,
-  recortada de la firma.
-- **Mrs Saint Delafield se ha retirado.** Existía solo para escribir la firma
-  como texto. Fuera dos ficheros de fuente y una familia del config: el sitio
-  usa tres tipografías, no cuatro.
-- **La entrada escribe la firma de verdad.** El barrido ya no descubre un texto
-  sino el trazo real, y su filo va inclinado al ángulo de la letra: no aparece,
-  se escribe. Se descartó `stroke-dashoffset` — el vectorizado es un contorno
-  relleno, no una línea central, así que dibujaría el perímetro de las letras y
-  las rellenaría de golpe. En caligrafía enlazada eso queda peor, no mejor.
-
-**El contrabajo detrás del cristal**, solo en la Home. Dos capas fijas por
-debajo de todo el contenido: la fotografía en una banda a la izquierda y, sobre
-ella, una hoja de papel esmerilado a pantalla completa. La foto **nunca se ve
-en crudo**, siempre difuminada y siempre por debajo del texto. El «cristal» es
-el papel del sitio al 50 % con desenfoque: esquinas rectas y sin borde, que el
-sistema no tiene radios ni sombras. La cabecera ya hacía esto mismo.
-
-- **Ninguna capa se mueve.** Lo que avanza al bajar es una máscara vertical que
-  descubre el instrumento de arriba abajo. Va con animaciones de scroll de CSS
-  (`animation-timeline: scroll()`), sin JavaScript y fuera del hilo principal.
-  Donde no hay soporte —o con `prefers-reduced-motion`— la imagen se queda
-  quieta y entera: no se pierde nada.
-- **Los negros de la foto son transparentes.** El fondo negro del estudio se
-  convertía en una plancha gris a la izquierda, justo lo que el sistema
-  prohíbe. La imagen lleva un mate por luminancia, así que el contrabajo emerge
-  del papel y las efes se leen como un recorte. Los mandos —ancho, opacidad,
-  saturación, velo y desenfoque del cristal— están todos en `tokens.css`.
-- **41 kB.** El fichero de `src/assets/img/` ya viene a la escala de pantalla,
-  así que se sirve tal cual: pasarlo por el optimizador de Astro solo lo
-  recodificaría con el canal alfa sin pérdida y lo multiplicaría por ocho.
-
-Para rehacer el asset desde el original —que está en el commit `fbff7e5`, en
-`public/doublebass_background_ref.jpg`: recorte `(220, 0, 2500, 5938)`, escalar
-a 360 px de ancho, desenfoque gaussiano de radio 2, alfa = `smoothstep(0,10 →
-0,38)` sobre la luminancia, y WebP con calidad 74 y alfa 62.
+**Los textos no viven en los componentes.** Cambiar una frase es tocar
+`src/data/` o `src/i18n/`, nunca maquetación.
 
 ---
 
-## Auditoría — Paso 9
+## Recetas
 
-Automatizada y repetible: `npm run audit` (necesita `npm run preview` en marcha).
-Comprueba contraste WCAG AA, espaciados fuera de la rejilla de 8 px y número de
-animaciones.
+### Publicar un correo del newsletter
 
-Estado en las cuatro rutas (`/`, `/en/`, `/sobre-mi/`, `/en/about/`) y a
-390 px de ancho:
+Dejar caer dos ficheros en `src/content/correos/`, `043.es.md` y `043.en.md`:
+
+```markdown
+---
+numero: 43
+lang: es
+etiqueta: "N.º 43"
+asunto: El asunto del correo
+adelanto: La línea que se lee en la ficha, antes de abrirlo…
+---
+
+El cuerpo, en Markdown.
+```
+
+No hay que tocar código. Se ordenan solos de mayor a menor. Quitar
+`borrador: true` de los tres actuales cuando lleguen los correos de verdad.
+
+### Poner una imagen donde hay un marco vacío
+
+Las dos llamadas a `MediaSlot` ya existen en `About.astro`. Solo hay que
+importar la imagen y añadirle `src` — el `placeholder` se queda, porque sigue
+siendo el texto de respaldo:
+
+```astro
+import retrato from '../assets/img/retrato.jpg';
+
+<MediaSlot src={retrato} alt={t('media.portraitAlt')} placeholder={t('media.portrait')} />
+```
+
+`MediaSlot` la sirve optimizada, en densidad 2x y en blanco y negro.
+
+### Subir o bajar el contrabajo del fondo
+
+Los mandos están juntos en `src/styles/tokens.css`, y no hay que tocar nada
+más. Lo que de verdad decide cuánta madera llega al papel es **la opacidad por
+lo que deja pasar el cristal**: hoy `0,45 × 0,50 ≈ 22 %`.
+
+```css
+--bass-width       /* ancho de la banda izquierda */
+--bass-opacity     /* cuánta imagen. El mando principal */
+--bass-saturation  /* a esta opacidad queda poco color: se sube, no se baja */
+--glass-veil       /* cuánto papel lleva el cristal */
+--glass-blur       /* cuánto esmerila */
+```
+
+Para rehacer el fichero desde la foto original —está en el commit `fbff7e5`,
+en `public/doublebass_background_ref.jpg`: recorte `(220, 0, 2500, 5938)`,
+escalar a 360 px de ancho, desenfoque gaussiano de radio 2, alfa =
+`smoothstep(0,10 → 0,38)` sobre la luminancia, y WebP con calidad 74 y alfa 62.
+
+### Añadir una página
+
+1. Añadirla al mapa `routes` de `src/i18n/ui.ts`, con su slug en cada idioma.
+2. Crear los dos ficheros en `src/pages/` (español en la raíz, inglés bajo `en/`).
+3. Pasarle `route="loQueSea"` al layout `Base`.
+
+De ahí salen solos los enlaces, el `canonical` y las alternativas `hreflang`.
+
+---
+
+## Auditoría
+
+`npm run audit` comprueba contraste WCAG AA, espaciados fuera de la rejilla de
+8 px y animaciones declaradas. Se corre con `npm run preview` en marcha:
+
+```bash
+node scripts/audit.mjs http://localhost:4321/sobre-mi/ 390
+```
+
+Estado en las cuatro rutas, a 1440 y a 390 px de ancho:
 
 ```
 CONTRASTE por debajo de AA .................. 0
@@ -198,34 +197,78 @@ ESPACIADOS fuera de la rejilla de 8 px ...... 0
 CONTRASTE contra el fondo ya pintado ........ 0   (peor caso real, 13,2:1)
 ```
 
-El fondo del contrabajo obligó a añadir la tercera comprobación. Las dos
-primeras miran el `background-color` de los ancestros, y por ahí el fondo no
-aparece: no lo pinta ningún ancestro, sino una capa fija por debajo de todo.
-La nueva mide sobre los píxeles ya pintados — apaga el texto, fotografía cada
-renglón dos veces (con el fondo y sin él) y solo juzga los píxeles que el
+**La tercera comprobación existe por el fondo del contrabajo.** Las dos
+primeras miran el `background-color` de los ancestros, y por ahí ese fondo no
+aparece nunca: no lo pinta ningún ancestro, sino una capa fija por debajo de
+todo. La nueva mide sobre los píxeles ya pintados — apaga el texto, fotografía
+cada renglón dos veces (con el fondo y sin él) y solo juzga los píxeles que el
 fondo cambia. Así las reglas de 1 px del diseño, que salen iguales en las dos
-capturas, no cuentan como fondo de nada. El peor caso medido con el
-contrabajo puesto es **13,2:1**, muy por encima del 4,5:1 que pide AA.
+capturas, no cuentan como fondo de nada.
 
-Se corrigió también un falso positivo: el texto que existe solo para el lector
-de pantalla se contaba como texto visible. WCAG pide contraste a la
-«presentación visual del texto», y eso no lo es.
+Mide renglón a renglón, no la caja del bloque, y descarta el texto que existe
+solo para el lector de pantalla: WCAG pide contraste a la «presentación visual
+del texto», y eso no lo es.
 
-Dos cosas que la auditoría encontró y se corrigieron, por si vuelven a surgir:
+Usa `sharp` para leer los píxeles. Está declarado en `devDependencies` — antes
+solo llegaba como dependencia transitiva de Astro, que es como no tenerlo.
 
-- **Tinta secundaria al 55 %.** El sistema la define así, pero sobre el papel da
-  4,24:1 y no llega al 4,5:1 que pide AA para texto pequeño — y las etiquetas
-  mono son de 12 px. Está al **58 %**, que da 4,68:1. La diferencia no se ve.
-- **Precarga de fuentes.** El atributo `preload` de Astro precarga *todas* las
-  variantes de cada familia, incluidas `latin-ext` y las cursivas que la Home no
-  usa: eran **10 ficheros y ~560 kB** antes del primer pixel. Se quitó. Las
+---
+
+## Decisiones ya tomadas
+
+Están discutidas y resueltas. No hace falta volver sobre ellas salvo que Emi
+pida lo contrario.
+
+- **Astro estático, sin framework de UI.** El sitio es de lectura: cero
+  JavaScript por defecto. Si algún día hay zona de miembros o pagos, se
+  reevalúa.
+- **Tipografías autohospedadas y versionadas** en `src/assets/fonts`. El build
+  no depende de la red y el navegador de quien lee no le pide nada a Google.
+  Licencia OFL incluida, como exige redistribuirlas.
+- **Sin `preload` de fuentes.** El atributo de Astro precarga *todas* las
+  variantes de cada familia, incluidas `latin-ext` y las cursivas que las
+  páginas no usan: eran 10 ficheros y ~560 kB antes del primer pixel. Las
   `@font-face` viajan en la hoja de estilos, que ya bloquea el render, así que
-  el navegador las descubre igual de pronto y baja solo lo que el texto necesita.
-
-Una excepción consciente al «máximo dos animaciones»: el acuse de recibo del
-formulario aparece con un fundido de 0,4 s. Es respuesta a una acción de quien
-lee, de la misma familia que un `hover`, no movimiento ambiental de la página.
-Está en el diseño original.
+  el navegador las descubre igual de pronto y baja solo lo necesario.
+- **Tinta secundaria al 58 %, no al 55 %.** El diseño la fija al 55 %, pero
+  sobre el papel da 4,24:1 y no llega al 4,5:1 que pide WCAG AA para texto
+  pequeño — y las etiquetas mono son de 12 px. Al 58 % da 4,68:1 y la
+  diferencia no se ve.
+- **Slug propio por idioma.** `/sobre-mi/` y `/en/about/`, no `/en/sobre-mi/`.
+- **Nada que no funcione se publica enlazado.** «Aula Virtual» y el
+  «Reproducir» del video están apagados a propósito, no rotos.
+- **Excepción consciente al tope de animaciones:** el acuse de recibo del
+  formulario aparece con un fundido de 0,4 s. Es respuesta a una acción, de la
+  misma familia que un `hover`, no movimiento ambiental. Está en el diseño
+  original.
+- **La firma es el logo, y se pinta como máscara.** `public/logo.svg` sobre
+  `currentColor`, no un `<img>`: así el mismo fichero de 7,8 kB sirve en tinta
+  sobre papel (cabecera y pie) y en papel sobre tinta (la entrada), se cachea
+  una vez para todo el sitio y no infla el HTML. El nombre viaja en texto para
+  el lector de pantalla, y es lo que queda si la máscara no carga. El alto lo
+  fija quien lo usa con `--logo-height`, nunca por `style` en línea, que
+  ganaría a cualquier media query.
+- **El logo dice «Rios», sin tilde, y así se queda.** Decisión de Emi. La
+  tilde vive en los textos —copias, `alt`, lo que oye un lector de pantalla,
+  que siguen diciendo «Ríos»—, no en el trazo.
+- **La entrada no usa `stroke-dashoffset`.** Era el plan mientras la firma fue
+  texto, pero el logo vectorizado es un contorno relleno, no una línea central:
+  dibujaría el perímetro de las letras y las rellenaría de golpe. En caligrafía
+  enlazada eso queda peor. Se quedó el barrido, con el filo inclinado al ángulo
+  de la letra: la firma no aparece, se escribe.
+- **Los negros de la foto del fondo son transparentes.** Sin el mate, el fondo
+  negro del estudio se convertía en una plancha gris a la izquierda — justo lo
+  que el sistema prohíbe. Con él, el contrabajo emerge del papel y las efes se
+  leen como un recorte.
+- **El fondo se sirve sin pasar por el optimizador.** El fichero ya viene a la
+  escala de pantalla (360 px, mateado y suavizado, 41 kB). Pasarlo por
+  `getImage` solo lo recodificaría con el canal alfa sin pérdida y lo
+  multiplicaría por ocho.
+- **`animation-timeline` va en su propia regla**, separada del atajo
+  `animation`. Juntas, el minificador las funde en `animation: … scroll(root)`,
+  y la línea de tiempo dentro del atajo no la acepta ningún navegador: se caía
+  la declaración entera y el fondo no animaba. Está comentado en
+  `Backdrop.astro` para que nadie lo «arregle».
 
 ---
 
@@ -236,33 +279,35 @@ Está en el diseño original.
 - [ ] **Conectar el proveedor de correo.** Hoy no hay ninguno: el formulario
       valida y maqueta bien, pero **no da de alta a nadie**. Está resuelto para
       que no mienta — en producción y sin proveedor muestra un error honesto con
-      una dirección a la que escribir, en vez de un «Listo» falso. Hace falta
-      decidir el proveedor (ConvertKit, MailerLite, Beehiiv…) y poner
-      `PUBLIC_NEWSLETTER_ENDPOINT`.
-- [x] **Dónde se despliega** — Vercel, desde el PR #1. El sitio es estático, así
-      que no hace falta adaptador ni configuración.
-- [ ] **Conectar el dominio `contrabajoenlaciudad.com`.** Mientras tanto, el
-      `site` de `astro.config.mjs` ya apunta ahí: de él salen el `canonical` y
-      las alternativas `hreflang`, así que las direcciones absolutas del HTML
-      son las definitivas aunque todavía se vea en la URL de Vercel.
+      una dirección a la que escribir, en vez de un «Listo» falso.
+
+      Falta que Emi diga cuál usa (ConvertKit, MailerLite, Beehiiv…). **Aviso
+      para quien lo implemente:** no basta con poner
+      `PUBLIC_NEWSLETTER_ENDPOINT`. El formulario hace un `POST` de
+      `{ email }` en JSON desde el navegador, y la mayoría de proveedores no
+      aceptan eso por CORS ni admiten exponer la clave en el cliente. Lo más
+      probable es que haga falta una función serverless en Vercel que reciba el
+      correo y hable con la API del proveedor con la clave del lado del
+      servidor. Conviene contarlo antes de estimar.
+
+- [ ] **Conectar el dominio `contrabajoenlaciudad.com`.** El `site` de
+      `astro.config.mjs` ya apunta ahí, así que las direcciones absolutas del
+      HTML son las definitivas aunque todavía se vea en la URL de Vercel.
 
 ### Contenido que falta (de Emi)
 
-- [ ] **Retrato con el contrabajo**, en blanco y negro, para *Sobre mí*. El
-      hueco ya está montado: importar la imagen y pasarla a `MediaSlot`.
-- [ ] **Video «Viaje en el tiempo»** (2:41) y su fotograma. El enlace
-      «Reproducir» está apagado hasta que llegue.
-- [ ] **Los tres correos reales** del archivo. Hoy los N.º 40, 41 y 42 tienen
-      asunto y adelanto de verdad, pero el cuerpo es texto de muestra —
-      marcados con `borrador: true`.
+- [ ] **Retrato con el contrabajo**, en blanco y negro, para *Sobre mí*.
+- [ ] **Video «Viaje en el tiempo»** (2:41) y su fotograma.
+- [ ] **Los tres correos reales.** Los N.º 40, 41 y 42 tienen asunto y adelanto
+      de verdad, pero el cuerpo es de muestra — marcados `borrador: true`.
 - [ ] **Los tres testimonios** de *Sobre mí*.
-- [x] **La firma en SVG** — llegó en el PR #3, y con ella el favicon.
 - [ ] **Enlaces reales de Instagram y YouTube.** Apuntan a las portadas.
 
 ### Próximos PRs
 
-- [ ] **PR #4 — Cierre para producción.** `sitemap.xml`, `robots.txt`, imagen
-      de Open Graph, datos estructurados y página 404.
+- [ ] **Cierre para producción.** `sitemap.xml`, `robots.txt`, imagen de Open
+      Graph, datos estructurados y página 404. Es el candidato natural al
+      siguiente PR si el proveedor de correo sigue sin decidirse.
 - [ ] **Comprobación de tipos en el build.** Hoy Astro transpila sin verificar:
       un error de tipos no rompe el despliegue, pero tampoco avisa. Añadir
       `@astrojs/check` y un `npm run check`.
@@ -271,11 +316,17 @@ Está en el diseño original.
 
 ---
 
-## Notas para quien retome esto
+## Notas sueltas
 
-- El sitio no lleva analítica ni ninguna cookie. Si se añade algo, hay que
-  poner aviso.
-- Los textos largos viven en `src/data/`, no en los componentes. Cambiar una
-  frase no debería obligar a tocar maquetación.
-- Se maqueta con el español, que es el texto más largo. El inglés entra en las
-  mismas cajas sin ajustar nada.
+- El sitio **no lleva analítica ni cookies**. Si se añade algo, hay que poner
+  aviso y revisar la nota legal.
+- **Se maqueta con el español**, que es el texto más largo. El inglés entra en
+  las mismas cajas sin ajustar nada.
+- Sin JavaScript no se pierde contenido: las frases-ancla quedan visibles y el
+  panel negro de la entrada no llega a aparecer.
+- La entrada se reproduce **una vez por sesión** (`sessionStorage`). Para
+  volver a verla, abrir una ventana nueva o borrar la clave `cec_intro`.
+- El fondo del contrabajo **solo está en la Home**, y se enciende con la prop
+  `backdrop` del layout `Base`. En *Sobre mí* no va: ahí manda el retrato.
+- El papel lo pinta `html`, no `body`. Tiene que seguir así: el fondo vive en
+  una capa con `z-index: -1`, y si `body` recupera su color se la come.
