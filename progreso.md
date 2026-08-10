@@ -2,7 +2,7 @@
 
 Bitácora del sitio de Emilse Ríos. Se actualiza en cada PR.
 
-**Última actualización:** 9 de agosto de 2026 · PR #2
+**Última actualización:** 10 de agosto de 2026 · PR #3
 
 ---
 
@@ -32,8 +32,23 @@ El sistema, tal como lo fija el diseño:
 | Espaciado | Rejilla de 8 px. Sin excepciones. |
 | Formas | Radios: cero. Sombras: cero. Las divisiones son reglas de 1 px. |
 | Medida | 60–68 caracteres. Columna de 640 px, número marginal de 48 px. |
-| Movimiento | Máximo dos animaciones por página. |
-| Prohibido | Parallax, marquesinas, contadores, cursores propios, texto que se escribe letra a letra, tarjetas que se levantan, zoom automático, iconos, emojis, fondos grises de relleno. |
+| Movimiento | Máximo tres animaciones en la Home, dos en el resto. |
+| Prohibido | Marquesinas, contadores, cursores propios, texto que se escribe letra a letra, tarjetas que se levantan, zoom automático, iconos, emojis, fondos grises de relleno. |
+
+### Enmiendas al sistema
+
+El sistema es de Emi y se puede cambiar; lo que no se puede es cambiarlo sin
+dejar constancia. Hasta hoy, dos:
+
+- **10 ago 2026 · Se levanta la prohibición de parallax y el tope sube a tres
+  animaciones en la Home.** Lo pide el fondo del contrabajo. La prohibición
+  existía contra el parallax de verdad —capas a distinta velocidad, que da
+  tirones y marea— y eso sigue fuera: la imagen del fondo no se mueve ni un
+  píxel. Lo que avanza con el scroll es un revelado, de la misma familia que
+  el de las frases-ancla.
+- **10 ago 2026 · «Papel y tinta, ningún otro color» rige la interfaz, no las
+  fotografías.** Las fotos traen su color y cuentan como fotos. Vale para el
+  fondo del contrabajo y para el retrato y el video que están por llegar.
 
 ---
 
@@ -109,6 +124,58 @@ archivo.
 páginas — `.block`, `.anchor`, `.section-title`, `.inline-mono` — se movieron
 de `Home.astro` a `base.css`.
 
+### PR #3 — El logo y el contrabajo de fondo
+
+**La firma ya es el logo de Emi.** Llegó como PNG de 2560 × 1440, del que solo
+1631 × 487 eran trazo. Se recortó y se vectorizó con `potrace`; vive en
+`public/logo.svg` y pesa 7,8 kB.
+
+Se pinta como **máscara sobre `currentColor`**, no como `<img>`: así el mismo
+fichero sirve en tinta sobre papel (cabecera y pie) y en papel sobre tinta (la
+entrada), se cachea una vez para todo el sitio y no infla el HTML. El nombre
+viaja en texto para el lector de pantalla — y es lo que queda si la máscara no
+carga. El alto lo fija quien lo usa con `--logo-height`; nunca por `style` en
+línea, que ganaría a las media queries.
+
+De aquí salen tres cosas que estaban pendientes:
+
+- **El favicon** ya no es una «E» provisional: es la E del propio logo,
+  recortada de la firma.
+- **Mrs Saint Delafield se ha retirado.** Existía solo para escribir la firma
+  como texto. Fuera dos ficheros de fuente y una familia del config: el sitio
+  usa tres tipografías, no cuatro.
+- **La entrada escribe la firma de verdad.** El barrido ya no descubre un texto
+  sino el trazo real, y su filo va inclinado al ángulo de la letra: no aparece,
+  se escribe. Se descartó `stroke-dashoffset` — el vectorizado es un contorno
+  relleno, no una línea central, así que dibujaría el perímetro de las letras y
+  las rellenaría de golpe. En caligrafía enlazada eso queda peor, no mejor.
+
+**El contrabajo detrás del cristal**, solo en la Home. Dos capas fijas por
+debajo de todo el contenido: la fotografía en una banda a la izquierda y, sobre
+ella, una hoja de papel esmerilado a pantalla completa. La foto **nunca se ve
+en crudo**, siempre difuminada y siempre por debajo del texto. El «cristal» es
+el papel del sitio al 50 % con desenfoque: esquinas rectas y sin borde, que el
+sistema no tiene radios ni sombras. La cabecera ya hacía esto mismo.
+
+- **Ninguna capa se mueve.** Lo que avanza al bajar es una máscara vertical que
+  descubre el instrumento de arriba abajo. Va con animaciones de scroll de CSS
+  (`animation-timeline: scroll()`), sin JavaScript y fuera del hilo principal.
+  Donde no hay soporte —o con `prefers-reduced-motion`— la imagen se queda
+  quieta y entera: no se pierde nada.
+- **Los negros de la foto son transparentes.** El fondo negro del estudio se
+  convertía en una plancha gris a la izquierda, justo lo que el sistema
+  prohíbe. La imagen lleva un mate por luminancia, así que el contrabajo emerge
+  del papel y las efes se leen como un recorte. Los mandos —ancho, opacidad,
+  saturación, velo y desenfoque del cristal— están todos en `tokens.css`.
+- **41 kB.** El fichero de `src/assets/img/` ya viene a la escala de pantalla,
+  así que se sirve tal cual: pasarlo por el optimizador de Astro solo lo
+  recodificaría con el canal alfa sin pérdida y lo multiplicaría por ocho.
+
+Para rehacer el asset desde el original —que está en el commit `fbff7e5`, en
+`public/doublebass_background_ref.jpg`: recorte `(220, 0, 2500, 5938)`, escalar
+a 360 px de ancho, desenfoque gaussiano de radio 2, alfa = `smoothstep(0,10 →
+0,38)` sobre la luminancia, y WebP con calidad 74 y alfa 62.
+
 ---
 
 ## Auditoría — Paso 9
@@ -123,7 +190,21 @@ Estado en las cuatro rutas (`/`, `/en/`, `/sobre-mi/`, `/en/about/`) y a
 ```
 CONTRASTE por debajo de AA .................. 0
 ESPACIADOS fuera de la rejilla de 8 px ...... 0
+CONTRASTE contra el fondo ya pintado ........ 0   (peor caso real, 13,2:1)
 ```
+
+El fondo del contrabajo obligó a añadir la tercera comprobación. Las dos
+primeras miran el `background-color` de los ancestros, y por ahí el fondo no
+aparece: no lo pinta ningún ancestro, sino una capa fija por debajo de todo.
+La nueva mide sobre los píxeles ya pintados — apaga el texto, fotografía cada
+renglón dos veces (con el fondo y sin él) y solo juzga los píxeles que el
+fondo cambia. Así las reglas de 1 px del diseño, que salen iguales en las dos
+capturas, no cuentan como fondo de nada. El peor caso medido con el
+contrabajo puesto es **13,2:1**, muy por encima del 4,5:1 que pide AA.
+
+Se corrigió también un falso positivo: el texto que existe solo para el lector
+de pantalla se contaba como texto visible. WCAG pide contraste a la
+«presentación visual del texto», y eso no lo es.
 
 Dos cosas que la auditoría encontró y se corrigieron, por si vuelven a surgir:
 
@@ -170,15 +251,15 @@ Está en el diseño original.
       asunto y adelanto de verdad, pero el cuerpo es texto de muestra —
       marcados con `borrador: true`.
 - [ ] **Los tres testimonios** de *Sobre mí*.
-- [ ] **La firma en SVG.** Ahora la entrada escribe «Emilse Ríos» con la
-      tipografía Mrs Saint Delafield y una máscara. Con el trazo real, la misma
-      animación se ejecuta con `stroke-dashoffset` y el gesto es de verdad.
-      El favicon también sale de ahí — hoy es una «E» provisional.
+- [x] **La firma en SVG** — llegó en el PR #3, y con ella el favicon.
 - [ ] **Enlaces reales de Instagram y YouTube.** Apuntan a las portadas.
+- [ ] **El logo dice «Rios», sin tilde.** El texto del sitio dice «Ríos», y eso
+      es lo que oye un lector de pantalla. Si la tilde debe estar también en el
+      trazo, hay que rehacer el logo y volver a vectorizarlo.
 
 ### Próximos PRs
 
-- [ ] **PR #3 — Cierre para producción.** `sitemap.xml`, `robots.txt`, imagen
+- [ ] **PR #4 — Cierre para producción.** `sitemap.xml`, `robots.txt`, imagen
       de Open Graph, datos estructurados y página 404.
 - [ ] **Comprobación de tipos en el build.** Hoy Astro transpila sin verificar:
       un error de tipos no rompe el despliegue, pero tampoco avisa. Añadir

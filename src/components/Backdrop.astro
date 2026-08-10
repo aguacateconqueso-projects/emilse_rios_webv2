@@ -1,0 +1,125 @@
+---
+/**
+ * El contrabajo detrás del cristal — solo en la Home.
+ *
+ * Dos capas fijas por detrás de todo el contenido:
+ *
+ *   1. La fotografía, en una banda a la izquierda, con el borde derecho
+ *      disuelto en el papel para que no haya corte.
+ *   2. Una hoja de papel esmerilado a pantalla completa. La foto nunca se ve
+ *      en crudo: siempre difuminada, siempre por debajo del texto.
+ *
+ * Ninguna de las dos se mueve. Lo que ocurre al bajar es que la máscara
+ * vertical se abre y va descubriendo el instrumento de arriba abajo, al ritmo
+ * de la lectura. No hay dos velocidades, así que no hay parallax ni tirones:
+ * la animación va ligada al scroll y corre fuera del hilo principal.
+ *
+ * Sin soporte de `animation-timeline`, o con `prefers-reduced-motion`, la
+ * imagen se queda quieta y entera. No se pierde nada.
+ *
+ * El fichero ya viene preparado para lo que se ve en pantalla — 360 px de
+ * ancho, mateado y suavizado — así que se sirve tal cual: pasarlo por el
+ * optimizador solo lo recodificaría con el canal alfa sin pérdida y lo
+ * multiplicaría por ocho. Son 41 kB. La receta está en `progreso.md`.
+ */
+import contrabajo from '../assets/img/contrabajo.webp';
+---
+
+<div class="backdrop" aria-hidden="true">
+  <div class="backdrop__bass" style={`--bass-src:url(${contrabajo.src})`}></div>
+  <div class="backdrop__glass"></div>
+</div>
+
+<style>
+  /* El punto de la máscara vertical: 0 % no descubre nada, 100 % lo descubre
+     entero. Registrada como porcentaje para que se pueda interpolar. */
+  @property --bass-reveal {
+    syntax: '<percentage>';
+    inherits: false;
+    initial-value: 100%;
+  }
+
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .backdrop__bass {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    width: var(--bass-width);
+    background-image: var(--bass-src);
+    background-size: cover;
+    /* Centrado en vertical: es donde cae la efe, que es lo único que hace
+       reconocible a un contrabajo de un vistazo. */
+    background-position: left center;
+    background-repeat: no-repeat;
+    /* La imagen llega ya mateada: sus negros son transparentes y solo queda la
+       madera. A la opacidad final le queda tan poco color que hay que
+       subírselo, no bajárselo, para que la madera siga leyéndose como madera. */
+    filter: saturate(var(--bass-saturation));
+    opacity: var(--bass-opacity);
+
+    /* Dos máscaras que se cortan entre sí: el desvanecido lateral fijo y el
+       revelado vertical que mueve el scroll. */
+    mask-image:
+      linear-gradient(to right, #000 70%, transparent 88%),
+      linear-gradient(to bottom, #000 var(--bass-reveal), transparent calc(var(--bass-reveal) + 20%));
+    mask-repeat: no-repeat;
+    mask-composite: intersect;
+    -webkit-mask-image:
+      linear-gradient(to right, #000 70%, transparent 88%),
+      linear-gradient(to bottom, #000 var(--bass-reveal), transparent calc(var(--bass-reveal) + 20%));
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-composite: source-in;
+  }
+
+  /* El cristal: el mismo papel del sitio, translúcido y esmerilado.
+     Esquinas rectas y sin borde — el sistema no tiene radios ni sombras. */
+  .backdrop__glass {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, var(--paper) var(--glass-veil), transparent);
+    backdrop-filter: blur(var(--glass-blur)) saturate(1.05);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.05);
+  }
+
+  /* --- El revelado ------------------------------------------------------- */
+  @keyframes bass-rise {
+    0% {
+      opacity: 0;
+      --bass-reveal: 0%;
+    }
+    18% {
+      opacity: var(--bass-opacity);
+      --bass-reveal: 10%;
+    }
+    100% {
+      opacity: var(--bass-opacity);
+      --bass-reveal: 100%;
+    }
+  }
+
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .backdrop__bass {
+        animation: bass-rise 1s linear both;
+      }
+
+      /* `animation-timeline` va en su propia regla a propósito. En la misma
+         que el atajo, el minificador los funde en `animation: … scroll(root)`
+         — y la línea de tiempo dentro del atajo no la acepta ningún
+         navegador, así que se caía la declaración entera y no animaba nada.
+         Selector distinto para que no pueda volver a fundirlas. */
+      .backdrop .backdrop__bass {
+        animation-timeline: scroll(root block);
+        /* Termina antes del cierre en negro, que va limpio. */
+        animation-range: 0% 58%;
+      }
+    }
+  }
+</style>
