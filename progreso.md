@@ -130,6 +130,11 @@ de `Home.astro` a `base.css`.
 1631 × 487 eran trazo. Se recortó y se vectorizó con `potrace`; vive en
 `public/logo.svg` y pesa 7,8 kB.
 
+**El logo dice «Rios», sin tilde, y así se queda.** Decisión de Emi, 10 ago
+2026: la tilde vive en los textos —copias, `alt`, lo que oye un lector de
+pantalla, que siguen diciendo «Ríos»—, no en el trazo. No hace falta volver
+sobre esto.
+
 Se pinta como **máscara sobre `currentColor`**, no como `<img>`: así el mismo
 fichero sirve en tinta sobre papel (cabecera y pie) y en papel sobre tinta (la
 entrada), se cachea una vez para todo el sitio y no infla el HTML. El nombre
@@ -253,9 +258,6 @@ Está en el diseño original.
 - [ ] **Los tres testimonios** de *Sobre mí*.
 - [x] **La firma en SVG** — llegó en el PR #3, y con ella el favicon.
 - [ ] **Enlaces reales de Instagram y YouTube.** Apuntan a las portadas.
-- [ ] **El logo dice «Rios», sin tilde.** El texto del sitio dice «Ríos», y eso
-      es lo que oye un lector de pantalla. Si la tilde debe estar también en el
-      trazo, hay que rehacer el logo y volver a vectorizarlo.
 
 ### Próximos PRs
 
