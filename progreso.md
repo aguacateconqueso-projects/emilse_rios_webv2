@@ -107,7 +107,7 @@ src/
   styles/tokens.css      Los tokens del sistema
   styles/base.css        Reset y primitivas compartidas
 public/logo.svg          La firma vectorizada. La usa Logo.astro de máscara
-public/favicon.svg       La E del logo, recortada de la firma
+public/favicon.svg       La E del logo. Se adapta al tema del navegador
 scripts/audit.mjs        Auditoría de contraste y rejilla
 ```
 
@@ -258,6 +258,17 @@ pida lo contrario.
 - **El logo dice «Rios», sin tilde, y así se queda.** Decisión de Emi. La
   tilde vive en los textos —copias, `alt`, lo que oye un lector de pantalla,
   que siguen diciendo «Ríos»—, no en el trazo.
+- **El favicon se saca por componente conexa, nunca recortando a ojo.** La E
+  es una pieza suelta del dibujo y ocupa de x=1 a x=328; el primer intento la
+  cortó en 235 y en la pestaña se veía un tajo vertical. Si algún día hay que
+  rehacerlo: etiquetar las piezas del canal alfa, quedarse con la de la E, y
+  centrar **su** caja de tinta en un lienzo cuadrado — el lienzo del trazado
+  no vale, que lleva aire de sobra y descentra la letra.
+- **Va sin los dos puntos** que acompañan a la E en la firma. A 32 px se
+  convierten en motas y ensucian; la E sola aguanta mejor.
+- **El favicon cambia de color con el tema del navegador.** Lleva un
+  `prefers-color-scheme` dentro del propio SVG: tinta sobre barra clara, papel
+  sobre barra oscura. En tinta sobre una pestaña oscura no se veía.
 - **La entrada no usa `stroke-dashoffset`.** Era el plan mientras la firma fue
   texto, pero el logo vectorizado es un contorno relleno, no una línea central:
   dibujaría el perímetro de las letras y las rellenaría de golpe. En caligrafía
