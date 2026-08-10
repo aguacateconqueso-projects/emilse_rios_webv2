@@ -17,10 +17,10 @@
  * Sin soporte de `animation-timeline`, o con `prefers-reduced-motion`, la
  * imagen se queda quieta y entera. No se pierde nada.
  *
- * El fichero ya viene preparado para lo que se ve en pantalla — 360 px de
- * ancho, mateado y suavizado — así que se sirve tal cual: pasarlo por el
- * optimizador solo lo recodificaría con el canal alfa sin pérdida y lo
- * multiplicaría por ocho. Son 41 kB. La receta está en `progreso.md`.
+ * El fichero ya viene preparado para lo que se ve en pantalla — 700 px de
+ * ancho y mateado — así que se sirve tal cual: pasarlo por el optimizador solo
+ * lo recodificaría con el canal alfa sin pérdida y lo multiplicaría por tres.
+ * Son 175 kB. La receta está en `progreso.md`.
  */
 import contrabajo from '../assets/img/contrabajo.webp';
 ---
@@ -54,14 +54,21 @@ import contrabajo from '../assets/img/contrabajo.webp';
     width: var(--bass-width);
     background-image: var(--bass-src);
     background-size: cover;
-    /* Centrado en vertical: es donde cae la efe, que es lo único que hace
-       reconocible a un contrabajo de un vistazo. */
+    /* La foto entra entera, sin recortar de más: así se ve el aro, la efe y el
+       puente, y el instrumento se reconoce de un vistazo. Ampliada a un detalle
+       parecía una imagen de mala resolución. */
     background-position: left center;
     background-repeat: no-repeat;
     /* La imagen llega ya mateada: sus negros son transparentes y solo queda la
        madera. A la opacidad final le queda tan poco color que hay que
-       subírselo, no bajárselo, para que la madera siga leyéndose como madera. */
-    filter: saturate(var(--bass-saturation));
+       subírselo, no bajárselo, para que la madera siga leyéndose como madera.
+
+       El desenfoque va acá y no en el cristal. Detrás del cristal no hay más
+       que esta imagen y papel liso, así que el resultado es el mismo — pero
+       un `backdrop-filter` a pantalla completa se recalcula en cada fotograma,
+       porque la máscara del revelado cambia con el scroll, y eso bajaba la
+       Home de 60 a 20 fps. Acá el desenfoque se limita a la banda. */
+    filter: blur(var(--glass-blur)) saturate(var(--bass-saturation));
     opacity: var(--bass-opacity);
 
     /* Dos máscaras que se cortan entre sí: el desvanecido lateral fijo y el
@@ -78,14 +85,13 @@ import contrabajo from '../assets/img/contrabajo.webp';
     -webkit-mask-composite: source-in;
   }
 
-  /* El cristal: el mismo papel del sitio, translúcido y esmerilado.
-     Esquinas rectas y sin borde — el sistema no tiene radios ni sombras. */
+  /* El cristal: el mismo papel del sitio, translúcido. Esquinas rectas y sin
+     borde — el sistema no tiene radios ni sombras. El esmerilado lo pone la
+     capa de abajo; ver el porqué en `.backdrop__bass`. */
   .backdrop__glass {
     position: absolute;
     inset: 0;
     background: color-mix(in srgb, var(--paper) var(--glass-veil), transparent);
-    backdrop-filter: blur(var(--glass-blur)) saturate(1.05);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.05);
   }
 
   /* --- El revelado ------------------------------------------------------- */
