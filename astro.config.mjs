@@ -51,7 +51,9 @@ export default defineConfig({
   },
 
   /**
-   * Las cuatro tipografías del sistema, servidas desde nuestro dominio.
+   * Las tres tipografías del sistema, servidas desde nuestro dominio.
+   * La cuarta —Mrs Saint Delafield— existió mientras la firma era texto; hoy
+   * la firma es el logo de Emi vectorizado, así que la familia se ha retirado.
    * Los ficheros viven en `src/assets/fonts` y están versionados: el build no
    * depende de la red y nadie le pide nada a Google desde el navegador.
    * Todas son SIL Open Font License — ver `src/assets/fonts/OFL.txt`.
@@ -89,16 +91,6 @@ export default defineConfig({
       fallbacks: ['ui-monospace', 'monospace'],
       options: {
         variants: [...cut('ibm-plex-mono', 400, 'normal'), ...cut('ibm-plex-mono', 500, 'normal')],
-      },
-    },
-    {
-      // Solo para la firma. En ningún otro sitio.
-      provider: fontProviders.local(),
-      name: 'Mrs Saint Delafield',
-      cssVariable: '--font-signature',
-      fallbacks: ['cursive'],
-      options: {
-        variants: [...cut('mrs-saint-delafield', 400, 'normal')],
       },
     },
   ],

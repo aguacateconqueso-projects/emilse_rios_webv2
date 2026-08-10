@@ -1,6 +1,7 @@
 ---
 import { type Lang, type Route, useTranslations, routePath } from '../i18n/ui';
 import LangSwitch from './LangSwitch.astro';
+import Logo from './Logo.astro';
 
 interface Props {
   lang: Lang;
@@ -13,8 +14,8 @@ const t = useTranslations(lang);
 
 <header class="header">
   <div class="header__inner">
-    <a class="header__mark signature" href={routePath('home', lang)} title={t('nav.home')}>
-      {t('site.name')}
+    <a class="header__mark" href={routePath('home', lang)} title={t('nav.home')}>
+      <Logo name={t('site.name')} />
     </a>
 
     <nav class="header__nav mono" aria-label={t('site.title')}>
@@ -54,9 +55,13 @@ const t = useTranslations(lang);
   }
 
   .header__mark {
-    font-size: 2.125rem; /* 34 px */
-    line-height: 1;
+    --logo-height: 32px;
+    display: flex;
     border-bottom: 0;
+  }
+
+  .header__mark:hover {
+    color: var(--ink-soft);
   }
 
   .header__nav {
@@ -91,7 +96,7 @@ const t = useTranslations(lang);
     }
 
     .header__mark {
-      font-size: 1.75rem; /* 28 px */
+      --logo-height: 24px;
     }
   }
 </style>

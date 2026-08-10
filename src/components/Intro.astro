@@ -5,9 +5,9 @@
  * 0,0 – 1,1 s  La firma se escribe de izquierda a derecha sobre negro pleno.
  * 1,1 – 1,4 s  Pausa con la firma completa en pantalla.
  * 1,4 – 2,0 s  El panel negro sale hacia arriba. Detrás, la Home ya montada.
- *
- * Es una de las dos únicas animaciones del sitio.
  */
+import Logo from './Logo.astro';
+
 interface Props {
   name: string;
 }
@@ -15,7 +15,7 @@ const { name } = Astro.props;
 ---
 
 <div class="intro" aria-hidden="true">
-  <span class="intro__signature signature">{name}</span>
+  <div class="intro__signature"><Logo name={name} /></div>
 </div>
 
 <style>
@@ -36,21 +36,22 @@ const { name } = Astro.props;
   }
 
   .intro__signature {
-    padding-inline: var(--space-3);
+    /* El alto sale del ancho que se le quiere dar, no al revés: la firma es
+       una línea larga y lo que manda es cuánto ocupa a lo ancho. */
+    --logo-height: calc(min(72vw, 40rem) * 487 / 1631);
     color: var(--paper);
-    font-size: clamp(4rem, 14vw, 8.75rem);
-    /* El revelado por máscara reproduce el gesto de escritura. Cuando llegue
-       la firma real en SVG, el mismo tiempo se ejecuta con stroke-dashoffset. */
-    clip-path: inset(0 100% 0 0);
+    clip-path: polygon(-20% 0, 0% 0, -12% 100%, -20% 100%);
     animation: intro-write 1.1s var(--ease-write) forwards;
   }
 
+  /* El filo del barrido va inclinado al mismo ángulo que la letra: la firma
+     no aparece, se escribe. */
   @keyframes intro-write {
     from {
-      clip-path: inset(0 100% 0 0);
+      clip-path: polygon(-20% 0, 0% 0, -12% 100%, -20% 100%);
     }
     to {
-      clip-path: inset(0 0 0 0);
+      clip-path: polygon(-20% 0, 120% 0, 108% 100%, -20% 100%);
     }
   }
 

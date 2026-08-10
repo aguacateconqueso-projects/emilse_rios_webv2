@@ -24,7 +24,8 @@
 
   /* --- 02 · Tipografía -------------------------------------------------
      Las familias las inyecta Astro como --font-display / --font-body /
-     --font-mono / --font-signature (ver astro.config.mjs). */
+     --font-mono (ver astro.config.mjs). La firma no es tipografía: es el
+     logo de Emi vectorizado, en public/logo.svg. */
 
   --text-hero: clamp(3rem, 8.5vw, 5.5rem); /* 48 → 88 px */
   --text-anchor: clamp(2rem, 5.4vw, 3.5rem); /* 32 → 56 px */
@@ -59,6 +60,16 @@
   --width-text: 48rem; /* 768 px · columna + gutter */
   --width-wide: 56.25rem; /* 900 px · fichas y testimonios */
   --width-full: 77.5rem; /* 1240 px · cabecera, pie, carrusel */
+
+  /* --- Fondo del contrabajo · solo en la Home ---------------------------
+     Los mandos del efecto, todos acá. Lo que de verdad manda es cuánta madera
+     llega al papel: opacidad × lo que deja pasar el cristal, hoy
+     0,45 × 0,50 ≈ 22 %. Subir cualquiera de los dos lo hace más presente. */
+  --bass-width: min(44vw, 32rem); /* 512 px · banda izquierda */
+  --bass-opacity: 0.45;
+  --bass-saturation: 1.1;
+  --glass-veil: 50%; /* cuánto papel lleva el cristal */
+  --glass-blur: 26px;
 
   /* --- 04 · Formas y movimiento ----------------------------------------- */
   --radius: 0; /* Cero. Ninguna esquina redondeada. */

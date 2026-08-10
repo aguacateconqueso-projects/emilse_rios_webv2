@@ -4,7 +4,7 @@ Sitio de **Emilse Ríos**, contrabajista y docente, y de su newsletter.
 Este documento es la memoria del proyecto: quien lo lea de cero debería poder
 seguir trabajando sin preguntar nada.
 
-**Última actualización:** 10 de agosto de 2026 · después del PR #2
+**Última actualización:** 10 de agosto de 2026 · después del PR #4
 
 ---
 
@@ -53,16 +53,32 @@ piezas: Sistema de Diseño, las dos páginas, y la animación de entrada.
 
 | | |
 |---|---|
-| Color | Papel `#FAFAF8`, tinta `#0D0D0D`, tinta secundaria, línea. Ningún otro. |
-| Tipografía | Instrument Serif (titulares), Newsreader (cuerpo), IBM Plex Mono (etiquetas), Mrs Saint Delafield (solo la firma) |
+| Color | Papel `#FAFAF8`, tinta `#0D0D0D`, tinta secundaria, línea. Ningún otro **en la interfaz**; las fotografías traen el suyo. |
+| Tipografía | Instrument Serif (titulares), Newsreader (cuerpo), IBM Plex Mono (etiquetas). La firma no es tipografía: es el logo. |
 | Espaciado | Rejilla de 8 px. Sin excepciones. |
 | Formas | Radios: cero. Sombras: cero. Las divisiones son reglas de 1 px. |
 | Medida | 60–68 caracteres. Columna de 640 px, número marginal de 48 px. |
-| Movimiento | Máximo dos animaciones por página. |
-| Prohibido | Parallax, marquesinas, contadores, cursores propios, texto que se escribe letra a letra, tarjetas que se levantan, zoom automático, iconos, emojis, fondos grises de relleno. |
+| Movimiento | Máximo tres animaciones en la Home, dos en el resto. |
+| Prohibido | Marquesinas, contadores, cursores propios, texto que se escribe letra a letra, tarjetas que se levantan, zoom automático, iconos, emojis, fondos grises de relleno. |
 
 Todo esto está en `src/styles/tokens.css`. **Ningún valor suelto en los
 componentes**: si hace falta uno nuevo, se añade como token.
+
+### Enmiendas, con fecha
+
+El sistema es de Emi y se puede cambiar. Lo que no se puede es cambiarlo sin
+dejar constancia, porque si no la tabla de arriba deja de ser fiable. Hasta hoy
+se ha tocado dos veces, las dos en el PR #4:
+
+- **10 ago 2026 · Cae la prohibición de parallax; el tope sube a tres
+  animaciones en la Home.** Lo pide el fondo del contrabajo. La prohibición
+  existía contra el parallax de verdad —capas a distinta velocidad, que da
+  tirones y marea— y eso sigue fuera: la imagen del fondo no se mueve ni un
+  píxel. Lo que avanza con el scroll es un revelado, de la misma familia que el
+  de las frases-ancla.
+- **10 ago 2026 · «Ningún otro color» rige la interfaz, no las fotografías.**
+  Una foto trae su color y cuenta como foto. Vale para el fondo del contrabajo
+  y para el retrato y el video que están por llegar.
 
 ---
 
@@ -70,10 +86,13 @@ componentes**: si hace falta uno nuevo, se añade como token.
 
 ```
 src/
-  assets/fonts/          Las cuatro familias en woff2 + OFL.txt
+  assets/fonts/          Las tres familias en woff2 + OFL.txt
+  assets/img/            contrabajo.webp, el fondo de la Home
   components/
     Header · Footer · LangSwitch   Cabecera, pie, conmutador ES/EN
+    Logo.astro                     La firma de Emi, como máscara
     Intro.astro                    Animación de entrada (solo Home)
+    Backdrop.astro                 El contrabajo tras el cristal (solo Home)
     Home.astro · About.astro       Los bloques de cada página
     EmailArchive.astro             Fichas del newsletter + <dialog>
     SubscribeForm.astro            Campo de suscripción
@@ -87,7 +106,8 @@ src/
   pages/                 index · sobre-mi · en/index · en/about
   styles/tokens.css      Los tokens del sistema
   styles/base.css        Reset y primitivas compartidas
-public/favicon.svg       Provisional, una «E»
+public/logo.svg          La firma vectorizada. La usa Logo.astro de máscara
+public/favicon.svg       La E del logo, recortada de la firma
 scripts/audit.mjs        Auditoría de contraste y rejilla
 ```
 
@@ -131,6 +151,25 @@ import retrato from '../assets/img/retrato.jpg';
 
 `MediaSlot` la sirve optimizada, en densidad 2x y en blanco y negro.
 
+### Subir o bajar el contrabajo del fondo
+
+Los mandos están juntos en `src/styles/tokens.css`, y no hay que tocar nada
+más. Lo que de verdad decide cuánta madera llega al papel es **la opacidad por
+lo que deja pasar el cristal**: hoy `0,45 × 0,50 ≈ 22 %`.
+
+```css
+--bass-width       /* ancho de la banda izquierda */
+--bass-opacity     /* cuánta imagen. El mando principal */
+--bass-saturation  /* a esta opacidad queda poco color: se sube, no se baja */
+--glass-veil       /* cuánto papel lleva el cristal */
+--glass-blur       /* cuánto esmerila */
+```
+
+Para rehacer el fichero desde la foto original —está en el commit `fbff7e5`,
+en `public/doublebass_background_ref.jpg`: recorte `(220, 0, 2500, 5938)`,
+escalar a 360 px de ancho, desenfoque gaussiano de radio 2, alfa =
+`smoothstep(0,10 → 0,38)` sobre la luminancia, y WebP con calidad 74 y alfa 62.
+
 ### Añadir una página
 
 1. Añadirla al mapa `routes` de `src/i18n/ui.ts`, con su slug en cada idioma.
@@ -150,12 +189,28 @@ De ahí salen solos los enlaces, el `canonical` y las alternativas `hreflang`.
 node scripts/audit.mjs http://localhost:4321/sobre-mi/ 390
 ```
 
-Estado en las cuatro rutas y a 390 px de ancho:
+Estado en las cuatro rutas, a 1440 y a 390 px de ancho:
 
 ```
 CONTRASTE por debajo de AA .................. 0
 ESPACIADOS fuera de la rejilla de 8 px ...... 0
+CONTRASTE contra el fondo ya pintado ........ 0   (peor caso real, 13,2:1)
 ```
+
+**La tercera comprobación existe por el fondo del contrabajo.** Las dos
+primeras miran el `background-color` de los ancestros, y por ahí ese fondo no
+aparece nunca: no lo pinta ningún ancestro, sino una capa fija por debajo de
+todo. La nueva mide sobre los píxeles ya pintados — apaga el texto, fotografía
+cada renglón dos veces (con el fondo y sin él) y solo juzga los píxeles que el
+fondo cambia. Así las reglas de 1 px del diseño, que salen iguales en las dos
+capturas, no cuentan como fondo de nada.
+
+Mide renglón a renglón, no la caja del bloque, y descarta el texto que existe
+solo para el lector de pantalla: WCAG pide contraste a la «presentación visual
+del texto», y eso no lo es.
+
+Usa `sharp` para leer los píxeles. Está declarado en `devDependencies` — antes
+solo llegaba como dependencia transitiva de Astro, que es como no tenerlo.
 
 ---
 
@@ -182,10 +237,38 @@ pida lo contrario.
 - **Slug propio por idioma.** `/sobre-mi/` y `/en/about/`, no `/en/sobre-mi/`.
 - **Nada que no funcione se publica enlazado.** «Aula Virtual» y el
   «Reproducir» del video están apagados a propósito, no rotos.
-- **Excepción consciente al «máximo dos animaciones»:** el acuse de recibo del
+- **Excepción consciente al tope de animaciones:** el acuse de recibo del
   formulario aparece con un fundido de 0,4 s. Es respuesta a una acción, de la
   misma familia que un `hover`, no movimiento ambiental. Está en el diseño
   original.
+- **La firma es el logo, y se pinta como máscara.** `public/logo.svg` sobre
+  `currentColor`, no un `<img>`: así el mismo fichero de 7,8 kB sirve en tinta
+  sobre papel (cabecera y pie) y en papel sobre tinta (la entrada), se cachea
+  una vez para todo el sitio y no infla el HTML. El nombre viaja en texto para
+  el lector de pantalla, y es lo que queda si la máscara no carga. El alto lo
+  fija quien lo usa con `--logo-height`, nunca por `style` en línea, que
+  ganaría a cualquier media query.
+- **El logo dice «Rios», sin tilde, y así se queda.** Decisión de Emi. La
+  tilde vive en los textos —copias, `alt`, lo que oye un lector de pantalla,
+  que siguen diciendo «Ríos»—, no en el trazo.
+- **La entrada no usa `stroke-dashoffset`.** Era el plan mientras la firma fue
+  texto, pero el logo vectorizado es un contorno relleno, no una línea central:
+  dibujaría el perímetro de las letras y las rellenaría de golpe. En caligrafía
+  enlazada eso queda peor. Se quedó el barrido, con el filo inclinado al ángulo
+  de la letra: la firma no aparece, se escribe.
+- **Los negros de la foto del fondo son transparentes.** Sin el mate, el fondo
+  negro del estudio se convertía en una plancha gris a la izquierda — justo lo
+  que el sistema prohíbe. Con él, el contrabajo emerge del papel y las efes se
+  leen como un recorte.
+- **El fondo se sirve sin pasar por el optimizador.** El fichero ya viene a la
+  escala de pantalla (360 px, mateado y suavizado, 41 kB). Pasarlo por
+  `getImage` solo lo recodificaría con el canal alfa sin pérdida y lo
+  multiplicaría por ocho.
+- **`animation-timeline` va en su propia regla**, separada del atajo
+  `animation`. Juntas, el minificador las funde en `animation: … scroll(root)`,
+  y la línea de tiempo dentro del atajo no la acepta ningún navegador: se caía
+  la declaración entera y el fondo no animaba. Está comentado en
+  `Backdrop.astro` para que nadie lo «arregle».
 
 ---
 
@@ -218,10 +301,6 @@ pida lo contrario.
 - [ ] **Los tres correos reales.** Los N.º 40, 41 y 42 tienen asunto y adelanto
       de verdad, pero el cuerpo es de muestra — marcados `borrador: true`.
 - [ ] **Los tres testimonios** de *Sobre mí*.
-- [ ] **La firma en SVG.** Ahora la entrada escribe «Emilse Ríos» con la
-      tipografía Mrs Saint Delafield y una máscara que reproduce el gesto. Con
-      el trazo real, la misma animación se ejecuta con `stroke-dashoffset`. El
-      favicon también saldría de ahí: hoy es una «E» provisional.
 - [ ] **Enlaces reales de Instagram y YouTube.** Apuntan a las portadas.
 
 ### Próximos PRs
@@ -247,3 +326,7 @@ pida lo contrario.
   panel negro de la entrada no llega a aparecer.
 - La entrada se reproduce **una vez por sesión** (`sessionStorage`). Para
   volver a verla, abrir una ventana nueva o borrar la clave `cec_intro`.
+- El fondo del contrabajo **solo está en la Home**, y se enciende con la prop
+  `backdrop` del layout `Base`. En *Sobre mí* no va: ahí manda el retrato.
+- El papel lo pinta `html`, no `body`. Tiene que seguir así: el fondo vive en
+  una capa con `z-index: -1`, y si `body` recupera su color se la come.

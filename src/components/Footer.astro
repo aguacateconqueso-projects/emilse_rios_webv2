@@ -1,6 +1,7 @@
 ---
 import { type Lang, type Route, useTranslations, routePath } from '../i18n/ui';
 import LangSwitch from './LangSwitch.astro';
+import Logo from './Logo.astro';
 
 interface Props {
   lang: Lang;
@@ -13,7 +14,7 @@ const t = useTranslations(lang);
 <footer class="footer">
   <div class="footer__inner">
     <div>
-      <div class="signature footer__mark">{t('site.name')}</div>
+      <div class="footer__mark"><Logo name={t('site.name')} /></div>
       <a class="mono-plain soft footer__email" href={`mailto:${t('footer.email')}`}>
         {t('footer.email')}
       </a>
@@ -50,8 +51,13 @@ const t = useTranslations(lang);
   }
 
   .footer__mark {
-    font-size: 2.5rem; /* 40 px */
-    line-height: 1;
+    --logo-height: 40px;
+  }
+
+  @media (max-width: 36rem) {
+    .footer__mark {
+      --logo-height: 32px;
+    }
   }
 
   .footer__email {

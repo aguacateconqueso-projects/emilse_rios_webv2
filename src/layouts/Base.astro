@@ -4,6 +4,7 @@ import { type Lang, type Route, useTranslations, routePath } from '../i18n/ui';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Intro from '../components/Intro.astro';
+import Backdrop from '../components/Backdrop.astro';
 import '../styles/tokens.css';
 import '../styles/base.css';
 
@@ -15,8 +16,17 @@ interface Props {
   route?: Route;
   /** La entrada solo se reproduce en la Home. */
   intro?: boolean;
+  /** El contrabajo detrás del cristal, también solo en la Home. */
+  backdrop?: boolean;
 }
-const { lang, title, description, route = 'home', intro = false } = Astro.props;
+const {
+  lang,
+  title,
+  description,
+  route = 'home',
+  intro = false,
+  backdrop = false,
+} = Astro.props;
 const t = useTranslations(lang);
 
 const canonical = new URL(routePath(route, lang), Astro.site);
@@ -31,7 +41,7 @@ const altEn = new URL(routePath(route, 'en'), Astro.site);
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    {/* Provisional: cuando llegue la firma en SVG, el icono sale de ahí. */}
+    {/* La «E» del logo de Emi, recortada de la propia firma. */}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="canonical" href={canonical} />
     <link rel="alternate" hreflang="es" href={altEs} />
@@ -56,7 +66,6 @@ const altEn = new URL(routePath(route, 'en'), Astro.site);
     <Font cssVariable="--font-display" />
     <Font cssVariable="--font-body" />
     <Font cssVariable="--font-mono" />
-    <Font cssVariable="--font-signature" />
 
     {/* Decide la entrada antes de pintar, para que no parpadee. */}
     <script is:inline define:vars={{ intro }}>
@@ -76,6 +85,7 @@ const altEn = new URL(routePath(route, 'en'), Astro.site);
 
   <body>
     <a class="skip-link mono" href="#contenido">{t('nav.skip')}</a>
+    {backdrop && <Backdrop />}
     {intro && <Intro name={t('site.name')} />}
 
     <Header lang={lang} route={route} />
