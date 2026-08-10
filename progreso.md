@@ -1,29 +1,55 @@
 # Progreso — Contrabajo en la Ciudad
 
-Bitácora del sitio de Emilse Ríos. Se actualiza en cada PR.
+Sitio de **Emilse Ríos**, contrabajista y docente, y de su newsletter.
+Este documento es la memoria del proyecto: quien lo lea de cero debería poder
+seguir trabajando sin preguntar nada.
 
-**Última actualización:** 9 de agosto de 2026 · PR #2
+**Última actualización:** 10 de agosto de 2026 · después del PR #2
+
+---
+
+## Dónde estamos
+
+| | |
+|---|---|
+| **Publicado** | Sí, en Vercel. Despliega solo en cada merge a `main`. |
+| **Dominio** | Pendiente. Todavía se ve en la URL de Vercel. |
+| **Páginas** | Home y Sobre mí, las dos en español e inglés. |
+| **Lo que falta para lanzar** | Conectar el proveedor de correo. El formulario **no da de alta a nadie**. |
+
+Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/`
+
+---
+
+## Arrancar
+
+```bash
+npm install
+npm run dev      # http://localhost:4321
+npm run build    # build de producción en ./dist
+npm run preview  # sirve el build
+npm run audit    # auditoría del diseño (necesita preview en marcha)
+```
+
+Astro 7, estático, sin framework de UI. No hace falta adaptador para Vercel.
 
 ---
 
 ## Cómo trabajamos
 
-- **Un PR por cambio, siempre.** Por mínimo que sea el cambio, va en su propia
-  rama y su propio Pull Request a `main`. Emi lo mergea, lo mira, ajustamos, y
-  seguimos.
-- **`main` no se toca directamente.** Solo recibió el commit inicial (README y
-  `.gitignore`) porque sin él no existía base contra la que abrir un PR.
-- Este documento se actualiza en el mismo PR que introduce el cambio, no después.
+- **Un PR por cambio, siempre.** Por mínimo que sea, va en su propia rama y su
+  propio Pull Request a `main`. Emi lo mergea, lo mira, ajustamos, y seguimos.
+- **`main` no se toca directamente.** Solo recibió el commit inicial, porque sin
+  él no existía base contra la que abrir un PR.
+- Este documento se actualiza **en el mismo PR** que introduce el cambio.
 
 ---
 
-## De dónde viene el diseño
+## El sistema de diseño
 
-El concepto visual ya estaba hecho en Claude Design. Llegó como export
-`.dc.html` con tres piezas: **Sistema de Diseño**, **Contrabajo en la Ciudad**
-(Home + Sobre mí) y **Animación de entrada**. Esta fase es la implementación.
-
-El sistema, tal como lo fija el diseño:
+Viene de Claude Design, ya aprobado. Llegó como export `.dc.html` en tres
+piezas: Sistema de Diseño, las dos páginas, y la animación de entrada.
+**No se inventa nada fuera de esto.**
 
 | | |
 |---|---|
@@ -35,111 +61,131 @@ El sistema, tal como lo fija el diseño:
 | Movimiento | Máximo dos animaciones por página. |
 | Prohibido | Parallax, marquesinas, contadores, cursores propios, texto que se escribe letra a letra, tarjetas que se levantan, zoom automático, iconos, emojis, fondos grises de relleno. |
 
----
-
-## Hecho
-
-### PR #1 — Fundación y Home
-
-**Stack.** Astro 7, estático, sin framework de UI. Se eligió por tres razones:
-cero JavaScript por defecto (el sitio es de lectura), i18n con rutas reales, y
-colecciones de contenido en Markdown para el archivo del newsletter, que va a
-crecer.
-
-**Sistema de diseño en código**
-- `src/styles/tokens.css` — todos los tokens: color, escala tipográfica,
-  rejilla de 8 px, anchos de columna, curvas de animación.
-- `src/styles/base.css` — reset mínimo y primitivas (`.mono`, `.row`,
-  `.prose`, `.reveal`, foco visible, salto al contenido).
-
-**Tipografías autohospedadas.** Las cuatro familias viven en
-`src/assets/fonts` y se sirven desde nuestro dominio: el build no depende de la
-red y el navegador de quien lee no le pide nada a Google. Licencia OFL incluida
-en `src/assets/fonts/OFL.txt`.
-
-**Bilingüe.** Español en la raíz (`/`), inglés en `/en/`. Cadenas de interfaz en
-`src/i18n/ui.ts`, textos de página en `src/data/home.ts`. Con `hreflang`,
-`canonical` y conmutador que no te saca de la página donde estás.
-
-**Home, completa en los dos idiomas** — hero, párrafo con minutos en mono,
-frases-ancla, dos campos de suscripción, archivo de correos y cierre en negro.
-
-**Archivo del newsletter.** Colección de contenido en
-`src/content/correos/`, un Markdown por correo y por idioma
-(`042.es.md`). Para publicar uno nuevo basta con dejar caer el fichero: no hay
-que tocar código. Se abre en un `<dialog>` nativo — foco atrapado y Escape
-funcionan sin escribir nada.
-
-**Las dos animaciones, y solo dos**
-1. **La entrada** — la firma se escribe sobre negro (0–1,1 s), pausa
-   (1,1–1,4 s), el panel sale hacia arriba (1,4–2,0 s). Solo en la Home y solo
-   la primera visita de la sesión. Un script en `<head>` decide antes de pintar,
-   así que no parpadea para quien ya la vio.
-2. **El revelado de las frases-ancla** — fundido más 8 px de subida, 0,7 s, con
-   `IntersectionObserver`.
-
-Ambas se desactivan con `prefers-reduced-motion`. Sin JavaScript, las
-frases-ancla se quedan visibles y el panel negro no llega a aparecer: no se
-pierde contenido.
-
-### PR #2 — Sobre mí
-
-**La página completa en los dos idiomas** — hero a dos columnas con el retrato,
-la historia, cinco frases-ancla, la ficha de trayectoria, el bloque de video,
-el formulario y los testimonios.
-
-**Slugs por idioma.** El inglés dejó de heredar la dirección española: la
-página es `/sobre-mi/` en español y `/en/about/` en inglés. Hay un mapa de
-rutas en `src/i18n/ui.ts` (`routes`) del que salen los enlaces, el `canonical`
-y las alternativas `hreflang`. Al añadir una página se añade allí y en
-`src/pages`. El conmutador de idioma te deja en la misma página, no te manda al
-inicio.
-
-**«Sobre mí» ya enlaza.** Estaba inerte en cabecera y pie desde el PR #1 para
-no publicar un enlace roto.
-
-**Huecos de imagen.** `MediaSlot.astro` dibuja un marco con su etiqueta
-mientras no llega el archivo — una regla de 1 px y el texto en mono, nunca un
-relleno gris, que el sistema prohíbe. Para poner la foto de verdad basta con
-importarla y pasarla en `src`; el componente ya la sirve optimizada y en blanco
-y negro. El enlace «Reproducir» del video está apagado hasta que exista el
-archivo.
-
-**Menos duplicación.** Los estilos de bloque que ahora comparten las dos
-páginas — `.block`, `.anchor`, `.section-title`, `.inline-mono` — se movieron
-de `Home.astro` a `base.css`.
+Todo esto está en `src/styles/tokens.css`. **Ningún valor suelto en los
+componentes**: si hace falta uno nuevo, se añade como token.
 
 ---
 
-## Auditoría — Paso 9
+## Mapa del proyecto
 
-Automatizada y repetible: `npm run audit` (necesita `npm run preview` en marcha).
-Comprueba contraste WCAG AA, espaciados fuera de la rejilla de 8 px y número de
-animaciones.
+```
+src/
+  assets/fonts/          Las cuatro familias en woff2 + OFL.txt
+  components/
+    Header · Footer · LangSwitch   Cabecera, pie, conmutador ES/EN
+    Intro.astro                    Animación de entrada (solo Home)
+    Home.astro · About.astro       Los bloques de cada página
+    EmailArchive.astro             Fichas del newsletter + <dialog>
+    SubscribeForm.astro            Campo de suscripción
+    MediaSlot.astro                Hueco de imagen
+  content/correos/       Un .md por correo y por idioma
+  content.config.ts      Esquema del archivo del newsletter
+  data/home.ts           Textos de la Home (es / en)
+  data/about.ts          Textos de Sobre mí (es / en)
+  i18n/ui.ts             Cadenas de interfaz + mapa de rutas
+  layouts/Base.astro     <head>, cabecera, pie, revelado de frases-ancla
+  pages/                 index · sobre-mi · en/index · en/about
+  styles/tokens.css      Los tokens del sistema
+  styles/base.css        Reset y primitivas compartidas
+public/favicon.svg       Provisional, una «E»
+scripts/audit.mjs        Auditoría de contraste y rejilla
+```
 
-Estado en las cuatro rutas (`/`, `/en/`, `/sobre-mi/`, `/en/about/`) y a
-390 px de ancho:
+**Los textos no viven en los componentes.** Cambiar una frase es tocar
+`src/data/` o `src/i18n/`, nunca maquetación.
+
+---
+
+## Recetas
+
+### Publicar un correo del newsletter
+
+Dejar caer dos ficheros en `src/content/correos/`, `043.es.md` y `043.en.md`:
+
+```markdown
+---
+numero: 43
+lang: es
+etiqueta: "N.º 43"
+asunto: El asunto del correo
+adelanto: La línea que se lee en la ficha, antes de abrirlo…
+---
+
+El cuerpo, en Markdown.
+```
+
+No hay que tocar código. Se ordenan solos de mayor a menor. Quitar
+`borrador: true` de los tres actuales cuando lleguen los correos de verdad.
+
+### Poner una imagen donde hay un marco vacío
+
+Las dos llamadas a `MediaSlot` ya existen en `About.astro`. Solo hay que
+importar la imagen y añadirle `src` — el `placeholder` se queda, porque sigue
+siendo el texto de respaldo:
+
+```astro
+import retrato from '../assets/img/retrato.jpg';
+
+<MediaSlot src={retrato} alt={t('media.portraitAlt')} placeholder={t('media.portrait')} />
+```
+
+`MediaSlot` la sirve optimizada, en densidad 2x y en blanco y negro.
+
+### Añadir una página
+
+1. Añadirla al mapa `routes` de `src/i18n/ui.ts`, con su slug en cada idioma.
+2. Crear los dos ficheros en `src/pages/` (español en la raíz, inglés bajo `en/`).
+3. Pasarle `route="loQueSea"` al layout `Base`.
+
+De ahí salen solos los enlaces, el `canonical` y las alternativas `hreflang`.
+
+---
+
+## Auditoría
+
+`npm run audit` comprueba contraste WCAG AA, espaciados fuera de la rejilla de
+8 px y animaciones declaradas. Se corre con `npm run preview` en marcha:
+
+```bash
+node scripts/audit.mjs http://localhost:4321/sobre-mi/ 390
+```
+
+Estado en las cuatro rutas y a 390 px de ancho:
 
 ```
 CONTRASTE por debajo de AA .................. 0
 ESPACIADOS fuera de la rejilla de 8 px ...... 0
 ```
 
-Dos cosas que la auditoría encontró y se corrigieron, por si vuelven a surgir:
+---
 
-- **Tinta secundaria al 55 %.** El sistema la define así, pero sobre el papel da
-  4,24:1 y no llega al 4,5:1 que pide AA para texto pequeño — y las etiquetas
-  mono son de 12 px. Está al **58 %**, que da 4,68:1. La diferencia no se ve.
-- **Precarga de fuentes.** El atributo `preload` de Astro precarga *todas* las
-  variantes de cada familia, incluidas `latin-ext` y las cursivas que la Home no
-  usa: eran **10 ficheros y ~560 kB** antes del primer pixel. Se quitó. Las
+## Decisiones ya tomadas
+
+Están discutidas y resueltas. No hace falta volver sobre ellas salvo que Emi
+pida lo contrario.
+
+- **Astro estático, sin framework de UI.** El sitio es de lectura: cero
+  JavaScript por defecto. Si algún día hay zona de miembros o pagos, se
+  reevalúa.
+- **Tipografías autohospedadas y versionadas** en `src/assets/fonts`. El build
+  no depende de la red y el navegador de quien lee no le pide nada a Google.
+  Licencia OFL incluida, como exige redistribuirlas.
+- **Sin `preload` de fuentes.** El atributo de Astro precarga *todas* las
+  variantes de cada familia, incluidas `latin-ext` y las cursivas que las
+  páginas no usan: eran 10 ficheros y ~560 kB antes del primer pixel. Las
   `@font-face` viajan en la hoja de estilos, que ya bloquea el render, así que
-  el navegador las descubre igual de pronto y baja solo lo que el texto necesita.
-
-Una excepción consciente al «máximo dos animaciones»: el acuse de recibo del
-formulario aparece con un fundido de 0,4 s. Es respuesta a una acción de quien
-lee, de la misma familia que un `hover`, no movimiento ambiental de la página.
-Está en el diseño original.
+  el navegador las descubre igual de pronto y baja solo lo necesario.
+- **Tinta secundaria al 58 %, no al 55 %.** El diseño la fija al 55 %, pero
+  sobre el papel da 4,24:1 y no llega al 4,5:1 que pide WCAG AA para texto
+  pequeño — y las etiquetas mono son de 12 px. Al 58 % da 4,68:1 y la
+  diferencia no se ve.
+- **Slug propio por idioma.** `/sobre-mi/` y `/en/about/`, no `/en/sobre-mi/`.
+- **Nada que no funcione se publica enlazado.** «Aula Virtual» y el
+  «Reproducir» del video están apagados a propósito, no rotos.
+- **Excepción consciente al «máximo dos animaciones»:** el acuse de recibo del
+  formulario aparece con un fundido de 0,4 s. Es respuesta a una acción, de la
+  misma familia que un `hover`, no movimiento ambiental. Está en el diseño
+  original.
 
 ---
 
@@ -150,36 +196,39 @@ Está en el diseño original.
 - [ ] **Conectar el proveedor de correo.** Hoy no hay ninguno: el formulario
       valida y maqueta bien, pero **no da de alta a nadie**. Está resuelto para
       que no mienta — en producción y sin proveedor muestra un error honesto con
-      una dirección a la que escribir, en vez de un «Listo» falso. Hace falta
-      decidir el proveedor (ConvertKit, MailerLite, Beehiiv…) y poner
-      `PUBLIC_NEWSLETTER_ENDPOINT`.
-- [x] **Dónde se despliega** — Vercel, desde el PR #1. El sitio es estático, así
-      que no hace falta adaptador ni configuración.
-- [ ] **Conectar el dominio `contrabajoenlaciudad.com`.** Mientras tanto, el
-      `site` de `astro.config.mjs` ya apunta ahí: de él salen el `canonical` y
-      las alternativas `hreflang`, así que las direcciones absolutas del HTML
-      son las definitivas aunque todavía se vea en la URL de Vercel.
+      una dirección a la que escribir, en vez de un «Listo» falso.
+
+      Falta que Emi diga cuál usa (ConvertKit, MailerLite, Beehiiv…). **Aviso
+      para quien lo implemente:** no basta con poner
+      `PUBLIC_NEWSLETTER_ENDPOINT`. El formulario hace un `POST` de
+      `{ email }` en JSON desde el navegador, y la mayoría de proveedores no
+      aceptan eso por CORS ni admiten exponer la clave en el cliente. Lo más
+      probable es que haga falta una función serverless en Vercel que reciba el
+      correo y hable con la API del proveedor con la clave del lado del
+      servidor. Conviene contarlo antes de estimar.
+
+- [ ] **Conectar el dominio `contrabajoenlaciudad.com`.** El `site` de
+      `astro.config.mjs` ya apunta ahí, así que las direcciones absolutas del
+      HTML son las definitivas aunque todavía se vea en la URL de Vercel.
 
 ### Contenido que falta (de Emi)
 
-- [ ] **Retrato con el contrabajo**, en blanco y negro, para *Sobre mí*. El
-      hueco ya está montado: importar la imagen y pasarla a `MediaSlot`.
-- [ ] **Video «Viaje en el tiempo»** (2:41) y su fotograma. El enlace
-      «Reproducir» está apagado hasta que llegue.
-- [ ] **Los tres correos reales** del archivo. Hoy los N.º 40, 41 y 42 tienen
-      asunto y adelanto de verdad, pero el cuerpo es texto de muestra —
-      marcados con `borrador: true`.
+- [ ] **Retrato con el contrabajo**, en blanco y negro, para *Sobre mí*.
+- [ ] **Video «Viaje en el tiempo»** (2:41) y su fotograma.
+- [ ] **Los tres correos reales.** Los N.º 40, 41 y 42 tienen asunto y adelanto
+      de verdad, pero el cuerpo es de muestra — marcados `borrador: true`.
 - [ ] **Los tres testimonios** de *Sobre mí*.
 - [ ] **La firma en SVG.** Ahora la entrada escribe «Emilse Ríos» con la
-      tipografía Mrs Saint Delafield y una máscara. Con el trazo real, la misma
-      animación se ejecuta con `stroke-dashoffset` y el gesto es de verdad.
-      El favicon también sale de ahí — hoy es una «E» provisional.
+      tipografía Mrs Saint Delafield y una máscara que reproduce el gesto. Con
+      el trazo real, la misma animación se ejecuta con `stroke-dashoffset`. El
+      favicon también saldría de ahí: hoy es una «E» provisional.
 - [ ] **Enlaces reales de Instagram y YouTube.** Apuntan a las portadas.
 
 ### Próximos PRs
 
-- [ ] **PR #3 — Cierre para producción.** `sitemap.xml`, `robots.txt`, imagen
-      de Open Graph, datos estructurados y página 404.
+- [ ] **Cierre para producción.** `sitemap.xml`, `robots.txt`, imagen de Open
+      Graph, datos estructurados y página 404. Es el candidato natural al
+      siguiente PR si el proveedor de correo sigue sin decidirse.
 - [ ] **Comprobación de tipos en el build.** Hoy Astro transpila sin verificar:
       un error de tipos no rompe el despliegue, pero tampoco avisa. Añadir
       `@astrojs/check` y un `npm run check`.
@@ -188,11 +237,13 @@ Está en el diseño original.
 
 ---
 
-## Notas para quien retome esto
+## Notas sueltas
 
-- El sitio no lleva analítica ni ninguna cookie. Si se añade algo, hay que
-  poner aviso.
-- Los textos largos viven en `src/data/`, no en los componentes. Cambiar una
-  frase no debería obligar a tocar maquetación.
-- Se maqueta con el español, que es el texto más largo. El inglés entra en las
-  mismas cajas sin ajustar nada.
+- El sitio **no lleva analítica ni cookies**. Si se añade algo, hay que poner
+  aviso y revisar la nota legal.
+- **Se maqueta con el español**, que es el texto más largo. El inglés entra en
+  las mismas cajas sin ajustar nada.
+- Sin JavaScript no se pierde contenido: las frases-ancla quedan visibles y el
+  panel negro de la entrada no llega a aparecer.
+- La entrada se reproduce **una vez por sesión** (`sessionStorage`). Para
+  volver a verla, abrir una ventana nueva o borrar la clave `cec_intro`.
