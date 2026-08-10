@@ -2,7 +2,7 @@
 
 Bitácora del sitio de Emilse Ríos. Se actualiza en cada PR.
 
-**Última actualización:** 9 de agosto de 2026 · PR #1
+**Última actualización:** 9 de agosto de 2026 · PR #2
 
 ---
 
@@ -82,6 +82,33 @@ Ambas se desactivan con `prefers-reduced-motion`. Sin JavaScript, las
 frases-ancla se quedan visibles y el panel negro no llega a aparecer: no se
 pierde contenido.
 
+### PR #2 — Sobre mí
+
+**La página completa en los dos idiomas** — hero a dos columnas con el retrato,
+la historia, cinco frases-ancla, la ficha de trayectoria, el bloque de video,
+el formulario y los testimonios.
+
+**Slugs por idioma.** El inglés dejó de heredar la dirección española: la
+página es `/sobre-mi/` en español y `/en/about/` en inglés. Hay un mapa de
+rutas en `src/i18n/ui.ts` (`routes`) del que salen los enlaces, el `canonical`
+y las alternativas `hreflang`. Al añadir una página se añade allí y en
+`src/pages`. El conmutador de idioma te deja en la misma página, no te manda al
+inicio.
+
+**«Sobre mí» ya enlaza.** Estaba inerte en cabecera y pie desde el PR #1 para
+no publicar un enlace roto.
+
+**Huecos de imagen.** `MediaSlot.astro` dibuja un marco con su etiqueta
+mientras no llega el archivo — una regla de 1 px y el texto en mono, nunca un
+relleno gris, que el sistema prohíbe. Para poner la foto de verdad basta con
+importarla y pasarla en `src`; el componente ya la sirve optimizada y en blanco
+y negro. El enlace «Reproducir» del video está apagado hasta que exista el
+archivo.
+
+**Menos duplicación.** Los estilos de bloque que ahora comparten las dos
+páginas — `.block`, `.anchor`, `.section-title`, `.inline-mono` — se movieron
+de `Home.astro` a `base.css`.
+
 ---
 
 ## Auditoría — Paso 9
@@ -90,7 +117,8 @@ Automatizada y repetible: `npm run audit` (necesita `npm run preview` en marcha)
 Comprueba contraste WCAG AA, espaciados fuera de la rejilla de 8 px y número de
 animaciones.
 
-Estado en `/`, `/en/` y a 390 px de ancho:
+Estado en las cuatro rutas (`/`, `/en/`, `/sobre-mi/`, `/en/about/`) y a
+390 px de ancho:
 
 ```
 CONTRASTE por debajo de AA .................. 0
@@ -125,13 +153,19 @@ Está en el diseño original.
       una dirección a la que escribir, en vez de un «Listo» falso. Hace falta
       decidir el proveedor (ConvertKit, MailerLite, Beehiiv…) y poner
       `PUBLIC_NEWSLETTER_ENDPOINT`.
-- [ ] **Decidir dónde se despliega** y conectar el dominio
-      `contrabajoenlaciudad.com`.
+- [x] **Dónde se despliega** — Vercel, desde el PR #1. El sitio es estático, así
+      que no hace falta adaptador ni configuración.
+- [ ] **Conectar el dominio `contrabajoenlaciudad.com`.** Mientras tanto, el
+      `site` de `astro.config.mjs` ya apunta ahí: de él salen el `canonical` y
+      las alternativas `hreflang`, así que las direcciones absolutas del HTML
+      son las definitivas aunque todavía se vea en la URL de Vercel.
 
 ### Contenido que falta (de Emi)
 
-- [ ] **Retrato con el contrabajo**, en blanco y negro, para *Sobre mí*.
-- [ ] **Video «Viaje en el tiempo»** (2:41) y su fotograma.
+- [ ] **Retrato con el contrabajo**, en blanco y negro, para *Sobre mí*. El
+      hueco ya está montado: importar la imagen y pasarla a `MediaSlot`.
+- [ ] **Video «Viaje en el tiempo»** (2:41) y su fotograma. El enlace
+      «Reproducir» está apagado hasta que llegue.
 - [ ] **Los tres correos reales** del archivo. Hoy los N.º 40, 41 y 42 tienen
       asunto y adelanto de verdad, pero el cuerpo es texto de muestra —
       marcados con `borrador: true`.
@@ -144,12 +178,11 @@ Está en el diseño original.
 
 ### Próximos PRs
 
-- [ ] **PR #2 — Sobre mí.** La página completa en los dos idiomas: hero a dos
-      columnas con el retrato, la ficha de trayectoria, el bloque de video, los
-      testimonios y el segundo formulario. Activa el enlace «Sobre mí», que hoy
-      está inerte en cabecera y pie para no publicar un enlace roto.
 - [ ] **PR #3 — Cierre para producción.** `sitemap.xml`, `robots.txt`, imagen
       de Open Graph, datos estructurados y página 404.
+- [ ] **Comprobación de tipos en el build.** Hoy Astro transpila sin verificar:
+      un error de tipos no rompe el despliegue, pero tampoco avisa. Añadir
+      `@astrojs/check` y un `npm run check`.
 - [ ] **Aula Virtual.** Está en el menú, apagada. Falta definir qué es: una
       página, un enlace afuera, o una zona con acceso.
 

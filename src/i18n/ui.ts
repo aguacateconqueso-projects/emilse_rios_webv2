@@ -33,9 +33,14 @@ export const ui = {
 
     'cards.open': 'Leer el correo',
     'cards.close': 'Cerrar',
-    'cards.region': 'Correos anteriores',
 
     'media.play': 'Reproducir',
+    'media.playSoon': 'El video llega pronto',
+    'media.portrait': 'Retrato de Emi con el contrabajo — blanco y negro',
+    'media.portraitAlt': 'Emilse Ríos con su contrabajo',
+    'media.still': 'Fotograma del video',
+    'about.description':
+      'Le dijeron que el contrabajo no era para ella. Esta es la historia de por qué se equivocaron: veinte años tocando y formando contrabajistas, de El Sistema a Madrid.',
     'footer.email': 'hola@contrabajoenlaciudad.com',
     'footer.instagram': 'Instagram',
     'footer.youtube': 'YouTube',
@@ -65,9 +70,14 @@ export const ui = {
 
     'cards.open': 'Read the email',
     'cards.close': 'Close',
-    'cards.region': 'Past emails',
 
     'media.play': 'Play',
+    'media.playSoon': 'The video is coming soon',
+    'media.portrait': 'Portrait of Emi with the double bass — black and white',
+    'media.portraitAlt': 'Emilse Ríos with her double bass',
+    'media.still': 'Video still',
+    'about.description':
+      'They told her the double bass wasn\'t for her. This is the story of why they were wrong: twenty years playing and training bassists, from El Sistema to Madrid.',
     'footer.email': 'hola@contrabajoenlaciudad.com',
     'footer.instagram': 'Instagram',
     'footer.youtube': 'YouTube',
@@ -81,15 +91,22 @@ export function useTranslations(lang: Lang) {
   };
 }
 
-/** Antepone el prefijo de idioma a una ruta interna. `/` en español, `/en/…` en inglés. */
-export function localizePath(path: string, lang: Lang): string {
-  const clean = `/${path.replace(/^\/+|\/+$/g, '')}`.replace(/\/+$/, '') || '/';
-  if (lang === defaultLang) return clean;
-  return clean === '/' ? '/en/' : `/en${clean}/`;
-}
+/**
+ * Las páginas del sitio y su dirección en cada idioma.
+ *
+ * Cada idioma tiene su propio slug: en inglés la página es `/en/about/`, no
+ * `/en/sobre-mi/`. Al añadir una página, se añade acá y en `src/pages`.
+ */
+export const routes = {
+  home: { es: '/', en: '/' },
+  about: { es: '/sobre-mi', en: '/about' },
+} as const satisfies Record<string, Record<Lang, string>>;
 
-/** Saca el idioma de una URL. */
-export function getLangFromUrl(url: URL): Lang {
-  const [, first] = url.pathname.split('/');
-  return (languages as readonly string[]).includes(first) ? (first as Lang) : defaultLang;
+export type Route = keyof typeof routes;
+
+/** Dirección de una página en un idioma. El inglés vive bajo `/en`. */
+export function routePath(route: Route, lang: Lang): string {
+  const slug = routes[route][lang];
+  if (lang === defaultLang) return slug === '/' ? '/' : `${slug}/`;
+  return slug === '/' ? '/en/' : `/en${slug}/`;
 }

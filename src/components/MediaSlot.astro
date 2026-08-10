@@ -1,0 +1,67 @@
+---
+import { Image } from 'astro:assets';
+
+/**
+ * Hueco de imagen.
+ *
+ * Mientras no llegue el archivo, dibuja un marco con su etiqueta — una regla
+ * de 1 px y el texto en mono, nunca un relleno gris, que el sistema prohíbe.
+ *
+ * Para poner la imagen real basta con importarla y pasarla en `src`:
+ *
+ *   import retrato from '../assets/img/retrato.jpg';
+ *   <MediaSlot src={retrato} alt="…" ratio="3 / 4" />
+ */
+interface Props {
+  /** Imagen importada desde `src/assets`. Si falta, se dibuja el marco vacío. */
+  src?: ImageMetadata;
+  alt?: string;
+  /** Texto del marco vacío. */
+  placeholder: string;
+  /** Proporción CSS, por ejemplo `3 / 4`. Sin valor, ocupa todo el alto. */
+  ratio?: string;
+  /** Ancho de presentación en píxeles, para que Astro genere el tamaño justo. */
+  width?: number;
+}
+const { src, alt = '', placeholder, ratio, width = 800 } = Astro.props;
+---
+
+<div class="slot" style={ratio ? `aspect-ratio:${ratio}` : undefined}>
+  {
+    src ? (
+      <Image src={src} alt={alt} width={width} densities={[1, 2]} class="slot__img" />
+    ) : (
+      <span class="mono slot__label">{placeholder}</span>
+    )
+  }
+</div>
+
+<style>
+  .slot {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 12rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+  }
+
+  .slot__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Las fotografías van en blanco y negro. */
+    filter: grayscale(1);
+  }
+
+  .slot__label {
+    max-width: 22rem;
+    padding: var(--space-3);
+    color: var(--ink-soft);
+    text-align: center;
+    text-wrap: pretty;
+  }
+</style>

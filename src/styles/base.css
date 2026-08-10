@@ -169,6 +169,59 @@ a:hover {
 }
 
 /* ==========================================================================
+   Bloques de página — los comparten la Home y Sobre mí
+   ========================================================================== */
+
+/* Separación entre bloques mayores: 96 px. */
+.block {
+  margin-top: var(--space-12);
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--text-section);
+  line-height: var(--leading-section);
+  letter-spacing: var(--tracking-section);
+  text-wrap: pretty;
+}
+
+/* Alinea el número con la mayúscula del título, sin salirse de la rejilla. */
+.row__num--h2 {
+  padding-top: var(--space-1);
+}
+
+/* Los minutos de un video, en mono dentro del cuerpo. */
+.inline-mono {
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  letter-spacing: 0.04em;
+}
+
+/* --- Frase-ancla --------------------------------------------------------- */
+.anchor {
+  max-width: 65rem; /* 1040 px */
+  margin: var(--space-12) auto;
+  padding-inline: var(--space-3);
+  text-align: center;
+}
+
+.anchor__num {
+  margin-bottom: var(--space-4);
+}
+
+.anchor__text {
+  max-width: 56.25rem; /* 900 px */
+  margin-inline: auto;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--text-anchor);
+  line-height: var(--leading-anchor);
+  letter-spacing: var(--tracking-section);
+  text-wrap: balance;
+}
+
+/* ==========================================================================
    Movimiento — el revelado de las frases-ancla.
    Es una de las dos únicas animaciones del sitio (la otra es la entrada).
    ========================================================================== */

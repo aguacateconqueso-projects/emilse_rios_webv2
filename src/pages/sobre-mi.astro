@@ -1,0 +1,19 @@
+---
+import Base from '../layouts/Base.astro';
+import About from '../components/About.astro';
+import { useTranslations } from '../i18n/ui';
+import { getAboutCopy } from '../data/about';
+
+const lang = 'es' as const;
+const t = useTranslations(lang);
+const { title } = getAboutCopy(lang);
+---
+
+<Base
+  lang={lang}
+  title={`${title} · ${t('site.title')}`}
+  description={t('about.description')}
+  route="about"
+>
+  <About lang={lang} />
+</Base>

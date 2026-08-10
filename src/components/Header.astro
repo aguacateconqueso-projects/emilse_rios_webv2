@@ -1,29 +1,32 @@
 ---
-import { type Lang, useTranslations, localizePath } from '../i18n/ui';
+import { type Lang, type Route, useTranslations, routePath } from '../i18n/ui';
 import LangSwitch from './LangSwitch.astro';
 
 interface Props {
   lang: Lang;
-  /** Ruta actual sin prefijo de idioma, para que el conmutador no te saque de la página. */
-  path?: string;
+  /** Página actual, para que el conmutador de idioma no te saque de ella. */
+  route?: Route;
 }
-const { lang, path = '/' } = Astro.props;
+const { lang, route = 'home' } = Astro.props;
 const t = useTranslations(lang);
 ---
 
 <header class="header">
   <div class="header__inner">
-    <a class="header__mark signature" href={localizePath('/', lang)} title={t('nav.home')}>
+    <a class="header__mark signature" href={routePath('home', lang)} title={t('nav.home')}>
       {t('site.name')}
     </a>
 
     <nav class="header__nav mono" aria-label={t('site.title')}>
-      {/* «Sobre mí» llega en el PR siguiente; hasta entonces no enlaza a un 404. */}
-      <span class="header__link header__link--muted" aria-disabled="true">{t('nav.about')}</span>
+      <a
+        class="header__link"
+        href={routePath('about', lang)}
+        aria-current={route === 'about' ? 'page' : undefined}>{t('nav.about')}</a
+      >
       <span class="header__link header__link--muted" aria-disabled="true" title={t('nav.aulaSoon')}>
         {t('nav.aula')}
       </span>
-      <LangSwitch lang={lang} hrefEs={localizePath(path, 'es')} hrefEn={localizePath(path, 'en')} />
+      <LangSwitch lang={lang} hrefEs={routePath(route, 'es')} hrefEn={routePath(route, 'en')} />
     </nav>
   </div>
   <div class="header__rule"></div>
