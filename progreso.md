@@ -4,7 +4,7 @@ Sitio de **Emilse Ríos**, contrabajista y docente, y de su newsletter.
 Este documento es la memoria del proyecto: quien lo lea de cero debería poder
 seguir trabajando sin preguntar nada.
 
-**Última actualización:** 10 de agosto de 2026 · después del PR #4
+**Última actualización:** 10 de agosto de 2026 · después del PR #5
 
 ---
 
@@ -162,13 +162,20 @@ lo que deja pasar el cristal**: hoy `0,45 × 0,50 ≈ 22 %`.
 --bass-opacity     /* cuánta imagen. El mando principal */
 --bass-saturation  /* a esta opacidad queda poco color: se sube, no se baja */
 --glass-veil       /* cuánto papel lleva el cristal */
---glass-blur       /* cuánto esmerila */
+--glass-blur       /* cuánto esmerila. Está en 3 px: de 6 para arriba la efe
+                      deja de leerse y vuelve a parecer baja resolución */
 ```
 
 Para rehacer el fichero desde la foto original —está en el commit `fbff7e5`,
-en `public/doublebass_background_ref.jpg`: recorte `(220, 0, 2500, 5938)`,
-escalar a 360 px de ancho, desenfoque gaussiano de radio 2, alfa =
-`smoothstep(0,10 → 0,38)` sobre la luminancia, y WebP con calidad 74 y alfa 62.
+en `public/doublebass_background_ref.jpg`: **sin recortar**, escalar a 700 px
+de ancho, desenfoque gaussiano de radio 0,5, alfa = `smoothstep(0,10 → 0,38)`
+sobre la luminancia, y WebP con calidad 72 y alfa 55. Son 175 kB.
+
+El encuadre es el de la foto entera **a propósito**. Al principio se usó un
+recorte cerrado sobre la efe y, aunque el efecto se entendía, parecía una
+imagen de mala resolución: 360 px de origen estirados a 512 en pantalla. Al
+abrir el encuadre hay que subir la resolución, no bajarla — se ve más campo y
+cada píxel de la foto rinde menos.
 
 ### Añadir una página
 
@@ -264,6 +271,17 @@ pida lo contrario.
   escala de pantalla (360 px, mateado y suavizado, 41 kB). Pasarlo por
   `getImage` solo lo recodificaría con el canal alfa sin pérdida y lo
   multiplicaría por ocho.
+- **Nunca escribir prefijos `-webkit-` a mano.** Poniendo `backdrop-filter` y
+  `-webkit-backdrop-filter` juntos, el minificador las deduplica y se queda con
+  la prefijada — que Chrome no reconoce. El cristal estuvo semanas sin
+  esmerilar nada por eso, y la imagen se veía en crudo. Los prefijos los pone
+  el minificador según targets; escribir solo la forma sin prefijo.
+- **El desenfoque del cristal va sobre la imagen, no sobre el cristal.** Detrás
+  del cristal solo hay la imagen y papel liso, así que el resultado es el
+  mismo. Pero un `backdrop-filter` a pantalla completa se recalcula en cada
+  fotograma —la máscara del revelado cambia con el scroll— y eso bajaba la Home
+  de 60 a 20 fps. Medido: 16,7 ms por fotograma con el cristal quitado, 50 ms
+  con él. Con el desenfoque en la banda, 16,7 ms.
 - **`animation-timeline` va en su propia regla**, separada del atajo
   `animation`. Juntas, el minificador las funde en `animation: … scroll(root)`,
   y la línea de tiempo dentro del atajo no la acepta ningún navegador: se caía

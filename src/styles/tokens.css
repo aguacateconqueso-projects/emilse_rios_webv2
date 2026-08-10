@@ -69,7 +69,10 @@
   --bass-opacity: 0.45;
   --bass-saturation: 1.1;
   --glass-veil: 50%; /* cuánto papel lleva el cristal */
-  --glass-blur: 26px;
+  /* Bajo a propósito. Estuvo en 26 px mientras el `backdrop-filter` no
+     aplicaba —ver Backdrop.astro—, así que ese valor nunca llegó a verse. Con
+     el cristal funcionando, de 6 px para arriba la efe deja de leerse. */
+  --glass-blur: 3px;
 
   /* --- 04 · Formas y movimiento ----------------------------------------- */
   --radius: 0; /* Cero. Ninguna esquina redondeada. */
