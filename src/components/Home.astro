@@ -19,32 +19,35 @@ const { blocks } = getHomeCopy(lang);
     switch (block.k) {
       case 'hero':
         return (
-          <section class="row hero">
-            <div class="row__num hero__num" aria-hidden="true">
+          <section class="hero">
+            <div class="mono-plain soft hero__num" aria-hidden="true">
               {block.n}
             </div>
-            <div class="row__body">
-              <h1 class="hero__title">{block.title}</h1>
-              <p class="mono soft hero__eyebrow">{block.eyebrow}</p>
-              <p class="hero__lead">{block.lead}</p>
-            </div>
+            <h1 class="hero__title">{block.title}</h1>
+            <p class="mono soft hero__eyebrow">{block.eyebrow}</p>
+            <p class="hero__lead">{block.lead}</p>
           </section>
         );
 
       case 'plate':
         return (
-          <figure class="plate block">
-            <div class="plate__frame">
-              <Image
-                src={emilseMadrid}
-                alt={block.alt}
-                width={900}
-                densities={[1, 2]}
-                class="plate__img"
-              />
+          <section class="row block plate">
+            <div class="row__num" aria-hidden="true" />
+            <div class="row__body">
+              <figure>
+                <div class="plate__frame">
+                  <Image
+                    src={emilseMadrid}
+                    alt={block.alt}
+                    width={640}
+                    densities={[1, 2]}
+                    class="plate__img"
+                  />
+                </div>
+                <figcaption class="mono soft plate__cap">{block.caption}</figcaption>
+              </figure>
             </div>
-            <figcaption class="mono soft plate__cap">{block.caption}</figcaption>
-          </figure>
+          </section>
         );
 
       case 'runs':
@@ -122,13 +125,24 @@ const { blocks } = getHomeCopy(lang);
 }
 
 <style>
-  /* --- Hero -------------------------------------------------------------- */
+  /* --- Hero ---------------------------------------------------------------
+     Portada centrada. Se sale de la rejilla de lectura a propósito: no es un
+     bloque de texto más, es la portada del sitio, y el numeral va centrado
+     encima como en las frases-ancla y en el cierre en negro — el sitio ya
+     tenía ese patrón para los momentos que no se leen en columna.
+
+     Más ancho que la medida para que el título respire en dos líneas; el
+     párrafo sí vuelve a la medida, porque eso sí se lee. */
   .hero {
-    padding-top: var(--space-3);
+    max-width: var(--width-wide);
+    margin-inline: auto;
+    padding-block-start: var(--space-4);
+    padding-inline: var(--space-3);
+    text-align: center;
   }
 
   .hero__num {
-    padding-top: var(--space-3);
+    margin-bottom: var(--space-4);
   }
 
   .hero__title {
@@ -137,6 +151,7 @@ const { blocks } = getHomeCopy(lang);
     font-size: var(--text-hero);
     line-height: var(--leading-hero);
     letter-spacing: var(--tracking-hero);
+    text-wrap: balance;
   }
 
   .hero__eyebrow {
@@ -144,30 +159,28 @@ const { blocks } = getHomeCopy(lang);
   }
 
   .hero__lead {
+    max-width: var(--measure);
     margin-top: var(--space-4);
+    margin-inline: auto;
     text-wrap: pretty;
   }
 
   /* --- La lámina ----------------------------------------------------------
-     La foto de Emi, a lo ancho, entre el título y el formulario. No es un hero
-     a pantalla completa a propósito: la página se lee como un ensayo impreso
-     —numerales al margen, la firma, los bloques 01/02/03— y esto es la lámina
-     que en un libro va después de la portada. Da la cara antes de pedir el
-     correo, y demuestra el título en vez de ilustrarlo: contrabajo, calle,
-     ciudad.
+     La foto de Emi, después del formulario. No es un hero a pantalla completa
+     a propósito: eso la pondría por encima del título y haría que la página
+     fuera sobre ella y no sobre el newsletter. Demuestra el título en vez de
+     ilustrarlo — contrabajo, calle, ciudad.
 
-     Sale un paso fuera de la medida de lectura (900 px contra los 768 de la
-     columna). Ese escalón es lo que la hace lámina y no «una imagen dentro del
-     texto».
+     Va **dentro de la rejilla de lectura**, alineada con los párrafos y con el
+     mismo hueco de numeral vacío que usa el formulario. Estuvo un paso fuera
+     de la medida (900 px contra los 768 de la columna) y sobresalir de los
+     márgenes no quedaba bien: la página tiene un borde de texto claro y la
+     foto lo rompía. Al meterla en la rejilla no puede volver a salirse, venga
+     el ancho que venga.
 
      Panorámica y horizontal porque la horizontalidad es el argumento de esta
      foto: la calle se va vacía hacia la izquierda y ella entra por la derecha
      con la voluta. Recortada en vertical se pierde la ciudad. */
-  .plate {
-    max-width: var(--width-wide);
-    margin-inline: auto;
-    padding-inline: var(--space-3);
-  }
 
   /* `clip` y no `hidden`. Los dos recortan igual lo que el acercamiento saca
      del marco, pero `hidden` convierte el marco en contenedor de scroll —uno

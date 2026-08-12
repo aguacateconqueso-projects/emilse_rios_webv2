@@ -4,7 +4,7 @@ Sitio de **Emilse Ríos**, contrabajista y docente, y de su newsletter.
 Este documento es la memoria del proyecto: quien lo lea de cero debería poder
 seguir trabajando sin preguntar nada.
 
-**Última actualización:** 12 de agosto de 2026 · la lámina de la Home
+**Última actualización:** 12 de agosto de 2026 · la portada de la Home
 
 ---
 
@@ -20,11 +20,13 @@ seguir trabajando sin preguntar nada.
 
 Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/`
 
-Lo último que se tocó fue **la lámina de la Home**: la foto de Emi con el
-contrabajo en una calle de Madrid, entre el título y el formulario. Antes fue
-el fondo del contrabajo (PRs #4 a #7), cerrado y aprobado; si se retoma, es
-solo para mover los mandos de `tokens.css` — ver la receta más abajo. **Lo
-siguiente sin dueño es el cierre para producción**, en «Próximos PRs».
+Lo último que se tocó fue **la portada de la Home**: título centrado, y la foto
+de Emi con el contrabajo en una calle de Madrid como lámina. El orden de la
+apertura es **título → subtítulo → formulario → lámina**, y después sigue la
+lectura normal. Antes fue el fondo del contrabajo (PRs #4 a #7), cerrado y
+aprobado; si se retoma, es solo para mover los mandos de `tokens.css` — ver la
+receta más abajo. **Lo siguiente sin dueño es el cierre para producción**, en
+«Próximos PRs».
 
 ---
 
@@ -180,15 +182,16 @@ import retrato from '../assets/img/retrato.jpg';
 
 ### Cambiar la foto de la lámina
 
-La lámina es la foto de la Home, entre el título y el formulario. El fichero es
+La lámina es la foto de la Home, justo después del formulario. El fichero es
 `src/assets/img/emilse-madrid.jpg`: **2400 × 1200, a color y sin recortar más**.
 
 - **A color, aunque se vea en blanco y negro.** El gris lo pone el CSS, porque
   el revelado necesita el color debajo para poder devolverlo. Si se sube ya
   desaturada, el efecto no tiene de dónde sacarlo.
-- **2400 px de ancho.** La lámina mide 900 px CSS, que en densidad 2 son 1800.
-  Astro genera el 1× y el 2× (32 y 79 kB en WebP); el original solo tiene que
-  dar de sobra. No hace falta tocarlo si se cambia el ancho de presentación.
+- **2400 px de ancho.** La lámina mide 640 px CSS —la medida de lectura—, que
+  en densidad 2 son 1280. Astro genera el 1× y el 2×; el original solo tiene
+  que dar de sobra. No hace falta tocarlo si se cambia el ancho de
+  presentación, y por eso se deja generoso.
 - **Recorte 2:1.** Del original se toma la franja que empieza al 16,5 % de la
   altura. Conserva la voluta arriba y el puño abajo, que es lo que hace que se
   lea el instrumento entero.
@@ -372,11 +375,32 @@ pida lo contrario.
 - **La foto de Emi es una lámina, no un hero.** No va a pantalla completa: eso
   la pondría por encima del título y haría que la página fuera sobre ella y no
   sobre el newsletter, además de comerse el remate de la entrada, que es donde
-  se escribe la firma. Va donde en un libro impreso va la lámina — después de
-  la portada— porque la página se lee así: numerales al margen, bloques
-  numerados, una firma. Y hace dos trabajos concretos: demuestra el título
-  (contrabajo, calle, ciudad) y da la cara justo antes de pedir el correo, que
-  en un newsletter en primera persona no es adorno.
+  se escribe la firma. Y hace dos trabajos concretos: demuestra el título
+  (contrabajo, calle, ciudad) y pone cara al «yo» que escribe, que en un
+  newsletter en primera persona no es adorno.
+- **El orden de la apertura es título → subtítulo → formulario → lámina.**
+  Decisión de Emi, 12 ago 2026. Al principio la lámina iba antes del
+  formulario, de frontispicio, para dar la cara antes de pedir el correo. Puesta
+  después, la apertura queda más limpia —tres cosas de texto seguidas y luego
+  la imagen— y el formulario sube, que es donde conviene que esté. La foto
+  sigue estando en la primera pantalla y media, así que no pierde el trabajo de
+  poner cara.
+- **La portada va centrada y fuera de la rejilla de lectura.** El título, el
+  subtítulo y el párrafo de entrada van centrados en la página, con el numeral
+  `01` centrado encima en vez de al margen — el mismo patrón que ya usaban las
+  frases-ancla y el cierre en negro para los momentos que no se leen en
+  columna. Ojo con una cosa al medirlo: la columna de lectura **no** está
+  centrada en la página, va 40 px a la derecha porque el numeral vive en el
+  margen izquierdo. La portada sí está centrada en la página. Esos 40 px de
+  diferencia son a propósito, no un descuadre: la portada no tiene numeral al
+  margen del que colgar.
+- **La lámina va dentro de la rejilla de lectura, alineada con los párrafos.**
+  Usa el mismo hueco de numeral vacío que el formulario, así que mide lo que
+  mide la medida —640 px— y no puede salirse. Estuvo un paso fuera (900 px
+  contra los 768 de la columna) como gesto editorial, y sobresalir de los
+  márgenes no quedaba bien: la página tiene un borde de texto muy claro y la
+  foto lo rompía. Si alguna vez se quiere más grande, se hace ancho de columna,
+  no ancho suelto.
 - **Se descartó la tira de tres fotos al costado del texto.** Era la otra idea
   sobre la mesa: replicar el fondo del contrabajo a la izquierda y sacar tres
   fotos a la derecha con el scroll. No se hizo por cuatro razones, y las cuatro
@@ -404,6 +428,11 @@ pida lo contrario.
   de ancho es una tira de 171 px y la cara queda diminuta. Al darle más alto hay
   que recortar por los lados, y lo primero que sobra es la calle vacía de la
   izquierda, no ella: de ahí el `object-position: 65%`.
+- **El tramo del revelado se ancla a `cover 50%`, no a la posición en la
+  página.** Va referido a la propia lámina y a la ventana, así que se recolocó
+  solo cuando la foto se movió de antes del formulario a después y de 900 px a
+  640. Comprobado después de moverla: sigue llegando en blanco y negro a
+  1440 × 900, 1440 × 1200, 1280 × 800 y 390 × 844.
 - **El recorte horizontal vive en `html`, no en `body`.** Con
   `overflow-x: hidden` en el `body`, su `overflow-y` pasa a `auto` por regla del
   propio CSS y el `body` se convierte en contenedor de scroll — uno que no
