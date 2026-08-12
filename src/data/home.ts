@@ -5,6 +5,8 @@ export type Run = { text: string; mono?: boolean };
 
 export type Block =
   | { k: 'hero'; n: string; eyebrow: string; title: string; lead: string }
+  /** La lámina: la foto de Emi a lo ancho, con su pie. Ver `Home.astro`. */
+  | { k: 'plate'; caption: string; alt: string }
   | { k: 'runs'; n: string; runs: Run[] }
   | { k: 'h2'; n: string; text: string }
   | { k: 'prose'; n?: string; paras: string[] }
@@ -23,6 +25,11 @@ const es: HomeCopy = {
       eyebrow: 'El newsletter',
       title: 'Contrabajo en la Ciudad',
       lead: 'Cada semana envío correos donde explico los errores que estancan tu progreso con el contrabajo. Son tan obvios que parecen tontos, pero son tan comunes que tal vez los estés cometiendo a diario — sin saberlo.',
+    },
+    {
+      k: 'plate',
+      caption: 'Emilse Ríos — Madrid',
+      alt: 'Emilse Ríos en una calle de Madrid, sonriendo, con la voluta de su contrabajo apoyada en el hombro',
     },
     { k: 'form', id: 'suscribete' },
     {
@@ -87,6 +94,11 @@ const en: HomeCopy = {
       eyebrow: 'The newsletter',
       title: 'Double Bass in the City',
       lead: 'Every week I send emails explaining the mistakes that stall your progress on the double bass. They are so obvious they look silly, and so common that you may be making them daily — without knowing it.',
+    },
+    {
+      k: 'plate',
+      caption: 'Emilse Ríos — Madrid',
+      alt: 'Emilse Ríos on a street in Madrid, smiling, the scroll of her double bass resting on her shoulder',
     },
     { k: 'form', id: 'suscribete' },
     {

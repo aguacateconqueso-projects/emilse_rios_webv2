@@ -9,10 +9,19 @@
 }
 
 /* El papel lo pinta la raíz, no el body: así el fondo del contrabajo puede
-   vivir por detrás de todo el contenido sin que el body lo tape. */
+   vivir por detrás de todo el contenido sin que el body lo tape.
+
+   El recorte horizontal va acá y no en el body, y no es cosmético. Con
+   `overflow-x: hidden` en el body, su `overflow-y` pasa a `auto` por regla del
+   propio CSS, y el body se convierte en contenedor de scroll — uno que no
+   scrollea nunca, porque quien scrollea es el documento. Cualquier animación
+   ligada a la posición de un elemento (`animation-timeline: view()`) se ata al
+   contenedor más cercano, encontraba ese, y se quedaba congelada. En la raíz el
+   recorte se propaga al viewport y no hay contenedor intermedio. */
 html {
   -webkit-text-size-adjust: 100%;
   background: var(--paper);
+  overflow-x: hidden;
 }
 
 body {
@@ -22,7 +31,6 @@ body {
   font-family: var(--font-body);
   font-size: var(--text-body);
   line-height: var(--leading-body);
-  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
 

@@ -1,8 +1,10 @@
 ---
+import { Image } from 'astro:assets';
 import { type Lang, useTranslations } from '../i18n/ui';
 import { getHomeCopy } from '../data/home';
 import SubscribeForm from './SubscribeForm.astro';
 import EmailArchive from './EmailArchive.astro';
+import emilseMadrid from '../assets/img/emilse-madrid.jpg';
 
 interface Props {
   lang: Lang;
@@ -27,6 +29,22 @@ const { blocks } = getHomeCopy(lang);
               <p class="hero__lead">{block.lead}</p>
             </div>
           </section>
+        );
+
+      case 'plate':
+        return (
+          <figure class="plate block">
+            <div class="plate__frame">
+              <Image
+                src={emilseMadrid}
+                alt={block.alt}
+                width={900}
+                densities={[1, 2]}
+                class="plate__img"
+              />
+            </div>
+            <figcaption class="mono soft plate__cap">{block.caption}</figcaption>
+          </figure>
         );
 
       case 'runs':
@@ -128,6 +146,128 @@ const { blocks } = getHomeCopy(lang);
   .hero__lead {
     margin-top: var(--space-4);
     text-wrap: pretty;
+  }
+
+  /* --- La lámina ----------------------------------------------------------
+     La foto de Emi, a lo ancho, entre el título y el formulario. No es un hero
+     a pantalla completa a propósito: la página se lee como un ensayo impreso
+     —numerales al margen, la firma, los bloques 01/02/03— y esto es la lámina
+     que en un libro va después de la portada. Da la cara antes de pedir el
+     correo, y demuestra el título en vez de ilustrarlo: contrabajo, calle,
+     ciudad.
+
+     Sale un paso fuera de la medida de lectura (900 px contra los 768 de la
+     columna). Ese escalón es lo que la hace lámina y no «una imagen dentro del
+     texto».
+
+     Panorámica y horizontal porque la horizontalidad es el argumento de esta
+     foto: la calle se va vacía hacia la izquierda y ella entra por la derecha
+     con la voluta. Recortada en vertical se pierde la ciudad. */
+  .plate {
+    max-width: var(--width-wide);
+    margin-inline: auto;
+    padding-inline: var(--space-3);
+  }
+
+  /* `clip` y no `hidden`. Los dos recortan igual lo que el acercamiento saca
+     del marco, pero `hidden` convierte el marco en contenedor de scroll —uno
+     que no scrollea nunca— y el revelado de abajo se ata al contenedor más
+     cercano: se quedaba clavado a mitad de camino. `clip` recorta sin crear
+     contenedor, así que la imagen queda atada al documento, que es quien de
+     verdad se mueve. */
+  .plate__frame {
+    aspect-ratio: 2 / 1;
+    overflow: clip;
+  }
+
+  .plate__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* En reposo va en blanco y negro, como el resto de las fotografías del
+       sitio. El color es lo que pasa al pasarle el scroll por encima; ver el
+       revelado más abajo. Sin soporte, se queda así y no se pierde nada. */
+    filter: grayscale(1);
+  }
+
+  .plate__cap {
+    margin-top: var(--space-2);
+  }
+
+  /* En pantalla estrecha la panorámica se vuelve una tira: la cara queda
+     diminuta. Se le da más alto y se recorta por los lados — lo primero que
+     sobra es la calle vacía de la izquierda, no ella. */
+  @media (max-width: 40rem) {
+    .plate__frame {
+      aspect-ratio: 3 / 2;
+    }
+
+    .plate__img {
+      object-position: 65% 50%;
+    }
+  }
+
+  /* --- El revelado de la lámina -------------------------------------------
+     Al pasarle el scroll por encima recupera el color y sigue acercándose muy
+     despacio. El color vuelve al blanco y negro cuando la lámina se va: así el
+     reposo de la página sigue siendo monocromo y el color es algo que ocurre
+     mientras la miras, no un estado permanente.
+
+     El acercamiento va en una sola dirección a lo largo de todo el paso. Si
+     subiera y bajara como el color, la foto respiraría, y eso se nota como un
+     tic; creciendo despacio se lee como deriva. Son tres centésimas: lo justo
+     para que el ojo registre que algo se mueve.
+
+     Va ligado al scroll, no al tiempo, así que corre fuera del hilo principal
+     y no se dispara solo. Cuarta animación de la Home — la enmienda al tope
+     está fechada en `progreso.md`. */
+  @keyframes plate-bloom {
+    0% {
+      filter: grayscale(1);
+      transform: scale(1);
+    }
+    15% {
+      filter: grayscale(0);
+    }
+    45% {
+      filter: grayscale(0);
+    }
+    100% {
+      filter: grayscale(1);
+      transform: scale(1.03);
+    }
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .plate__img {
+        animation: plate-bloom 1s linear both;
+      }
+
+      /* La línea de tiempo y el tramo van en su propia regla a propósito: en
+         la misma que el atajo `animation`, el minificador los funde dentro de
+         él, y ahí no los acepta ningún navegador — se cae la declaración
+         entera y no anima nada. Pasó con el fondo del contrabajo. Selector
+         distinto para que no pueda volver a fundirlas. */
+      /* El tramo arranca a mitad del paso de la lámina por la ventana. La
+         cuenta importa: ese punto cae siempre por debajo de la página sin
+         mover, en cualquier ventana de menos de 1525 px de alto — o sea, en
+         todas. Anclándolo antes, en un monitor alto la lámina ya nacía a
+         color al cargar y el blanco y negro dejaba de ser el reposo. Así
+         llega en blanco y negro, florece cuando está bien encuadrada, y se
+         apaga al irse por arriba.
+
+         Se escribe con un solo valor. El final que queremos —la lámina fuera
+         de pantalla por arriba— es justo el que toma por defecto, y al no
+         nombrarlo el minificador no tiene nada que reescribir: escrito como
+         `cover 50% exit 100%` lo dejaba en `exit 0%`, que no es lo mismo, y
+         el color entraba y salía en un cuarto del recorrido. Es el mismo tipo
+         de trampa que la de `animation-timeline`. */
+      .plate .plate__img {
+        animation-timeline: view();
+        animation-range: cover 50%;
+      }
+    }
   }
 
   /* --- Cierre en negro --------------------------------------------------- */

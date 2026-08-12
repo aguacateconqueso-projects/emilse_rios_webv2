@@ -4,7 +4,7 @@ Sitio de **Emilse Ríos**, contrabajista y docente, y de su newsletter.
 Este documento es la memoria del proyecto: quien lo lea de cero debería poder
 seguir trabajando sin preguntar nada.
 
-**Última actualización:** 10 de agosto de 2026 · después del PR #7
+**Última actualización:** 12 de agosto de 2026 · la lámina de la Home
 
 ---
 
@@ -20,10 +20,11 @@ seguir trabajando sin preguntar nada.
 
 Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/`
 
-Lo último que se tocó fue el fondo del contrabajo de la Home (PRs #4 a #7).
-Está cerrado y aprobado; si se retoma, es solo para mover los mandos de
-`tokens.css` — ver la receta más abajo. **Lo siguiente sin dueño es el cierre
-para producción**, en «Próximos PRs».
+Lo último que se tocó fue **la lámina de la Home**: la foto de Emi con el
+contrabajo en una calle de Madrid, entre el título y el formulario. Antes fue
+el fondo del contrabajo (PRs #4 a #7), cerrado y aprobado; si se retoma, es
+solo para mover los mandos de `tokens.css` — ver la receta más abajo. **Lo
+siguiente sin dueño es el cierre para producción**, en «Próximos PRs».
 
 ---
 
@@ -74,7 +75,7 @@ piezas: Sistema de Diseño, las dos páginas, y la animación de entrada.
 | Espaciado | Rejilla de 8 px. Sin excepciones. |
 | Formas | Radios: cero. Sombras: cero. Las divisiones son reglas de 1 px. |
 | Medida | 60–68 caracteres. Columna de 640 px, número marginal de 48 px. |
-| Movimiento | Máximo tres animaciones en la Home, dos en el resto. |
+| Movimiento | Máximo cuatro animaciones en la Home, dos en el resto. |
 | Prohibido | Marquesinas, contadores, cursores propios, texto que se escribe letra a letra, tarjetas que se levantan, zoom automático, iconos, emojis, fondos grises de relleno. |
 
 Todo esto está en `src/styles/tokens.css`. **Ningún valor suelto en los
@@ -84,7 +85,16 @@ componentes**: si hace falta uno nuevo, se añade como token.
 
 El sistema es de Emi y se puede cambiar. Lo que no se puede es cambiarlo sin
 dejar constancia, porque si no la tabla de arriba deja de ser fiable. Hasta hoy
-se ha tocado dos veces, las dos en el PR #4:
+se ha tocado tres veces:
+
+- **12 ago 2026 · El tope de la Home sube a cuatro animaciones.** Lo pide el
+  revelado de la lámina. Las cuatro son ahora: la entrada, las frases-ancla, el
+  fondo del contrabajo y la lámina. Tres de ellas van ligadas al scroll o a que
+  algo entre en pantalla, no al reloj, así que nada se mueve solo: la página
+  quieta está quieta. Ese es el límite real, más que el número — si alguna vez
+  se propone una quinta, la pregunta no es cuántas hay sino si arranca sola.
+
+Y antes, las dos del PR #4:
 
 - **10 ago 2026 · Cae la prohibición de parallax; el tope sube a tres
   animaciones en la Home.** Lo pide el fondo del contrabajo. La prohibición
@@ -104,6 +114,7 @@ se ha tocado dos veces, las dos en el PR #4:
 src/
   assets/fonts/          Las tres familias en woff2 + OFL.txt
   assets/img/            contrabajo.webp, el fondo de la Home
+                         emilse-madrid.jpg, la lámina de la Home
   components/
     Header · Footer · LangSwitch   Cabecera, pie, conmutador ES/EN
     Logo.astro                     La firma de Emi, como máscara
@@ -167,6 +178,37 @@ import retrato from '../assets/img/retrato.jpg';
 
 `MediaSlot` la sirve optimizada, en densidad 2x y en blanco y negro.
 
+### Cambiar la foto de la lámina
+
+La lámina es la foto de la Home, entre el título y el formulario. El fichero es
+`src/assets/img/emilse-madrid.jpg`: **2400 × 1200, a color y sin recortar más**.
+
+- **A color, aunque se vea en blanco y negro.** El gris lo pone el CSS, porque
+  el revelado necesita el color debajo para poder devolverlo. Si se sube ya
+  desaturada, el efecto no tiene de dónde sacarlo.
+- **2400 px de ancho.** La lámina mide 900 px CSS, que en densidad 2 son 1800.
+  Astro genera el 1× y el 2× (32 y 79 kB en WebP); el original solo tiene que
+  dar de sobra. No hace falta tocarlo si se cambia el ancho de presentación.
+- **Recorte 2:1.** Del original se toma la franja que empieza al 16,5 % de la
+  altura. Conserva la voluta arriba y el puño abajo, que es lo que hace que se
+  lea el instrumento entero.
+
+El original de cámara —5721 × 3806, 6,2 MB— está en el commit `378eccb`, en
+`public/image_hero.jpg`. Se sacó de `public/` a propósito: ahí se servía en
+crudo al navegador, sin pasar por el optimizador.
+
+Para rehacerla desde el original:
+
+```js
+sharp(original)
+  .extract({ left: 0, top: Math.round(3806 * 0.165), width: 5721, height: 2861 })
+  .resize({ width: 2400 })
+  .jpeg({ quality: 82, mozjpeg: true, chromaSubsampling: '4:4:4' })
+```
+
+El texto del pie y el `alt` viven en `src/data/home.ts`, en el bloque `plate`.
+El pie es el mismo en los dos idiomas; el `alt`, no.
+
 ### Subir o bajar el contrabajo del fondo
 
 Los mandos están juntos en `src/styles/tokens.css`, y no hay que tocar nada
@@ -225,7 +267,8 @@ De ahí salen solos los enlaces, el `canonical` y las alternativas `hreflang`.
 node scripts/audit.mjs http://localhost:4321/sobre-mi/ 390
 ```
 
-Estado en las cuatro rutas, a 1440 y a 390 px de ancho:
+Estado en las cuatro rutas, a 1440 y a 390 px de ancho, vuelto a pasar con la
+lámina puesta:
 
 ```
 CONTRASTE por debajo de AA .................. 0
@@ -326,6 +369,63 @@ pida lo contrario.
   fotograma —la máscara del revelado cambia con el scroll— y eso bajaba la Home
   de 60 a 20 fps. Medido: 16,7 ms por fotograma con el cristal quitado, 50 ms
   con él. Con el desenfoque en la banda, 16,7 ms.
+- **La foto de Emi es una lámina, no un hero.** No va a pantalla completa: eso
+  la pondría por encima del título y haría que la página fuera sobre ella y no
+  sobre el newsletter, además de comerse el remate de la entrada, que es donde
+  se escribe la firma. Va donde en un libro impreso va la lámina — después de
+  la portada— porque la página se lee así: numerales al margen, bloques
+  numerados, una firma. Y hace dos trabajos concretos: demuestra el título
+  (contrabajo, calle, ciudad) y da la cara justo antes de pedir el correo, que
+  en un newsletter en primera persona no es adorno.
+- **Se descartó la tira de tres fotos al costado del texto.** Era la otra idea
+  sobre la mesa: replicar el fondo del contrabajo a la izquierda y sacar tres
+  fotos a la derecha con el scroll. No se hizo por cuatro razones, y las cuatro
+  siguen en pie si vuelve a proponerse. Solo hay una foto, no tres, y tendrían
+  que aguantar el mismo blanco y negro y la misma luz. El hueco a la derecha de
+  la columna son 336 px a 1440, 256 a 1280 y nada por debajo de 1200, así que
+  el efecto solo existiría en monitores grandes. Tres fotos a plena opacidad
+  enfrente del fondo convierten la página en un pasillo simétrico y le quitan
+  al contrabajo lo que lo hace funcionar, que es ser un fantasma al 22 %. Y
+  *Sobre mí* ya es exactamente texto a la izquierda y retrato a la derecha: la
+  Home haciendo lo mismo confunde las dos páginas.
+- **Las horizontales van en el flujo; las verticales, al costado del texto.**
+  Un formato por función, y nunca los dos mezclados en la misma tira. Esta foto
+  es horizontal y su horizontalidad es el argumento: la calle se va vacía hacia
+  la izquierda y ella entra por la derecha con la voluta. Recortada en vertical
+  se pierde la ciudad y queda un retrato de estudio cualquiera. El vertical de
+  la casa es el retrato pendiente de *Sobre mí*, que ya tiene su hueco a 3/4.
+- **La lámina va en blanco y negro, y el color es lo que ocurre al pasarle el
+  scroll por encima.** En color permanente entran el ladrillo naranja y el
+  coche azul, y la interfaz es estrictamente monocroma. Así el reposo de la
+  página sigue siendo monocromo y el color es una recompensa, no un estado. El
+  acercamiento que la acompaña va en una sola dirección, no de ida y vuelta:
+  subiendo y bajando la foto respira, y eso se lee como un tic.
+- **En pantalla estrecha la lámina pasa de 2:1 a 3:2.** Una panorámica a 342 px
+  de ancho es una tira de 171 px y la cara queda diminuta. Al darle más alto hay
+  que recortar por los lados, y lo primero que sobra es la calle vacía de la
+  izquierda, no ella: de ahí el `object-position: 65%`.
+- **El recorte horizontal vive en `html`, no en `body`.** Con
+  `overflow-x: hidden` en el `body`, su `overflow-y` pasa a `auto` por regla del
+  propio CSS y el `body` se convierte en contenedor de scroll — uno que no
+  scrollea nunca, porque quien scrollea es el documento. Cualquier animación
+  atada a la posición de un elemento se engancha al contenedor más cercano,
+  encontraba ese, y se quedaba congelada. En la raíz el recorte se propaga al
+  viewport y no hay contenedor intermedio. Comprobado que no reaparece scroll
+  horizontal en las cuatro rutas a 1440, 1280 y 390.
+- **El marco de la lámina recorta con `clip`, no con `hidden`.** Misma trampa,
+  un piso más abajo: los dos recortan igual lo que el acercamiento saca del
+  marco, pero `hidden` crea contenedor de scroll y `clip` no. Con `hidden`, el
+  revelado se ataba al marco en vez de al documento y se quedaba clavado a
+  mitad de camino. **Regla general: si se pone un `overflow` para recortar y
+  dentro hay algo ligado al scroll, tiene que ser `clip`.**
+- **`animation-range` se escribe con un solo valor.** Puesto entero como
+  `cover 50% exit 100%`, el minificador lo dejaba en `cover 50% exit 0%` — que
+  no es lo mismo: el color entraba y salía en un cuarto del recorrido. El final
+  que se quiere es justo el que toma por defecto, así que no nombrarlo lo deja
+  fuera del alcance del minificador. Es de la misma familia que lo de
+  `animation-timeline`, acá abajo, y conviene mirar el CSS ya construido
+  —`grep animation-range dist/_astro/*.css`— antes de dar por bueno un
+  revelado que «no va».
 - **`animation-timeline` va en su propia regla**, separada del atajo
   `animation`. Juntas, el minificador las funde en `animation: … scroll(root)`,
   y la línea de tiempo dentro del atajo no la acepta ningún navegador: se caía
@@ -358,7 +458,9 @@ pida lo contrario.
 
 ### Contenido que falta (de Emi)
 
-- [ ] **Retrato con el contrabajo**, en blanco y negro, para *Sobre mí*.
+- [ ] **Retrato con el contrabajo**, en blanco y negro, para *Sobre mí*. Es
+      **vertical** y distinto del de la Home: ahí ya está la foto de Madrid, y
+      repetirla en las dos páginas las aplana.
 - [ ] **Video «Viaje en el tiempo»** (2:41) y su fotograma.
 - [ ] **Los tres correos reales.** Los N.º 40, 41 y 42 tienen asunto y adelanto
       de verdad, pero el cuerpo es de muestra — marcados `borrador: true`.
@@ -390,5 +492,8 @@ pida lo contrario.
   volver a verla, abrir una ventana nueva o borrar la clave `cec_intro`.
 - El fondo del contrabajo **solo está en la Home**, y se enciende con la prop
   `backdrop` del layout `Base`. En *Sobre mí* no va: ahí manda el retrato.
+- La lámina **se queda quieta y en blanco y negro** si el navegador no soporta
+  `animation-timeline: view()` o si hay `prefers-reduced-motion`. No se pierde
+  nada: el blanco y negro es el estado de reposo, no un paso intermedio.
 - El papel lo pinta `html`, no `body`. Tiene que seguir así: el fondo vive en
   una capa con `z-index: -1`, y si `body` recupera su color se la come.
