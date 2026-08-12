@@ -26,12 +26,12 @@ const es: HomeCopy = {
       title: 'Contrabajo en la Ciudad',
       lead: 'Cada semana envío correos donde explico los errores que estancan tu progreso con el contrabajo. Son tan obvios que parecen tontos, pero son tan comunes que tal vez los estés cometiendo a diario — sin saberlo.',
     },
+    { k: 'form', id: 'suscribete' },
     {
       k: 'plate',
       caption: 'Emilse Ríos — Madrid',
       alt: 'Emilse Ríos en una calle de Madrid, sonriendo, con la voluta de su contrabajo apoyada en el hombro',
     },
-    { k: 'form', id: 'suscribete' },
     {
       k: 'runs',
       n: '02',
@@ -95,12 +95,12 @@ const en: HomeCopy = {
       title: 'Double Bass in the City',
       lead: 'Every week I send emails explaining the mistakes that stall your progress on the double bass. They are so obvious they look silly, and so common that you may be making them daily — without knowing it.',
     },
+    { k: 'form', id: 'suscribete' },
     {
       k: 'plate',
       caption: 'Emilse Ríos — Madrid',
       alt: 'Emilse Ríos on a street in Madrid, smiling, the scroll of her double bass resting on her shoulder',
     },
-    { k: 'form', id: 'suscribete' },
     {
       k: 'runs',
       n: '02',
