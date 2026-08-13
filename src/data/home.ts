@@ -4,19 +4,9 @@ import type { Lang } from '../i18n/ui';
 export type Run = { text: string; mono?: boolean };
 
 export type Block =
-  /**
-   * La apertura, que es una sola composición: el título centrado arriba, y
-   * debajo el párrafo de entrada y la lámina en paralelo. Ver `Home.astro`.
-   */
-  | {
-      k: 'hero';
-      n: string;
-      eyebrow: string;
-      title: string;
-      lead: string;
-      caption: string;
-      alt: string;
-    }
+  | { k: 'hero'; n: string; eyebrow: string; title: string; lead: string }
+  /** La lámina: la foto de Emi a lo ancho, con su pie. Ver `Home.astro`. */
+  | { k: 'plate'; caption: string; alt: string }
   | { k: 'runs'; n: string; runs: Run[] }
   | { k: 'h2'; n: string; text: string }
   | { k: 'prose'; n?: string; paras: string[] }
@@ -35,10 +25,13 @@ const es: HomeCopy = {
       eyebrow: 'El newsletter',
       title: 'Contrabajo en la Ciudad',
       lead: 'Cada semana envío correos donde explico los errores que estancan tu progreso con el contrabajo. Son tan obvios que parecen tontos, pero son tan comunes que tal vez los estés cometiendo a diario — sin saberlo.',
-      caption: 'Emilse Ríos — Madrid',
-      alt: 'Emilse Ríos en una calle de Madrid, cargando su contrabajo al hombro, delante de un portal de piedra',
     },
     { k: 'form', id: 'suscribete' },
+    {
+      k: 'plate',
+      caption: 'Emilse Ríos — Madrid',
+      alt: 'Emilse Ríos sonriendo en una calle de Madrid, con su contrabajo al hombro delante de un portal de madera',
+    },
     {
       k: 'runs',
       n: '02',
@@ -101,10 +94,13 @@ const en: HomeCopy = {
       eyebrow: 'The newsletter',
       title: 'Double Bass in the City',
       lead: 'Every week I send emails explaining the mistakes that stall your progress on the double bass. They are so obvious they look silly, and so common that you may be making them daily — without knowing it.',
-      caption: 'Emilse Ríos — Madrid',
-      alt: 'Emilse Ríos on a street in Madrid, carrying her double bass on her shoulder past a stone doorway',
     },
     { k: 'form', id: 'suscribete' },
+    {
+      k: 'plate',
+      caption: 'Emilse Ríos — Madrid',
+      alt: 'Emilse Ríos smiling on a street in Madrid, her double bass on her shoulder in front of a wooden doorway',
+    },
     {
       k: 'runs',
       n: '02',

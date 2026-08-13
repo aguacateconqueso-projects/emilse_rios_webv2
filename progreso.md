@@ -4,7 +4,7 @@ Sitio de **Emilse Ríos**, contrabajista y docente, y de su newsletter.
 Este documento es la memoria del proyecto: quien lo lea de cero debería poder
 seguir trabajando sin preguntar nada.
 
-**Última actualización:** 13 de agosto de 2026 · la apertura, a dos columnas
+**Última actualización:** 13 de agosto de 2026 · la lámina, horizontal otra vez
 
 ---
 
@@ -20,13 +20,15 @@ seguir trabajando sin preguntar nada.
 
 Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/`
 
-Lo último que se tocó fue **la apertura de la Home**. Es una sola composición:
-el título centrado arriba, y debajo el párrafo de entrada a la izquierda con la
-lámina en paralelo a la derecha. El formulario va justo después, y de ahí sigue
-la lectura normal.
+Lo último que se tocó fue **la lámina de la Home**, que vuelve a ser
+horizontal — con un recorte que hizo Emi de la foto de cuerpo entero. La
+apertura queda en columna: título centrado, subtítulo, formulario y lámina, uno
+debajo del otro, y de ahí sigue la lectura normal. La versión a dos columnas
+del PR #12 se deshizo; el porqué está en «Decisiones ya tomadas», que es donde
+importa.
 
-Antes de eso, la lámina cambió de foto y de formato, antes fue la portada
-centrada, y antes el fondo del contrabajo (PRs #4 a #7), cerrado y aprobado; si
+Antes de eso, la portada centrada, y antes el fondo del contrabajo (PRs #4 a
+#7), cerrado y aprobado; si
 se retoma, es solo para mover los mandos de `tokens.css` — ver la receta más
 abajo. **Lo siguiente sin dueño es el cierre para producción**, en «Próximos
 PRs».
@@ -185,40 +187,34 @@ import retrato from '../assets/img/retrato.jpg';
 
 ### Cambiar la foto de la lámina
 
-La lámina es la foto de la apertura de la Home, al lado del párrafo de
-entrada. El fichero es
-`src/assets/img/emilse-madrid.jpg`: **1200 × 1500, a color y sin recortar más**.
+La lámina es la foto de la Home, justo después del formulario. El fichero es
+`src/assets/img/emilse-madrid.jpg`: **1536 × 948, a color**.
 
 - **A color, aunque se vea en blanco y negro.** El gris lo pone el CSS, porque
   el revelado necesita el color debajo para poder devolverlo. Si se sube ya
   desaturada, el efecto no tiene de dónde sacarlo.
-- **1200 px de ancho.** La lámina se presenta a 288 px CSS al lado del texto y
-  a 416 cuando la banda se apila, así que en densidad 2 hacen falta 832. Astro
-  genera el 1× y el 2×; el original solo tiene que dar de sobra. Se deja
-  generoso para no tener que rehacerlo si cambia el ancho de presentación.
-- **Recorte 4:5.** Del original se toma la franja que empieza al 13 % de la
-  altura. Es lo más cerrado que se puede sin perder nada de lo que cuenta la
-  foto: la figura entera con los tacones en la acera, el contrabajo completo,
-  el «TONI 2» de la fachada y el portal.
+- **1536 px de ancho.** La lámina se presenta a 640 px CSS —la medida de
+  lectura—, que en densidad 2 son 1280. Astro genera el 1× y el 2× (48 y
+  165 kB en WebP); el original solo tiene que dar de sobra.
+- **El encuadre no se toca.** Este lo recortó Emi: llega a 2048 × 1264 y solo
+  se reescala. `aspect-ratio` en `Home.astro` vale exactamente lo que el
+  fichero —`1536 / 948`— para que el marco no vuelva a recortar por su cuenta.
+  **Si se cambia la foto por otra de proporción distinta, hay que cambiar ese
+  `aspect-ratio` con ella**, o el marco la recorta en silencio.
 
-El original de cámara —3572 × 5368, 12,3 MB— está en el commit `58dd75c`, en
-`public/image_hero_2.jpg`. Se sacó de `public/` a propósito: ahí se servía en
-crudo al navegador, sin pasar por el optimizador. La foto anterior de la
-lámina —el retrato corto, horizontal— está en el commit `378eccb`, en
-`public/image_hero.jpg`.
+El original está en el commit `d63b52b`, en `public/image_hero_3.png` (4,2 MB).
+Se sacó de `public/` a propósito: ahí se servía en crudo al navegador, sin
+pasar por el optimizador. Las dos fotos anteriores de la lámina siguen en el
+historial: el retrato corto en `378eccb` (`public/image_hero.jpg`) y la de
+cuerpo entero, vertical, en `58dd75c` (`public/image_hero_2.jpg`).
 
 Para rehacerla desde el original:
 
 ```js
 sharp(original)
-  .extract({ left: 0, top: Math.round(5368 * 0.13), width: 3572, height: 4465 })
-  .resize({ width: 1200 })
+  .resize({ width: 1536 })
   .jpeg({ quality: 82, mozjpeg: true, chromaSubsampling: '4:4:4' })
 ```
-
-Si algún día vuelve una foto horizontal, el marco es `aspect-ratio` en
-`Home.astro` y el ancho es `.plate__fig`: una horizontal puede ir a los 640 px
-de la columna entera; una vertical, no — ver las decisiones.
 
 El texto del pie y el `alt` viven en `src/data/home.ts`, en el bloque `plate`.
 El pie es el mismo en los dos idiomas; el `alt`, no.
@@ -389,18 +385,20 @@ pida lo contrario.
   se escribe la firma. Y hace dos trabajos concretos: demuestra el título
   (contrabajo, calle, ciudad) y pone cara al «yo» que escribe, que en un
   newsletter en primera persona no es adorno.
-- **La apertura es una sola composición: título centrado, y debajo el párrafo
-  y la lámina en paralelo.** Decisión de Emi, 13 ago 2026. Por eso el hero y la
-  lámina **viven en el mismo bloque de datos y en el mismo `case`** de
-  `Home.astro`: antes eran dos bloques sueltos y la foto iba después del
-  formulario. Quien vaya a moverlos, que los mueva juntos.
-
-  Las dos versiones anteriores están probadas y descartadas, por si vuelven a
-  proponerse: la lámina de frontispicio, entre el título y el formulario, daba
-  la cara antes de pedir el correo pero empujaba el formulario fuera de la
-  primera pantalla; puesta después del formulario, la apertura eran cuatro
-  cosas apiladas y la foto llegaba tarde. En paralelo, el párrafo y la foto se
-  leen a la vez y el formulario queda justo debajo.
+- **El orden de la apertura es título → subtítulo → formulario → lámina, en
+  columna.** Decisión de Emi, 13 ago 2026, después de probar la alternativa. La
+  portada va centrada arriba; el formulario y la lámina siguen en la rejilla de
+  lectura, uno debajo del otro. Nada en paralelo.
+- **Se probó la apertura a dos columnas —párrafo a la izquierda, foto a la
+  derecha— y no funcionó.** Está en el historial en el PR #12, y conviene saber
+  por qué se deshizo antes de volver a proponerla: **la medida de lectura son
+  640 px y no caben dos columnas útiles dentro**. Al ancho de la rejilla las
+  columnas quedaban en 384 y 288 px, y ni el párrafo tenía medida ni la foto
+  tamaño. Ensanchando la banda para que cupieran, se despegaba del resto de la
+  página: a 1240 px el párrafo arrancaba en 160 y la foto terminaba en 1340,
+  con todo lo demás entre 440 y 1080. No hay ancho que resuelva las dos cosas a
+  la vez. **La lección es del ancho, no de la idea:** en esta rejilla, texto y
+  foto en paralelo solo saldrían rompiendo la columna de lectura.
 - **La portada va centrada y fuera de la rejilla de lectura.** El título, el
   subtítulo y el párrafo de entrada van centrados en la página, con el numeral
   `01` centrado encima en vez de al margen — el mismo patrón que ya usaban las
@@ -410,25 +408,12 @@ pida lo contrario.
   margen izquierdo. La portada sí está centrada en la página. Esos 40 px de
   diferencia son a propósito, no un descuadre: la portada no tiene numeral al
   margen del que colgar.
-- **La banda de la apertura mide lo que la rejilla de lectura, y ahí está el
-  porqué.** Se probaron tres anchos y la diferencia se ve. A 1240 px el párrafo
-  arrancaba en 160 y la foto terminaba en 1340, con todo lo demás de la página
-  entre 440 y 1080: la banda flotaba. A 900 px coincidía con la caja del
-  título, pero el título es texto centrado y sus bordes no se ven, mientras que
-  los de la banda sí — seguía sin engancharse a nada. A **768 px**, que es el
-  ancho de `.row`, aparecen dos alineaciones de verdad: el borde izquierdo del
-  párrafo cae en la columna de numerales, y el borde derecho de la foto cae
-  exactamente donde terminan el formulario y todos los párrafos. Con eso la
-  apertura entra en el mismo corredor vertical que el resto de la página.
-
-  El precio es que las dos columnas son estrechas —párrafo de 384 px, foto de
-  288— y no hay forma de evitarlo: la medida de lectura son 640 px y no caben
-  dos columnas útiles dentro. Si algún día la foto tiene que ser más grande,
-  hay que elegir entre eso y las alineaciones.
-- **La foto va a la derecha y el texto a la izquierda, y no es por costumbre.**
-  El fondo del contrabajo ocupa los 512 px de la izquierda de la pantalla. Una
-  foto opaca ahí encima lo tapa justo donde se lee; el texto, con aire entre
-  los renglones, lo deja respirar.
+- **La lámina va dentro de la rejilla de lectura, a lo ancho de la columna.**
+  Usa el mismo hueco de numeral vacío que el formulario, así que mide los
+  640 px de la medida y queda alineada al píxel con los párrafos, con el pie y
+  con la regla del formulario. Estuvo un paso fuera (900 px contra los 768 de
+  la columna) como gesto editorial, y sobresalir de los márgenes no quedaba
+  bien: la página tiene un borde de texto muy claro y la foto lo rompía.
 - **Se descartó la tira de tres fotos al costado del texto.** Era la otra idea
   sobre la mesa: replicar el fondo del contrabajo a la izquierda y sacar tres
   fotos a la derecha con el scroll. No se hizo por cuatro razones, y las cuatro
@@ -442,68 +427,57 @@ pida lo contrario.
   Home haciendo lo mismo confunde las dos páginas.
 - **Una horizontal puede llenar la columna; una vertical no.** Es la regla que
   decide el ancho de cualquier foto que entre en el flujo del texto. Una
-  horizontal a los 640 px de la medida mide 320 de alto y se lee de un vistazo.
-  Una vertical a esos mismos 640 mide 800 de alto: deja de ser una lámina y se
-  convierte en una parada, porque hay que scrollear para verla entera. Por eso
-  la de ahora va a **288 px** al lado del texto, y a **416** cuando la banda se
-  apila. Nunca los dos formatos mezclados en la misma tira.
-- **La lámina cambió de foto el 12 ago 2026, y de horizontal a vertical.** La
-  primera era un retrato corto: la cara grande, la voluta en el hombro, la
-  calle desenfocada. La de ahora es de cuerpo entero, con el contrabajo entero
-  y la fachada. **No se recortó en horizontal, y se probó:** a 2:1 se pierden
-  las piernas y los tacones, que son el gesto de la foto —está caminando, no
-  posando—, y a 3:2 el «TONI 2» de la fachada queda guillotinado por la mitad,
-  que es peor que no verlo. Las dos versiones parecían fotos mal recortadas. La
-  foto es vertical de nacimiento: el contrabajo es alto, el portal es alto, el
-  árbol es alto. Se respeta y se le da el ancho que le toca.
+  horizontal a los 640 px de la medida mide unos 400 de alto y se lee de un
+  vistazo. Una vertical a esos mismos 640 mide 800: deja de ser una lámina y se
+  convierte en una parada, porque hay que scrollear para verla entera. Y
+  achicándola para que quepa, la cara se vuelve diminuta. Nunca los dos
+  formatos mezclados en la misma tira.
+- **La lámina es horizontal, y se llegó ahí por descarte.** El recorrido, para
+  no repetirlo: primero un retrato corto horizontal; después una foto de cuerpo
+  entero vertical, que obligó a achicarla a 416 px para que no fuera una parada
+  y aun así no encajaba; luego esa misma vertical al lado del texto, que no
+  cabía en la medida. Al final Emi recortó ella misma la foto de cuerpo entero
+  a **1,62 horizontal** —cara grande, contrabajo entero, el portal con su
+  voluta de latón— y con eso la lámina vuelve a lo que siempre funcionó: a lo
+  ancho de la columna, después del formulario. **Si aparece otra foto vertical,
+  el problema no es la foto: es que esta rejilla no tiene sitio para una.**
 - **La lámina va en blanco y negro, y el color es lo que ocurre al pasarle el
   scroll por encima.** En color permanente entran la madera del contrabajo y el
   oro de la fachada, y la interfaz es estrictamente monocroma. Así el reposo de la
   página sigue siendo monocromo y el color es una recompensa, no un estado. El
   acercamiento que la acompaña va en una sola dirección, no de ida y vuelta:
   subiendo y bajando la foto respira, y eso se lee como un tic.
-- **La lámina no necesita un recorte aparte para móvil.** Siendo vertical, en
-  pantalla estrecha se limita sola al ancho de la columna y el 4:5 aguanta
-  igual de bien. Mientras fue panorámica sí hacía falta —a 342 px de ancho una
-  2:1 es una tira de 171 px y la cara quedaba diminuta—, y esa regla de móvil
-  se quitó al cambiar la foto. Si vuelve una horizontal, vuelve a hacer falta.
-- **El revelado va atado al scroll del documento y medido en píxeles.** Esto
-  cambió el 13 ago 2026 y **contradice lo que decía este documento el día
-  anterior**, así que conviene entender por qué antes de volver atrás.
+- **La lámina no lleva recorte aparte para móvil.** Lo hubo mientras fue una
+  panorámica 2:1 con media calle vacía: a 342 px de ancho quedaba una tira de
+  171 px y había que recortar por los lados. El encuadre de ahora lo eligió
+  Emi y ya viene cerrado —1,62 en vez de 2—, así que en estrecho se mantiene
+  entero. Volver a recortarlo por CSS sería deshacer su decisión.
+- **El revelado se ancla a `cover 50%` con `view()`, y hay una regla detrás.**
+  El tramo va referido al paso de la propia lámina por la ventana, así que se
+  recoloca solo cada vez que la foto cambia de sitio o de tamaño — y ha
+  cambiado cuatro veces.
 
-  Mientras la foto estuvo a media página, el tramo iba con `view()`, referido
-  al paso de la propia lámina por la ventana. Era lo correcto: se recolocaba
-  solo cada vez que la foto se movía. Al subirla a la apertura dejó de
-  funcionar, y no por un descuido — es una limitación de `view()`. Cualquier
-  punto de su recorrido se calcula desde la posición de la foto menos el alto
-  de la ventana, así que para un elemento de la primera pantalla ese punto cae
-  en scroll negativo en cuanto la ventana pasa de unos 1050 px de alto. Y el
-  scroll no puede ser negativo: el navegador entra directo a mitad del tramo.
-  Medido antes de cambiarlo: **65 % de color al cargar en una ventana de 1200**.
+  Eso vale **mientras la lámina viva por debajo del pliegue**, que es donde
+  está. El 13 ago 2026 estuvo un rato en la primera pantalla, en la apertura a
+  dos columnas, y ahí `view()` no puede cumplir la única condición que importa
+  —llegar en blanco y negro—: sus puntos de anclaje se calculan restando el
+  alto de la ventana, así que para un elemento de la primera pantalla caen en
+  scroll negativo en cuanto la ventana pasa de unos 1050 px, y el navegador
+  entra directo a mitad del tramo. Medido entonces: **65 % de color al cargar
+  en una ventana de 1200**. La solución fue `scroll(root)` con el tramo en
+  píxeles, y se deshizo con el resto de aquella maqueta.
 
-  Atado al documento, el scroll en reposo es cero y el cero es el primer
-  fotograma, sea cual sea la ventana. Es exactamente el motivo por el que el
-  fondo del contrabajo usa `scroll(root)` desde el PR #4.
+  **La regla, por si vuelve a hacer falta:** una foto por debajo del pliegue va
+  con `view()`, que se recoloca sola; una de la primera pantalla va con
+  `scroll(root)`, que es lo único que garantiza el primer fotograma al cargar —
+  es el mismo motivo por el que el fondo del contrabajo usa `scroll(root)`.
 
-  **La regla, para no volver a chocarse:** una foto que vive por debajo del
-  pliegue va con `view()`, que se recoloca sola; una que vive en la primera
-  pantalla va con `scroll(root)`, porque es la única forma de garantizar el
-  primer fotograma al cargar.
-
-  El precio es que el tramo son píxeles concretos —720 al lado del texto, 1000
-  apilada— sacados de dónde está la foto: arranca en 344 y desaparece por
-  arriba en 704. **Si se cambia el texto de la apertura, la foto se mueve y
-  estos números se mueven con ella.** Se miden así:
-
-  ```js
-  const r = document.querySelector('.plate__frame').getBoundingClientRect();
-  console.log(r.top + scrollY, r.height);   // arranque y alto
-  ```
-
-  Van en píxeles y no en porcentaje a propósito: en porcentaje, alargar la
-  página con un párrafo nuevo movería el revelado sin que nadie lo tocara.
   Comprobado que llega en blanco y negro a 1440 × 900, 1440 × 1200,
   1920 × 1400, 1280 × 800, 900 × 1000 y 390 × 844.
+- **Al medir el gris desde Playwright, cuidado con la notación científica.**
+  A mitad de camino el filtro vale `grayscale(1.00929e-16)` —cero— y un
+  `match(/[\d.]+/)` lee «1.00929» y hace pensar que la curva no es monótona.
+  Capturar el paréntesis entero: `match(/grayscale\(([^)]+)\)/)`.
 - **El recorte horizontal vive en `html`, no en `body`.** Con
   `overflow-x: hidden` en el `body`, su `overflow-y` pasa a `auto` por regla del
   propio CSS y el `body` se convierte en contenedor de scroll — uno que no
