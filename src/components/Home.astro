@@ -34,12 +34,12 @@ const { blocks } = getHomeCopy(lang);
           <section class="row block plate">
             <div class="row__num" aria-hidden="true" />
             <div class="row__body">
-              <figure>
+              <figure class="plate__fig">
                 <div class="plate__frame">
                   <Image
                     src={emilseMadrid}
                     alt={block.alt}
-                    width={640}
+                    width={416}
                     densities={[1, 2]}
                     class="plate__img"
                   />
@@ -178,9 +178,15 @@ const { blocks } = getHomeCopy(lang);
      foto lo rompía. Al meterla en la rejilla no puede volver a salirse, venga
      el ancho que venga.
 
-     Panorámica y horizontal porque la horizontalidad es el argumento de esta
-     foto: la calle se va vacía hacia la izquierda y ella entra por la derecha
-     con la voluta. Recortada en vertical se pierde la ciudad. */
+     Es vertical, y **no ocupa la columna entera**: 416 px dentro de los 640 de
+     la medida, alineada al mismo borde izquierdo que los párrafos. Una foto
+     vertical a todo el ancho de la columna mide 800 px de alto y deja de ser
+     una lámina para convertirse en una parada; a 416 se lee como la lámina de
+     un libro, con su pie debajo. Es la misma regla que ya está escrita en
+     `progreso.md`: las horizontales van a lo ancho, las verticales no. */
+  .plate__fig {
+    max-width: 26rem; /* 416 px */
+  }
 
   /* `clip` y no `hidden`. Los dos recortan igual lo que el acercamiento saca
      del marco, pero `hidden` convierte el marco en contenedor de scroll —uno
@@ -189,7 +195,7 @@ const { blocks } = getHomeCopy(lang);
      contenedor, así que la imagen queda atada al documento, que es quien de
      verdad se mueve. */
   .plate__frame {
-    aspect-ratio: 2 / 1;
+    aspect-ratio: 4 / 5;
     overflow: clip;
   }
 
@@ -205,19 +211,6 @@ const { blocks } = getHomeCopy(lang);
 
   .plate__cap {
     margin-top: var(--space-2);
-  }
-
-  /* En pantalla estrecha la panorámica se vuelve una tira: la cara queda
-     diminuta. Se le da más alto y se recorta por los lados — lo primero que
-     sobra es la calle vacía de la izquierda, no ella. */
-  @media (max-width: 40rem) {
-    .plate__frame {
-      aspect-ratio: 3 / 2;
-    }
-
-    .plate__img {
-      object-position: 65% 50%;
-    }
   }
 
   /* --- El revelado de la lámina -------------------------------------------

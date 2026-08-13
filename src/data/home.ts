@@ -30,7 +30,7 @@ const es: HomeCopy = {
     {
       k: 'plate',
       caption: 'Emilse Ríos — Madrid',
-      alt: 'Emilse Ríos en una calle de Madrid, sonriendo, con la voluta de su contrabajo apoyada en el hombro',
+      alt: 'Emilse Ríos en una calle de Madrid, cargando su contrabajo al hombro, delante de un portal de piedra',
     },
     {
       k: 'runs',
@@ -99,7 +99,7 @@ const en: HomeCopy = {
     {
       k: 'plate',
       caption: 'Emilse Ríos — Madrid',
-      alt: 'Emilse Ríos on a street in Madrid, smiling, the scroll of her double bass resting on her shoulder',
+      alt: 'Emilse Ríos on a street in Madrid, carrying her double bass on her shoulder past a stone doorway',
     },
     {
       k: 'runs',

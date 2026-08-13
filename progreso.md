@@ -4,7 +4,7 @@ Sitio de **Emilse Ríos**, contrabajista y docente, y de su newsletter.
 Este documento es la memoria del proyecto: quien lo lea de cero debería poder
 seguir trabajando sin preguntar nada.
 
-**Última actualización:** 12 de agosto de 2026 · la portada de la Home
+**Última actualización:** 13 de agosto de 2026 · la lámina cambia de foto
 
 ---
 
@@ -20,13 +20,16 @@ seguir trabajando sin preguntar nada.
 
 Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/`
 
-Lo último que se tocó fue **la portada de la Home**: título centrado, y la foto
-de Emi con el contrabajo en una calle de Madrid como lámina. El orden de la
-apertura es **título → subtítulo → formulario → lámina**, y después sigue la
-lectura normal. Antes fue el fondo del contrabajo (PRs #4 a #7), cerrado y
-aprobado; si se retoma, es solo para mover los mandos de `tokens.css` — ver la
-receta más abajo. **Lo siguiente sin dueño es el cierre para producción**, en
-«Próximos PRs».
+Lo último que se tocó fue **la lámina de la Home**: cambió de foto y de
+formato, de un retrato corto horizontal a una de cuerpo entero, vertical, con
+el contrabajo entero y la fachada de la calle. El orden de la apertura es
+**título → subtítulo → formulario → lámina**, y después sigue la lectura
+normal.
+
+Antes de eso, la portada centrada, y antes el fondo del contrabajo (PRs #4 a
+#7), cerrado y aprobado; si se retoma, es solo para mover los mandos de
+`tokens.css` — ver la receta más abajo. **Lo siguiente sin dueño es el cierre
+para producción**, en «Próximos PRs».
 
 ---
 
@@ -183,31 +186,38 @@ import retrato from '../assets/img/retrato.jpg';
 ### Cambiar la foto de la lámina
 
 La lámina es la foto de la Home, justo después del formulario. El fichero es
-`src/assets/img/emilse-madrid.jpg`: **2400 × 1200, a color y sin recortar más**.
+`src/assets/img/emilse-madrid.jpg`: **1200 × 1500, a color y sin recortar más**.
 
 - **A color, aunque se vea en blanco y negro.** El gris lo pone el CSS, porque
   el revelado necesita el color debajo para poder devolverlo. Si se sube ya
   desaturada, el efecto no tiene de dónde sacarlo.
-- **2400 px de ancho.** La lámina mide 640 px CSS —la medida de lectura—, que
-  en densidad 2 son 1280. Astro genera el 1× y el 2×; el original solo tiene
-  que dar de sobra. No hace falta tocarlo si se cambia el ancho de
-  presentación, y por eso se deja generoso.
-- **Recorte 2:1.** Del original se toma la franja que empieza al 16,5 % de la
-  altura. Conserva la voluta arriba y el puño abajo, que es lo que hace que se
-  lea el instrumento entero.
+- **1200 px de ancho.** La lámina se presenta a 416 px CSS, que en densidad 2
+  son 832. Astro genera el 1× y el 2× (43 y 173 kB en WebP); el original solo
+  tiene que dar de sobra. Se deja generoso para no tener que rehacerlo si
+  cambia el ancho de presentación.
+- **Recorte 4:5.** Del original se toma la franja que empieza al 13 % de la
+  altura. Es lo más cerrado que se puede sin perder nada de lo que cuenta la
+  foto: la figura entera con los tacones en la acera, el contrabajo completo,
+  el «TONI 2» de la fachada y el portal.
 
-El original de cámara —5721 × 3806, 6,2 MB— está en el commit `378eccb`, en
-`public/image_hero.jpg`. Se sacó de `public/` a propósito: ahí se servía en
-crudo al navegador, sin pasar por el optimizador.
+El original de cámara —3572 × 5368, 12,3 MB— está en el commit `58dd75c`, en
+`public/image_hero_2.jpg`. Se sacó de `public/` a propósito: ahí se servía en
+crudo al navegador, sin pasar por el optimizador. La foto anterior de la
+lámina —el retrato corto, horizontal— está en el commit `378eccb`, en
+`public/image_hero.jpg`.
 
 Para rehacerla desde el original:
 
 ```js
 sharp(original)
-  .extract({ left: 0, top: Math.round(3806 * 0.165), width: 5721, height: 2861 })
-  .resize({ width: 2400 })
+  .extract({ left: 0, top: Math.round(5368 * 0.13), width: 3572, height: 4465 })
+  .resize({ width: 1200 })
   .jpeg({ quality: 82, mozjpeg: true, chromaSubsampling: '4:4:4' })
 ```
+
+Si algún día vuelve una foto horizontal, el marco es `aspect-ratio` en
+`Home.astro` y el ancho es `.plate__fig`: una horizontal puede ir a los 640 px
+de la columna entera; una vertical, no — ver las decisiones.
 
 El texto del pie y el `alt` viven en `src/data/home.ts`, en el bloque `plate`.
 El pie es el mismo en los dos idiomas; el `alt`, no.
@@ -395,12 +405,12 @@ pida lo contrario.
   diferencia son a propósito, no un descuadre: la portada no tiene numeral al
   margen del que colgar.
 - **La lámina va dentro de la rejilla de lectura, alineada con los párrafos.**
-  Usa el mismo hueco de numeral vacío que el formulario, así que mide lo que
-  mide la medida —640 px— y no puede salirse. Estuvo un paso fuera (900 px
-  contra los 768 de la columna) como gesto editorial, y sobresalir de los
-  márgenes no quedaba bien: la página tiene un borde de texto muy claro y la
-  foto lo rompía. Si alguna vez se quiere más grande, se hace ancho de columna,
-  no ancho suelto.
+  Usa el mismo hueco de numeral vacío que el formulario, así que arranca en el
+  mismo borde izquierdo que el texto y no puede salirse. Estuvo un paso fuera
+  (900 px contra los 768 de la columna) como gesto editorial, y sobresalir de
+  los márgenes no quedaba bien: la página tiene un borde de texto muy claro y
+  la foto lo rompía. Si alguna vez se quiere más grande, se hace ancho de
+  columna, no ancho suelto.
 - **Se descartó la tira de tres fotos al costado del texto.** Era la otra idea
   sobre la mesa: replicar el fondo del contrabajo a la izquierda y sacar tres
   fotos a la derecha con el scroll. No se hizo por cuatro razones, y las cuatro
@@ -412,22 +422,35 @@ pida lo contrario.
   al contrabajo lo que lo hace funcionar, que es ser un fantasma al 22 %. Y
   *Sobre mí* ya es exactamente texto a la izquierda y retrato a la derecha: la
   Home haciendo lo mismo confunde las dos páginas.
-- **Las horizontales van en el flujo; las verticales, al costado del texto.**
-  Un formato por función, y nunca los dos mezclados en la misma tira. Esta foto
-  es horizontal y su horizontalidad es el argumento: la calle se va vacía hacia
-  la izquierda y ella entra por la derecha con la voluta. Recortada en vertical
-  se pierde la ciudad y queda un retrato de estudio cualquiera. El vertical de
-  la casa es el retrato pendiente de *Sobre mí*, que ya tiene su hueco a 3/4.
+- **Una horizontal puede llenar la columna; una vertical no.** Es la regla que
+  decide el ancho de cualquier foto que entre en el flujo del texto. Una
+  horizontal a los 640 px de la medida mide 320 de alto y se lee de un vistazo.
+  Una vertical a esos mismos 640 mide 800 de alto: deja de ser una lámina y se
+  convierte en una parada, porque hay que scrollear para verla entera. Por eso
+  la de ahora va a **416 px**, alineada al borde izquierdo del texto, con el
+  pie debajo — el resto de la columna se queda en blanco a propósito, que es
+  como se pone una lámina en un libro. Nunca los dos formatos mezclados en la
+  misma tira.
+- **La lámina cambió de foto el 12 ago 2026, y de horizontal a vertical.** La
+  primera era un retrato corto: la cara grande, la voluta en el hombro, la
+  calle desenfocada. La de ahora es de cuerpo entero, con el contrabajo entero
+  y la fachada. **No se recortó en horizontal, y se probó:** a 2:1 se pierden
+  las piernas y los tacones, que son el gesto de la foto —está caminando, no
+  posando—, y a 3:2 el «TONI 2» de la fachada queda guillotinado por la mitad,
+  que es peor que no verlo. Las dos versiones parecían fotos mal recortadas. La
+  foto es vertical de nacimiento: el contrabajo es alto, el portal es alto, el
+  árbol es alto. Se respeta y se le da el ancho que le toca.
 - **La lámina va en blanco y negro, y el color es lo que ocurre al pasarle el
-  scroll por encima.** En color permanente entran el ladrillo naranja y el
-  coche azul, y la interfaz es estrictamente monocroma. Así el reposo de la
+  scroll por encima.** En color permanente entran la madera del contrabajo y el
+  oro de la fachada, y la interfaz es estrictamente monocroma. Así el reposo de la
   página sigue siendo monocromo y el color es una recompensa, no un estado. El
   acercamiento que la acompaña va en una sola dirección, no de ida y vuelta:
   subiendo y bajando la foto respira, y eso se lee como un tic.
-- **En pantalla estrecha la lámina pasa de 2:1 a 3:2.** Una panorámica a 342 px
-  de ancho es una tira de 171 px y la cara queda diminuta. Al darle más alto hay
-  que recortar por los lados, y lo primero que sobra es la calle vacía de la
-  izquierda, no ella: de ahí el `object-position: 65%`.
+- **La lámina no necesita un recorte aparte para móvil.** Siendo vertical, en
+  pantalla estrecha se limita sola al ancho de la columna y el 4:5 aguanta
+  igual de bien. Mientras fue panorámica sí hacía falta —a 342 px de ancho una
+  2:1 es una tira de 171 px y la cara quedaba diminuta—, y esa regla de móvil
+  se quitó al cambiar la foto. Si vuelve una horizontal, vuelve a hacer falta.
 - **El tramo del revelado se ancla a `cover 50%`, no a la posición en la
   página.** Va referido a la propia lámina y a la ventana, así que se recolocó
   solo cuando la foto se movió de antes del formulario a después y de 900 px a
@@ -488,8 +511,8 @@ pida lo contrario.
 ### Contenido que falta (de Emi)
 
 - [ ] **Retrato con el contrabajo**, en blanco y negro, para *Sobre mí*. Es
-      **vertical** y distinto del de la Home: ahí ya está la foto de Madrid, y
-      repetirla en las dos páginas las aplana.
+      distinto del de la Home: ahí ya está la foto de la calle, y repetirla en
+      las dos páginas las aplana. Su hueco en *Sobre mí* es a 3/4.
 - [ ] **Video «Viaje en el tiempo»** (2:41) y su fotograma.
 - [ ] **Los tres correos reales.** Los N.º 40, 41 y 42 tienen asunto y adelanto
       de verdad, pero el cuerpo es de muestra — marcados `borrador: true`.
