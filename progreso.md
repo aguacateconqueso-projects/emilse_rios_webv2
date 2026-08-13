@@ -4,7 +4,7 @@ Sitio de **Emilse Ríos**, contrabajista y docente, y de su newsletter.
 Este documento es la memoria del proyecto: quien lo lea de cero debería poder
 seguir trabajando sin preguntar nada.
 
-**Última actualización:** 13 de agosto de 2026 · la lámina cambia de foto
+**Última actualización:** 13 de agosto de 2026 · la apertura, a dos columnas
 
 ---
 
@@ -20,16 +20,16 @@ seguir trabajando sin preguntar nada.
 
 Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/`
 
-Lo último que se tocó fue **la lámina de la Home**: cambió de foto y de
-formato, de un retrato corto horizontal a una de cuerpo entero, vertical, con
-el contrabajo entero y la fachada de la calle. El orden de la apertura es
-**título → subtítulo → formulario → lámina**, y después sigue la lectura
-normal.
+Lo último que se tocó fue **la apertura de la Home**. Es una sola composición:
+el título centrado arriba, y debajo el párrafo de entrada a la izquierda con la
+lámina en paralelo a la derecha. El formulario va justo después, y de ahí sigue
+la lectura normal.
 
-Antes de eso, la portada centrada, y antes el fondo del contrabajo (PRs #4 a
-#7), cerrado y aprobado; si se retoma, es solo para mover los mandos de
-`tokens.css` — ver la receta más abajo. **Lo siguiente sin dueño es el cierre
-para producción**, en «Próximos PRs».
+Antes de eso, la lámina cambió de foto y de formato, antes fue la portada
+centrada, y antes el fondo del contrabajo (PRs #4 a #7), cerrado y aprobado; si
+se retoma, es solo para mover los mandos de `tokens.css` — ver la receta más
+abajo. **Lo siguiente sin dueño es el cierre para producción**, en «Próximos
+PRs».
 
 ---
 
@@ -185,16 +185,17 @@ import retrato from '../assets/img/retrato.jpg';
 
 ### Cambiar la foto de la lámina
 
-La lámina es la foto de la Home, justo después del formulario. El fichero es
+La lámina es la foto de la apertura de la Home, al lado del párrafo de
+entrada. El fichero es
 `src/assets/img/emilse-madrid.jpg`: **1200 × 1500, a color y sin recortar más**.
 
 - **A color, aunque se vea en blanco y negro.** El gris lo pone el CSS, porque
   el revelado necesita el color debajo para poder devolverlo. Si se sube ya
   desaturada, el efecto no tiene de dónde sacarlo.
-- **1200 px de ancho.** La lámina se presenta a 416 px CSS, que en densidad 2
-  son 832. Astro genera el 1× y el 2× (43 y 173 kB en WebP); el original solo
-  tiene que dar de sobra. Se deja generoso para no tener que rehacerlo si
-  cambia el ancho de presentación.
+- **1200 px de ancho.** La lámina se presenta a 288 px CSS al lado del texto y
+  a 416 cuando la banda se apila, así que en densidad 2 hacen falta 832. Astro
+  genera el 1× y el 2×; el original solo tiene que dar de sobra. Se deja
+  generoso para no tener que rehacerlo si cambia el ancho de presentación.
 - **Recorte 4:5.** Del original se toma la franja que empieza al 13 % de la
   altura. Es lo más cerrado que se puede sin perder nada de lo que cuenta la
   foto: la figura entera con los tacones en la acera, el contrabajo completo,
@@ -388,13 +389,18 @@ pida lo contrario.
   se escribe la firma. Y hace dos trabajos concretos: demuestra el título
   (contrabajo, calle, ciudad) y pone cara al «yo» que escribe, que en un
   newsletter en primera persona no es adorno.
-- **El orden de la apertura es título → subtítulo → formulario → lámina.**
-  Decisión de Emi, 12 ago 2026. Al principio la lámina iba antes del
-  formulario, de frontispicio, para dar la cara antes de pedir el correo. Puesta
-  después, la apertura queda más limpia —tres cosas de texto seguidas y luego
-  la imagen— y el formulario sube, que es donde conviene que esté. La foto
-  sigue estando en la primera pantalla y media, así que no pierde el trabajo de
-  poner cara.
+- **La apertura es una sola composición: título centrado, y debajo el párrafo
+  y la lámina en paralelo.** Decisión de Emi, 13 ago 2026. Por eso el hero y la
+  lámina **viven en el mismo bloque de datos y en el mismo `case`** de
+  `Home.astro`: antes eran dos bloques sueltos y la foto iba después del
+  formulario. Quien vaya a moverlos, que los mueva juntos.
+
+  Las dos versiones anteriores están probadas y descartadas, por si vuelven a
+  proponerse: la lámina de frontispicio, entre el título y el formulario, daba
+  la cara antes de pedir el correo pero empujaba el formulario fuera de la
+  primera pantalla; puesta después del formulario, la apertura eran cuatro
+  cosas apiladas y la foto llegaba tarde. En paralelo, el párrafo y la foto se
+  leen a la vez y el formulario queda justo debajo.
 - **La portada va centrada y fuera de la rejilla de lectura.** El título, el
   subtítulo y el párrafo de entrada van centrados en la página, con el numeral
   `01` centrado encima en vez de al margen — el mismo patrón que ya usaban las
@@ -404,13 +410,25 @@ pida lo contrario.
   margen izquierdo. La portada sí está centrada en la página. Esos 40 px de
   diferencia son a propósito, no un descuadre: la portada no tiene numeral al
   margen del que colgar.
-- **La lámina va dentro de la rejilla de lectura, alineada con los párrafos.**
-  Usa el mismo hueco de numeral vacío que el formulario, así que arranca en el
-  mismo borde izquierdo que el texto y no puede salirse. Estuvo un paso fuera
-  (900 px contra los 768 de la columna) como gesto editorial, y sobresalir de
-  los márgenes no quedaba bien: la página tiene un borde de texto muy claro y
-  la foto lo rompía. Si alguna vez se quiere más grande, se hace ancho de
-  columna, no ancho suelto.
+- **La banda de la apertura mide lo que la rejilla de lectura, y ahí está el
+  porqué.** Se probaron tres anchos y la diferencia se ve. A 1240 px el párrafo
+  arrancaba en 160 y la foto terminaba en 1340, con todo lo demás de la página
+  entre 440 y 1080: la banda flotaba. A 900 px coincidía con la caja del
+  título, pero el título es texto centrado y sus bordes no se ven, mientras que
+  los de la banda sí — seguía sin engancharse a nada. A **768 px**, que es el
+  ancho de `.row`, aparecen dos alineaciones de verdad: el borde izquierdo del
+  párrafo cae en la columna de numerales, y el borde derecho de la foto cae
+  exactamente donde terminan el formulario y todos los párrafos. Con eso la
+  apertura entra en el mismo corredor vertical que el resto de la página.
+
+  El precio es que las dos columnas son estrechas —párrafo de 384 px, foto de
+  288— y no hay forma de evitarlo: la medida de lectura son 640 px y no caben
+  dos columnas útiles dentro. Si algún día la foto tiene que ser más grande,
+  hay que elegir entre eso y las alineaciones.
+- **La foto va a la derecha y el texto a la izquierda, y no es por costumbre.**
+  El fondo del contrabajo ocupa los 512 px de la izquierda de la pantalla. Una
+  foto opaca ahí encima lo tapa justo donde se lee; el texto, con aire entre
+  los renglones, lo deja respirar.
 - **Se descartó la tira de tres fotos al costado del texto.** Era la otra idea
   sobre la mesa: replicar el fondo del contrabajo a la izquierda y sacar tres
   fotos a la derecha con el scroll. No se hizo por cuatro razones, y las cuatro
@@ -427,10 +445,8 @@ pida lo contrario.
   horizontal a los 640 px de la medida mide 320 de alto y se lee de un vistazo.
   Una vertical a esos mismos 640 mide 800 de alto: deja de ser una lámina y se
   convierte en una parada, porque hay que scrollear para verla entera. Por eso
-  la de ahora va a **416 px**, alineada al borde izquierdo del texto, con el
-  pie debajo — el resto de la columna se queda en blanco a propósito, que es
-  como se pone una lámina en un libro. Nunca los dos formatos mezclados en la
-  misma tira.
+  la de ahora va a **288 px** al lado del texto, y a **416** cuando la banda se
+  apila. Nunca los dos formatos mezclados en la misma tira.
 - **La lámina cambió de foto el 12 ago 2026, y de horizontal a vertical.** La
   primera era un retrato corto: la cara grande, la voluta en el hombro, la
   calle desenfocada. La de ahora es de cuerpo entero, con el contrabajo entero
@@ -451,11 +467,43 @@ pida lo contrario.
   igual de bien. Mientras fue panorámica sí hacía falta —a 342 px de ancho una
   2:1 es una tira de 171 px y la cara quedaba diminuta—, y esa regla de móvil
   se quitó al cambiar la foto. Si vuelve una horizontal, vuelve a hacer falta.
-- **El tramo del revelado se ancla a `cover 50%`, no a la posición en la
-  página.** Va referido a la propia lámina y a la ventana, así que se recolocó
-  solo cuando la foto se movió de antes del formulario a después y de 900 px a
-  640. Comprobado después de moverla: sigue llegando en blanco y negro a
-  1440 × 900, 1440 × 1200, 1280 × 800 y 390 × 844.
+- **El revelado va atado al scroll del documento y medido en píxeles.** Esto
+  cambió el 13 ago 2026 y **contradice lo que decía este documento el día
+  anterior**, así que conviene entender por qué antes de volver atrás.
+
+  Mientras la foto estuvo a media página, el tramo iba con `view()`, referido
+  al paso de la propia lámina por la ventana. Era lo correcto: se recolocaba
+  solo cada vez que la foto se movía. Al subirla a la apertura dejó de
+  funcionar, y no por un descuido — es una limitación de `view()`. Cualquier
+  punto de su recorrido se calcula desde la posición de la foto menos el alto
+  de la ventana, así que para un elemento de la primera pantalla ese punto cae
+  en scroll negativo en cuanto la ventana pasa de unos 1050 px de alto. Y el
+  scroll no puede ser negativo: el navegador entra directo a mitad del tramo.
+  Medido antes de cambiarlo: **65 % de color al cargar en una ventana de 1200**.
+
+  Atado al documento, el scroll en reposo es cero y el cero es el primer
+  fotograma, sea cual sea la ventana. Es exactamente el motivo por el que el
+  fondo del contrabajo usa `scroll(root)` desde el PR #4.
+
+  **La regla, para no volver a chocarse:** una foto que vive por debajo del
+  pliegue va con `view()`, que se recoloca sola; una que vive en la primera
+  pantalla va con `scroll(root)`, porque es la única forma de garantizar el
+  primer fotograma al cargar.
+
+  El precio es que el tramo son píxeles concretos —720 al lado del texto, 1000
+  apilada— sacados de dónde está la foto: arranca en 344 y desaparece por
+  arriba en 704. **Si se cambia el texto de la apertura, la foto se mueve y
+  estos números se mueven con ella.** Se miden así:
+
+  ```js
+  const r = document.querySelector('.plate__frame').getBoundingClientRect();
+  console.log(r.top + scrollY, r.height);   // arranque y alto
+  ```
+
+  Van en píxeles y no en porcentaje a propósito: en porcentaje, alargar la
+  página con un párrafo nuevo movería el revelado sin que nadie lo tocara.
+  Comprobado que llega en blanco y negro a 1440 × 900, 1440 × 1200,
+  1920 × 1400, 1280 × 800, 900 × 1000 y 390 × 844.
 - **El recorte horizontal vive en `html`, no en `body`.** Con
   `overflow-x: hidden` en el `body`, su `overflow-y` pasa a `auto` por regla del
   propio CSS y el `body` se convierte en contenedor de scroll — uno que no
