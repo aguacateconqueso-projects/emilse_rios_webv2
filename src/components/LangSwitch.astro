@@ -38,11 +38,14 @@ const t = useTranslations(lang);
     gap: var(--space-1);
   }
 
+  /* El color secundario se puede subir desde fuera con `--lang-soft`. Lo hace
+     el panel del menú, donde el 58 % de siempre no llega a AA sobre cristal.
+     Sin nadie que la ponga, se queda en la tinta secundaria de siempre. */
   .lang__link {
     font-family: var(--font-mono);
     font-size: var(--text-mono);
     letter-spacing: var(--tracking-mono);
-    color: var(--ink-soft);
+    color: var(--lang-soft, var(--ink-soft));
     border-bottom: 0;
   }
 
@@ -59,6 +62,6 @@ const t = useTranslations(lang);
   .lang__sep {
     font-family: var(--font-mono);
     font-size: var(--text-mono);
-    color: var(--ink-soft);
+    color: var(--lang-soft, var(--ink-soft));
   }
 </style>

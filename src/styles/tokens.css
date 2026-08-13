@@ -15,6 +15,14 @@
      son de 12 px). Al 58 % da 4,68:1 y la diferencia no se ve. */
   --ink-soft: rgba(13, 13, 13, 0.58);
 
+  /* Tinta secundaria sobre cristal. El 58 % está calibrado contra el papel
+     liso; sobre el cristal del menú pasa contenido de la página por detrás, y
+     el peor caso es el bloque negro del cierre. Medido sobre los píxeles ya
+     pintados: al 72 % se quedaba en 4,34:1, por debajo de AA. Al 80 % da
+     5,24:1 en ese peor caso y 5,50:1 sobre papel liso. Solo dentro del panel
+     del menú — fuera, la tinta secundaria sigue siendo la de siempre. */
+  --ink-soft-glass: rgba(13, 13, 13, 0.8);
+
   /* Línea — reglas de 1 px. Decorativa, sin requisito de contraste. */
   --rule: rgba(13, 13, 13, 0.12);
 
@@ -75,6 +83,16 @@
      imagen a 700 px, la sumaba al emborronado de ampliarla. Con el fichero a
      1200 px lo que hace falta es apenas un velo. */
   --glass-blur: 1px;
+
+  /* --- Cristal del menú -------------------------------------------------
+     El panel que baja de la firma. Lleva mucho más papel que el cristal del
+     fondo porque encima va texto que tiene que leerse pase lo que pase por
+     detrás. El mando real es el velo: al 86 % el peor caso caía a 4,34:1.
+     Bajarlo se paga en contraste; el desenfoque, en cambio, puede subir sin
+     coste de legibilidad. Cualquier cambio acá se vuelve a medir con
+     `scripts/audit-menu.mjs`. */
+  --menu-veil: 90%;
+  --menu-blur: 12px;
 
   /* --- 04 · Formas y movimiento ----------------------------------------- */
   --radius: 0; /* Cero. Ninguna esquina redondeada. */

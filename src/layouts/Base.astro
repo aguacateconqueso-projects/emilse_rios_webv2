@@ -121,8 +121,10 @@ const altEn = new URL(routePath(route, 'en'), Astro.site);
 </html>
 
 <style>
-  /* La cabecera es fija: el contenido arranca por debajo de ella. */
+  /* La cabecera es fija: el contenido arranca por debajo de ella. Mide 90 px
+     desde que la firma lleva la palabra «MENÚ» debajo, así que este hueco sube
+     al siguiente valor de la rejilla de 8 — 96, no 90, que se saldría. */
   .main {
-    padding-top: 4.5rem; /* 72 px */
+    padding-top: var(--space-12); /* 96 px */
   }
 </style>
