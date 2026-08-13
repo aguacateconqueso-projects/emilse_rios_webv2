@@ -20,21 +20,17 @@ const { blocks } = getHomeCopy(lang);
       case 'hero':
         return (
           <section class="hero">
-            <div class="mono-plain soft hero__num" aria-hidden="true">
-              {block.n}
+            <div class="hero__head">
+              <div class="mono-plain soft hero__num" aria-hidden="true">
+                {block.n}
+              </div>
+              <h1 class="hero__title">{block.title}</h1>
+              <p class="mono soft hero__eyebrow">{block.eyebrow}</p>
             </div>
-            <h1 class="hero__title">{block.title}</h1>
-            <p class="mono soft hero__eyebrow">{block.eyebrow}</p>
-            <p class="hero__lead">{block.lead}</p>
-          </section>
-        );
 
-      case 'plate':
-        return (
-          <section class="row block plate">
-            <div class="row__num" aria-hidden="true" />
-            <div class="row__body">
-              <figure class="plate__fig">
+            <div class="hero__band">
+              <p class="hero__lead">{block.lead}</p>
+              <figure class="hero__fig">
                 <div class="plate__frame">
                   <Image
                     src={emilseMadrid}
@@ -134,9 +130,12 @@ const { blocks } = getHomeCopy(lang);
      Más ancho que la medida para que el título respire en dos líneas; el
      párrafo sí vuelve a la medida, porque eso sí se lee. */
   .hero {
+    padding-block-start: var(--space-4);
+  }
+
+  .hero__head {
     max-width: var(--width-wide);
     margin-inline: auto;
-    padding-block-start: var(--space-4);
     padding-inline: var(--space-3);
     text-align: center;
   }
@@ -158,34 +157,52 @@ const { blocks } = getHomeCopy(lang);
     margin-top: var(--space-3);
   }
 
+  /* --- La banda: el párrafo de entrada y la lámina, en paralelo -------------
+     El título va centrado y solo; debajo, el párrafo a la izquierda y la foto
+     a su lado. La apertura es una composición, no tres bloques sueltos, y por
+     eso el hero y la lámina viven en el mismo `case` — antes eran dos bloques
+     de datos y la foto iba después del formulario.
+
+     La banda es más ancha que la columna de lectura, y eso es deliberado: el
+     título ya lo era (900 px contra 768). La apertura se abre y luego la
+     página se cierra en su columna. Con dos columnas de verdad no cabía de
+     otra forma — el párrafo a la medida son 640 px y la lámina 416.
+
+     La foto va a la **derecha**, no a la izquierda, por el fondo del
+     contrabajo: la banda del fantasma ocupa los 512 px de la izquierda, y una
+     foto opaca encima lo tapaba justo donde se lee. Con el texto a la
+     izquierda el fantasma respira entre los renglones. */
+  .hero__band {
+    max-width: var(--width-text);
+    margin-top: var(--space-8);
+    margin-inline: auto;
+    padding-inline: var(--space-3);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 18rem);
+    align-items: center;
+    gap: var(--space-6);
+  }
+
+  /* El tope solo actúa al apilarse: en dos columnas el párrafo mide 384 px y
+     nunca lo alcanza. Apilado sí, y sin él se iría a 720 px de ancho, por
+     encima de la medida. */
   .hero__lead {
     max-width: var(--measure);
-    margin-top: var(--space-4);
-    margin-inline: auto;
     text-wrap: pretty;
   }
 
-  /* --- La lámina ----------------------------------------------------------
-     La foto de Emi, después del formulario. No es un hero a pantalla completa
-     a propósito: eso la pondría por encima del título y haría que la página
-     fuera sobre ella y no sobre el newsletter. Demuestra el título en vez de
-     ilustrarlo — contrabajo, calle, ciudad.
+  /* Apilada, la banda vuelve al ancho de la columna de lectura: el párrafo a
+     la medida y la lámina debajo, a su ancho de siempre. */
+  @media (max-width: 60rem) {
+    .hero__band {
+      max-width: var(--width-text);
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-6);
+    }
 
-     Va **dentro de la rejilla de lectura**, alineada con los párrafos y con el
-     mismo hueco de numeral vacío que usa el formulario. Estuvo un paso fuera
-     de la medida (900 px contra los 768 de la columna) y sobresalir de los
-     márgenes no quedaba bien: la página tiene un borde de texto claro y la
-     foto lo rompía. Al meterla en la rejilla no puede volver a salirse, venga
-     el ancho que venga.
-
-     Es vertical, y **no ocupa la columna entera**: 416 px dentro de los 640 de
-     la medida, alineada al mismo borde izquierdo que los párrafos. Una foto
-     vertical a todo el ancho de la columna mide 800 px de alto y deja de ser
-     una lámina para convertirse en una parada; a 416 se lee como la lámina de
-     un libro, con su pie debajo. Es la misma regla que ya está escrita en
-     `progreso.md`: las horizontales van a lo ancho, las verticales no. */
-  .plate__fig {
-    max-width: 26rem; /* 416 px */
+    .hero__fig {
+      max-width: 26rem; /* 416 px */
+    }
   }
 
   /* `clip` y no `hidden`. Los dos recortan igual lo que el acercamiento saca
@@ -244,7 +261,7 @@ const { blocks } = getHomeCopy(lang);
     }
   }
 
-  @supports (animation-timeline: view()) {
+  @supports (animation-timeline: scroll()) {
     @media (prefers-reduced-motion: no-preference) {
       .plate__img {
         animation: plate-bloom 1s linear both;
@@ -254,24 +271,37 @@ const { blocks } = getHomeCopy(lang);
          la misma que el atajo `animation`, el minificador los funde dentro de
          él, y ahí no los acepta ningún navegador — se cae la declaración
          entera y no anima nada. Pasó con el fondo del contrabajo. Selector
-         distinto para que no pueda volver a fundirlas. */
-      /* El tramo arranca a mitad del paso de la lámina por la ventana. La
-         cuenta importa: ese punto cae siempre por debajo de la página sin
-         mover, en cualquier ventana de menos de 1525 px de alto — o sea, en
-         todas. Anclándolo antes, en un monitor alto la lámina ya nacía a
-         color al cargar y el blanco y negro dejaba de ser el reposo. Así
-         llega en blanco y negro, florece cuando está bien encuadrada, y se
-         apaga al irse por arriba.
+         distinto para que no pueda volver a fundirlas.
 
-         Se escribe con un solo valor. El final que queremos —la lámina fuera
-         de pantalla por arriba— es justo el que toma por defecto, y al no
-         nombrarlo el minificador no tiene nada que reescribir: escrito como
-         `cover 50% exit 100%` lo dejaba en `exit 0%`, que no es lo mismo, y
-         el color entraba y salía en un cuarto del recorrido. Es el mismo tipo
-         de trampa que la de `animation-timeline`. */
-      .plate .plate__img {
-        animation-timeline: view();
-        animation-range: cover 50%;
+         Va atado al scroll del documento y medido en píxeles, no al paso de
+         la lámina por la ventana. Mientras la foto estaba a media página,
+         `view()` era lo correcto porque se recolocaba sola. Ahora está en la
+         primera pantalla, y ahí `view()` no puede cumplir la única condición
+         que importa —llegar en blanco y negro—: cualquier punto de su
+         recorrido cae en scroll negativo si la ventana es más alta que unos
+         1050 px, así que en un monitor grande la foto nacía a color. Medido:
+         65 % de color al cargar en una ventana de 1200. Atado al documento,
+         el scroll en reposo es cero y el cero es el primer fotograma, sea cual
+         sea la ventana. Es el mismo motivo por el que el fondo del contrabajo
+         usa `scroll(root)`.
+
+         Los 720 px son de dónde está la foto: arranca en 344 y desaparece por
+         arriba en 704. Si se cambia el texto de la apertura y la foto se
+         mueve, este número se mueve con ella — es el precio de atarlo al
+         documento, y por eso está medido y anotado en `progreso.md` en vez de
+         puesto a ojo. En píxeles y no en porcentaje para que el largo de la
+         página no lo toque. */
+      .hero__fig .plate__img {
+        animation-timeline: scroll(root block);
+        animation-range: 0px 45rem; /* 720 px */
+      }
+
+      /* Apilada, la foto baja: arranca sobre los 500 px y desaparece cerca de
+         los 990. El tramo la sigue. */
+      @media (max-width: 60rem) {
+        .hero__fig .plate__img {
+          animation-range: 0px 62.5rem; /* 1000 px */
+        }
       }
     }
   }
