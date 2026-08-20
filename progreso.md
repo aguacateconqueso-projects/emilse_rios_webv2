@@ -4,7 +4,7 @@ Sitio de **Emilse Ríos**, contrabajista y docente, y de su newsletter.
 Este documento es la memoria del proyecto: quien lo lea de cero debería poder
 seguir trabajando sin preguntar nada.
 
-**Última actualización:** 13 de agosto de 2026 · el menú, en una cápsula de cristal
+**Última actualización:** 20 de agosto de 2026 · el menú, en una cápsula de cristal
 
 ---
 
@@ -27,6 +27,11 @@ Inicio, Sobre mí, Aula Virtual y el conmutador de idioma, que antes estaban
 sueltos a la derecha. Copia el comportamiento del sitio que Emi pasó de
 referencia, y trajo dos enmiendas al sistema —radio y sombra, solo para esta
 cápsula— anotadas más abajo.
+
+Fueron dos PRs: el **#14** llevó la primera versión —una barra a lo ancho con
+un panel cuadrado colgando— y el **#15** la rehízo entera después de que Emi la
+devolviera por tres cosas: no se veía transparente, no tenía animación de
+entrada ni de salida, y a veces se repintaba de negro el marco superior.
 
 Antes de eso, la lámina volvió a ser horizontal con un recorte de Emi, antes la
 portada centrada, y antes el fondo del contrabajo (PRs #4 a #7), cerrado y
@@ -63,6 +68,15 @@ Astro 7, estático, sin framework de UI. No hace falta adaptador para Vercel.
   #5, su contenido fue a parar a una rama muerta y nunca llegó a `main`. Hubo
   que reabrirlo como #6. Un diff un poco más largo se lee sin problema; una
   rama muerta cuesta media hora y confunde a quien mergea.
+- **Una rama con su PR ya mergeado está muerta: no se le añaden commits.** Es
+  el mismo error del #5 por otra puerta, y volvió a pasar en el #14. Emi lo
+  mergeó, luego pidió cambios, y los cambios se empujaron a *esa misma rama*.
+  El `push` funcionó, GitHub no se quejó de nada y el PR siguió mergeado y
+  cerrado: el trabajo no llegó a `main` y no se veía en ningún sitio. Lo cazó
+  Emi, no yo. **Cuando llega feedback sobre algo ya mergeado, el trabajo nuevo
+  arranca de `main` en una rama nueva y va en un PR nuevo** — así salió el #15.
+  La señal de alarma es empujar a una rama y que el PR no muestre commits
+  nuevos.
 - **Antes de abrir un PR, comprobar de qué commit sale la rama.** Si `main` se
   ha movido, traerlo primero. A mitad de esta sesión se mergeó un PR que
   reescribía `progreso.md` entero y hubo que rehacer los cambios a mano sobre
@@ -96,7 +110,7 @@ El sistema es de Emi y se puede cambiar. Lo que no se puede es cambiarlo sin
 dejar constancia, porque si no la tabla de arriba deja de ser fiable. Hasta hoy
 se ha tocado cinco veces:
 
-- **13 ago 2026 · La cápsula del menú lleva esquinas redondeadas y sombra.**
+- **20 ago 2026 · La cápsula del menú lleva esquinas redondeadas y sombra.**
   Las dos cosas están prohibidas en la tabla —«Radios: cero. Sombras: cero»— y
   las dos las pidió Emi con el sitio de referencia delante, después de ver una
   primera versión a escuadra. Valen **solo para la cápsula del menú**, que es
@@ -105,7 +119,7 @@ se ha tocado cinco veces:
   como `--menu-radius` y `--menu-shadow`, separadas de `--radius` y `--shadow`,
   que siguen valiendo cero. Si alguna vez se quiere redondear algo más, es otra
   enmienda: estos dos tokens no son un permiso general.
-- **13 ago 2026 · La apertura del menú no cuenta contra el tope de
+- **20 ago 2026 · La apertura del menú no cuenta contra el tope de
   animaciones.** Es respuesta a una acción, de la misma familia que un `hover`,
   no movimiento ambiental — el mismo criterio que ya se aplicó al acuse de
   recibo del formulario. Las cuatro de la Home siguen siendo la entrada, las
@@ -351,7 +365,7 @@ Están discutidas y resueltas. No hace falta volver sobre ellas salvo que Emi
 pida lo contrario.
 
 - **El menú vive en una cápsula de cristal, y la firma dejó de llevar a la
-  portada.** Decisión de Emi, 13 ago 2026, con el sitio de «analogue» de
+  portada.** Decisión de Emi, 20 ago 2026, con el sitio de «analogue» de
   referencia. La primera versión fue una barra a lo ancho con panel cuadrado, y
   Emi la devolvió: quería la cápsula flotante de la referencia, cristal de
   verdad y animación en los dos sentidos. Como la firma ya no es un enlace,
@@ -363,10 +377,13 @@ pida lo contrario.
   conocida de artefactos de composición; y encima la barra muestreaba la
   entrada, un panel negro a pantalla completa con `z-index: 200`, mientras se
   desvanecía. Ahora la cabecera no tiene fondo, ni regla, ni filtro: solo
-  coloca la cápsula, que es lo único que filtra en todo el sitio. **No pude
-  reproducirlo yo** —es un artefacto de GPU y en un navegador sin pantalla no
-  aparece—, así que esto quita las dos causas probables, no una confirmada.
-  Conviene que Emi lo mire otra vez en su máquina.
+  coloca la cápsula, que es lo único que filtra en todo el sitio. **Emi
+  confirmó el 20 ago 2026 que ya no se ve.** No llegó a reproducirse acá —es un
+  artefacto de composición de la GPU y en un navegador sin pantalla no
+  aparece—, así que la comprobación tuvo que hacerla ella en su máquina: de las
+  dos causas probables no se supo nunca cuál era, solo que quitándolas las dos
+  se acabó. Si alguna vez vuelve, el sitio donde mirar es el `backdrop-filter`
+  de la cápsula contra la animación de entrada.
 - **La cabecera no captura el ratón.** Sigue siendo una banda fija de lado a
   lado, pero transparente: sin `pointer-events: none` se comería los clics de
   toda la franja superior de la página. El `auto` se devuelve en la cápsula.
