@@ -1,4 +1,18 @@
 ---
+/**
+ * Cabecera — la firma centrada, y el menú detrás de ella.
+ *
+ * El logo dejó de ser un enlace a la portada y pasó a ser el tirador del menú:
+ * al pulsarlo baja un panel de cristal con las opciones que antes estaban
+ * sueltas a la derecha. «Inicio» es ahora la primera opción del panel, para
+ * que no se pierda el camino a la portada.
+ *
+ * Va sobre `<details>` a propósito, no sobre un botón con JavaScript: el
+ * desplegable nativo abre y cierra sin una línea de script, así que el menú
+ * funciona igual con el JavaScript apagado. El script que hay debajo solo
+ * añade lo que el elemento nativo no trae —cerrar con Escape y al pulsar
+ * fuera— y el menú sigue completo si no llega a ejecutarse.
+ */
 import { type Lang, type Route, useTranslations, routePath } from '../i18n/ui';
 import LangSwitch from './LangSwitch.astro';
 import Logo from './Logo.astro';
@@ -13,25 +27,75 @@ const t = useTranslations(lang);
 ---
 
 <header class="header">
-  <div class="header__inner">
-    <a class="header__mark" href={routePath('home', lang)} title={t('nav.home')}>
+  <details class="menu" data-menu>
+    <summary class="menu__trigger" title={t('nav.menu')}>
       <Logo name={t('site.name')} />
-    </a>
 
-    <nav class="header__nav mono" aria-label={t('site.title')}>
-      <a
-        class="header__link"
-        href={routePath('about', lang)}
-        aria-current={route === 'about' ? 'page' : undefined}>{t('nav.about')}</a
-      >
-      <span class="header__link header__link--muted" aria-disabled="true" title={t('nav.aulaSoon')}>
-        {t('nav.aula')}
+      {/*
+        La firma sola no dice que se abra. Sin esta palabra el sitio se queda
+        sin ninguna navegación visible, y el sistema prohíbe iconos, así que la
+        pista es texto. Cambia sola con `[open]`, sin JavaScript.
+      */}
+      <span class="mono menu__hint" aria-hidden="true">
+        <span class="menu__hint--open">{t('nav.menu')}</span>
+        <span class="menu__hint--close">{t('nav.close')}</span>
       </span>
-      <LangSwitch lang={lang} hrefEs={routePath(route, 'es')} hrefEn={routePath(route, 'en')} />
-    </nav>
-  </div>
+
+      {/* El nombre lo pone el logo; esto añade de qué es el tirador. Si abre o
+          cierra no hace falta decirlo: `<details>` ya lo anuncia solo. */}
+      <span class="visually-hidden">{t('nav.menu')}</span>
+    </summary>
+
+    <div class="menu__panel">
+      <nav class="menu__nav mono" aria-label={t('site.title')}>
+        <a
+          class="menu__item"
+          href={routePath('home', lang)}
+          aria-current={route === 'home' ? 'page' : undefined}>{t('nav.start')}</a
+        >
+        <a
+          class="menu__item"
+          href={routePath('about', lang)}
+          aria-current={route === 'about' ? 'page' : undefined}>{t('nav.about')}</a
+        >
+        {/*
+          «Aula Virtual» sigue apagada: está en el menú pero no lleva a ninguna
+          parte, y se dice en vez de fingir que existe.
+        */}
+        <span class="menu__item menu__item--muted" aria-disabled="true" title={t('nav.aulaSoon')}>
+          {t('nav.aula')}
+        </span>
+        <div class="menu__item menu__item--lang">
+          <LangSwitch lang={lang} hrefEs={routePath(route, 'es')} hrefEn={routePath(route, 'en')} />
+        </div>
+      </nav>
+    </div>
+  </details>
+
   <div class="header__rule"></div>
 </header>
+
+<script>
+  /*
+    Solo los remates. Abrir y cerrar lo hace `<details>` por su cuenta, así que
+    si esto no se ejecuta el menú sigue funcionando entero.
+  */
+  const menu = document.querySelector<HTMLDetailsElement>('[data-menu]');
+
+  if (menu) {
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || !menu.open) return;
+      menu.open = false;
+      /* El foco vuelve al tirador: si no, se queda en el aire. */
+      menu.querySelector<HTMLElement>('summary')?.focus();
+    });
+
+    document.addEventListener('pointerdown', (event) => {
+      if (!menu.open) return;
+      if (!menu.contains(event.target as Node)) menu.open = false;
+    });
+  }
+</script>
 
 <style>
   .header {
@@ -44,44 +108,133 @@ const t = useTranslations(lang);
     backdrop-filter: blur(8px);
   }
 
-  .header__inner {
-    max-width: var(--width-full);
-    margin-inline: auto;
+  /* --- El tirador: la firma, centrada -------------------------------------
+     El `<details>` no maqueta nada; solo agrupa. Lo que se centra es el
+     tirador, y el panel cuelga de la cabecera, no de aquí. */
+  .menu {
     padding: var(--space-2) var(--space-3);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
   }
 
-  .header__mark {
+  .menu__trigger {
+    /* Sin el triángulo del desplegable nativo: la firma es el tirador. */
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+    cursor: pointer;
     --logo-height: 32px;
+  }
+
+  .menu__hint {
+    color: var(--ink-soft);
+  }
+
+  .menu__hint--close,
+  .menu[open] .menu__hint--open {
+    display: none;
+  }
+
+  .menu[open] .menu__hint--close {
+    display: inline;
+  }
+
+  .menu__trigger::-webkit-details-marker {
+    display: none;
+  }
+
+  .menu__trigger:hover {
+    color: var(--ink-soft);
+  }
+
+  .menu__trigger:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 4px;
+  }
+
+  /* --- El panel de cristal -------------------------------------------------
+     Cuelga de la cabecera y va en posición absoluta, no en el flujo: así la
+     barra no crece al abrirse y el panel flota sobre la página.
+
+     El cristal es el mismo del fondo del contrabajo — papel translúcido más
+     desenfoque— pero acá sí se pone con `backdrop-filter`, y se puede: debajo
+     hay contenido de verdad que tiene que verse pasar, el panel es pequeño y
+     no cambia en cada fotograma. Lo que hundía la Home a 20 fps era un
+     `backdrop-filter` a pantalla completa recalculándose con el scroll.
+
+     Sin prefijos `-webkit-` escritos a mano: los pone el minificador. Ver
+     `progreso.md`. */
+  .menu__panel {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(100vw - var(--space-4), 22rem); /* 352 px */
+    background: color-mix(in srgb, var(--paper) var(--menu-veil), transparent);
+    backdrop-filter: blur(var(--menu-blur)) saturate(1.4);
+    /* La tinta secundaria de dentro del panel se sube: sobre el cristal, el
+       58 % de siempre no llega a AA. Lo hereda también el conmutador de
+       idioma, que lee esta variable. */
+    --lang-soft: var(--ink-soft-glass);
+    border: 1px solid var(--rule);
+    border-top: 0;
+  }
+
+  .menu__nav {
     display: flex;
+    flex-direction: column;
+  }
+
+  /* Cada opción es una franja con su regla de 1 px. La última no la lleva. */
+  .menu__item {
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--rule);
+    color: var(--ink);
+    text-align: center;
+  }
+
+  .menu__item:last-child {
     border-bottom: 0;
   }
 
-  .header__mark:hover {
-    color: var(--ink-soft);
+  a.menu__item:hover {
+    background: color-mix(in srgb, var(--ink) 5%, transparent);
   }
 
-  .header__nav {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
+  a.menu__item[aria-current='page'] {
+    color: var(--ink-soft-glass);
   }
 
-  .header__link {
-    border-bottom: 0;
-    white-space: nowrap;
-  }
-
-  .header__link:hover {
-    color: var(--ink-soft);
-  }
-
-  .header__link--muted {
-    color: var(--ink-soft);
+  .menu__item--muted {
+    color: var(--ink-soft-glass);
     cursor: default;
+  }
+
+  .menu__item--lang {
+    display: flex;
+    justify-content: center;
+  }
+
+  /* --- La apertura ---------------------------------------------------------
+     Un fundido corto con un palmo de recorrido. No cuenta contra el tope de
+     animaciones de la Home: es respuesta a una acción, de la misma familia que
+     un `hover`, no movimiento ambiental — el mismo criterio que el acuse de
+     recibo del formulario. Ver `progreso.md`. */
+  @media (prefers-reduced-motion: no-preference) {
+    .menu[open] .menu__panel {
+      animation: menu-drop 0.22s var(--ease-reveal) both;
+    }
+  }
+
+  @keyframes menu-drop {
+    from {
+      opacity: 0;
+      transform: translate(-50%, calc(var(--space-1) * -1));
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
   }
 
   .header__rule {
@@ -89,13 +242,8 @@ const t = useTranslations(lang);
     background: var(--rule);
   }
 
-  /* En móvil el Aula Virtual sobra: aún no lleva a ninguna parte. */
   @media (max-width: 36rem) {
-    .header__link--muted {
-      display: none;
-    }
-
-    .header__mark {
+    .menu__trigger {
       --logo-height: 24px;
     }
   }

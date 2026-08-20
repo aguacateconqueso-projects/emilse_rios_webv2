@@ -4,7 +4,7 @@ Sitio de **Emilse Ríos**, contrabajista y docente, y de su newsletter.
 Este documento es la memoria del proyecto: quien lo lea de cero debería poder
 seguir trabajando sin preguntar nada.
 
-**Última actualización:** 13 de agosto de 2026 · la lámina, horizontal otra vez
+**Última actualización:** 13 de agosto de 2026 · el menú, detrás de la firma
 
 ---
 
@@ -20,18 +20,17 @@ seguir trabajando sin preguntar nada.
 
 Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/`
 
-Lo último que se tocó fue **la lámina de la Home**, que vuelve a ser
-horizontal — con un recorte que hizo Emi de la foto de cuerpo entero. La
-apertura queda en columna: título centrado, subtítulo, formulario y lámina, uno
-debajo del otro, y de ahí sigue la lectura normal. La versión a dos columnas
-del PR #12 se deshizo; el porqué está en «Decisiones ya tomadas», que es donde
-importa.
+Lo último que se tocó fue **el menú**. La firma de Emi va centrada en la
+cabecera y es el tirador: al pulsarla baja un panel de cristal con Inicio,
+Sobre mí, Aula Virtual y el conmutador de idioma, que antes estaban sueltos a
+la derecha. Debajo de la firma va la palabra «MENÚ» —«CERRAR» con el panel
+abierto— porque si no, el sitio se queda sin navegación visible.
 
-Antes de eso, la portada centrada, y antes el fondo del contrabajo (PRs #4 a
-#7), cerrado y aprobado; si
-se retoma, es solo para mover los mandos de `tokens.css` — ver la receta más
-abajo. **Lo siguiente sin dueño es el cierre para producción**, en «Próximos
-PRs».
+Antes de eso, la lámina volvió a ser horizontal con un recorte de Emi, antes la
+portada centrada, y antes el fondo del contrabajo (PRs #4 a #7), cerrado y
+aprobado; si se retoma, es solo para mover los mandos de `tokens.css` — ver la
+receta más abajo. **Lo siguiente sin dueño es el cierre para producción**, en
+«Próximos PRs».
 
 ---
 
@@ -43,6 +42,7 @@ npm run dev      # http://localhost:4321
 npm run build    # build de producción en ./dist
 npm run preview  # sirve el build
 npm run audit    # auditoría del diseño (necesita preview en marcha)
+npm run audit:menu # contraste del menú de cristal (idem)
 ```
 
 Astro 7, estático, sin framework de UI. No hace falta adaptador para Vercel.
@@ -123,7 +123,8 @@ src/
   assets/img/            contrabajo.webp, el fondo de la Home
                          emilse-madrid.jpg, la lámina de la Home
   components/
-    Header · Footer · LangSwitch   Cabecera, pie, conmutador ES/EN
+    Header.astro                   Cabecera: la firma centrada y el menú
+    Footer · LangSwitch            Pie y conmutador ES/EN
     Logo.astro                     La firma de Emi, como máscara
     Intro.astro                    Animación de entrada (solo Home)
     Backdrop.astro                 El contrabajo tras el cristal (solo Home)
@@ -143,6 +144,7 @@ src/
 public/logo.svg          La firma vectorizada. La usa Logo.astro de máscara
 public/favicon.svg       La E del logo. Se adapta al tema del navegador
 scripts/audit.mjs        Auditoría de contraste y rejilla
+scripts/audit-menu.mjs   Contraste del menú de cristal, con el panel abierto
 ```
 
 **Los textos no viven en los componentes.** Cambiar una frase es tocar
@@ -294,6 +296,23 @@ cada renglón dos veces (con el fondo y sin él) y solo juzga los píxeles que e
 fondo cambia. Así las reglas de 1 px del diseño, que salen iguales en las dos
 capturas, no cuentan como fondo de nada.
 
+### La auditoría del menú
+
+`npm run audit:menu` es la misma idea aplicada al panel del menú, que también
+es translúcido y por el que también pasa la página. Abre el menú y mide sus
+cuatro renglones sobre los tres fondos que existen: el bloque negro del cierre
+—el peor caso—, una fotografía y papel liso.
+
+```
+peor caso de todos .......................... 5,24:1 ✓   (el cierre en negro)
+```
+
+**Sin el método de las dos capturas no hay medición posible.** El primer
+intento buscaba los píxeles más oscuros del renglón y daba 1,00:1 en sitios
+donde el texto es tinta plena sobre papel: lo más oscuro del renglón no era el
+texto del menú, eran las letras de la página que se ven **a través** del
+cristal. Solo apagando los glifos y comparando se separan las dos cosas.
+
 Mide renglón a renglón, no la caja del bloque, y descarta el texto que existe
 solo para el lector de pantalla: WCAG pide contraste a la «presentación visual
 del texto», y eso no lo es.
@@ -307,6 +326,54 @@ solo llegaba como dependencia transitiva de Astro, que es como no tenerlo.
 
 Están discutidas y resueltas. No hace falta volver sobre ellas salvo que Emi
 pida lo contrario.
+
+- **El menú vive detrás de la firma, y la firma dejó de llevar a la portada.**
+  Decisión de Emi, 13 ago 2026, con el sitio de «analogue» de referencia. La
+  firma va centrada en la cabecera y es el tirador; las opciones que estaban
+  sueltas a la derecha bajan en un panel de cristal. Como la firma ya no es un
+  enlace, **«Inicio» es la primera opción del panel**: si no, no habría forma
+  de volver a la portada — el logo del pie tampoco enlaza.
+- **El menú va sobre `<details>`, no sobre un botón con JavaScript.** El
+  desplegable nativo abre y cierra sin una línea de script, así que el menú
+  funciona con el JavaScript apagado — comprobado con `javaScriptEnabled:
+  false`. El script solo añade lo que el elemento nativo no trae: cerrar con
+  Escape (devolviendo el foco al tirador) y cerrar al pulsar fuera. Si no llega
+  a ejecutarse no se pierde nada. La misma razón vale para la palabra
+  «MENÚ»/«CERRAR», que cambia con el selector `[open]` y no con script.
+- **Debajo de la firma va la palabra «MENÚ», y no es decoración.** Con la firma
+  sola, el sitio se queda **sin ninguna navegación visible**: nada indica que
+  se abra. El sistema prohíbe iconos, así que la pista solo puede ser texto. Es
+  lo que en la referencia hacen las dos etiquetas que flanquean el logotipo.
+  Sube la cabecera a 90 px, y por eso el hueco del contenido pasó de 72 a 96 —
+  al siguiente valor de la rejilla de 8, que 90 se saldría.
+- **El panel es de cristal pero con mucho más papel que el fondo del
+  contrabajo: 90 %, no 50 %.** Encima va texto que tiene que leerse pase lo que
+  pase por detrás, y por detrás pasa la página entera al scrollear — en el peor
+  caso, el bloque negro del cierre. Medido sobre los píxeles ya pintados: al
+  86 % el peor renglón caía a **4,34:1**, por debajo de AA. Al 90 %, con la
+  tinta secundaria subida al 80 % dentro del panel, el peor caso es 5,24:1.
+  **Bajar el velo se paga en contraste; el desenfoque no.** Cualquier cambio en
+  `--menu-veil` se vuelve a medir con `npm run audit:menu`.
+- **La tinta secundaria del panel es otra, `--ink-soft-glass`.** El 58 % de
+  siempre está calibrado contra el papel liso y sobre el cristal no llega a AA.
+  Vale solo dentro del panel. El conmutador de idioma lo hereda por
+  `--lang-soft`, una variable que `LangSwitch` lee con la de siempre como
+  respaldo: así el pie, que usa el mismo componente sobre papel, no se entera.
+- **El panel tiene esquinas rectas, y la referencia no.** El vídeo que pasó Emi
+  es todo cápsulas redondeadas y sombras suaves; el sistema dice «Radios: cero.
+  Sombras: cero». Se tomó el **comportamiento** —firma centrada, desplegable de
+  cristal— y se dejó la forma en el idioma del sitio. Si Emi prefiere las
+  esquinas de la referencia, es una enmienda al sistema con fecha, no un
+  retoque suelto: el radio tendría que entrar como token y aplicarse a todo.
+- **La apertura del menú no cuenta contra el tope de animaciones.** Es
+  respuesta a una acción, de la misma familia que un `hover`, no movimiento
+  ambiental — el mismo criterio que el acuse de recibo del formulario. Las
+  cuatro de la Home siguen siendo la entrada, las frases-ancla, el fondo y la
+  lámina.
+- **El `backdrop-filter` del panel sí se puede permitir.** El que hundía la
+  Home de 60 a 20 fps era a pantalla completa y se recalculaba en cada
+  fotograma, porque la máscara del revelado cambiaba con el scroll. Este es un
+  panel pequeño, quieto, y solo existe mientras el menú está abierto.
 
 - **Astro estático, sin framework de UI.** El sitio es de lectura: cero
   JavaScript por defecto. Si algún día hay zona de miembros o pagos, se

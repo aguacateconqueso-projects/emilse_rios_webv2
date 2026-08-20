@@ -9,7 +9,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "audit": "node scripts/audit.mjs"
+    "audit": "node scripts/audit.mjs",
+    "audit:menu": "node scripts/audit-menu.mjs"
   },
   "dependencies": {
     "astro": "^7.2.0"
