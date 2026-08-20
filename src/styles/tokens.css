@@ -84,15 +84,29 @@
      1200 px lo que hace falta es apenas un velo. */
   --glass-blur: 1px;
 
-  /* --- Cristal del menú -------------------------------------------------
-     El panel que baja de la firma. Lleva mucho más papel que el cristal del
-     fondo porque encima va texto que tiene que leerse pase lo que pase por
-     detrás. El mando real es el velo: al 86 % el peor caso caía a 4,34:1.
-     Bajarlo se paga en contraste; el desenfoque, en cambio, puede subir sin
-     coste de legibilidad. Cualquier cambio acá se vuelve a medir con
-     `scripts/audit-menu.mjs`. */
-  --menu-veil: 90%;
-  --menu-blur: 12px;
+  /* --- Cristal del menú --------------------------------------------------
+     La cápsula que flota en la cabecera. Es el único sitio del sitio que
+     filtra lo que tiene detrás, a propósito: dos `backdrop-filter` anidados
+     repintaban de negro el marco superior.
+
+     `--menu-veil` es el mando del contraste, no el del gusto. Por detrás de la
+     cápsula pasa la página entera al scrollear, y el peor caso es el bloque
+     negro del cierre. Está en el valor MÁS BAJO —el más transparente— que
+     aguanta WCAG AA ahí: bajarlo tira el contraste del texto. El desenfoque,
+     en cambio, se puede subir sin coste. Cualquier cambio acá se vuelve a
+     medir con `npm run audit:menu`, que falla si algo baja de 4,5:1. */
+  --menu-width: 24rem; /* 384 px */
+  --menu-veil: 70%;
+  --menu-blur: 24px;
+  --menu-duration: 0.34s;
+
+  /* Enmienda del 13 ago 2026 — ver progreso.md. El sistema dice «Radios: cero.
+     Sombras: cero», y estos dos valores son la excepción, pedida por Emi con
+     el sitio de referencia delante. Valen SOLO para la cápsula del menú, que
+     es un objeto flotante y no una división de la página; el resto del sitio
+     sigue a escuadra y sin sombras. */
+  --menu-radius: 1.5rem; /* 24 px */
+  --menu-shadow: 0 0.5rem 2rem rgba(13, 13, 13, 0.1);
 
   /* --- 04 · Formas y movimiento ----------------------------------------- */
   --radius: 0; /* Cero. Ninguna esquina redondeada. */

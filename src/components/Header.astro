@@ -1,17 +1,29 @@
 ---
 /**
- * Cabecera — la firma centrada, y el menú detrás de ella.
+ * Cabecera — una cápsula de cristal flotando sobre la página.
  *
- * El logo dejó de ser un enlace a la portada y pasó a ser el tirador del menú:
- * al pulsarlo baja un panel de cristal con las opciones que antes estaban
- * sueltas a la derecha. «Inicio» es ahora la primera opción del panel, para
- * que no se pierda el camino a la portada.
+ * Copia el comportamiento del sitio de referencia que pasó Emi: la firma
+ * centrada dentro de una cápsula translúcida que, al pulsarla, crece hacia
+ * abajo y descubre el menú. Las opciones que antes estaban sueltas a la
+ * derecha viven dentro; «Inicio» es la primera, porque la firma dejó de ser
+ * enlace y el logo del pie tampoco lo es.
  *
- * Va sobre `<details>` a propósito, no sobre un botón con JavaScript: el
- * desplegable nativo abre y cierra sin una línea de script, así que el menú
- * funciona igual con el JavaScript apagado. El script que hay debajo solo
- * añade lo que el elemento nativo no trae —cerrar con Escape y al pulsar
- * fuera— y el menú sigue completo si no llega a ejecutarse.
+ * **La cabecera ya no es una barra.** No tiene fondo, ni regla, ni filtro
+ * propio: es solo un contenedor fijo, transparente y sin capturar el ratón,
+ * que coloca la cápsula. El cristal está únicamente en la cápsula. Eso no es
+ * estética: la barra tenía su propio `backdrop-filter` y el panel otro dentro,
+ * y un `backdrop-filter` anidado dentro de otro es justo lo que repintaba de
+ * negro el marco superior. Encima, la barra muestreaba la entrada —un panel
+ * negro a pantalla completa, `z-index: 200`— mientras se desvanecía. Sin
+ * barra no hay ninguna de las dos cosas.
+ *
+ * Abre y cierra con animación en los dos sentidos. Eso pide JavaScript: el
+ * `<details>` nativo quita su contenido de golpe y no hay salida que animar.
+ * El truco es no dejarle cerrar todavía —`preventDefault()`—, animar, y poner
+ * `open = false` cuando la transición termina. Por eso el elemento se marca
+ * con `data-js` desde el propio script: sin él, el CSS deja el menú abierto en
+ * cuanto `<details>` lo está, y todo sigue funcionando sin una línea de
+ * script, solo que sin animación.
  */
 import { type Lang, type Route, useTranslations, routePath } from '../i18n/ui';
 import LangSwitch from './LangSwitch.astro';
@@ -29,12 +41,18 @@ const t = useTranslations(lang);
 <header class="header">
   <details class="menu" data-menu>
     <summary class="menu__trigger" title={t('nav.menu')}>
+      {/*
+        Hueco. La cápsula es una rejilla de tres columnas con las dos de fuera
+        iguales, y esto ocupa la primera: así la firma queda centrada de verdad
+        aunque solo haya etiqueta a un lado. */}
+      <span aria-hidden="true"></span>
+
       <Logo name={t('site.name')} />
 
       {/*
-        La firma sola no dice que se abra. Sin esta palabra el sitio se queda
-        sin ninguna navegación visible, y el sistema prohíbe iconos, así que la
-        pista es texto. Cambia sola con `[open]`, sin JavaScript.
+        La firma sola no dice que se abra, y el sistema prohíbe iconos, así que
+        la pista es texto. Es lo que en la referencia hacen las etiquetas que
+        flanquean el logotipo.
       */}
       <span class="mono menu__hint" aria-hidden="true">
         <span class="menu__hint--open">{t('nav.menu')}</span>
@@ -46,97 +64,167 @@ const t = useTranslations(lang);
       <span class="visually-hidden">{t('nav.menu')}</span>
     </summary>
 
-    <div class="menu__panel">
-      <nav class="menu__nav mono" aria-label={t('site.title')}>
-        <a
-          class="menu__item"
-          href={routePath('home', lang)}
-          aria-current={route === 'home' ? 'page' : undefined}>{t('nav.start')}</a
-        >
-        <a
-          class="menu__item"
-          href={routePath('about', lang)}
-          aria-current={route === 'about' ? 'page' : undefined}>{t('nav.about')}</a
-        >
-        {/*
-          «Aula Virtual» sigue apagada: está en el menú pero no lleva a ninguna
-          parte, y se dice en vez de fingir que existe.
-        */}
-        <span class="menu__item menu__item--muted" aria-disabled="true" title={t('nav.aulaSoon')}>
-          {t('nav.aula')}
-        </span>
-        <div class="menu__item menu__item--lang">
-          <LangSwitch lang={lang} hrefEs={routePath(route, 'es')} hrefEn={routePath(route, 'en')} />
-        </div>
-      </nav>
+    {/*
+      Dos capas para poder animar el alto sin saberlo de antemano: la de fuera
+      va de `0fr` a `1fr` en una rejilla, la de dentro recorta. Es la única
+      forma de llevar un alto automático a cero con transición.
+    */}
+    <div class="menu__wrap">
+      <div class="menu__clip">
+        <nav class="menu__nav mono" aria-label={t('site.title')}>
+          <a
+            class="menu__item"
+            href={routePath('home', lang)}
+            aria-current={route === 'home' ? 'page' : undefined}>{t('nav.start')}</a
+          >
+          <a
+            class="menu__item"
+            href={routePath('about', lang)}
+            aria-current={route === 'about' ? 'page' : undefined}>{t('nav.about')}</a
+          >
+          {/*
+            «Aula Virtual» sigue apagada: está en el menú pero no lleva a
+            ninguna parte, y se dice en vez de fingir que existe.
+          */}
+          <span class="menu__item menu__item--muted" aria-disabled="true" title={t('nav.aulaSoon')}>
+            {t('nav.aula')}
+          </span>
+          <div class="menu__item menu__item--lang">
+            <LangSwitch
+              lang={lang}
+              hrefEs={routePath(route, 'es')}
+              hrefEn={routePath(route, 'en')}
+            />
+          </div>
+        </nav>
+      </div>
     </div>
   </details>
-
-  <div class="header__rule"></div>
 </header>
 
 <script>
-  /*
-    Solo los remates. Abrir y cerrar lo hace `<details>` por su cuenta, así que
-    si esto no se ejecuta el menú sigue funcionando entero.
-  */
   const menu = document.querySelector<HTMLDetailsElement>('[data-menu]');
+  const tirador = menu?.querySelector<HTMLElement>('summary');
+  const capa = menu?.querySelector<HTMLElement>('.menu__wrap');
 
-  if (menu) {
+  if (menu && tirador && capa) {
+    /*
+      Desde acá manda la clase, no el atributo `open`. Marcarlo con script y no
+      en el HTML es lo que hace que sin JavaScript el menú siga abriéndose:
+      entonces este atributo no existe y el CSS se queda con la regla de
+      `[open]`, sin animación pero entero.
+    */
+    menu.dataset.js = '';
+
+    const quieto = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    /** Cierra dejando correr la animación; sin ella, de una vez. */
+    const cerrar = () => {
+      if (!menu.open || !menu.classList.contains('is-open')) return;
+      menu.classList.remove('is-open');
+
+      if (quieto.matches) {
+        menu.open = false;
+        return;
+      }
+      /*
+        `transitionend` puede no llegar (pestaña de fondo): con red de
+        seguridad. Y hay que mirar QUÉ terminó: estos eventos burbujean, así
+        que el fundido del contenido —0,14 s, más corto que el alto— llegaba
+        acá y cerraba de golpe a mitad de la animación.
+      */
+      let hecho = false;
+      const rematar = () => {
+        if (hecho) return;
+        hecho = true;
+        capa.removeEventListener('transitionend', alTerminar);
+        menu.open = false;
+      };
+      const alTerminar = (event: TransitionEvent) => {
+        if (event.target !== capa || event.propertyName !== 'grid-template-rows') return;
+        rematar();
+      };
+      capa.addEventListener('transitionend', alTerminar);
+      window.setTimeout(rematar, 800);
+    };
+
+    const abrir = () => {
+      menu.open = true;
+      /* Un fotograma de margen: si no, el navegador no ve el cambio y no anima. */
+      requestAnimationFrame(() => menu.classList.add('is-open'));
+    };
+
+    tirador.addEventListener('click', (event) => {
+      event.preventDefault(); /* el estado lo llevamos nosotros */
+      if (menu.open) cerrar();
+      else abrir();
+    });
+
     document.addEventListener('keydown', (event) => {
       if (event.key !== 'Escape' || !menu.open) return;
-      menu.open = false;
+      cerrar();
       /* El foco vuelve al tirador: si no, se queda en el aire. */
-      menu.querySelector<HTMLElement>('summary')?.focus();
+      tirador.focus();
     });
 
     document.addEventListener('pointerdown', (event) => {
-      if (!menu.open) return;
-      if (!menu.contains(event.target as Node)) menu.open = false;
+      if (menu.open && !menu.contains(event.target as Node)) cerrar();
     });
   }
 </script>
 
 <style>
+  /* --- La cabecera: solo coloca -------------------------------------------
+     Sin fondo, sin regla y sin filtro. Y sin capturar el ratón, que si no una
+     banda invisible de lado a lado se comería los clics de la página. */
   .header {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 50;
-    background: color-mix(in srgb, var(--paper) 94%, transparent);
-    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    padding: var(--space-2);
+    pointer-events: none;
   }
 
-  /* --- El tirador: la firma, centrada -------------------------------------
-     El `<details>` no maqueta nada; solo agrupa. Lo que se centra es el
-     tirador, y el panel cuelga de la cabecera, no de aquí. */
+  /* --- La cápsula de cristal ----------------------------------------------
+     Acá está todo el efecto, y es lo único que filtra en toda la cabecera.
+     El velo lo manda `--menu-veil`: es el mando del contraste, y está en el
+     valor más bajo que aguanta AA con el bloque negro del cierre por detrás.
+     Cualquier cambio se vuelve a medir con `npm run audit:menu`.
+
+     Sin prefijos `-webkit-` escritos a mano: los pone el minificador. */
   .menu {
-    padding: var(--space-2) var(--space-3);
+    pointer-events: auto;
+    width: min(100% - var(--space-2), var(--menu-width));
+    border-radius: var(--menu-radius);
+    background: color-mix(in srgb, var(--paper) var(--menu-veil), transparent);
+    backdrop-filter: blur(var(--menu-blur)) saturate(1.6);
+    box-shadow: var(--menu-shadow);
+    /* Para que el contenido no se salga por las esquinas redondeadas. */
+    overflow: hidden;
   }
 
+  /* Píldora ancha y fina, como la de la referencia: la firma en el centro y la
+     etiqueta a un lado. Las dos columnas de fuera miden lo mismo, y por eso la
+     firma cae en el centro exacto de la cápsula y no desplazada. */
   .menu__trigger {
     /* Sin el triángulo del desplegable nativo: la firma es el tirador. */
     list-style: none;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    gap: var(--space-1);
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
     cursor: pointer;
-    --logo-height: 32px;
+    --logo-height: 28px;
   }
 
   .menu__hint {
-    color: var(--ink-soft);
-  }
-
-  .menu__hint--close,
-  .menu[open] .menu__hint--open {
-    display: none;
-  }
-
-  .menu[open] .menu__hint--close {
-    display: inline;
+    justify-self: end;
+    white-space: nowrap;
   }
 
   .menu__trigger::-webkit-details-marker {
@@ -149,43 +237,91 @@ const t = useTranslations(lang);
 
   .menu__trigger:focus-visible {
     outline: 2px solid var(--ink);
-    outline-offset: 4px;
+    outline-offset: -4px;
   }
 
-  /* --- El panel de cristal -------------------------------------------------
-     Cuelga de la cabecera y va en posición absoluta, no en el flujo: así la
-     barra no crece al abrirse y el panel flota sobre la página.
-
-     El cristal es el mismo del fondo del contrabajo — papel translúcido más
-     desenfoque— pero acá sí se pone con `backdrop-filter`, y se puede: debajo
-     hay contenido de verdad que tiene que verse pasar, el panel es pequeño y
-     no cambia en cada fotograma. Lo que hundía la Home a 20 fps era un
-     `backdrop-filter` a pantalla completa recalculándose con el scroll.
-
-     Sin prefijos `-webkit-` escritos a mano: los pone el minificador. Ver
-     `progreso.md`. */
-  .menu__panel {
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(100vw - var(--space-4), 22rem); /* 352 px */
-    background: color-mix(in srgb, var(--paper) var(--menu-veil), transparent);
-    backdrop-filter: blur(var(--menu-blur)) saturate(1.4);
-    /* La tinta secundaria de dentro del panel se sube: sobre el cristal, el
-       58 % de siempre no llega a AA. Lo hereda también el conmutador de
-       idioma, que lee esta variable. */
-    --lang-soft: var(--ink-soft-glass);
-    border: 1px solid var(--rule);
-    border-top: 0;
+  .menu__hint,
+  .menu__hint span {
+    color: var(--ink-soft-glass);
   }
 
+  /* --- Crecer y encogerse --------------------------------------------------
+     `grid-template-rows` de `0fr` a `1fr` es lo que permite animar un alto que
+     no se conoce. La capa de dentro recorta mientras tanto.
+
+     Sin JavaScript no hay `data-js`, y entonces manda la primera regla: con
+     `<details>` abierto el menú está a la vista, sin animación. */
+  .menu__wrap {
+    display: grid;
+    grid-template-rows: 1fr;
+  }
+
+  .menu__clip {
+    overflow: hidden;
+  }
+
+  .menu[data-js] .menu__wrap {
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--menu-duration) var(--ease-panel);
+  }
+
+  .menu[data-js].is-open .menu__wrap {
+    grid-template-rows: 1fr;
+  }
+
+  /* El contenido entra un pelo después del alto, y se va antes: así no se ve
+     el texto apretándose contra el borde mientras la cápsula se cierra. */
+  .menu[data-js] .menu__nav {
+    opacity: 0;
+    transition: opacity 0.14s ease;
+  }
+
+  .menu[data-js].is-open .menu__nav {
+    opacity: 1;
+    transition-duration: 0.2s;
+    transition-delay: 0.08s;
+  }
+
+  /* La palabra del tirador. Sin JavaScript la manda `[open]`; con él, la clase,
+     para que cambie a la vez que la animación y no antes. */
+  .menu__hint--close {
+    display: none;
+  }
+
+  .menu[open] .menu__hint--open {
+    display: none;
+  }
+
+  .menu[open] .menu__hint--close {
+    display: inline;
+  }
+
+  .menu[data-js][open] .menu__hint--open {
+    display: inline;
+  }
+
+  .menu[data-js][open] .menu__hint--close {
+    display: none;
+  }
+
+  .menu[data-js].is-open .menu__hint--open {
+    display: none;
+  }
+
+  .menu[data-js].is-open .menu__hint--close {
+    display: inline;
+  }
+
+  /* --- Las opciones --------------------------------------------------------
+     Todas en tinta plena. La página actual se marca con un fondo apenas
+     insinuado, no aclarando el texto: sobre cristal, aclarar es justo lo que
+     tira el contraste al suelo. */
   .menu__nav {
     display: flex;
     flex-direction: column;
+    border-top: 1px solid var(--rule);
   }
 
-  /* Cada opción es una franja con su regla de 1 px. La última no la lleva. */
   .menu__item {
     padding: var(--space-2) var(--space-3);
     border-bottom: 1px solid var(--rule);
@@ -198,11 +334,11 @@ const t = useTranslations(lang);
   }
 
   a.menu__item:hover {
-    background: color-mix(in srgb, var(--ink) 5%, transparent);
+    background: color-mix(in srgb, var(--ink) 6%, transparent);
   }
 
   a.menu__item[aria-current='page'] {
-    color: var(--ink-soft-glass);
+    background: color-mix(in srgb, var(--ink) 4%, transparent);
   }
 
   .menu__item--muted {
@@ -213,33 +349,16 @@ const t = useTranslations(lang);
   .menu__item--lang {
     display: flex;
     justify-content: center;
+    /* La tinta secundaria del conmutador se sube: sobre cristal, la de siempre
+       no llega a AA. `LangSwitch` lee esta variable y si no está usa la suya. */
+    --lang-soft: var(--ink-soft-glass);
   }
 
-  /* --- La apertura ---------------------------------------------------------
-     Un fundido corto con un palmo de recorrido. No cuenta contra el tope de
-     animaciones de la Home: es respuesta a una acción, de la misma familia que
-     un `hover`, no movimiento ambiental — el mismo criterio que el acuse de
-     recibo del formulario. Ver `progreso.md`. */
-  @media (prefers-reduced-motion: no-preference) {
-    .menu[open] .menu__panel {
-      animation: menu-drop 0.22s var(--ease-reveal) both;
+  @media (prefers-reduced-motion: reduce) {
+    .menu[data-js] .menu__wrap,
+    .menu[data-js] .menu__nav {
+      transition: none;
     }
-  }
-
-  @keyframes menu-drop {
-    from {
-      opacity: 0;
-      transform: translate(-50%, calc(var(--space-1) * -1));
-    }
-    to {
-      opacity: 1;
-      transform: translate(-50%, 0);
-    }
-  }
-
-  .header__rule {
-    height: 1px;
-    background: var(--rule);
   }
 
   @media (max-width: 36rem) {
