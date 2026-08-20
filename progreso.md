@@ -4,7 +4,7 @@ Sitio de **Emilse Ríos**, contrabajista y docente, y de su newsletter.
 Este documento es la memoria del proyecto: quien lo lea de cero debería poder
 seguir trabajando sin preguntar nada.
 
-**Última actualización:** 13 de agosto de 2026 · el menú, en una cápsula de cristal
+**Última actualización:** 20 de agosto de 2026 · el menú, en una cápsula de cristal
 
 ---
 
@@ -110,7 +110,7 @@ El sistema es de Emi y se puede cambiar. Lo que no se puede es cambiarlo sin
 dejar constancia, porque si no la tabla de arriba deja de ser fiable. Hasta hoy
 se ha tocado cinco veces:
 
-- **13 ago 2026 · La cápsula del menú lleva esquinas redondeadas y sombra.**
+- **20 ago 2026 · La cápsula del menú lleva esquinas redondeadas y sombra.**
   Las dos cosas están prohibidas en la tabla —«Radios: cero. Sombras: cero»— y
   las dos las pidió Emi con el sitio de referencia delante, después de ver una
   primera versión a escuadra. Valen **solo para la cápsula del menú**, que es
@@ -119,7 +119,7 @@ se ha tocado cinco veces:
   como `--menu-radius` y `--menu-shadow`, separadas de `--radius` y `--shadow`,
   que siguen valiendo cero. Si alguna vez se quiere redondear algo más, es otra
   enmienda: estos dos tokens no son un permiso general.
-- **13 ago 2026 · La apertura del menú no cuenta contra el tope de
+- **20 ago 2026 · La apertura del menú no cuenta contra el tope de
   animaciones.** Es respuesta a una acción, de la misma familia que un `hover`,
   no movimiento ambiental — el mismo criterio que ya se aplicó al acuse de
   recibo del formulario. Las cuatro de la Home siguen siendo la entrada, las
@@ -365,7 +365,7 @@ Están discutidas y resueltas. No hace falta volver sobre ellas salvo que Emi
 pida lo contrario.
 
 - **El menú vive en una cápsula de cristal, y la firma dejó de llevar a la
-  portada.** Decisión de Emi, 13 ago 2026, con el sitio de «analogue» de
+  portada.** Decisión de Emi, 20 ago 2026, con el sitio de «analogue» de
   referencia. La primera versión fue una barra a lo ancho con panel cuadrado, y
   Emi la devolvió: quería la cápsula flotante de la referencia, cristal de
   verdad y animación en los dos sentidos. Como la firma ya no es un enlace,
@@ -377,10 +377,13 @@ pida lo contrario.
   conocida de artefactos de composición; y encima la barra muestreaba la
   entrada, un panel negro a pantalla completa con `z-index: 200`, mientras se
   desvanecía. Ahora la cabecera no tiene fondo, ni regla, ni filtro: solo
-  coloca la cápsula, que es lo único que filtra en todo el sitio. **No pude
-  reproducirlo yo** —es un artefacto de GPU y en un navegador sin pantalla no
-  aparece—, así que esto quita las dos causas probables, no una confirmada.
-  Conviene que Emi lo mire otra vez en su máquina.
+  coloca la cápsula, que es lo único que filtra en todo el sitio. **Emi
+  confirmó el 20 ago 2026 que ya no se ve.** No llegó a reproducirse acá —es un
+  artefacto de composición de la GPU y en un navegador sin pantalla no
+  aparece—, así que la comprobación tuvo que hacerla ella en su máquina: de las
+  dos causas probables no se supo nunca cuál era, solo que quitándolas las dos
+  se acabó. Si alguna vez vuelve, el sitio donde mirar es el `backdrop-filter`
+  de la cápsula contra la animación de entrada.
 - **La cabecera no captura el ratón.** Sigue siendo una banda fija de lado a
   lado, pero transparente: sin `pointer-events: none` se comería los clics de
   toda la franja superior de la página. El `auto` se devuelve en la cápsula.
@@ -641,18 +644,6 @@ pida lo contrario.
 - [ ] **Conectar el dominio `contrabajoenlaciudad.com`.** El `site` de
       `astro.config.mjs` ya apunta ahí, así que las direcciones absolutas del
       HTML son las definitivas aunque todavía se vea en la URL de Vercel.
-
-### Por confirmar
-
-- [ ] **Que el marco superior ya no se repinte de negro.** Emi lo vio en su
-      máquina con la primera versión del menú. Había dos causas probables y las
-      dos se quitaron en el #15 —dos `backdrop-filter` anidados, y la barra
-      muestreando la entrada negra mientras se desvanecía—, pero **no llegó a
-      reproducirse aquí**: es un artefacto de composición de la GPU y en un
-      navegador sin pantalla no aparece. O sea que están quitadas las causas
-      probables, no una causa confirmada. Si vuelve a verse, el siguiente sitio
-      donde mirar es el `backdrop-filter` de la cápsula contra la animación de
-      entrada.
 
 ### Contenido que falta (de Emi)
 
