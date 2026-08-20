@@ -4,7 +4,7 @@ Sitio de **Emilse Ríos**, contrabajista y docente, y de su newsletter.
 Este documento es la memoria del proyecto: quien lo lea de cero debería poder
 seguir trabajando sin preguntar nada.
 
-**Última actualización:** 13 de agosto de 2026 · el menú, detrás de la firma
+**Última actualización:** 13 de agosto de 2026 · el menú, en una cápsula de cristal
 
 ---
 
@@ -20,11 +20,13 @@ seguir trabajando sin preguntar nada.
 
 Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/`
 
-Lo último que se tocó fue **el menú**. La firma de Emi va centrada en la
-cabecera y es el tirador: al pulsarla baja un panel de cristal con Inicio,
-Sobre mí, Aula Virtual y el conmutador de idioma, que antes estaban sueltos a
-la derecha. Debajo de la firma va la palabra «MENÚ» —«CERRAR» con el panel
-abierto— porque si no, el sitio se queda sin navegación visible.
+Lo último que se tocó fue **el menú**. La cabecera dejó de ser una barra: ahora
+es una cápsula de cristal que flota sobre la página, con la firma de Emi en el
+centro y la palabra «MENÚ» al lado. Al pulsarla crece hacia abajo y descubre
+Inicio, Sobre mí, Aula Virtual y el conmutador de idioma, que antes estaban
+sueltos a la derecha. Copia el comportamiento del sitio que Emi pasó de
+referencia, y trajo dos enmiendas al sistema —radio y sombra, solo para esta
+cápsula— anotadas más abajo.
 
 Antes de eso, la lámina volvió a ser horizontal con un recorte de Emi, antes la
 portada centrada, y antes el fondo del contrabajo (PRs #4 a #7), cerrado y
@@ -92,7 +94,24 @@ componentes**: si hace falta uno nuevo, se añade como token.
 
 El sistema es de Emi y se puede cambiar. Lo que no se puede es cambiarlo sin
 dejar constancia, porque si no la tabla de arriba deja de ser fiable. Hasta hoy
-se ha tocado tres veces:
+se ha tocado cinco veces:
+
+- **13 ago 2026 · La cápsula del menú lleva esquinas redondeadas y sombra.**
+  Las dos cosas están prohibidas en la tabla —«Radios: cero. Sombras: cero»— y
+  las dos las pidió Emi con el sitio de referencia delante, después de ver una
+  primera versión a escuadra. Valen **solo para la cápsula del menú**, que es
+  un objeto que flota sobre la página y no una división de la página: por eso
+  no arrastran al resto del sitio, que sigue a escuadra y sin sombras. Están
+  como `--menu-radius` y `--menu-shadow`, separadas de `--radius` y `--shadow`,
+  que siguen valiendo cero. Si alguna vez se quiere redondear algo más, es otra
+  enmienda: estos dos tokens no son un permiso general.
+- **13 ago 2026 · La apertura del menú no cuenta contra el tope de
+  animaciones.** Es respuesta a una acción, de la misma familia que un `hover`,
+  no movimiento ambiental — el mismo criterio que ya se aplicó al acuse de
+  recibo del formulario. Las cuatro de la Home siguen siendo la entrada, las
+  frases-ancla, el fondo del contrabajo y la lámina.
+
+Y antes:
 
 - **12 ago 2026 · El tope de la Home sube a cuatro animaciones.** Lo pide el
   revelado de la lámina. Las cuatro son ahora: la entrada, las frases-ancla, el
@@ -304,8 +323,12 @@ cuatro renglones sobre los tres fondos que existen: el bloque negro del cierre
 —el peor caso—, una fotografía y papel liso.
 
 ```
-peor caso de todos .......................... 5,24:1 ✓   (el cierre en negro)
+peor caso de todos .......................... 4,83:1 ✓   (el cierre en negro)
 ```
+
+Sirve además para **elegir el velo**: con `VELO=66% npm run audit:menu` se mide
+sin tocar el token. Así se encontró el suelo, entre 62 % (4,37:1, por debajo de
+AA) y 66 % (4,66:1).
 
 **Sin el método de las dos capturas no hay medición posible.** El primer
 intento buscaba los píxeles más oscuros del renglón y daba 1,00:1 en sitios
@@ -327,53 +350,61 @@ solo llegaba como dependencia transitiva de Astro, que es como no tenerlo.
 Están discutidas y resueltas. No hace falta volver sobre ellas salvo que Emi
 pida lo contrario.
 
-- **El menú vive detrás de la firma, y la firma dejó de llevar a la portada.**
-  Decisión de Emi, 13 ago 2026, con el sitio de «analogue» de referencia. La
-  firma va centrada en la cabecera y es el tirador; las opciones que estaban
-  sueltas a la derecha bajan en un panel de cristal. Como la firma ya no es un
-  enlace, **«Inicio» es la primera opción del panel**: si no, no habría forma
-  de volver a la portada — el logo del pie tampoco enlaza.
-- **El menú va sobre `<details>`, no sobre un botón con JavaScript.** El
-  desplegable nativo abre y cierra sin una línea de script, así que el menú
-  funciona con el JavaScript apagado — comprobado con `javaScriptEnabled:
-  false`. El script solo añade lo que el elemento nativo no trae: cerrar con
-  Escape (devolviendo el foco al tirador) y cerrar al pulsar fuera. Si no llega
-  a ejecutarse no se pierde nada. La misma razón vale para la palabra
-  «MENÚ»/«CERRAR», que cambia con el selector `[open]` y no con script.
-- **Debajo de la firma va la palabra «MENÚ», y no es decoración.** Con la firma
-  sola, el sitio se queda **sin ninguna navegación visible**: nada indica que
-  se abra. El sistema prohíbe iconos, así que la pista solo puede ser texto. Es
-  lo que en la referencia hacen las dos etiquetas que flanquean el logotipo.
-  Sube la cabecera a 90 px, y por eso el hueco del contenido pasó de 72 a 96 —
-  al siguiente valor de la rejilla de 8, que 90 se saldría.
-- **El panel es de cristal pero con mucho más papel que el fondo del
-  contrabajo: 90 %, no 50 %.** Encima va texto que tiene que leerse pase lo que
-  pase por detrás, y por detrás pasa la página entera al scrollear — en el peor
-  caso, el bloque negro del cierre. Medido sobre los píxeles ya pintados: al
-  86 % el peor renglón caía a **4,34:1**, por debajo de AA. Al 90 %, con la
-  tinta secundaria subida al 80 % dentro del panel, el peor caso es 5,24:1.
-  **Bajar el velo se paga en contraste; el desenfoque no.** Cualquier cambio en
-  `--menu-veil` se vuelve a medir con `npm run audit:menu`.
+- **El menú vive en una cápsula de cristal, y la firma dejó de llevar a la
+  portada.** Decisión de Emi, 13 ago 2026, con el sitio de «analogue» de
+  referencia. La primera versión fue una barra a lo ancho con panel cuadrado, y
+  Emi la devolvió: quería la cápsula flotante de la referencia, cristal de
+  verdad y animación en los dos sentidos. Como la firma ya no es un enlace,
+  **«Inicio» es la primera opción del panel**: si no, no habría forma de volver
+  a la portada — el logo del pie tampoco enlaza.
+- **La cabecera ya no es una barra, y eso arregla el marco negro.** Emi vio que
+  «a veces se repasa de negro el marco superior». Había dos `backdrop-filter`
+  anidados —uno en la barra, otro en el panel de dentro—, que es una receta
+  conocida de artefactos de composición; y encima la barra muestreaba la
+  entrada, un panel negro a pantalla completa con `z-index: 200`, mientras se
+  desvanecía. Ahora la cabecera no tiene fondo, ni regla, ni filtro: solo
+  coloca la cápsula, que es lo único que filtra en todo el sitio. **No pude
+  reproducirlo yo** —es un artefacto de GPU y en un navegador sin pantalla no
+  aparece—, así que esto quita las dos causas probables, no una confirmada.
+  Conviene que Emi lo mire otra vez en su máquina.
+- **La cabecera no captura el ratón.** Sigue siendo una banda fija de lado a
+  lado, pero transparente: sin `pointer-events: none` se comería los clics de
+  toda la franja superior de la página. El `auto` se devuelve en la cápsula.
+- **El velo del cristal se eligió midiendo, no a ojo.** Emi pidió que se viera
+  transparente. Se barrió el valor con `npm run audit:menu` y el suelo está
+  entre 62 % —4,37:1, por debajo de AA— y 66 % —4,66:1—. Quedó en **70 %**
+  (4,83:1 en el peor caso), que deja margen sin ser opaco. Se pudo bajar tanto
+  desde el 90 % de la primera versión porque **las opciones pasaron a tinta
+  plena**: la página actual ya no se marca aclarando la letra, que es justo lo
+  que hundía el contraste sobre cristal, sino con un fondo apenas insinuado.
+- **Abrir y cerrar con animación pide JavaScript, pero no depende de él.** El
+  `<details>` nativo quita su contenido de golpe: no hay salida que animar. El
+  truco es interceptar el clic, no dejarle cerrar, animar, y poner
+  `open = false` al terminar la transición. Para que eso no rompa el caso sin
+  script, el elemento se marca con `data-js` **desde el propio script**: si no
+  se ejecuta, esa marca no existe y el CSS se queda con la regla de `[open]`,
+  que deja el menú abierto sin animación. Comprobado con `javaScriptEnabled:
+  false`.
+- **El alto se anima con `grid-template-rows` de `0fr` a `1fr`.** Es la única
+  forma de llevar un alto automático a cero con transición sin medirlo en
+  JavaScript.
+- **`transitionend` burbujea, y eso costó el cierre.** La primera versión
+  cerraba de golpe: el fundido del contenido dura 0,14 s, menos que el alto,
+  terminaba antes, subía hasta el contenedor y disparaba el remate a mitad de
+  la animación. Hay que mirar `event.target` **y** `event.propertyName`. Con
+  red de seguridad por temporizador, porque en una pestaña de fondo el evento
+  puede no llegar nunca.
 - **La tinta secundaria del panel es otra, `--ink-soft-glass`.** El 58 % de
   siempre está calibrado contra el papel liso y sobre el cristal no llega a AA.
-  Vale solo dentro del panel. El conmutador de idioma lo hereda por
+  Vale solo dentro de la cápsula. El conmutador de idioma lo hereda por
   `--lang-soft`, una variable que `LangSwitch` lee con la de siempre como
   respaldo: así el pie, que usa el mismo componente sobre papel, no se entera.
-- **El panel tiene esquinas rectas, y la referencia no.** El vídeo que pasó Emi
-  es todo cápsulas redondeadas y sombras suaves; el sistema dice «Radios: cero.
-  Sombras: cero». Se tomó el **comportamiento** —firma centrada, desplegable de
-  cristal— y se dejó la forma en el idioma del sitio. Si Emi prefiere las
-  esquinas de la referencia, es una enmienda al sistema con fecha, no un
-  retoque suelto: el radio tendría que entrar como token y aplicarse a todo.
-- **La apertura del menú no cuenta contra el tope de animaciones.** Es
-  respuesta a una acción, de la misma familia que un `hover`, no movimiento
-  ambiental — el mismo criterio que el acuse de recibo del formulario. Las
-  cuatro de la Home siguen siendo la entrada, las frases-ancla, el fondo y la
-  lámina.
-- **El `backdrop-filter` del panel sí se puede permitir.** El que hundía la
-  Home de 60 a 20 fps era a pantalla completa y se recalculaba en cada
-  fotograma, porque la máscara del revelado cambiaba con el scroll. Este es un
-  panel pequeño, quieto, y solo existe mientras el menú está abierto.
+- **Debajo de la firma, o al lado, va la palabra «MENÚ».** Con la firma sola el
+  sitio se queda **sin ninguna navegación visible**: nada indica que se abra. El
+  sistema prohíbe iconos, así que la pista solo puede ser texto. Es lo que en la
+  referencia hacen las dos etiquetas que flanquean el logotipo. La cápsula es
+  una rejilla de tres columnas con las de fuera iguales, y por eso la firma cae
+  en el centro exacto aunque la etiqueta esté solo a un lado.
 
 - **Astro estático, sin framework de UI.** El sitio es de lectura: cero
   JavaScript por defecto. Si algún día hay zona de miembros o pagos, se

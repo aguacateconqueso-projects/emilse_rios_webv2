@@ -32,14 +32,16 @@ async function medir(nombre, prepara) {
   await p.goto('http://localhost:4321/', { waitUntil: 'networkidle' });
   await p.waitForTimeout(2600);
   await prepara(p);
+  const velo = process.env.VELO;
+  if (velo) await p.evaluate((v) => document.documentElement.style.setProperty('--menu-veil', v), velo);
   await p.locator('summary').click();
-  await p.waitForTimeout(600);
+  await p.waitForTimeout(1000);
 
   console.log(`\n── ${nombre} ──`);
   let peorGlobal = Infinity;
-  const filas = await p.locator('.menu__panel .menu__item').count();
+  const filas = await p.locator('.menu .menu__item').count();
   for (let i = 0; i < filas; i++) {
-    const fila = p.locator('.menu__panel .menu__item').nth(i);
+    const fila = p.locator('.menu .menu__item').nth(i);
     const texto = (await fila.innerText()).trim().replace(/\s+/g, ' ');
     const box = await fila.boundingBox();
     const conTexto = await p.screenshot({ clip: box });
