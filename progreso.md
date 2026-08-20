@@ -28,6 +28,11 @@ sueltos a la derecha. Copia el comportamiento del sitio que Emi pasó de
 referencia, y trajo dos enmiendas al sistema —radio y sombra, solo para esta
 cápsula— anotadas más abajo.
 
+Fueron dos PRs: el **#14** llevó la primera versión —una barra a lo ancho con
+un panel cuadrado colgando— y el **#15** la rehízo entera después de que Emi la
+devolviera por tres cosas: no se veía transparente, no tenía animación de
+entrada ni de salida, y a veces se repintaba de negro el marco superior.
+
 Antes de eso, la lámina volvió a ser horizontal con un recorte de Emi, antes la
 portada centrada, y antes el fondo del contrabajo (PRs #4 a #7), cerrado y
 aprobado; si se retoma, es solo para mover los mandos de `tokens.css` — ver la
@@ -63,6 +68,15 @@ Astro 7, estático, sin framework de UI. No hace falta adaptador para Vercel.
   #5, su contenido fue a parar a una rama muerta y nunca llegó a `main`. Hubo
   que reabrirlo como #6. Un diff un poco más largo se lee sin problema; una
   rama muerta cuesta media hora y confunde a quien mergea.
+- **Una rama con su PR ya mergeado está muerta: no se le añaden commits.** Es
+  el mismo error del #5 por otra puerta, y volvió a pasar en el #14. Emi lo
+  mergeó, luego pidió cambios, y los cambios se empujaron a *esa misma rama*.
+  El `push` funcionó, GitHub no se quejó de nada y el PR siguió mergeado y
+  cerrado: el trabajo no llegó a `main` y no se veía en ningún sitio. Lo cazó
+  Emi, no yo. **Cuando llega feedback sobre algo ya mergeado, el trabajo nuevo
+  arranca de `main` en una rama nueva y va en un PR nuevo** — así salió el #15.
+  La señal de alarma es empujar a una rama y que el PR no muestre commits
+  nuevos.
 - **Antes de abrir un PR, comprobar de qué commit sale la rama.** Si `main` se
   ha movido, traerlo primero. A mitad de esta sesión se mergeó un PR que
   reescribía `progreso.md` entero y hubo que rehacer los cambios a mano sobre
@@ -627,6 +641,18 @@ pida lo contrario.
 - [ ] **Conectar el dominio `contrabajoenlaciudad.com`.** El `site` de
       `astro.config.mjs` ya apunta ahí, así que las direcciones absolutas del
       HTML son las definitivas aunque todavía se vea en la URL de Vercel.
+
+### Por confirmar
+
+- [ ] **Que el marco superior ya no se repinte de negro.** Emi lo vio en su
+      máquina con la primera versión del menú. Había dos causas probables y las
+      dos se quitaron en el #15 —dos `backdrop-filter` anidados, y la barra
+      muestreando la entrada negra mientras se desvanecía—, pero **no llegó a
+      reproducirse aquí**: es un artefacto de composición de la GPU y en un
+      navegador sin pantalla no aparece. O sea que están quitadas las causas
+      probables, no una causa confirmada. Si vuelve a verse, el siguiente sitio
+      donde mirar es el `backdrop-filter` de la cápsula contra la animación de
+      entrada.
 
 ### Contenido que falta (de Emi)
 
