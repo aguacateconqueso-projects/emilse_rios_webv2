@@ -1,0 +1,289 @@
+---
+/**
+ * La página de venta de un producto — el paso 2 del recorrido.
+ *
+ * Es a la vez la carta y el destino del botón «Ver» del catálogo: una sola
+ * cosa con dos usos. Dentro está el botón de comprar, que es el paso 3.
+ *
+ * **Hoy el paso 4 sale del sitio.** La membresía sigue cobrando en
+ * `emilseriosacademy.com` y ahí se queda hasta el cambio de dominio, así que
+ * «Comprar» lleva a su checkout de Stripe, que funciona. Se dice en la propia
+ * página en vez de que la alumna descubra sola que cambió de dominio a mitad
+ * de una compra.
+ */
+import { type Lang, useTranslations, routePath } from '../i18n/ui';
+import type { Product } from '../data/aula';
+
+interface Props {
+  lang: Lang;
+  producto: Product;
+}
+const { lang, producto } = Astro.props;
+const t = useTranslations(lang);
+const copia = producto.copia[lang];
+const pagina = copia.pagina!;
+const comprar = producto.comprarHref?.[lang];
+const carta = producto.cartaHref?.[lang];
+/** Fuera del sitio mientras el cobro no viva acá. */
+const fuera = comprar?.startsWith('http') ?? false;
+---
+
+<article>
+  <header class="row row--wide">
+    <div class="row__num" aria-hidden="true">00</div>
+    <div class="row__body">
+      <a class="mono soft prod__back" href={routePath('aula', lang)}>{t('aula.back')}</a>
+      <h1 class="prod__title">{pagina.titulo}</h1>
+      <p class="prod__lead">{pagina.entradilla}</p>
+    </div>
+  </header>
+
+  {/* El precio y el botón, arriba y otra vez al final: quien ya está decidido
+      no debería tener que leer la carta entera para encontrar dónde pagar. */}
+  <div class="row row--wide block">
+    <div class="row__num" aria-hidden="true"></div>
+    <div class="row__body">
+      <div class="buy">
+        <p class="buy__price">
+          {copia.precio}
+          <span class="mono soft buy__per">{copia.cadencia}</span>
+        </p>
+        <div class="buy__actions">
+          {
+            comprar && (
+              <a class="mono buy__cta" href={comprar} rel={fuera ? 'noopener' : undefined}>
+                {t('aula.buy')}
+              </a>
+            )
+          }
+          {
+            carta && (
+              <a class="mono soft buy__alt" href={carta} rel="noopener">
+                {t('aula.letter')}
+              </a>
+            )
+          }
+        </div>
+        <p class="mono soft buy__note">{t('aula.buyNote')}</p>
+        {fuera && <p class="buy__away">{t('aula.leaving')}</p>}
+      </div>
+    </div>
+  </div>
+
+  {
+    pagina.bloques.map((bloque) => {
+      switch (bloque.k) {
+        case 'prose':
+          return (
+            <div class="row block">
+              <div class="row__num" aria-hidden="true">
+                {bloque.n ?? ''}
+              </div>
+              <div class="row__body prose">
+                {bloque.paras.map((para) => (
+                  <p>{para}</p>
+                ))}
+              </div>
+            </div>
+          );
+
+        case 'anchor':
+          return (
+            <div class="anchor reveal">
+              <p class="anchor__text">{bloque.text}</p>
+            </div>
+          );
+
+        case 'lista':
+          return (
+            <section class="row block">
+              <div class="row__num row__num--h2" aria-hidden="true">
+                {bloque.n}
+              </div>
+              <div class="row__body">
+                <h2 class="section-title">{bloque.titulo}</h2>
+                <ul class="items" role="list">
+                  {bloque.items.map((item) => (
+                    <li class="items__row">{item}</li>
+                  ))}
+                </ul>
+              </div>
+            </section>
+          );
+
+        case 'faq':
+          return (
+            <section class="row block">
+              <div class="row__num row__num--h2" aria-hidden="true">
+                {bloque.n}
+              </div>
+              <div class="row__body">
+                <h2 class="section-title">{bloque.titulo}</h2>
+                <dl class="faq">
+                  {bloque.items.map((item) => (
+                    <div class="faq__row">
+                      <dt class="faq__q">{item.q}</dt>
+                      <dd class="faq__a">{item.a}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            </section>
+          );
+      }
+    })
+  }
+
+  {/* El mismo botón al final, para quien llegó leyendo. */}
+  {
+    comprar && (
+      <div class="row row--wide block">
+        <div class="row__num" aria-hidden="true" />
+        <div class="row__body">
+          <div class="buy buy--foot">
+            <p class="buy__price">
+              {copia.precio}
+              <span class="mono soft buy__per">{copia.cadencia}</span>
+            </p>
+            <div class="buy__actions">
+              <a class="mono buy__cta" href={comprar} rel={fuera ? 'noopener' : undefined}>
+                {t('aula.buy')}
+              </a>
+            </div>
+            <p class="mono soft buy__note">{t('aula.buyNote')}</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+</article>
+
+<style>
+  .prod__back {
+    display: inline-block;
+    border-bottom-color: transparent;
+  }
+
+  .prod__back:hover {
+    color: var(--ink);
+    border-bottom-color: currentColor;
+  }
+
+  .prod__title {
+    margin-top: var(--space-3);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--text-hero);
+    line-height: var(--leading-hero);
+    letter-spacing: var(--tracking-hero);
+  }
+
+  .prod__lead {
+    margin-top: var(--space-3);
+    max-width: var(--measure);
+    text-wrap: pretty;
+  }
+
+  /* --- El bloque de compra -------------------------------------------------
+     Encuadrado con reglas de 1 px arriba y abajo, no con una caja gris: el
+     sistema no tiene fondos de relleno. */
+  .buy {
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--rule);
+    padding: var(--space-4) 0;
+    max-width: var(--measure);
+  }
+
+  .buy__price {
+    font-family: var(--font-display);
+    font-size: var(--text-anchor);
+    line-height: 1;
+  }
+
+  .buy__per {
+    margin-left: var(--space-1);
+    vertical-align: middle;
+  }
+
+  .buy__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+  }
+
+  /* El único botón macizo del sitio. Se lo gana: es el final del recorrido. */
+  .buy__cta {
+    display: inline-block;
+    padding: var(--space-2) var(--space-4);
+    background: var(--ink);
+    color: var(--paper);
+    border-bottom: 0;
+  }
+
+  .buy__cta:hover {
+    background: var(--ink-soft);
+  }
+
+  .buy__alt {
+    border-bottom-color: var(--rule);
+  }
+
+  .buy__alt:hover {
+    color: var(--ink);
+    border-bottom-color: currentColor;
+  }
+
+  .buy__note {
+    margin-top: var(--space-3);
+  }
+
+  .buy__away {
+    margin-top: var(--space-3);
+    font-size: var(--text-small);
+    line-height: 1.5;
+    color: var(--ink-soft);
+    text-wrap: pretty;
+  }
+
+  /* --- Listas y preguntas --------------------------------------------------- */
+  .items {
+    margin: var(--space-4) 0 0;
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .items__row {
+    border-top: 1px solid var(--rule);
+    padding: var(--space-3) 0;
+    font-size: clamp(1.0625rem, 2vw, 1.25rem);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  .faq {
+    margin: var(--space-4) 0 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .faq__row {
+    border-top: 1px solid var(--rule);
+    padding: var(--space-3) 0;
+  }
+
+  .faq__q {
+    font-family: var(--font-display);
+    font-size: 1.25rem; /* 20 px */
+    line-height: 1.3;
+  }
+
+  .faq__a {
+    margin: var(--space-1) 0 0;
+    font-size: var(--text-small);
+    line-height: var(--leading-body);
+    color: var(--ink-soft);
+    text-wrap: pretty;
+  }
+</style>

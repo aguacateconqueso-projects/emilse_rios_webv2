@@ -1,0 +1,198 @@
+---
+/**
+ * El catálogo del Aula Virtual — la portada de la tienda.
+ *
+ * Una lista, no una rejilla de tarjetas: el sistema prohíbe las tarjetas que se
+ * levantan y las sombras, así que lo que separa un producto del siguiente es
+ * una regla de 1 px, igual que en la ficha de trayectoria de *Sobre mí*.
+ *
+ * Las fichas de lo que está a la venta son enlaces. Las de lo que está por
+ * llegar **no lo son**, y se ven apagadas: es la misma regla que tuvo apagada
+ * esta sección entera hasta hoy.
+ */
+import { type Lang, useTranslations, productPath } from '../i18n/ui';
+import { catalogo } from '../data/aula';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="row row--wide">
+  <div class="row__num" aria-hidden="true">00</div>
+  <div class="row__body">
+    <h1 class="tienda__title">{t('aula.title')}</h1>
+    <p class="tienda__lead">{t('aula.description')}</p>
+  </div>
+</section>
+
+<section class="row row--wide block">
+  <div class="row__num" aria-hidden="true"></div>
+  <div class="row__body">
+    <ul class="cat" role="list">
+      {
+        catalogo.map((producto) => {
+          const copia = producto.copia[lang];
+          const venta = producto.estado === 'venta';
+          const Ficha = venta ? 'a' : 'div';
+          return (
+            <li class:list={['cat__item', !venta && 'is-soon']}>
+              <Ficha
+                class="cat__link"
+                href={venta ? productPath(producto.slug, lang) : undefined}
+                aria-disabled={venta ? undefined : 'true'}
+              >
+                <span class="mono-plain soft cat__num" aria-hidden="true">
+                  {producto.num}
+                </span>
+
+                <span class="cat__body">
+                  <span class="cat__name">{copia.nombre}</span>
+                  <span class="cat__sum">{copia.resumen}</span>
+                </span>
+
+                <span class="cat__side mono">
+                  {venta ? (
+                    <>
+                      <span class="cat__price">
+                        {copia.precio} <span class="soft">{copia.cadencia}</span>
+                      </span>
+                      <span class="cat__cta">
+                        {producto.tipo === 'membresia' ? t('aula.seeMembership') : t('aula.see')}
+                      </span>
+                    </>
+                  ) : (
+                    <span class="soft cat__soon">{t('aula.soon')}</span>
+                  )}
+                </span>
+              </Ficha>
+            </li>
+          );
+        })
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .tienda__title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--text-hero);
+    line-height: var(--leading-hero);
+    letter-spacing: var(--tracking-hero);
+  }
+
+  .tienda__lead {
+    margin-top: var(--space-3);
+    max-width: var(--measure);
+    text-wrap: pretty;
+  }
+
+  /* --- La lista ----------------------------------------------------------- */
+  .cat {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .cat__item {
+    border-top: 1px solid var(--rule);
+  }
+
+  /* La ficha entera es la zona pulsable, no solo el nombre. Sin borde inferior:
+     el subrayado de los enlaces del sitio no tiene sentido en una fila. */
+  .cat__link {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-1) var(--col-gap);
+    padding: var(--space-4) 0;
+    border-bottom: 0;
+    color: inherit;
+  }
+
+  a.cat__link:hover {
+    color: var(--ink);
+  }
+
+  a.cat__link:hover .cat__cta {
+    border-bottom-color: currentColor;
+  }
+
+  .cat__num {
+    flex: 0 0 var(--col-gutter);
+  }
+
+  .cat__body {
+    flex: 1 1 22rem;
+    min-width: 0;
+  }
+
+  .cat__name {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--text-section);
+    line-height: var(--leading-section);
+    letter-spacing: var(--tracking-section);
+  }
+
+  .cat__sum {
+    display: block;
+    margin-top: var(--space-1);
+    max-width: 32rem; /* 512 px */
+    font-size: var(--text-small);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  .cat__side {
+    flex: 0 0 9rem; /* 144 px */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-1);
+    text-align: right;
+  }
+
+  .cat__price {
+    white-space: nowrap;
+  }
+
+  /* La llamada se subraya con una regla, como los enlaces del sitio. */
+  .cat__cta {
+    border-bottom: 1px solid var(--ink-soft);
+  }
+
+  /* --- Lo que todavía no está ---------------------------------------------
+     Apagado y sin enlace. Se dice que llega, no se finge que existe. */
+  .is-soon .cat__name,
+  .is-soon .cat__sum {
+    color: var(--ink-soft);
+  }
+
+  .is-soon .cat__link {
+    cursor: default;
+  }
+
+  /* Apilado, el precio y la llamada se van al principio de la fila en vez de
+     quedarse colgando a la derecha de una columna que ya no existe. */
+  @media (max-width: 40rem) {
+    .cat__num {
+      flex-basis: 100%;
+    }
+
+    .cat__side {
+      flex: 1 1 100%;
+      flex-direction: row;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-top: var(--space-2);
+      text-align: left;
+    }
+  }
+</style>
