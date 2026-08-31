@@ -1,0 +1,39 @@
+---
+/**
+ * La página de cada producto del aula, en inglés.
+ *
+ * Gemela de `/aulavirtual/[producto].astro`: mismos productos, mismos slugs
+ * —el slug es la identidad del producto y no se traduce—, y la copia sale del
+ * mismo fichero de datos. Lo único que cambia es el idioma.
+ */
+import Base from '../../../layouts/Base.astro';
+import Producto from '../../../components/Producto.astro';
+import { useTranslations, productPath } from '../../../i18n/ui';
+import { conPagina, type Product } from '../../../data/aula';
+
+export function getStaticPaths() {
+  return conPagina().map((producto) => ({
+    params: { producto: producto.slug },
+    props: { producto },
+  }));
+}
+
+interface Props {
+  producto: Product;
+}
+const { producto } = Astro.props;
+const lang = 'en' as const;
+const t = useTranslations(lang);
+const copia = producto.copia[lang];
+---
+
+<Base
+  lang={lang}
+  title={`${copia.nombre} · ${t('aula.title')}`}
+  description={copia.resumen}
+  route="aula"
+  pathEs={productPath(producto.slug, 'es')}
+  pathEn={productPath(producto.slug, 'en')}
+>
+  <Producto lang={lang} producto={producto} />
+</Base>

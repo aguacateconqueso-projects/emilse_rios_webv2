@@ -16,7 +16,7 @@ export const ui = {
 
     'nav.about': 'Sobre mí',
     'nav.aula': 'Aula Virtual',
-    'nav.aulaSoon': 'Aula Virtual, próximamente',
+    'nav.enter': 'Ingresar al aula',
     'nav.home': 'Ir al inicio',
     'nav.start': 'Inicio',
     'nav.menu': 'Menú',
@@ -44,6 +44,22 @@ export const ui = {
     'media.still': 'Fotograma del video',
     'about.description':
       'Le dijeron que el contrabajo no era para ella. Esta es la historia de por qué se equivocaron: veinte años tocando y formando contrabajistas, de El Sistema a Madrid.',
+    'aula.title': 'Aula Virtual',
+    'aula.description':
+      'Los cursos y la membresía de Emilse Ríos. Aprende contrabajo a tu ritmo, con acompañamiento de verdad.',
+    'aula.soon': 'Próximamente',
+    'aula.soonLong': 'Emi lo está preparando. Todavía no está a la venta.',
+    'aula.available': 'A la venta',
+    'aula.see': 'Ver el curso',
+    'aula.seeMembership': 'Ver la membresía',
+    'aula.buy': 'Comprar',
+    'aula.buyNote': 'Pago seguro con Stripe. Cancela cuando quieras.',
+    'aula.letter': 'Leer la carta completa',
+    'aula.back': 'Volver al Aula Virtual',
+    'aula.month': 'al mes',
+    'aula.once': 'pago único, acceso de por vida',
+    'aula.leaving':
+      'La membresía todavía vive en emilseriosacademy.com. Se muda a esta casa con el cambio de dominio, y quien ya esté dentro no tiene que hacer nada.',
     'footer.email': 'hola@contrabajoenlaciudad.com',
     'footer.instagram': 'Instagram',
     'footer.youtube': 'YouTube',
@@ -56,7 +72,7 @@ export const ui = {
 
     'nav.about': 'About',
     'nav.aula': 'Virtual Classroom',
-    'nav.aulaSoon': 'Virtual Classroom, coming soon',
+    'nav.enter': 'Enter the classroom',
     'nav.home': 'Go to the home page',
     'nav.start': 'Home',
     'nav.menu': 'Menu',
@@ -84,6 +100,22 @@ export const ui = {
     'media.still': 'Video still',
     'about.description':
       'They told her the double bass wasn\'t for her. This is the story of why they were wrong: twenty years playing and training bassists, from El Sistema to Madrid.',
+    'aula.title': 'Virtual Classroom',
+    'aula.description':
+      "Emilse Ríos's courses and membership. Learn double bass at your own pace, with real guidance.",
+    'aula.soon': 'Coming soon',
+    'aula.soonLong': "Emi is putting it together. It isn't on sale yet.",
+    'aula.available': 'On sale',
+    'aula.see': 'View the course',
+    'aula.seeMembership': 'View the membership',
+    'aula.buy': 'Buy',
+    'aula.buyNote': 'Secure payment with Stripe. Cancel whenever you want.',
+    'aula.letter': 'Read the full letter',
+    'aula.back': 'Back to the Virtual Classroom',
+    'aula.month': 'a month',
+    'aula.once': 'one payment, lifetime access',
+    'aula.leaving':
+      'The membership still lives at emilseriosacademy.com. It moves into this house with the domain change, and anyone already inside has nothing to do.',
     'footer.email': 'hola@contrabajoenlaciudad.com',
     'footer.instagram': 'Instagram',
     'footer.youtube': 'YouTube',
@@ -106,6 +138,7 @@ export function useTranslations(lang: Lang) {
 export const routes = {
   home: { es: '/', en: '/' },
   about: { es: '/sobre-mi', en: '/about' },
+  aula: { es: '/aulavirtual', en: '/classroom' },
 } as const satisfies Record<string, Record<Lang, string>>;
 
 export type Route = keyof typeof routes;
@@ -115,4 +148,16 @@ export function routePath(route: Route, lang: Lang): string {
   const slug = routes[route][lang];
   if (lang === defaultLang) return slug === '/' ? '/' : `${slug}/`;
   return slug === '/' ? '/en/' : `/en${slug}/`;
+}
+
+/**
+ * Dirección de la página de un producto del aula.
+ *
+ * El slug de la sección se traduce —`/aulavirtual/` y `/en/classroom/`—, pero
+ * **el del producto no**: el slug es la identidad del producto, la misma que
+ * llevará su fila en la base de datos y la que aparecerá en el enlace que Emi
+ * pegue en un correo. Un producto, un slug, en los dos idiomas.
+ */
+export function productPath(slug: string, lang: Lang): string {
+  return `${routePath('aula', lang)}${slug}/`;
 }

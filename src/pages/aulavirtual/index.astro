@@ -1,0 +1,17 @@
+---
+import Base from '../../layouts/Base.astro';
+import Catalogo from '../../components/Catalogo.astro';
+import { useTranslations } from '../../i18n/ui';
+
+const lang = 'es' as const;
+const t = useTranslations(lang);
+---
+
+<Base
+  lang={lang}
+  title={`${t('aula.title')} · ${t('site.title')}`}
+  description={t('aula.description')}
+  route="aula"
+>
+  <Catalogo lang={lang} />
+</Base>

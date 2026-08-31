@@ -1,0 +1,39 @@
+---
+/**
+ * La página de cada producto del aula, en español.
+ *
+ * `getStaticPaths` solo genera las de los productos **a la venta y con carta
+ * escrita**. Los que están por llegar no tienen página: si la tuvieran, habría
+ * una URL indexable prometiendo algo que todavía no se puede comprar.
+ */
+import Base from '../../layouts/Base.astro';
+import Producto from '../../components/Producto.astro';
+import { useTranslations, productPath } from '../../i18n/ui';
+import { conPagina, type Product } from '../../data/aula';
+
+export function getStaticPaths() {
+  return conPagina().map((producto) => ({
+    params: { producto: producto.slug },
+    props: { producto },
+  }));
+}
+
+interface Props {
+  producto: Product;
+}
+const { producto } = Astro.props;
+const lang = 'es' as const;
+const t = useTranslations(lang);
+const copia = producto.copia[lang];
+---
+
+<Base
+  lang={lang}
+  title={`${copia.nombre} · ${t('aula.title')}`}
+  description={copia.resumen}
+  route="aula"
+  pathEs={productPath(producto.slug, 'es')}
+  pathEn={productPath(producto.slug, 'en')}
+>
+  <Producto lang={lang} producto={producto} />
+</Base>

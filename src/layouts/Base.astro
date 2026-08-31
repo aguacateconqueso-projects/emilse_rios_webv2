@@ -12,8 +12,16 @@ interface Props {
   lang: Lang;
   title: string;
   description: string;
-  /** Página actual, para canonical y alternativas hreflang. */
+  /** Sección actual: marca la opción del menú y da el canonical por defecto. */
   route?: Route;
+  /**
+   * Dirección exacta de esta página en cada idioma. Solo hace falta cuando la
+   * página no es la portada de su sección —la de un producto del aula, por
+   * ejemplo—: sin esto, el canonical y el conmutador de idioma apuntarían a
+   * `/aulavirtual/` desde la página de un curso.
+   */
+  pathEs?: string;
+  pathEn?: string;
   /** La entrada solo se reproduce en la Home. */
   intro?: boolean;
   /** El contrabajo detrás del cristal, también solo en la Home. */
@@ -24,14 +32,19 @@ const {
   title,
   description,
   route = 'home',
+  pathEs,
+  pathEn,
   intro = false,
   backdrop = false,
 } = Astro.props;
 const t = useTranslations(lang);
 
-const canonical = new URL(routePath(route, lang), Astro.site);
-const altEs = new URL(routePath(route, 'es'), Astro.site);
-const altEn = new URL(routePath(route, 'en'), Astro.site);
+const hrefEs = pathEs ?? routePath(route, 'es');
+const hrefEn = pathEn ?? routePath(route, 'en');
+
+const canonical = new URL(lang === 'en' ? hrefEn : hrefEs, Astro.site);
+const altEs = new URL(hrefEs, Astro.site);
+const altEn = new URL(hrefEn, Astro.site);
 ---
 
 <!doctype html>
@@ -88,13 +101,13 @@ const altEn = new URL(routePath(route, 'en'), Astro.site);
     {backdrop && <Backdrop />}
     {intro && <Intro name={t('site.name')} />}
 
-    <Header lang={lang} route={route} />
+    <Header lang={lang} route={route} hrefEs={hrefEs} hrefEn={hrefEn} />
 
     <main id="contenido" class="main">
       <slot />
     </main>
 
-    <Footer lang={lang} route={route} />
+    <Footer lang={lang} hrefEs={hrefEs} hrefEn={hrefEn} />
 
     {/* Revelado de las frases-ancla. La segunda y última animación. */}
     <script>

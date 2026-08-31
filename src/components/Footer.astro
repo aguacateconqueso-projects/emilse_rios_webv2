@@ -1,13 +1,15 @@
 ---
-import { type Lang, type Route, useTranslations, routePath } from '../i18n/ui';
+import { type Lang, useTranslations, routePath } from '../i18n/ui';
 import LangSwitch from './LangSwitch.astro';
 import Logo from './Logo.astro';
 
 interface Props {
   lang: Lang;
-  route?: Route;
+  /** Esta misma página en cada idioma, ya localizada. */
+  hrefEs: string;
+  hrefEn: string;
 }
-const { lang, route = 'home' } = Astro.props;
+const { lang, hrefEs, hrefEn } = Astro.props;
 const t = useTranslations(lang);
 ---
 
@@ -28,7 +30,8 @@ const t = useTranslations(lang);
         {t('footer.youtube')}
       </a>
       <a class="footer__link" href={routePath('about', lang)}>{t('nav.about')}</a>
-      <LangSwitch lang={lang} hrefEs={routePath(route, 'es')} hrefEn={routePath(route, 'en')} />
+      <a class="footer__link" href={routePath('aula', lang)}>{t('nav.aula')}</a>
+      <LangSwitch lang={lang} hrefEs={hrefEs} hrefEn={hrefEn} />
     </nav>
   </div>
 </footer>

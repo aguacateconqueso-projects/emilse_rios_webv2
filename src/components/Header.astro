@@ -28,17 +28,29 @@
 import { type Lang, type Route, useTranslations, routePath } from '../i18n/ui';
 import LangSwitch from './LangSwitch.astro';
 import Logo from './Logo.astro';
+import { entrarHref } from '../data/aula';
 
 interface Props {
   lang: Lang;
-  /** Página actual, para que el conmutador de idioma no te saque de ella. */
+  /** Sección actual, para marcar la opción del menú. */
   route?: Route;
+  /** Esta misma página en cada idioma, ya localizada. */
+  hrefEs: string;
+  hrefEn: string;
 }
-const { lang, route = 'home' } = Astro.props;
+const { lang, route = 'home', hrefEs, hrefEn } = Astro.props;
 const t = useTranslations(lang);
+
+/*
+  El botón de ingresar sale solo dentro del aula. En la Home y en Sobre mí no
+  pinta nada: quien llega ahí viene a leer, no a entrar a estudiar. Y hoy lleva
+  fuera del sitio, a la academia, que es donde el aula funciona de verdad.
+*/
+const enAula = route === 'aula';
+const entrar = entrarHref[lang];
 ---
 
-<header class="header">
+<header class:list={['header', enAula && 'header--aula']}>
   <details class="menu" data-menu>
     <summary class="menu__trigger" title={t('nav.menu')}>
       {/*
@@ -82,24 +94,38 @@ const t = useTranslations(lang);
             href={routePath('about', lang)}
             aria-current={route === 'about' ? 'page' : undefined}>{t('nav.about')}</a
           >
+          <a
+            class="menu__item"
+            href={routePath('aula', lang)}
+            aria-current={route === 'aula' ? 'page' : undefined}>{t('nav.aula')}</a
+          >
           {/*
-            «Aula Virtual» sigue apagada: está en el menú pero no lleva a
-            ninguna parte, y se dice en vez de fingir que existe.
+            Debajo de 56rem no cabe la cápsula de ingresar al lado de la del
+            menú sin que se pisen, así que ahí la opción vive dentro del panel.
+            Es la misma puerta por otra puerta, no una segunda cosa.
           */}
-          <span class="menu__item menu__item--muted" aria-disabled="true" title={t('nav.aulaSoon')}>
-            {t('nav.aula')}
-          </span>
+          {
+            enAula && (
+              <a class="menu__item menu__item--enter" href={entrar} rel="noopener">
+                {t('nav.enter')}
+              </a>
+            )
+          }
           <div class="menu__item menu__item--lang">
-            <LangSwitch
-              lang={lang}
-              hrefEs={routePath(route, 'es')}
-              hrefEn={routePath(route, 'en')}
-            />
+            <LangSwitch lang={lang} hrefEs={hrefEs} hrefEn={hrefEn} />
           </div>
         </nav>
       </div>
     </div>
   </details>
+
+  {
+    enAula && (
+      <a class="mono enter" href={entrar} rel="noopener">
+        {t('nav.enter')}
+      </a>
+    )
+  }
 </header>
 
 <script>
@@ -341,17 +367,75 @@ const t = useTranslations(lang);
     background: color-mix(in srgb, var(--ink) 4%, transparent);
   }
 
-  .menu__item--muted {
-    color: var(--ink-soft-glass);
-    cursor: default;
-  }
-
   .menu__item--lang {
     display: flex;
     justify-content: center;
     /* La tinta secundaria del conmutador se sube: sobre cristal, la de siempre
        no llega a AA. `LangSwitch` lee esta variable y si no está usa la suya. */
     --lang-soft: var(--ink-soft-glass);
+  }
+
+  /* --- La puerta del aula --------------------------------------------------
+     Segunda cápsula, a la derecha, con el mismo cristal que la del menú: es un
+     objeto flotante de la misma familia, así que hereda la enmienda del radio
+     y de la sombra y no abre ninguna nueva. Va posicionada y no como hermana
+     en el flujo, porque la del menú tiene que quedarse centrada en la página,
+     no centrada en lo que sobre.
+
+     Solo aparece en el aula. La cabecera no captura el ratón, así que esta
+     recupera el suyo, igual que hace la cápsula del menú. */
+  .enter {
+    position: absolute;
+    right: var(--space-2);
+    top: var(--space-2);
+    pointer-events: auto;
+    display: none;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--menu-radius);
+    border-bottom: 0;
+    background: color-mix(in srgb, var(--paper) var(--menu-veil), transparent);
+    backdrop-filter: blur(var(--menu-blur)) saturate(1.6);
+    box-shadow: var(--menu-shadow);
+    color: var(--ink);
+    /* Que mida lo mismo de alto que la cápsula del menú: 28 px de firma más
+       los 16 de arriba y abajo. La línea del mono es más corta, así que se
+       fuerza el alto de la caja. */
+    line-height: 28px;
+  }
+
+  .enter:hover {
+    color: var(--ink-soft-glass);
+  }
+
+  /* El corte está medido, no elegido a ojo. La cápsula del menú mide 384 px y
+     va centrada en la ventana, así que su borde derecho avanza a la mitad de
+     lo que crece la pantalla, mientras que esta está clavada al margen: las
+     dos se acercan hasta pisarse. Medido con las dos etiquetas —la inglesa,
+     ENTER THE CLASSROOM, es la larga—, a 832 px todavía se solapaban 4 px y a
+     864 quedaban 12. A 56 rem hay 28 px de aire en inglés y 54 en español.
+
+     Por debajo, la puerta se va dentro del panel, que es donde está su gemela
+     `menu__item--enter`. Si algún día cambia el texto del botón o el ancho de
+     la cápsula, este número se vuelve a medir. */
+  @media (min-width: 56rem) {
+    .enter {
+      display: block;
+    }
+
+    .header--aula .menu__item--enter {
+      display: none;
+    }
+  }
+
+  /* Dentro del panel es la última opción antes del idioma, y es la única en
+     negativo: es el final del recorrido, igual que el botón de comprar. */
+  .menu__item--enter {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  a.menu__item--enter:hover {
+    background: var(--ink-soft);
   }
 
   @media (prefers-reduced-motion: reduce) {
