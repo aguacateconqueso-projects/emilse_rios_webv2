@@ -1,10 +1,10 @@
 # Progreso — Contrabajo en la Ciudad
 
-Sitio de **Emilse Ríos**, contrabajista y docente, y de su newsletter.
-Este documento es la memoria del proyecto: quien lo lea de cero debería poder
-seguir trabajando sin preguntar nada.
+Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
+membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
+de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 20 de agosto de 2026 · el menú, en una cápsula de cristal
+**Última actualización:** 31 de agosto de 2026 · el sitio pasa a ser una plataforma
 
 ---
 
@@ -13,18 +13,25 @@ seguir trabajando sin preguntar nada.
 | | |
 |---|---|
 | **Publicado** | Sí, en Vercel. Despliega solo en cada merge a `main`. |
-| **Dominio** | Pendiente. Todavía se ve en la URL de Vercel. |
+| **Dominio** | Pendiente. Todavía se ve en la URL de Vercel. El destino es `emilserios.com`. |
 | **Páginas** | Home y Sobre mí, las dos en español e inglés. |
 | **Identidad** | El logo de Emi, vectorizado, en cabecera, pie, entrada y favicon. |
-| **Lo que falta para lanzar** | Conectar el proveedor de correo. El formulario **no da de alta a nadie**. |
+| **Alcance** | Desde el 31 ago 2026 esto deja de ser solo el sitio: aquí van también el aula, la membresía y los cursos. Ver **La plataforma**. |
+| **Lo que falta para lanzar** | Conectar Klaviyo. El formulario **no da de alta a nadie**. |
 
 Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/`
 
-Lo último que se tocó fue **el menú**. La cabecera dejó de ser una barra: ahora
-es una cápsula de cristal que flota sobre la página, con la firma de Emi en el
-centro y la palabra «MENÚ» al lado. Al pulsarla crece hacia abajo y descubre
-Inicio, Sobre mí, Aula Virtual y el conmutador de idioma, que antes estaban
-sueltos a la derecha. Copia el comportamiento del sitio que Emi pasó de
+**Lo que está en marcha ahora mismo** es la plataforma: se decidió el alcance,
+se dibujó el aula, y Emi le mandó a Edu —quien hizo la web original y controla
+el dominio— la pedida completa para recuperar `emilserios.com`. **Se espera su
+respuesta.** Nada de las primeras cinco fases depende de eso, así que se puede
+avanzar mientras. Todo está en la sección siguiente.
+
+Del sitio en sí, lo último que se tocó fue **el menú**. La cabecera dejó de ser
+una barra: ahora es una cápsula de cristal que flota sobre la página, con la
+firma de Emi en el centro y la palabra «MENÚ» al lado. Al pulsarla crece hacia
+abajo y descubre Inicio, Sobre mí, Aula Virtual y el conmutador de idioma, que
+antes estaban sueltos a la derecha. Copia el comportamiento del sitio que Emi pasó de
 referencia, y trajo dos enmiendas al sistema —radio y sombra, solo para esta
 cápsula— anotadas más abajo.
 
@@ -36,8 +43,304 @@ entrada ni de salida, y a veces se repintaba de negro el marco superior.
 Antes de eso, la lámina volvió a ser horizontal con un recorte de Emi, antes la
 portada centrada, y antes el fondo del contrabajo (PRs #4 a #7), cerrado y
 aprobado; si se retoma, es solo para mover los mandos de `tokens.css` — ver la
-receta más abajo. **Lo siguiente sin dueño es el cierre para producción**, en
-«Próximos PRs».
+receta más abajo. **Lo siguiente sin dueño, del sitio, es el cierre para
+producción**, en «Próximos PRs»; de la plataforma, traer el repo de la
+membresía.
+
+---
+
+## La plataforma
+
+Hasta el 30 de agosto de 2026 este repo era un sitio de dos páginas con una
+newsletter. Desde el **31 de agosto** es la casa de todo lo de Emi: el sitio
+público, el aula de las alumnas, la membresía y los cursos, **en un solo
+dominio, un solo despliegue y un solo repositorio**. Esto reencuadra el resto
+del documento: lo de abajo sigue siendo cierto, pero es la primera capa de algo
+más grande.
+
+Lo que hoy está repartido, y qué le pasa a cada cosa:
+
+| Dónde | Qué es | Qué le pasa |
+|---|---|---|
+| `emilserios.com` | WordPress + Tutor LMS, hecho por **Edu** | Se tira. **El dominio se queda**, y es el destino final de todo. |
+| `emilseriosacademy.com` | La membresía «Estudiemos Juntos». Viva, cobrando, con miembros reales. | Su código se muda **a este repo**. El dominio acaba redirigiendo. |
+| Vimeo · Stripe · Klaviyo | Videos, cobros y newsletter | **Los maneja Emi**, están a su nombre. No hay que pedirlos ni migrarlos. |
+| Este repo | Home y Sobre mí | Es la base sobre la que se monta todo lo demás. |
+
+La membresía existe en un dominio aparte por una sola razón: el DNS de
+`emilserios.com` lo controlaba un tercero difícil de localizar y no se pudo
+crear un subdominio. Recuperar ese control es lo que destraba la fusión.
+
+### El dominio, y Edu
+
+`emilserios.com` está registrado en **Hostinger**, en la cuenta de Edu, que
+hizo la web original. **Emi le envió el 31 de agosto de 2026 el correo con
+todo lo que hace falta, en una sola pedida.** Se le pidió:
+
+1. **El dominio.** Vía preferente: mover el dominio a una cuenta de Hostinger
+   de Emi, que en hPanel es inmediato y no pasa por códigos ni esperas. Vía
+   alterna: código de autorización (EPP) + quitar el bloqueo de traspaso.
+2. **La zona DNS entera**, exportada: A, CNAME, **MX**, TXT (SPF/DKIM/DMARC) y
+   subdominios.
+3. **Dónde vive `info@emilserios.com`**, cuántos buzones hay y quién los paga.
+4. **Acceso al hosting** y una copia completa del sitio (ficheros + BD).
+5. **Search Console y Analytics**, y el listado de URLs publicadas.
+6. Cualquier otro servicio colgado del dominio.
+7. Una fecha de corte y estar localizable el día del cambio.
+
+**Estado: enviado, esperando respuesta.** Nada de las fases 1 a 5 depende de
+esto, así que se puede avanzar entretanto; lo único que bloquea de verdad es la
+fase 6.
+
+Tres trampas apuntadas para cuando conteste:
+
+- **El orden importa.** Primero el traspaso, después cambiar el contacto del
+  titular. Al revés se activa un bloqueo ICANN de 60 días.
+- **Traspasar el dominio no mueve el DNS.** El registrador de destino arranca
+  con sus nameservers por defecto. La zona hay que replicarla **antes** de que
+  el traspaso se complete, o se cae el correo de Emi el mismo día.
+- **El correo probablemente vive dentro del plan de hosting.** Si es el correo
+  incluido de Hostinger, apagar el hosting apaga el buzón — y ese buzón es el
+  `reply-to` de todos los correos de la academia. Hay que decidir dónde vive el
+  correo antes de tocar nada.
+
+Si Edu solo diera **una** cosa, la útil es delegar los nameservers a Cloudflare
+bajo una cuenta de Emi: es un cambio de dos minutos por su parte, el dominio
+sigue siendo suyo, y a partir de ahí el DNS se controla desde acá para siempre.
+
+### El aula
+
+Una sola aula para las dos cosas que vende Emi: la membresía y los cursos.
+
+```
+/aula/                   Mi escritorio
+                         ├─ Si tiene membresía: el ejercicio de esta semana,
+                         │  con la cuenta atrás al jueves
+                         ├─ Mis cursos, con barra de progreso
+                         └─ Entrada a la tienda
+
+/aula/membresia/         Las tres pestañas de hoy, INTACTAS
+                         (ejercicio de la semana · concepto base · bonus)
+
+/aula/curso/<slug>/      El reproductor
+                         ├─ Columna: módulos y lecciones, con sus ✓
+                         ├─ Centro: video, descripción, PDF
+                         ├─ «Marcar como completada»
+                         └─ Hilo privado con Emi
+
+/aula/tienda/            Catálogo
+                         ├─ Comprado     → «Entrar al curso»
+                         ├─ A la venta   → «Comprar»
+                         └─ Próximamente → «Avisadme cuando salga»
+
+/aula/cuenta/            Suscripción, facturación, contraseña, idioma
+/panel/                  La consola de Emi (solo admin, solo español)
+```
+
+**El foro no es uno, son dos mecanismos distintos.** En la membresía el foro es
+colectivo: todas leen todas las preguntas, y **solo Emi responde**. En un curso
+el hilo es **privado** entre esa alumna y Emi. Son tablas distintas y reglas de
+acceso distintas, y está bien que lo sean.
+
+En el hilo del curso, Emi puede responder con **video y con audio**. El video se
+resuelve pegando un enlace de Vimeo, reutilizando el normalizador que ya existe
+en su panel —el que acepta la URL, el enlace de gestión, el ID pelado o el
+`<iframe>` entero, porque Emi pega algo distinto cada vez—. El audio se graba
+desde el navegador y va a Storage sin transcodificar: para un instrumento, «escucha
+cómo suena esto» suele valer más que ver las manos, y pesa cien veces menos.
+**Y hay correo en los dos sentidos:** a la alumna cuando Emi responde, a Emi
+cuando entra una pregunta. Sin eso el hilo no sirve.
+
+### Cómo se decide el acceso
+
+Hoy, en la membresía, el acceso es una sola pregunta binaria: `has_active_sub()`.
+Eso vale para **una** membresía y para nada más. Un curso es otra forma: compra
+única, acceso de por vida. La pieza que unifica las dos es una tabla de
+**derechos de acceso**:
+
+```
+entitlements
+  user_id · product_id
+  source      'stripe_sub' | 'stripe_once' | 'manual'
+  granted_at
+  expires_at  NULL = para siempre       ← cursos
+              fecha = fin de período    ← membresía
+  revoked_at
+```
+
+Con eso, la membresía pasa a ser **un producto más** cuyo derecho caduca cada
+mes, y el webhook de Stripe tiene una sola responsabilidad: escribir derechos,
+venga de una suscripción o de un pago único. `has_active_sub()` se reescribe
+encima de esta tabla, así que **nada de lo que hoy funciona en la membresía se
+rompe**.
+
+Los cursos son un modelo aparte —`products` → `courses` → `modules` →
+`lessons`, más `lesson_progress` y los hilos privados—. **No se estira la tabla
+`exercises` con más valores de `kind`**: está optimizada para «una fila vigente
+a la vez con ventana temporal», que es justo lo contrario de un curso.
+
+### Las reglas que no se rompen
+
+De la membresía, heredadas y no negociables:
+
+1. **Un solo ejercicio semanal vigente**, igual para todos, que rota los jueves
+   y **desaparece**. No hay biblioteca histórica: es el gancho de retención y
+   Emi lo argumenta en su carta de ventas. La tentación al unificar es
+   «ya que los cursos son permanentes, dejemos también los ejercicios viejos».
+   Eso rompe el producto.
+2. **No hay niveles.** Emi guía inicial y avanzado dentro del mismo video.
+3. **Dos foros separados por idioma**, sin traducción automática.
+4. **El bonus se acumula y no expira.** Única excepción a la ventana.
+5. **Contenido y cobro son dos relojes independientes.** El contenido es un
+   calendario global semanal; el cobro es mensual desde el alta de cada quien.
+
+De los cursos, nuevas:
+
+6. **Cerrar un curso quita el botón de comprar, nunca quita el acceso a quien
+   ya lo compró.** Emi va a hacer lanzamientos: abrir, cerrar, reabrir. Acceso
+   de por vida es de por vida aunque el curso lleve dos años descatalogado. Es
+   el fallo clásico de estas plataformas y es un desastre de reputación.
+7. **Publicar y anunciar son dos actos distintos.** El correo de lanzamiento
+   sale de un botón aparte, con confirmación que diga a cuánta gente va. Si se
+   dispara al guardar, el día que Emi corrija una errata todo el mundo lo
+   recibe dos veces.
+8. **Todo correo comercial lleva enlace de baja**, y se respeta. Escribir a
+   quien compró un curso es legal en la UE por la excepción de cliente
+   existente, pero solo con baja funcionando.
+
+Y una que viene de la membresía y hay que reimplantar tal cual: **la red contra
+el bucle de pago**. Alguien que ya pagó puede quedar encerrado en la puerta de
+pago si el webhook de Stripe falla o tarda. La solución vive en tres capas
+—reintentos al volver del pago, una llamada que le pregunta a Stripe
+directamente, y un camino de alta que no depende del webhook en absoluto— y
+nació de un incidente real con el primer suscriptor. Cualquier panel nuevo la
+necesita.
+
+### Las cartas de venta de los cursos
+
+Cada curso tiene su página pública propia, `/cursos/<slug>/`, indexable, con el
+sistema de diseño de este sitio. Emi la escribe desde su panel. Esa página es a
+la vez la carta de ventas y el destino del botón «Comprar» de la tienda: una
+sola cosa con dos usos.
+
+Al publicar, el anuncio va por dos vías distintas y **cada herramienta hace lo
+suyo**: la plataforma avisa a los usuarios que ya tienen cuenta, cada uno en su
+idioma; y **la campaña grande la manda Emi por Klaviyo**, que es donde está su
+lista de verdad. La plataforma no intenta ser un mailer masivo — mandar
+campañas por el proveedor transaccional le quema la reputación al dominio justo
+cuando más falta hace que lleguen los correos de acceso.
+
+La lista de «avisadme cuando salga» es, en la práctica, la lista de
+relanzamiento de Emi. Tiene que ser exportable a Klaviyo.
+
+### El código de la membresía, ya leído
+
+Vive en **`aguacateconqueso-projects/emilse_rios_membresias`** — ojo al nombre,
+es `emilse_rios`, con guion bajo, igual que este repo. Leído entero el 31 ago
+2026. Son **6.076 líneas en `src/`** y **405 de SQL** en siete migraciones. El
+dossier de traspaso resultó fiel: no hay sorpresas de arquitectura.
+
+**Es un repositorio público, y no hay credenciales dentro.** El `.gitignore`
+excluye `.env` y `.env.*` salvo `.env.example`, y ese ejemplo solo lleva
+marcadores (`sk_test_...`, `eyJ...`). Comprobado con un barrido de patrones de
+clave sobre el árbol. Al mudar el código **hay que mantener esa disciplina**,
+porque este repo también es público.
+
+Lo que se confirma leyendo el código, y que importa para la mudanza:
+
+- **La lógica de acceso está toda en la base de datos, no en el frontend.** Las
+  páginas hablan directo con Supabase desde el navegador con la clave `anon`,
+  que es pública a propósito; quien decide qué ve cada quien son las políticas
+  RLS. **Por eso el frontend se puede reescribir entero sin tocar una sola
+  regla de acceso** — es lo que hace barata esta mudanza.
+- **`has_active_sub()` se define una sola vez**, en la migración `0001`, y las
+  demás se apoyan en ella. Cambiarla por derechos de acceso es tocar **una
+  función**, no siete migraciones.
+- **La sesión usa `flowType: 'implicit'`** y un adaptador propio de
+  almacenamiento: la casilla «mantener sesión iniciada» decide si el token va a
+  `localStorage` o a `sessionStorage`. Es lo que hará que todo el mundo tenga
+  que volver a entrar al cambiar de dominio.
+- **El espejo de Stripe está aislado** en `src/lib/stripe-sync.ts`, compartido
+  por el webhook y por la verificación bajo demanda, precisamente para que los
+  dos caminos escriban la misma fila. Ese aislamiento es lo que permitirá
+  añadir el pago único sin tocar el de la suscripción.
+
+Y dos cosas que hay que arreglar al mudar, encontradas leyendo:
+
+- ⚠️ **La migración `0007` no es idempotente**, aunque el dossier diga que
+  todas lo son. Su `create type public.content_kind as enum (…)` no lleva el
+  envoltorio `do $$ … exception when duplicate_object` que sí usa la `0001`, así
+  que **volver a pegarla falla**. Va dentro de una transacción, así que no deja
+  nada a medias, pero conviene saberlo antes de repetirla por si acaso. Las
+  migraciones nuevas se escriben con el envoltorio.
+- ⚠️ **`trialing` no significa lo mismo en el código que en la base de datos.**
+  `subGrantsAccess()` da acceso a `'active'` y a `'trialing'`, pero
+  `has_active_sub()` —que es la puerta de verdad— solo acepta `'active'`. Si
+  algún día Emi ofrece un período de prueba, la red de seguridad escribiría una
+  fila `trialing` que la RLS rechazaría: el usuario pagaría y no vería nada.
+  Hoy no se usan pruebas, así que no está roto; al pasar a derechos de acceso
+  hay que decidir de una vez si `trialing` entra o no, y que lo digan los dos
+  lados igual.
+
+La capa visual de la academia que se guarda sin enchufar son dos ficheros:
+`public/membresia-ui.css` y `public/membresia-ui.js`.
+
+### Las fases
+
+```
+Fase 0   Pedir el dominio a Edu (enviado) + traer el repo de la membresía
+Fase 1   Derechos de acceso + mudar el aula y el panel a este repo
+Fase 2   Cursos: modelo, reproductor, progreso, hilo privado con video y audio
+Fase 3   Tienda + pago único + los estados de lanzamiento
+Fase 4   Cartas de venta + botón de anuncio
+Fase 5   Cargar los 4 cursos y las alumnas que ya compraron
+Fase 6   El cambio de dominio, con todo lo demás funcionando
+```
+
+**No hay fase de migración automática.** Son **4 cursos y unas 5 alumnas**: se
+cargan a mano en una tarde desde el panel, y el acceso se concede desde la
+pantalla de miembros que ya existe. Escribir una herramienta para eso costaría
+más que hacerlo. De Tutor LMS solo hace falta que Emi pase la estructura de
+cada curso —qué lecciones, en qué orden, con qué enlace de Vimeo— y los correos
+de quienes compraron.
+
+**El cambio de dominio va al final**, aunque el control del dominio se pida ya:
+son cosas distintas. El día del cambio hay que tocar, todo junto:
+`PUBLIC_SITE_URL` · la URL del webhook en Stripe · el enlace del portal de
+Stripe que está a mano en el menú del aula · las **Redirect URLs** de Supabase
+Auth · la **lista de dominios permitidos en Vimeo**, o los videos se bloquean
+aunque el embed sea correcto · verificar el dominio en Resend · los 301 de las
+URLs viejas. Y **todo el mundo tendrá que volver a iniciar sesión**, porque la
+sesión vive en `localStorage` y eso es por origen. Hay que avisarlo por correo
+antes, no después.
+
+### Lo que se decidió el 31 de agosto de 2026
+
+- **El dominio final es `emilserios.com`.** Es el nombre de ella, tiene
+  historial y enlaces, y es el dominio del buzón que aparece como `reply-to` en
+  todos los correos de la academia. `contrabajoenlaciudad.com` es un nombre de
+  producto, no de persona.
+- **Todo vive en este repo.** Un repositorio, un despliegue, un dominio. La
+  alternativa era mantener dos proyectos hablando con la misma base de datos, y
+  eso duplica el mantenimiento para siempre a cambio de ahorrarse una mudanza
+  una sola vez.
+- **El aula hereda el sistema de diseño de este sitio**, no el de la academia.
+  Si el aula parece un sitio distinto al público, la alumna nota la costura. La
+  capa visual de la academia —paleta cálida, cursor de clave de fa, notas
+  musicales de colores— **se guarda en el repo sin enchufar** por si Emi la
+  quiere recuperar; no se borra.
+- **Los cursos se abren enteros al comprar**, con acceso de por vida. Sin
+  goteo por semanas.
+- **Sin certificados.** Van a ser muchos cursos.
+- **Progreso solo en los cursos**, no en la membresía. En la membresía no tiene
+  sentido: el contenido desaparece igual.
+- **Membresía y cursos van separados** de momento: sin paquete y sin descuento
+  cruzado. El modelo de derechos de acceso lo soporta el día que se decida lo
+  contrario; sería solo un precio distinto en Stripe.
+- **Nada del WordPress viejo hace falta**, salvo el dominio y el correo. Los
+  videos están en Vimeo de Emi, el orden de los cursos lo tiene ella, Tutor LMS
+  lo maneja ella, Stripe está a su nombre y la newsletter es suya en Klaviyo.
+  Eso redujo la pedida a Edu a la mitad.
 
 ---
 
@@ -362,7 +665,8 @@ solo llegaba como dependencia transitiva de Astro, que es como no tenerlo.
 ## Decisiones ya tomadas
 
 Están discutidas y resueltas. No hace falta volver sobre ellas salvo que Emi
-pida lo contrario.
+pida lo contrario. Las que tienen que ver con la plataforma —dominio, aula,
+cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
 
 - **El menú vive en una cápsula de cristal, y la firma dejó de llevar a la
   portada.** Decisión de Emi, 20 ago 2026, con el sitio de «analogue» de
@@ -627,23 +931,35 @@ pida lo contrario.
 
 ### Bloquea el lanzamiento
 
-- [ ] **Conectar el proveedor de correo.** Hoy no hay ninguno: el formulario
-      valida y maqueta bien, pero **no da de alta a nadie**. Está resuelto para
-      que no mienta — en producción y sin proveedor muestra un error honesto con
-      una dirección a la que escribir, en vez de un «Listo» falso.
+- [ ] **Conectar Klaviyo.** El formulario valida y maqueta bien, pero **no da
+      de alta a nadie**. Está resuelto para que no mienta — en producción y sin
+      proveedor muestra un error honesto con una dirección a la que escribir,
+      en vez de un «Listo» falso.
 
-      Falta que Emi diga cuál usa (ConvertKit, MailerLite, Beehiiv…). **Aviso
-      para quien lo implemente:** no basta con poner
-      `PUBLIC_NEWSLETTER_ENDPOINT`. El formulario hace un `POST` de
-      `{ email }` en JSON desde el navegador, y la mayoría de proveedores no
-      aceptan eso por CORS ni admiten exponer la clave en el cliente. Lo más
-      probable es que haga falta una función serverless en Vercel que reciba el
-      correo y hable con la API del proveedor con la clave del lado del
-      servidor. Conviene contarlo antes de estimar.
+      **El proveedor ya se sabe: Emi usa Klaviyo** y la cuenta es suya
+      (31 ago 2026). Falta enchufarlo. **Aviso para quien lo implemente:** no
+      basta con poner `PUBLIC_NEWSLETTER_ENDPOINT`. El formulario hace un
+      `POST` de `{ email }` en JSON desde el navegador, y la mayoría de
+      proveedores no aceptan eso por CORS ni admiten exponer la clave en el
+      cliente. Hace falta una función serverless en Vercel que reciba el correo
+      y hable con la API de Klaviyo con la clave del lado del servidor — un
+      `POST` a su API de perfiles. Hay que elegir además **a qué lista entra**
+      quien se suscribe. Conviene contarlo antes de estimar.
 
-- [ ] **Conectar el dominio `contrabajoenlaciudad.com`.** El `site` de
-      `astro.config.mjs` ya apunta ahí, así que las direcciones absolutas del
-      HTML son las definitivas aunque todavía se vea en la URL de Vercel.
+- [ ] **Recuperar `emilserios.com`.** Emi le mandó a Edu la pedida completa el
+      31 de agosto de 2026 — dominio, zona DNS, correo, hosting y Google, todo
+      en un solo correo. **Esperando respuesta.** Es lo único del proyecto que
+      depende de alguien de fuera, y es lo que más puede tardar. Los detalles y
+      las tres trampas del traspaso están en **La plataforma → El dominio, y Edu**.
+
+- [ ] **Decidir qué pasa con `contrabajoenlaciudad.com`.** Quedó abierto el
+      31 ago 2026. El dominio principal es `emilserios.com`, ya decidido; falta
+      saber si el otro se redirige, si se queda como marca de la newsletter, o
+      si se suelta. **Mientras no se decida, `astro.config.mjs` sigue con
+      `site: 'https://contrabajoenlaciudad.com'` y eso ya no es correcto**: de
+      ahí salen el `<link rel="canonical">`, las URLs absolutas y el futuro
+      sitemap. Cambiarlo es una línea, pero conviene hacerlo cuando se sepa el
+      destino y en su propio PR.
 
 ### Contenido que falta (de Emi)
 
@@ -655,6 +971,11 @@ pida lo contrario.
       de verdad, pero el cuerpo es de muestra — marcados `borrador: true`.
 - [ ] **Los tres testimonios** de *Sobre mí*.
 - [ ] **Enlaces reales de Instagram y YouTube.** Apuntan a las portadas.
+- [ ] **La estructura de los 4 cursos.** Para la fase 5: qué lecciones, en qué
+      orden, con qué enlace de Vimeo y qué PDF. Lo tiene Emi, que maneja el
+      Tutor LMS y el Vimeo directamente.
+- [ ] **Los correos de quienes ya compraron un curso** (unas 5 personas), para
+      concederles el acceso a mano en la plataforma nueva.
 
 ### Próximos PRs
 
@@ -664,8 +985,37 @@ pida lo contrario.
 - [ ] **Comprobación de tipos en el build.** Hoy Astro transpila sin verificar:
       un error de tipos no rompe el despliegue, pero tampoco avisa. Añadir
       `@astrojs/check` y un `npm run check`.
-- [ ] **Aula Virtual.** Está en el menú, apagada. Falta definir qué es: una
-      página, un enlace afuera, o una zona con acceso.
+- [ ] **Mudar el código de la membresía a este repo.** El repositorio ya está
+      localizado y leído entero (`aguacateconqueso-projects/emilse_rios_membresias`,
+      31 ago 2026) — ver **La plataforma → El código de la membresía, ya leído**.
+      Es el siguiente paso real y no depende de Edu. Empieza por la migración de
+      derechos de acceso, que es una función y no siete migraciones.
+
+- [ ] **Aula Virtual.** Ya no está por definir: es una zona con acceso, y su
+      forma entera está en **La plataforma → El aula**. Está en el menú,
+      apagada, y ahí se queda hasta que exista. Ver también la regla de más
+      abajo sobre no enlazar lo que no funciona.
+
+- [ ] **Ponerle marco al hilo privado de los cursos.** Cuánto se compromete
+      Emi a responder. Con 5 alumnas no urge, pero **hay que decidirlo antes de
+      vender**: después de vender ya no se puede cambiar sin quedar mal. Aunque
+      sea un «respondo en 72 h laborables» escrito en la página del curso.
+
+- [ ] **Preguntarle a Emi por el IVA.** Stripe Tax está apagado. Que su
+      contadora lo declare y que Stripe lo *cobre* son cosas distintas: si está
+      apagado, el IVA del país del comprador sale del margen de Emi sin que se
+      note. La pregunta exacta es «¿el IVA lo estamos añadiendo al precio o lo
+      estamos absorbiendo?».
+
+- [ ] **La casilla de renuncia al desistimiento** en el checkout de los cursos.
+      En la UE hay 14 días de devolución en contenido digital salvo que el
+      comprador renuncie expresamente marcándola. Sin ella, cualquiera puede ver
+      el curso entero y pedir el dinero de vuelta el día 13.
+
+- [ ] **Decidir dónde vive la carta de ventas de la academia.** Hoy está
+      escondida y Emi la ofrece por enlace directo desde su newsletter. Al
+      fusionar hay que elegir su URL dentro de `emilserios.com` y mantenerla
+      `noindex`. Pendiente de confirmar con Emi.
 
 ---
 
