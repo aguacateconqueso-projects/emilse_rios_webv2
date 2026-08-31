@@ -54,6 +54,8 @@ export type Bloque =
   | { k: 'faq'; n: string; titulo: string; items: Pregunta[] }
   /** La posdata firmada. */
   | { k: 'pd'; label: string; texto: string; firma: string }
+  /** El pie de la carta original: «¿aún no estás suscrito?» y su botón. */
+  | { k: 'news'; texto: string; enlace: string; href: string }
   /**
    * El bloque de compra, puesto donde la carta lo pida. `precio` es la ficha
    * entera —importe, lo que incluye y la letra pequeña—; `simple` es solo el
@@ -69,10 +71,31 @@ export type Pagina = {
   bloques: Bloque[];
 };
 
-/** Lo que necesita el bloque de compra, en el idioma que toque. */
+/**
+ * Lo que necesita el bloque de compra, en el idioma que toque.
+ *
+ * Los nombres salen de la carta de la academia, que es de donde viene esta
+ * ficha entera: cabecera con el nombre y su eco en el otro idioma, la etiqueta
+ * del precio, el importe, el párrafo que explica que el precio se congela, lo
+ * que incluye, el botón, la línea corta y la letra pequeña.
+ */
 export type Compra = {
   /** El texto del botón. En la membresía es «Acá te unes», no «Comprar». */
   etiqueta: string;
+  /**
+   * El nombre del producto en el OTRO idioma, al lado del suyo en la cabecera
+   * de la ficha. Es un guiño del original: la membresía se llama igual en las
+   * dos versiones y la carta lo enseña.
+   */
+  eco: string;
+  /** La palabra sobre el importe. En la carta es «Precio». */
+  etiquetaPrecio: string;
+  /** Lo que va pegado al importe: «/mes». */
+  cadenciaCorta: string;
+  /** La primera frase del párrafo del precio, la que va en negrita. */
+  notaFuerte: string;
+  /** El resto de ese párrafo: que el precio se congela. */
+  notaResto: string;
   /** Lo que incluye, en la ficha de precio. */
   incluye: string[];
   /** La línea corta bajo el botón. */
@@ -116,6 +139,14 @@ export type Product = {
 
 /** Dónde vive hoy la membresía. Una sola constante: al mudarla se toca acá. */
 export const ACADEMIA = 'https://emilseriosacademy.com';
+
+/**
+ * El alta al newsletter, tal como la tiene la carta original: la página alojada
+ * de Klaviyo, que es donde vive la lista de verdad y que **funciona hoy**. El
+ * formulario propio de este sitio todavía no da de alta a nadie, así que
+ * mandar acá no es un rodeo, es el único camino que llega.
+ */
+const NEWSLETTER = 'https://manage.kmail-lists.com/subscriptions/subscribe?a=TPxGBg&g=SaE8Px';
 
 /** El botón de arriba a la derecha del aula. Lleva al aula que ya funciona. */
 export const entrarHref: Record<Lang, string> = {
@@ -193,6 +224,12 @@ const membresia: Product = {
       fotoAlt: 'Emilse Ríos',
       compra: {
         etiqueta: 'Acá te unes',
+        eco: 'Let’s study together',
+        etiquetaPrecio: 'Precio',
+        cadenciaCorta: '/mes',
+        notaFuerte: 'La membresía cuesta €65 al mes.',
+        notaResto:
+          'Ese precio se congela para ti: el día que suba, tú sigues pagando lo mismo durante todo el tiempo que estés dentro.',
         incluye: [
           'Cada jueves un ejercicio nuevo en la plataforma basado en un concepto base.',
           'Cada mes te explico un tema, un concepto base técnico, para que entiendas de dónde vienen los movimientos, la coordinación, el sonido, solo un concepto. Simple.',
@@ -371,6 +408,12 @@ const membresia: Product = {
             ],
           },
           { k: 'cta', variante: 'simple' },
+          {
+            k: 'news',
+            texto: '¿Aún no estás suscrito al newsletter?',
+            enlace: 'Acá te suscribes',
+            href: NEWSLETTER,
+          },
         ],
       },
     },
@@ -384,6 +427,12 @@ const membresia: Product = {
       fotoAlt: 'Emilse Ríos',
       compra: {
         etiqueta: 'Join here',
+        eco: 'Estudiemos juntos',
+        etiquetaPrecio: 'Price',
+        cadenciaCorta: '/mo',
+        notaFuerte: 'The membership is €65/month.',
+        notaResto:
+          'That price freezes for you: the day it goes up, you keep paying the same for as long as you stay in.',
         incluye: [
           'A new exercise every Thursday on the platform, based on a core concept.',
           'Every month I explain one topic — a core technical concept — so you understand where the movements, coordination, and sound come from. Just one concept. Simple.',
@@ -562,6 +611,12 @@ const membresia: Product = {
             ],
           },
           { k: 'cta', variante: 'simple' },
+          {
+            k: 'news',
+            texto: 'Not subscribed to the newsletter yet?',
+            enlace: 'Subscribe here',
+            href: NEWSLETTER,
+          },
         ],
       },
     },
