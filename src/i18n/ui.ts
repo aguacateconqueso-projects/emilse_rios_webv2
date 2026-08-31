@@ -48,16 +48,10 @@ export const ui = {
     'aula.description':
       'Los cursos y la membresía de Emilse Ríos. Aprende contrabajo a tu ritmo, con acompañamiento de verdad.',
     'aula.soon': 'Próximamente',
-    'aula.soonLong': 'Emi lo está preparando. Todavía no está a la venta.',
-    'aula.available': 'A la venta',
     'aula.see': 'Ver el curso',
     'aula.seeMembership': 'Ver la membresía',
     'aula.buy': 'Comprar',
-    'aula.buyNote': 'Pago seguro con Stripe. Cancela cuando quieras.',
-    'aula.letter': 'Leer la carta completa',
     'aula.back': 'Volver al Aula Virtual',
-    'aula.month': 'al mes',
-    'aula.once': 'pago único, acceso de por vida',
     'aula.leaving':
       'La membresía todavía vive en emilseriosacademy.com. Se muda a esta casa con el cambio de dominio, y quien ya esté dentro no tiene que hacer nada.',
     'footer.email': 'hola@contrabajoenlaciudad.com',
@@ -104,16 +98,10 @@ export const ui = {
     'aula.description':
       "Emilse Ríos's courses and membership. Learn double bass at your own pace, with real guidance.",
     'aula.soon': 'Coming soon',
-    'aula.soonLong': "Emi is putting it together. It isn't on sale yet.",
-    'aula.available': 'On sale',
     'aula.see': 'View the course',
     'aula.seeMembership': 'View the membership',
     'aula.buy': 'Buy',
-    'aula.buyNote': 'Secure payment with Stripe. Cancel whenever you want.',
-    'aula.letter': 'Read the full letter',
     'aula.back': 'Back to the Virtual Classroom',
-    'aula.month': 'a month',
-    'aula.once': 'one payment, lifetime access',
     'aula.leaving':
       'The membership still lives at emilseriosacademy.com. It moves into this house with the domain change, and anyone already inside has nothing to do.',
     'footer.email': 'hola@contrabajoenlaciudad.com',
