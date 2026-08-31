@@ -1,0 +1,138 @@
+---
+/**
+ * El bloque de compra — el paso 3 del recorrido.
+ *
+ * Dos formas, según lo que la carta necesite en ese punto:
+ *
+ * - `precio`: la ficha entera —importe, lo que incluye, el botón y la letra
+ *   pequeña—. Es la que en la carta de la academia va después de la historia,
+ *   cuando ya se ha explicado todo.
+ * - `simple`: solo el importe y el botón. Va donde la carta ya lo contó y solo
+ *   hace falta la puerta: justo tras el gancho, y al final de cada tramo largo.
+ *
+ * **Hoy el paso 4 sale del sitio.** La membresía sigue cobrando en
+ * `emilseriosacademy.com` y ahí se queda hasta el cambio de dominio, así que el
+ * botón lleva a su checkout de Stripe, que funciona. Se dice una vez, en la
+ * primera ficha de precio, en lugar de que la lectora descubra sola que cambió
+ * de dominio a mitad de una compra.
+ */
+import { type Lang, useTranslations } from '../i18n/ui';
+import type { Product } from '../data/aula';
+
+interface Props {
+  lang: Lang;
+  producto: Product;
+  variante: 'simple' | 'precio';
+  /** El aviso de que el cobro vive fuera solo se dice una vez por página. */
+  aviso?: boolean;
+}
+const { lang, producto, variante, aviso = false } = Astro.props;
+const t = useTranslations(lang);
+const copia = producto.copia[lang];
+const compra = copia.compra;
+const href = producto.comprarHref?.[lang];
+/** Fuera del sitio mientras el cobro no viva acá. */
+const fuera = href?.startsWith('http') ?? false;
+---
+
+{
+  href && (
+    <div class="row row--wide block">
+      <div class="row__num" aria-hidden="true" />
+      <div class="row__body">
+        <div class:list={['buy', variante === 'precio' && 'buy--card']}>
+          <p class="buy__price">
+            {copia.precio}
+            <span class="mono soft buy__per">{copia.cadencia}</span>
+          </p>
+
+          {variante === 'precio' && compra && (
+            <ul class="buy__feat" role="list">
+              {compra.incluye.map((item) => (
+                <li class="buy__feat-row">{item}</li>
+              ))}
+            </ul>
+          )}
+
+          <a class="mono buy__cta" href={href} rel={fuera ? 'noopener' : undefined}>
+            {compra?.etiqueta ?? t('aula.buy')}
+          </a>
+
+          {compra && <p class="mono soft buy__note">{compra.nota}</p>}
+
+          {variante === 'precio' && compra && <p class="buy__fine">{compra.pie}</p>}
+
+          {fuera && aviso && <p class="buy__away">{t('aula.leaving')}</p>}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+<style>
+  /* Encuadrado con reglas de 1 px, no con una caja gris: el sistema no tiene
+     fondos de relleno. La regla de arriba va en tinta plena para que el bloque
+     pese más que una división cualquiera. */
+  .buy {
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--rule);
+    padding: var(--space-4) 0;
+    max-width: var(--measure);
+  }
+
+  .buy__price {
+    font-family: var(--font-display);
+    font-size: var(--text-anchor);
+    line-height: 1;
+  }
+
+  .buy__per {
+    margin-left: var(--space-1);
+    vertical-align: middle;
+  }
+
+  /* Lo que incluye. Filas separadas por reglas, como la ficha de trayectoria
+     de Sobre mí. */
+  .buy__feat {
+    margin: var(--space-4) 0 0;
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .buy__feat-row {
+    border-top: 1px solid var(--rule);
+    padding: var(--space-2) 0;
+    font-size: var(--text-small);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  /* El único botón macizo del sitio. Se lo gana: es el final del recorrido, y
+     no hay color de acento con el que destacarlo de otra manera. */
+  .buy__cta {
+    display: inline-block;
+    margin-top: var(--space-4);
+    padding: var(--space-2) var(--space-4);
+    background: var(--ink);
+    color: var(--paper);
+    border-bottom: 0;
+  }
+
+  .buy__cta:hover {
+    background: var(--ink-soft);
+  }
+
+  .buy__note {
+    margin-top: var(--space-3);
+  }
+
+  .buy__fine,
+  .buy__away {
+    margin-top: var(--space-3);
+    font-size: var(--text-small);
+    line-height: 1.5;
+    color: var(--ink-soft);
+    text-wrap: pretty;
+  }
+</style>

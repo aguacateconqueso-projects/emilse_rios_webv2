@@ -192,12 +192,29 @@ de la membresía sale del sitio, y por eso la propia página lo dice en vez de
 dejar que la alumna descubra sola que cambió de dominio a mitad de una compra.
 El séptimo es lo que trae la migración de derechos de acceso.
 
-**El catálogo tiene siete productos.** La membresía, que es lo único a la venta,
-y seis cursos que Emi ya tiene grabados pero todavía sin estrategia de venta. Los
-seis salen como «Próximamente» y **sus fichas no son enlaces**: no tienen página
-porque no tienen carta, y una URL indexable prometiendo algo que no se puede
-comprar es peor que un hueco anunciado. Cuando Emi mande el nombre, el precio y
-la carta de cada uno, se escriben en `src/data/aula.ts` y la página aparece sola.
+**El catálogo tiene siete productos**, y **cada uno lleva su foto**. La membresía,
+que es lo único a la venta, y seis cursos que Emi ya tiene grabados pero todavía
+sin estrategia de venta. Los seis salen como «Próximamente» y **sus fichas no son
+enlaces**: no tienen página porque no tienen carta, y una URL indexable
+prometiendo algo que no se puede comprar es peor que un hueco anunciado. Cuando
+Emi mande el nombre, el precio, la foto y la carta de cada uno, se escriben en
+`src/data/aula.ts` y la página aparece sola.
+
+Las seis fotos que faltan **se ven como marcos vacíos con su etiqueta**, que es
+lo que ya hace el resto del sitio con las imágenes que Emi no ha mandado. No se
+rellenan con una foto de archivo ni con un gris: un hueco que se ve es un hueco
+que alguien arregla.
+
+**La carta de la membresía es la de `emilseriosacademy.com`, palabra por
+palabra.** No se reescribió: lleva un año vendiendo y el texto es de Emi. Lo que
+cambió es la ropa — se pinta en blanco y negro con el sistema de este sitio, no
+con la capa cálida de la academia — porque si el aula pareciera un sitio distinto
+al público, la alumna notaría la costura. Dos cosas del original se quedaron
+fuera a propósito: **el precio de fundador**, cuya ventana cerró el 23 de julio
+de 2026 y en la academia quedó como código inerte, y **el alta al newsletter del
+final**, que en este sitio tiene su propio sitio y su propio formulario — meterlo
+dentro de la carta era mandar a la lectora a otro lado justo cuando está por
+comprar.
 
 **Los nombres «Curso 1» a «Curso 6» son marcadores**, no títulos. Están puestos
 para que se vea la forma del catálogo, y se sustituyen enteros.
@@ -563,6 +580,7 @@ src/
   assets/fonts/          Las tres familias en woff2 + OFL.txt
   assets/img/            contrabajo.webp, el fondo de la Home
                          emilse-madrid.jpg, la lámina de la Home
+                         emilse-membresia.jpg, el retrato de la carta
   components/
     Header.astro                   Cabecera: la firma centrada y el menú
     Footer · LangSwitch            Pie y conmutador ES/EN
@@ -570,8 +588,9 @@ src/
     Intro.astro                    Animación de entrada (solo Home)
     Backdrop.astro                 El contrabajo tras el cristal (solo Home)
     Home.astro · About.astro       Los bloques de cada página
-    Catalogo.astro                 La lista de productos del Aula Virtual
-    Producto.astro                 La página de venta de un producto
+    Catalogo.astro                 La rejilla de productos del Aula Virtual
+    Producto.astro                 La carta de venta de un producto
+    Compra.astro                   El bloque de precio y el botón de comprar
     EmailArchive.astro             Fichas del newsletter + <dialog>
     SubscribeForm.astro            Campo de suscripción
     MediaSlot.astro                Hueco de imagen
@@ -627,10 +646,26 @@ Todo el catálogo del Aula Virtual sale de `src/data/aula.ts`. Un curso pasa de
 1. `estado: 'venta'` en vez de `'proximamente'`.
 2. El `nombre`, el `resumen` de una línea, el `precio` y la `cadencia` («pago
    único, acceso de por vida»), **en los dos idiomas**.
-3. Una `pagina` con su `titulo`, su `entradilla` y sus `bloques` — hay cuatro
-   clases: `prose`, `anchor`, `lista` y `faq`, y se combinan en el orden que
-   pida la carta. La membresía sirve de ejemplo.
-4. `comprarHref` con el enlace de pago de cada idioma.
+3. La `foto`, importada desde `src/assets/img`. Sin ella la ficha dibuja el
+   marco vacío con el texto de `fotoPie`, que también hay que escribir.
+4. Una `pagina` con su `titulo`, su `subtitulo` y sus `bloques`. Hay nueve
+   clases y se combinan en el orden que pida la carta:
+
+   | Bloque | Para qué |
+   |---|---|
+   | `lede` | La apertura grande, en dos líneas |
+   | `prose` | Párrafos. Uno puede ir `{ fuerte: true }` |
+   | `anchor` | Una frase suelta, centrada, que separa tramos |
+   | `hitos` | Una etiqueta y su párrafo, en filas |
+   | `contraste` | Para quién es y para quién no, a dos columnas |
+   | `lista` | Una enumeración con reglas |
+   | `faq` | Preguntas y respuestas |
+   | `pd` | La posdata firmada |
+   | `cta` | El botón. `precio` es la ficha entera; `simple`, solo el botón |
+
+5. Un `compra` con el texto del botón, lo que incluye, la nota corta y la letra
+   pequeña.
+6. `comprarHref` con el enlace de pago de cada idioma.
 
 Con eso, la ficha del catálogo se vuelve un enlace y `getStaticPaths` genera
 `/aulavirtual/<slug>/` y `/en/classroom/<slug>/` sola. **No hay que tocar
@@ -803,10 +838,30 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
   de datos y la que Emi pegue en un correo. Un producto, un slug, dos idiomas.
   La membresía es `estudiemos-juntos`, que es su nombre, no `membresia`.
 
-- **La ficha del catálogo es una fila, no una tarjeta.** El sistema prohíbe las
-  tarjetas que se levantan y las sombras, así que lo que separa un producto del
-  siguiente es una regla de 1 px, igual que la ficha de trayectoria de *Sobre
-  mí*. La fila entera es la zona pulsable, no solo el nombre.
+- **Cada producto lleva su foto, en una rejilla de tres columnas.** La forma la
+  pidió Emi el 31 ago 2026 con el sitio viejo delante: imagen, título, texto y
+  llamada. Lo que **no** se copió de esa referencia es la ropa — allí las fichas
+  son cajas negras con esquinas redondeadas y botones de píldora, y acá el
+  sistema dice radios cero y sombras cero. Así que la ficha no es una caja: es
+  una columna con su foto enmarcada por una regla de 1 px, como los huecos de
+  imagen del resto del sitio, y las fotos van en blanco y negro. **La referencia
+  daba el orden de las piezas, no el estilo**, y eso no hizo falta enmendarlo.
+  La ficha entera es la zona pulsable, no solo el nombre.
+
+- **La carta de la membresía se trajo entera, sin reescribir una frase.** Es de
+  Emi y lleva un año vendiendo; el trabajo era vestirla, no mejorarla. Se armó
+  con bloques nombrados —apertura, prosa, descubrimientos, es-para-ti /
+  no-es-para-ti, ficha de precio, posdata, preguntas— para que la carta de un
+  curso se escriba combinándolos en otro orden. **Si una carta futura pide una
+  forma que no está, se añade un tipo de bloque; no se mete maquetación dentro
+  del texto.**
+
+- **El botón de comprar aparece cuatro veces, y lo decide el texto.** En la
+  carta original hay cuatro llamadas y acá también, porque quitarlas cambiaría
+  la carta. Dónde van lo dice `data/aula.ts`, no el componente. El aviso de que
+  el cobro todavía vive fuera se da **una sola vez**, en la primera: repetirlo
+  cuatro veces es ruido, callarlo es dejar que la lectora descubra sola el
+  cambio de dominio a mitad de una compra.
 
 - **El botón de comprar es el único botón macizo del sitio.** Tinta llena, papel
   encima, sin radio y sin sombra. Se lo gana porque es el final del recorrido y
@@ -1128,11 +1183,11 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
       de verdad, pero el cuerpo es de muestra — marcados `borrador: true`.
 - [ ] **Los tres testimonios** de *Sobre mí*.
 - [ ] **Enlaces reales de Instagram y YouTube.** Apuntan a las portadas.
-- [ ] **El nombre, el precio y la carta de los 6 cursos.** Es lo que bloquea el
-      catálogo: hoy las seis fichas dicen «Curso 1» a «Curso 6» y salen como
-      «Próximamente», sin enlace, porque no hay nada a lo que enlazar. De cada
-      uno hace falta el nombre, una línea de resumen, el precio y la carta de
-      ventas. En cuanto lleguen se escriben en `src/data/aula.ts` y la página
+- [ ] **El nombre, el precio, la foto y la carta de los 6 cursos.** Es lo que
+      bloquea el catálogo: hoy las seis fichas dicen «Curso 1» a «Curso 6», con
+      el marco de la foto vacío, y salen como «Próximamente», sin enlace, porque
+      no hay nada a lo que enlazar. De cada uno hace falta el nombre, una línea
+      de resumen, el precio, **una foto** y la carta de ventas. En cuanto lleguen se escriben en `src/data/aula.ts` y la página
       aparece sola. **Depende de que Emi haga su estrategia de venta**, que es
       lo que está esperando.
 

@@ -2,9 +2,16 @@
 /**
  * El catálogo del Aula Virtual — la portada de la tienda.
  *
- * Una lista, no una rejilla de tarjetas: el sistema prohíbe las tarjetas que se
- * levantan y las sombras, así que lo que separa un producto del siguiente es
- * una regla de 1 px, igual que en la ficha de trayectoria de *Sobre mí*.
+ * Cada producto lleva su foto arriba, el nombre, una línea de qué es y su
+ * estado. La forma es la que pidió Emi con el sitio viejo delante: una rejilla
+ * de tres columnas, imagen, título, texto y llamada.
+ *
+ * Lo que **no** se copia de esa referencia es la ropa: allí las fichas son
+ * cajas negras con esquinas redondeadas y botones de píldora, y acá el sistema
+ * dice radios cero y sombras cero. Así que la ficha no es una caja: es una
+ * columna con su foto enmarcada por una regla de 1 px, igual que los huecos de
+ * imagen del resto del sitio. Las fotos van en blanco y negro, como la lámina
+ * de la Home — de eso se encarga `MediaSlot`.
  *
  * Las fichas de lo que está a la venta son enlaces. Las de lo que está por
  * llegar **no lo son**, y se ven apagadas: es la misma regla que tuvo apagada
@@ -12,6 +19,7 @@
  */
 import { type Lang, useTranslations, productPath } from '../i18n/ui';
 import { catalogo } from '../data/aula';
+import MediaSlot from './MediaSlot.astro';
 
 interface Props {
   lang: Lang;
@@ -20,64 +28,79 @@ const { lang } = Astro.props;
 const t = useTranslations(lang);
 ---
 
-<section class="row row--wide">
-  <div class="row__num" aria-hidden="true">00</div>
-  <div class="row__body">
-    <h1 class="tienda__title">{t('aula.title')}</h1>
-    <p class="tienda__lead">{t('aula.description')}</p>
-  </div>
+{/*
+  La entrada comparte el ancho de la rejilla, no el de la columna de lectura:
+  si no, el titular arrancaría a media pantalla de la primera foto y se vería
+  la costura entre dos anchos distintos. Por eso el número va encima y no al
+  margen — al margen se saldría del contenedor.
+*/}
+<section class="tienda__wrap">
+  <div class="mono-plain soft" aria-hidden="true">00</div>
+  <h1 class="tienda__title">{t('aula.title')}</h1>
+  <p class="tienda__lead">{t('aula.description')}</p>
 </section>
 
-<section class="row row--wide block">
-  <div class="row__num" aria-hidden="true"></div>
-  <div class="row__body">
-    <ul class="cat" role="list">
-      {
-        catalogo.map((producto) => {
-          const copia = producto.copia[lang];
-          const venta = producto.estado === 'venta';
-          const Ficha = venta ? 'a' : 'div';
-          return (
-            <li class:list={['cat__item', !venta && 'is-soon']}>
-              <Ficha
-                class="cat__link"
-                href={venta ? productPath(producto.slug, lang) : undefined}
-                aria-disabled={venta ? undefined : 'true'}
-              >
-                <span class="mono-plain soft cat__num" aria-hidden="true">
-                  {producto.num}
-                </span>
+<section class="tienda__wrap block">
+  <ul class="cat" role="list">
+    {
+      catalogo.map((producto) => {
+        const copia = producto.copia[lang];
+        const venta = producto.estado === 'venta';
+        const Ficha = venta ? 'a' : 'div';
+        return (
+          <li class:list={['cat__item', !venta && 'is-soon']}>
+            <Ficha
+              class="cat__link"
+              href={venta ? productPath(producto.slug, lang) : undefined}
+              aria-disabled={venta ? undefined : 'true'}
+            >
+              <span class="cat__media">
+                <MediaSlot
+                  src={producto.foto}
+                  alt={copia.fotoAlt ?? ''}
+                  placeholder={copia.fotoPie}
+                  ratio="3 / 2"
+                  width={520}
+                />
+              </span>
 
-                <span class="cat__body">
-                  <span class="cat__name">{copia.nombre}</span>
-                  <span class="cat__sum">{copia.resumen}</span>
-                </span>
-
-                <span class="cat__side mono">
-                  {venta ? (
-                    <>
-                      <span class="cat__price">
-                        {copia.precio} <span class="soft">{copia.cadencia}</span>
-                      </span>
-                      <span class="cat__cta">
-                        {producto.tipo === 'membresia' ? t('aula.seeMembership') : t('aula.see')}
-                      </span>
-                    </>
+              <span class="cat__meta mono">
+                <span class="cat__num" aria-hidden="true">{producto.num}</span>
+                {
+                  venta ? (
+                    <span class="cat__price">
+                      {copia.precio} <span class="soft">{copia.cadencia}</span>
+                    </span>
                   ) : (
-                    <span class="soft cat__soon">{t('aula.soon')}</span>
-                  )}
+                    <span class="soft">{t('aula.soon')}</span>
+                  )
+                }
+              </span>
+
+              <span class="cat__name">{copia.nombre}</span>
+              <span class="cat__sum">{copia.resumen}</span>
+
+              {/*
+                Nada debajo del resumen en lo que está por llegar: la línea de
+                datos ya dice «Próximamente» y repetirlo con otras palabras solo
+                le da a un hueco el peso visual de un producto.
+              */}
+              {venta && (
+                <span class="mono cat__cta">
+                  {producto.tipo === 'membresia' ? t('aula.seeMembership') : t('aula.see')}
                 </span>
-              </Ficha>
-            </li>
-          );
-        })
-      }
-    </ul>
-  </div>
+              )}
+            </Ficha>
+          </li>
+        );
+      })
+    }
+  </ul>
 </section>
 
 <style>
   .tienda__title {
+    margin-top: var(--space-3);
     font-family: var(--font-display);
     font-weight: 400;
     font-size: var(--text-hero);
@@ -91,49 +114,74 @@ const t = useTranslations(lang);
     text-wrap: pretty;
   }
 
-  /* --- La lista ----------------------------------------------------------- */
+  /* --- La rejilla ----------------------------------------------------------
+     Tres columnas donde caben, dos en tableta, una en el teléfono. El hueco es
+     de 48 px, que está en la rejilla de 8. */
+  .tienda__wrap {
+    max-width: var(--width-full);
+    margin-inline: auto;
+    padding-inline: var(--space-3);
+  }
+
   .cat {
     margin: 0;
     padding: 0;
     list-style: none;
-    border-bottom: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-8) var(--space-6);
   }
 
-  .cat__item {
-    border-top: 1px solid var(--rule);
+  @media (max-width: 62rem) {
+    .cat {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 38rem) {
+    .cat {
+      grid-template-columns: 1fr;
+      gap: var(--space-8);
+    }
   }
 
   /* La ficha entera es la zona pulsable, no solo el nombre. Sin borde inferior:
-     el subrayado de los enlaces del sitio no tiene sentido en una fila. */
+     el subrayado de los enlaces del sitio no tiene sentido en una columna. */
   .cat__link {
     display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: var(--space-1) var(--col-gap);
-    padding: var(--space-4) 0;
+    flex-direction: column;
+    height: 100%;
     border-bottom: 0;
     color: inherit;
   }
 
-  a.cat__link:hover {
-    color: var(--ink);
+  .cat__media {
+    display: block;
   }
 
-  a.cat__link:hover .cat__cta {
-    border-bottom-color: currentColor;
+  /* La línea de datos, entre la foto y el nombre: el número al margen y el
+     precio o el estado al otro lado. */
+  .cat__meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--rule);
   }
 
   .cat__num {
-    flex: 0 0 var(--col-gutter);
+    color: var(--ink-soft);
   }
 
-  .cat__body {
-    flex: 1 1 22rem;
-    min-width: 0;
+  .cat__price {
+    white-space: nowrap;
   }
 
   .cat__name {
     display: block;
+    margin-top: var(--space-3);
     font-family: var(--font-display);
     font-weight: 400;
     font-size: var(--text-section);
@@ -144,28 +192,24 @@ const t = useTranslations(lang);
   .cat__sum {
     display: block;
     margin-top: var(--space-1);
-    max-width: 32rem; /* 512 px */
     font-size: var(--text-small);
     line-height: 1.5;
     text-wrap: pretty;
   }
 
-  .cat__side {
-    flex: 0 0 9rem; /* 144 px */
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: var(--space-1);
-    text-align: right;
-  }
-
-  .cat__price {
-    white-space: nowrap;
-  }
-
-  /* La llamada se subraya con una regla, como los enlaces del sitio. */
+  /* La llamada se pega al fondo de la ficha para que las tres queden alineadas
+     aunque los textos midan distinto. Se subraya con una regla, como los
+     enlaces del sitio. */
   .cat__cta {
+    display: inline-block;
+    align-self: flex-start;
+    margin-top: auto;
+    padding-top: var(--space-3);
     border-bottom: 1px solid var(--ink-soft);
+  }
+
+  a.cat__link:hover .cat__cta {
+    border-bottom-color: currentColor;
   }
 
   /* --- Lo que todavía no está ---------------------------------------------
@@ -179,20 +223,4 @@ const t = useTranslations(lang);
     cursor: default;
   }
 
-  /* Apilado, el precio y la llamada se van al principio de la fila en vez de
-     quedarse colgando a la derecha de una columna que ya no existe. */
-  @media (max-width: 40rem) {
-    .cat__num {
-      flex-basis: 100%;
-    }
-
-    .cat__side {
-      flex: 1 1 100%;
-      flex-direction: row;
-      align-items: baseline;
-      justify-content: space-between;
-      margin-top: var(--space-2);
-      text-align: left;
-    }
-  }
 </style>
