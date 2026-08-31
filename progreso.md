@@ -205,16 +205,51 @@ lo que ya hace el resto del sitio con las imágenes que Emi no ha mandado. No se
 rellenan con una foto de archivo ni con un gris: un hueco que se ve es un hueco
 que alguien arregla.
 
-**La carta de la membresía es la de `emilseriosacademy.com`, palabra por
-palabra.** No se reescribió: lleva un año vendiendo y el texto es de Emi. Lo que
-cambió es la ropa — se pinta en blanco y negro con el sistema de este sitio, no
-con la capa cálida de la academia — porque si el aula pareciera un sitio distinto
-al público, la alumna notaría la costura. Dos cosas del original se quedaron
-fuera a propósito: **el precio de fundador**, cuya ventana cerró el 23 de julio
-de 2026 y en la academia quedó como código inerte, y **el alta al newsletter del
-final**, que en este sitio tiene su propio sitio y su propio formulario — meterlo
-dentro de la carta era mandar a la lectora a otro lado justo cuando está por
-comprar.
+**La carta de la membresía es la de `emilseriosacademy.com`, entera y en el
+mismo orden.** No se reescribió: lleva un año vendiendo y el texto es de Emi. Lo
+que cambió es la ropa — se pinta en blanco y negro con el sistema de este sitio,
+no con la capa cálida de la academia — porque si el aula pareciera un sitio
+distinto al público, la alumna notaría la costura.
+
+Las piezas, en el orden en que van, y todas están:
+
+```
+foto · título · subtítulo · apertura en dos líneas
+gancho + botón
+la historia (2012, la azotea de Buenos Aires)
+los tres descubrimientos
+la meta, y por qué el ejercicio desaparece
+«¿Necesitas ayuda? ¿Una guía clara?»
+es para ti / no es para ti, a dos columnas
+los cursos se terminan, esta membresía no
+ficha de precio + botón
+«Mucho para muchos» + botón
+posdata firmada
+once preguntas, desplegables + botón
+«¿Aún no estás suscrito al newsletter?»
+```
+
+**La ficha de precio va pieza por pieza como la original**: el nombre con su eco
+en el otro idioma —*Estudiemos juntos · Let's study together*—, la etiqueta
+«Precio», el importe con su «/mes», el párrafo que explica que el precio se
+congela, lo que incluye, el botón, «cancela cuando quieras» y la letra pequeña
+del día de cobro. A dos columnas, como allí.
+
+**Las preguntas van desplegables**, también como allí: once abiertas a la vez son
+un muro, y quien busca la suya la encuentra antes leyendo solo los titulares. Se
+resuelve con `<details>`, sin una línea de script y con el teclado ya hecho.
+
+Lo único que se dejó fuera es **el precio de fundador**, y no por criterio: su
+ventana cerró el 23 de julio de 2026 y en la academia el copy quedó como código
+inerte detrás de un `if` con una fecha. Acá entra solo el precio estándar. Si Emi
+vuelve a abrir una ventana, se añade como bloque, no como una condición
+escondida.
+
+**El pie del newsletter sí está**, y su botón sale a la página alojada de
+Klaviyo, igual que en el original. Es lo que hay: el formulario propio de este
+sitio todavía no da de alta a nadie, así que mandar ahí no es un rodeo, es el
+único camino que llega. El día que Klaviyo esté conectado acá, este enlace pasa a
+ser interno.
 
 **Los nombres «Curso 1» a «Curso 6» son marcadores**, no títulos. Están puestos
 para que se vea la forma del catálogo, y se sustituyen enteros.
@@ -522,7 +557,16 @@ componentes**: si hace falta uno nuevo, se añade como token.
 
 El sistema es de Emi y se puede cambiar. Lo que no se puede es cambiarlo sin
 dejar constancia, porque si no la tabla de arriba deja de ser fiable. Hasta hoy
-se ha tocado seis veces:
+se ha tocado siete veces:
+
+- **31 ago 2026 · El aula se revela al bajar, y eso no suma una animación
+  nueva.** Los bloques de la carta y las fichas del catálogo aparecen con el
+  mismo fundido que ya tenían las frases-ancla: la misma clase, la misma curva,
+  el mismo observador. La tabla dice «dos animaciones fuera de la Home» y el
+  aula tiene **una**, aplicada a más elementos. Aplicar un movimiento que ya
+  existe a más sitios no es añadir movimiento; añadir uno distinto sí, y eso
+  sigue necesitando enmienda. La carta de la academia hace exactamente esto, así
+  que además es lo que la lectora ya conoce.
 
 - **31 ago 2026 · El radio y la sombra del menú valen para la cápsula de
   ingresar al aula.** La enmienda del 20 de agosto decía «solo para la cápsula
@@ -661,6 +705,7 @@ Todo el catálogo del Aula Virtual sale de `src/data/aula.ts`. Un curso pasa de
    | `lista` | Una enumeración con reglas |
    | `faq` | Preguntas y respuestas |
    | `pd` | La posdata firmada |
+   | `news` | El pie: «¿aún no estás suscrito?» y su botón |
    | `cta` | El botón. `precio` es la ficha entera; `simple`, solo el botón |
 
 5. Un `compra` con el texto del botón, lo que incluye, la nota corta y la letra
@@ -837,6 +882,18 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
   el slug es la identidad del producto, la misma que llevará su fila en la base
   de datos y la que Emi pegue en un correo. Un producto, un slug, dos idiomas.
   La membresía es `estudiemos-juntos`, que es su nombre, no `membresia`.
+
+- **El revelado lleva una red de seguridad, y hacía falta de verdad.** El
+  `IntersectionObserver` solo avisa cuando **cambia** si el elemento cruza el
+  borde, y un salto de scroll mayor que la pantalla —una rueda rápida, la tecla
+  Fin, un enlace a un ancla— lo lleva de estar debajo a estar encima en un solo
+  fotograma. En los dos momentos está fuera, así que no hay cambio que avisar y
+  el bloque **se queda invisible para siempre**. Con una frase-ancla por página
+  casi no se notaba; con los dieciséis bloques de la carta pasaba en cuanto
+  alguien bajaba con ganas, y se cazó midiendo, no mirando. La red es un barrido
+  atado a un fotograma que descubre lo que ya quedó por encima del borde, y se
+  desengancha solo cuando no queda nada. Vale para todo el sitio, no solo para
+  el aula.
 
 - **Cada producto lleva su foto, en una rejilla de tres columnas.** La forma la
   pidió Emi el 31 ago 2026 con el sitio viejo delante: imagen, título, texto y

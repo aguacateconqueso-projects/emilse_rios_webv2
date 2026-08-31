@@ -4,17 +4,19 @@
  *
  * Dos formas, según lo que la carta necesite en ese punto:
  *
- * - `precio`: la ficha entera —importe, lo que incluye, el botón y la letra
- *   pequeña—. Es la que en la carta de la academia va después de la historia,
- *   cuando ya se ha explicado todo.
+ * - `precio`: **la ficha de la carta original, pieza por pieza** — el nombre
+ *   con su eco en el otro idioma, la etiqueta «Precio», el importe con su
+ *   «/mes», el párrafo que explica que el precio se congela, lo que incluye, el
+ *   botón, la línea corta y la letra pequeña. A dos columnas, como allí.
  * - `simple`: solo el importe y el botón. Va donde la carta ya lo contó y solo
- *   hace falta la puerta: justo tras el gancho, y al final de cada tramo largo.
+ *   hace falta la puerta: tras el gancho, tras el mensaje final y tras las
+ *   preguntas.
  *
  * **Hoy el paso 4 sale del sitio.** La membresía sigue cobrando en
  * `emilseriosacademy.com` y ahí se queda hasta el cambio de dominio, así que el
  * botón lleva a su checkout de Stripe, que funciona. Se dice una vez, en la
- * primera ficha de precio, en lugar de que la lectora descubra sola que cambió
- * de dominio a mitad de una compra.
+ * primera ficha, en lugar de que la lectora descubra sola que cambió de dominio
+ * a mitad de una compra.
  */
 import { type Lang, useTranslations } from '../i18n/ui';
 import type { Product } from '../data/aula';
@@ -33,34 +35,60 @@ const compra = copia.compra;
 const href = producto.comprarHref?.[lang];
 /** Fuera del sitio mientras el cobro no viva acá. */
 const fuera = href?.startsWith('http') ?? false;
+const ficha = variante === 'precio' && !!compra;
 ---
 
 {
   href && (
-    <div class="row row--wide block">
+    <div class="row row--wide block reveal">
       <div class="row__num" aria-hidden="true" />
       <div class="row__body">
-        <div class:list={['buy', variante === 'precio' && 'buy--card']}>
-          <p class="buy__price">
-            {copia.precio}
-            <span class="mono soft buy__per">{copia.cadencia}</span>
-          </p>
+        <div class:list={['buy', ficha && 'buy--card']}>
+          {ficha && compra ? (
+            <>
+              <div class="buy__cols">
+                <div class="buy__left">
+                  <p class="buy__name">
+                    {copia.nombre}
+                    <span class="buy__echo"> {compra.eco}</span>
+                  </p>
+                  <p class="mono soft buy__label">{compra.etiquetaPrecio}</p>
+                  <p class="buy__price">
+                    {copia.precio}
+                    <span class="mono soft buy__per">{compra.cadenciaCorta}</span>
+                  </p>
+                  <p class="buy__lead">
+                    <strong>{compra.notaFuerte}</strong> {compra.notaResto}
+                  </p>
+                </div>
 
-          {variante === 'precio' && compra && (
-            <ul class="buy__feat" role="list">
-              {compra.incluye.map((item) => (
-                <li class="buy__feat-row">{item}</li>
-              ))}
-            </ul>
+                <div class="buy__right">
+                  <ul class="buy__feat" role="list">
+                    {compra.incluye.map((item) => (
+                      <li class="buy__feat-row">{item}</li>
+                    ))}
+                  </ul>
+                  <a class="mono buy__cta" href={href} rel={fuera ? 'noopener' : undefined}>
+                    {compra.etiqueta}
+                  </a>
+                  <p class="mono soft buy__note">{compra.nota}</p>
+                </div>
+              </div>
+
+              <p class="buy__fine">{compra.pie}</p>
+            </>
+          ) : (
+            <>
+              <p class="buy__price">
+                {copia.precio}
+                <span class="mono soft buy__per">{compra?.cadenciaCorta ?? copia.cadencia}</span>
+              </p>
+              <a class="mono buy__cta" href={href} rel={fuera ? 'noopener' : undefined}>
+                {compra?.etiqueta ?? t('aula.buy')}
+              </a>
+              {compra && <p class="mono soft buy__note">{compra.nota}</p>}
+            </>
           )}
-
-          <a class="mono buy__cta" href={href} rel={fuera ? 'noopener' : undefined}>
-            {compra?.etiqueta ?? t('aula.buy')}
-          </a>
-
-          {compra && <p class="mono soft buy__note">{compra.nota}</p>}
-
-          {variante === 'precio' && compra && <p class="buy__fine">{compra.pie}</p>}
 
           {fuera && aviso && <p class="buy__away">{t('aula.leaving')}</p>}
         </div>
@@ -80,6 +108,42 @@ const fuera = href?.startsWith('http') ?? false;
     max-width: var(--measure);
   }
 
+  /* La ficha completa es más ancha que la columna de lectura: son dos columnas
+     y con 640 px se estrangulan. */
+  .buy--card {
+    max-width: none;
+  }
+
+  .buy__cols {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-6) var(--col-gap);
+  }
+
+  .buy__left,
+  .buy__right {
+    flex: 1 1 18rem;
+    min-width: 0;
+  }
+
+  .buy__name {
+    font-family: var(--font-display);
+    font-size: var(--text-section);
+    line-height: var(--leading-section);
+    letter-spacing: var(--tracking-section);
+  }
+
+  /* El nombre en el otro idioma, apagado y en cursiva: es un eco, no un
+     segundo título. */
+  .buy__echo {
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+
+  .buy__label {
+    margin-top: var(--space-3);
+  }
+
   .buy__price {
     font-family: var(--font-display);
     font-size: var(--text-anchor);
@@ -91,10 +155,26 @@ const fuera = href?.startsWith('http') ?? false;
     vertical-align: middle;
   }
 
+  .buy__lead {
+    margin-top: var(--space-2);
+    max-width: 26rem; /* 416 px */
+    font-size: var(--text-small);
+    line-height: var(--leading-body);
+    text-wrap: pretty;
+  }
+
+  /* La negrita del original se resuelve con la tipografía de titulares, que es
+     como este sistema destaca; subir el peso de la de cuerpo no está previsto. */
+  .buy__lead strong {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.125rem; /* 18 px */
+  }
+
   /* Lo que incluye. Filas separadas por reglas, como la ficha de trayectoria
      de Sobre mí. */
   .buy__feat {
-    margin: var(--space-4) 0 0;
+    margin: 0;
     padding: 0;
     list-style: none;
     border-bottom: 1px solid var(--rule);
@@ -129,7 +209,8 @@ const fuera = href?.startsWith('http') ?? false;
 
   .buy__fine,
   .buy__away {
-    margin-top: var(--space-3);
+    margin-top: var(--space-4);
+    max-width: var(--measure);
     font-size: var(--text-small);
     line-height: 1.5;
     color: var(--ink-soft);

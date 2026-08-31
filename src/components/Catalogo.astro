@@ -34,7 +34,7 @@ const t = useTranslations(lang);
   la costura entre dos anchos distintos. Por eso el número va encima y no al
   margen — al margen se saldría del contenedor.
 */}
-<section class="tienda__wrap">
+<section class="tienda__wrap reveal">
   <div class="mono-plain soft" aria-hidden="true">00</div>
   <h1 class="tienda__title">{t('aula.title')}</h1>
   <p class="tienda__lead">{t('aula.description')}</p>
@@ -48,7 +48,7 @@ const t = useTranslations(lang);
         const venta = producto.estado === 'venta';
         const Ficha = venta ? 'a' : 'div';
         return (
-          <li class:list={['cat__item', !venta && 'is-soon']}>
+          <li class:list={['cat__item', 'reveal', !venta && 'is-soon']}>
             <Ficha
               class="cat__link"
               href={venta ? productPath(producto.slug, lang) : undefined}
