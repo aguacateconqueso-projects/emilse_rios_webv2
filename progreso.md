@@ -233,6 +233,58 @@ cuando más falta hace que lleguen los correos de acceso.
 La lista de «avisadme cuando salga» es, en la práctica, la lista de
 relanzamiento de Emi. Tiene que ser exportable a Klaviyo.
 
+### El código de la membresía, ya leído
+
+Vive en **`aguacateconqueso-projects/emilse_rios_membresias`** — ojo al nombre,
+es `emilse_rios`, con guion bajo, igual que este repo. Leído entero el 31 ago
+2026. Son **6.076 líneas en `src/`** y **405 de SQL** en siete migraciones. El
+dossier de traspaso resultó fiel: no hay sorpresas de arquitectura.
+
+**Es un repositorio público, y no hay credenciales dentro.** El `.gitignore`
+excluye `.env` y `.env.*` salvo `.env.example`, y ese ejemplo solo lleva
+marcadores (`sk_test_...`, `eyJ...`). Comprobado con un barrido de patrones de
+clave sobre el árbol. Al mudar el código **hay que mantener esa disciplina**,
+porque este repo también es público.
+
+Lo que se confirma leyendo el código, y que importa para la mudanza:
+
+- **La lógica de acceso está toda en la base de datos, no en el frontend.** Las
+  páginas hablan directo con Supabase desde el navegador con la clave `anon`,
+  que es pública a propósito; quien decide qué ve cada quien son las políticas
+  RLS. **Por eso el frontend se puede reescribir entero sin tocar una sola
+  regla de acceso** — es lo que hace barata esta mudanza.
+- **`has_active_sub()` se define una sola vez**, en la migración `0001`, y las
+  demás se apoyan en ella. Cambiarla por derechos de acceso es tocar **una
+  función**, no siete migraciones.
+- **La sesión usa `flowType: 'implicit'`** y un adaptador propio de
+  almacenamiento: la casilla «mantener sesión iniciada» decide si el token va a
+  `localStorage` o a `sessionStorage`. Es lo que hará que todo el mundo tenga
+  que volver a entrar al cambiar de dominio.
+- **El espejo de Stripe está aislado** en `src/lib/stripe-sync.ts`, compartido
+  por el webhook y por la verificación bajo demanda, precisamente para que los
+  dos caminos escriban la misma fila. Ese aislamiento es lo que permitirá
+  añadir el pago único sin tocar el de la suscripción.
+
+Y dos cosas que hay que arreglar al mudar, encontradas leyendo:
+
+- ⚠️ **La migración `0007` no es idempotente**, aunque el dossier diga que
+  todas lo son. Su `create type public.content_kind as enum (…)` no lleva el
+  envoltorio `do $$ … exception when duplicate_object` que sí usa la `0001`, así
+  que **volver a pegarla falla**. Va dentro de una transacción, así que no deja
+  nada a medias, pero conviene saberlo antes de repetirla por si acaso. Las
+  migraciones nuevas se escriben con el envoltorio.
+- ⚠️ **`trialing` no significa lo mismo en el código que en la base de datos.**
+  `subGrantsAccess()` da acceso a `'active'` y a `'trialing'`, pero
+  `has_active_sub()` —que es la puerta de verdad— solo acepta `'active'`. Si
+  algún día Emi ofrece un período de prueba, la red de seguridad escribiría una
+  fila `trialing` que la RLS rechazaría: el usuario pagaría y no vería nada.
+  Hoy no se usan pruebas, así que no está roto; al pasar a derechos de acceso
+  hay que decidir de una vez si `trialing` entra o no, y que lo digan los dos
+  lados igual.
+
+La capa visual de la academia que se guarda sin enchufar son dos ficheros:
+`public/membresia-ui.css` y `public/membresia-ui.js`.
+
 ### Las fases
 
 ```
@@ -933,11 +985,11 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
 - [ ] **Comprobación de tipos en el build.** Hoy Astro transpila sin verificar:
       un error de tipos no rompe el despliegue, pero tampoco avisa. Añadir
       `@astrojs/check` y un `npm run check`.
-- [ ] **Traer el repo de la membresía.** Es el siguiente paso real y no
-      depende de Edu. Falta el nombre exacto del repositorio en GitHub
-      (`owner/repo`) para engancharlo a la sesión y leer el código de verdad;
-      hasta ahora solo se ha trabajado con el dossier de traspaso. Sin eso no se
-      puede planificar la mudanza con precisión.
+- [ ] **Mudar el código de la membresía a este repo.** El repositorio ya está
+      localizado y leído entero (`aguacateconqueso-projects/emilse_rios_membresias`,
+      31 ago 2026) — ver **La plataforma → El código de la membresía, ya leído**.
+      Es el siguiente paso real y no depende de Edu. Empieza por la migración de
+      derechos de acceso, que es una función y no siete migraciones.
 
 - [ ] **Aula Virtual.** Ya no está por definir: es una zona con acceso, y su
       forma entera está en **La plataforma → El aula**. Está en el menú,
