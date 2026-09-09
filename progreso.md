@@ -24,6 +24,10 @@ Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/` · `/productos/` ·
 `/en/products/` · `/productos/estudiemos-juntos/` ·
 `/en/products/estudiemos-juntos/` · `/aulavirtual/` · `/en/classroom/`
 
+**Ojo con esas rutas: las cuatro de la tienda están en el PR #21, todavía sin
+fusionar.** En `main` la tienda sigue viviendo en `/aulavirtual/`. En cuanto el
+PR entre, esta advertencia se borra y ya no hay nada que aclarar.
+
 Las dos direcciones viejas de la carta de la membresía
 —`/aulavirtual/estudiemos-juntos/` y su gemela inglesa— **siguen funcionando**:
 redirigen a la nueva. Están puestas en `astro.config.mjs` y salen del propio
@@ -53,15 +57,17 @@ Del sitio en sí, lo último que se tocó fue **el menú**. La cabecera dejó de
 una barra: ahora es una cápsula de cristal que flota sobre la página, con la
 firma de Emi en el centro y la palabra «MENÚ» al lado. Al pulsarla crece hacia
 abajo y descubre Inicio, Sobre mí, Productos, Aula Virtual y el conmutador de
-idioma, que
-antes estaban sueltos a la derecha. Copia el comportamiento del sitio que Emi pasó de
-referencia, y trajo dos enmiendas al sistema —radio y sombra, solo para esta
-cápsula— anotadas más abajo.
+idioma, que antes estaban sueltos a la derecha. Copia el comportamiento del
+sitio que Emi pasó de referencia, y trajo dos enmiendas al sistema —radio y
+sombra, solo para esta cápsula— anotadas más abajo.
 
 Fueron dos PRs: el **#14** llevó la primera versión —una barra a lo ancho con
 un panel cuadrado colgando— y el **#15** la rehízo entera después de que Emi la
 devolviera por tres cosas: no se veía transparente, no tenía animación de
 entrada ni de salida, y a veces se repintaba de negro el marco superior.
+
+Después llegó el aula en fachada (**#18** a **#20**) y, el 9 sep 2026, **el #21,
+que separa la tienda del aula** — es el que está abierto ahora mismo.
 
 Antes de eso, la lámina volvió a ser horizontal con un recorte de Emi, antes la
 portada centrada, y antes el fondo del contrabajo (PRs #4 a #7), cerrado y
@@ -1311,11 +1317,13 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
       de ingresar, en los dos idiomas. Sin backend. La opción del menú dejó de
       estar apagada. Ver **La plataforma → La tienda, y el recorrido de compra**.
 
-- [x] **La tienda se separa del aula.** Hecho el 9 sep 2026: el catálogo y las
-      cartas se mudaron a **Productos** —`/productos/` y `/en/products/`—, que
-      es una página del sitio como Sobre mí, y el Aula Virtual quedó detrás del
-      inicio de sesión. Las direcciones viejas redirigen. Sigue sin haber
-      backend: la sesión que abre la puerta es la de la academia.
+- [ ] **La tienda se separa del aula.** Escrito el 9 sep 2026 y **abierto en el
+      PR #21, a la espera de revisión**: el catálogo y las cartas se mudaron a
+      **Productos** —`/productos/` y `/en/products/`—, que es una página del
+      sitio como Sobre mí, y el Aula Virtual quedó detrás del inicio de sesión.
+      Las direcciones viejas redirigen. Sigue sin haber backend: la sesión que
+      abre la puerta es la de la academia. Al fusionar, marcar esta casilla y
+      quitar la advertencia de **Dónde estamos → Rutas vivas**.
 
 - [ ] **Que el aula pida la sesión acá.** Hoy `/aulavirtual/` es una puerta
       honesta, no un candado: el botón sale a `emilseriosacademy.com/entrar/`,
