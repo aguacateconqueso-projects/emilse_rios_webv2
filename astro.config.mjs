@@ -63,6 +63,17 @@ export default defineConfig({
   redirects: {
     '/aulavirtual/[producto]': '/productos/[producto]',
     '/en/classroom/[producto]': '/en/products/[producto]',
+
+    /*
+     * La membresía va aparte, y escrita a mano, porque su carta no la genera la
+     * ruta dinámica: se trasplantó entera desde la academia y tiene página
+     * propia —ver `src/pages/productos/estudiemos-juntos.astro`—. Los dos
+     * patrones de arriba sacan sus direcciones de los productos que SÍ genera
+     * `[producto].astro`, así que sin estas dos líneas la carta perdería sus
+     * direcciones viejas, que son las que Emi ya pegó en sus correos.
+     */
+    '/aulavirtual/estudiemos-juntos': '/productos/estudiemos-juntos',
+    '/en/classroom/estudiemos-juntos': '/en/products/estudiemos-juntos',
   },
 
   build: {

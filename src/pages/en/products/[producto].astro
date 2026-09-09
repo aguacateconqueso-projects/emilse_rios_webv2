@@ -4,7 +4,8 @@
  *
  * Gemela de `/productos/[producto].astro`: mismos productos, mismos slugs
  * —el slug es la identidad del producto y no se traduce—, y la copia sale del
- * mismo fichero de datos. Lo único que cambia es el idioma.
+ * mismo fichero de datos. Lo único que cambia es el idioma — incluida la nota
+ * de por qué la membresía no pasa por acá.
  */
 import Base from '../../../layouts/Base.astro';
 import Producto from '../../../components/Producto.astro';
@@ -12,10 +13,12 @@ import { useTranslations, productPath } from '../../../i18n/ui';
 import { conPagina, type Product } from '../../../data/aula';
 
 export function getStaticPaths() {
-  return conPagina().map((producto) => ({
-    params: { producto: producto.slug },
-    props: { producto },
-  }));
+  return conPagina()
+    .filter((producto) => !producto.cartaPropia)
+    .map((producto) => ({
+      params: { producto: producto.slug },
+      props: { producto },
+    }));
 }
 
 interface Props {

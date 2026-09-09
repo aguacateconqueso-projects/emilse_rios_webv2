@@ -134,6 +134,21 @@ export type Product = {
    * más cambia.
    */
   comprarHref?: Record<Lang, string>;
+  /**
+   * Este producto trae **su propia carta**, escrita como página entera, en vez
+   * de armarse con los bloques de `pagina` y `Producto.astro`.
+   *
+   * Hoy es solo la membresía: su carta se trasplantó tal cual desde la academia
+   * —ver `src/components/membresia/Carta.astro` y
+   * `docs/PORTAR-CARTA-DE-VENTAS.md`— con su propio diseño, sus animaciones y su
+   * documento completo. Por eso `/productos/[producto].astro` la desvía en vez
+   * de meterla en `Base.astro`: si fuera dentro, saldrían dos documentos
+   * anidados.
+   *
+   * Su `pagina` sigue escrita en este fichero y no se borra: es la misma carta
+   * en el sistema de diseño del sitio, y volver a ella es cambiar esta bandera.
+   */
+  cartaPropia?: boolean;
   copia: Record<Lang, Copia>;
 };
 
@@ -214,6 +229,7 @@ const membresia: Product = {
   tipo: 'membresia',
   estado: 'venta',
   num: '01',
+  cartaPropia: true,
   foto: membresiaFoto,
   comprarHref: {
     es: `${ACADEMIA}/api/checkout?lang=es`,

@@ -5,6 +5,15 @@
  * `getStaticPaths` solo genera las de los productos **a la venta y con carta
  * escrita**. Los que están por llegar no tienen página: si la tuvieran, habría
  * una URL indexable prometiendo algo que todavía no se puede comprar.
+ *
+ * **La membresía no pasa por acá.** Su carta se trasplantó entera desde la
+ * academia —`src/components/membresia/Carta.astro`, ver
+ * `docs/PORTAR-CARTA-DE-VENTAS.md`— y es un documento completo, con su `<html>`
+ * y su propio diseño. Tiene página propia en `src/pages/productos/estudiemos-juntos.astro` por una razón
+ * concreta: Astro recoge el CSS de **todo lo que una página importa**, aunque no
+ * lo pinte, así que basta con nombrar `Base.astro` acá arriba para que la hoja
+ * del sistema del sitio se cuele en la carta y le pise el fondo crema. Aisladas,
+ * cada una lleva lo suyo.
  */
 import Base from '../../layouts/Base.astro';
 import Producto from '../../components/Producto.astro';
@@ -12,10 +21,12 @@ import { useTranslations, productPath } from '../../i18n/ui';
 import { conPagina, type Product } from '../../data/aula';
 
 export function getStaticPaths() {
-  return conPagina().map((producto) => ({
-    params: { producto: producto.slug },
-    props: { producto },
-  }));
+  return conPagina()
+    .filter((producto) => !producto.cartaPropia)
+    .map((producto) => ({
+      params: { producto: producto.slug },
+      props: { producto },
+    }));
 }
 
 interface Props {

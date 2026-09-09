@@ -5,7 +5,8 @@ membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
 **Última actualización:** 9 de septiembre de 2026 · la tienda se muda a
-**Productos** y el Aula Virtual queda detrás del inicio de sesión
+**Productos**, el Aula Virtual queda detrás del inicio de sesión, y la carta de
+la membresía se **trasplanta entera** desde la academia
 
 ---
 
@@ -35,7 +36,19 @@ el dominio— la pedida completa para recuperar `emilserios.com`. **Se espera su
 respuesta.** Nada de las primeras cinco fases depende de eso, así que se puede
 avanzar mientras. Todo está en la sección siguiente.
 
-Y ya hay algo puesto: **la tienda abrió, y desde el 9 sep 2026 tiene página
+Lo último que se hizo, el 9 sep 2026, fue **trasplantar la carta de venta de la
+membresía**: la página a la que lleva la ficha de la membresía en Productos ya no
+se pinta con el sistema de este sitio, sino que es el fichero de la academia
+traído entero —crema, Hanken Grotesk, cursor de clave de fa, notas musicales,
+botones de tinta que crecen desde el cursor—. Lo pidió Emi con el kit
+`docs/PORTAR-CARTA-DE-VENTAS.md` delante. Es una excepción de una sola ruta,
+anotada como enmienda al sistema de diseño, y la versión en blanco y negro sigue
+escrita debajo por si se quiere volver. Está contado en **La carta
+trasplantada**. ⚠️ Ojo con una consecuencia: la carta trae también **las puertas
+de la membresía**, y hoy están cerradas hasta el 1 de octubre, así que el botón
+de comprar aparece apagado — igual que en la academia.
+
+Y antes de eso: **la tienda abrió, y desde el 9 sep 2026 tiene página
 propia**. Se llama **Productos**, vive en `/productos/` y `/en/products/`, y en
 ella están los siete productos, la carta de venta de la membresía y el botón de
 comprar, que hoy lleva al cobro que ya funciona en la academia. Sin base de
@@ -222,12 +235,20 @@ rellenan con una foto de archivo ni con un gris: un hueco que se ve es un hueco
 que alguien arregla.
 
 **La carta de la membresía es la de `emilseriosacademy.com`, entera y en el
-mismo orden.** No se reescribió: lleva un año vendiendo y el texto es de Emi. Lo
-que cambió es la ropa — se pinta en blanco y negro con el sistema de este sitio,
-no con la capa cálida de la academia — porque si el aula pareciera un sitio
-distinto al público, la alumna notaría la costura.
+mismo orden.** No se reescribió: lleva un año vendiendo y el texto es de Emi.
 
-Las piezas, en el orden en que van, y todas están:
+⚠️ **Y desde el 9 sep 2026 tampoco cambió la ropa: se trasplantó también.** Hasta
+ese día la carta se pintaba en blanco y negro con el sistema de este sitio; hoy
+llega tal cual venía, con la crema de la academia, su Hanken Grotesk, su cursor
+de clave de fa y sus notas musicales. Lo pidió Emi con el kit de trasplante
+delante —`docs/PORTAR-CARTA-DE-VENTAS.md`—, y está anotado como enmienda al
+sistema de diseño. Lo que sigue describe **la versión B/N**, que no se ha
+borrado: vive en `src/data/aula.ts` y en `Producto.astro`, sin ruta, y se vuelve
+a ella quitando `cartaPropia: true` de la membresía. Lo que hay publicado hoy
+está en **La carta trasplantada**, más abajo.
+
+Las piezas, en el orden en que van, y todas están (las dos versiones llevan las
+mismas):
 
 ```
 foto · título · subtítulo · apertura en dos líneas
@@ -300,6 +321,80 @@ numeración. La plataforma manda lo suyo, que es distinto — «ya tienes acceso
 esto es lo que acabas de desbloquear» — y no intenta hacer de facturador. Lo que
 sí hay que comprobar antes de vender es que el recibo de Stripe esté encendido
 en el panel de Emi, porque viene apagado por defecto.
+
+### La carta trasplantada
+
+Lo que está publicado en `/productos/estudiemos-juntos/` y en
+`/en/products/estudiemos-juntos/` desde el 9 sep 2026 es el
+`Landing.astro` de `emilse_rios_membresias`, traído **entero**. No es una copia
+a ojo: es el mismo fichero, con los mismos números. La regla del kit es de una
+línea — *no reescribir la carta, trasplantarla* — y la razón es que cada
+`cubic-bezier`, cada `560ms` y cada `260%` está elegido, y aproximarlo se nota.
+
+Lo que vino, y de dónde:
+
+| Qué | Dónde vive acá |
+|---|---|
+| La carta entera (copy, markup, 400 líneas de CSS y 4 scripts) | `src/components/membresia/Carta.astro` |
+| Tipografías y tokens de la academia | `public/colors_and_type.css` |
+| El retrato del hero (y la imagen de compartir) | `public/img/foto.jpg` |
+| El logo caligráfico | `public/img/logo_emi_alpha.png` |
+| El cursor de clave de fa, oscuro y claro | `public/img/clef-cursor*.svg` |
+| El respaldo del `onerror` de la foto | `public/emi-city.jpg` |
+| Las fechas de las puertas y el alta al newsletter | `src/lib/membership.ts` |
+
+**Va suelta, sin `Base.astro`.** La carta imprime el documento completo —su
+`<!DOCTYPE html>`, su `<head>`, su `<body>`—, así que meterla dentro del layout
+daría dos documentos anidados. Por eso tiene página propia
+(`src/pages/productos/estudiemos-juntos.astro` y su gemela inglesa) y la ruta
+dinámica `[producto].astro` se salta los productos con `cartaPropia`.
+
+⚠️ **Y por eso esa página no importa nada más.** Astro recoge el CSS de todo lo
+que una página importa, aunque no lo pinte: mientras la carta vivió dentro de
+`[producto].astro`, la hoja del sistema del sitio se colaba **después** de la
+suya y le pisaba el fondo crema. Si algún día alguien añade un `import` a ese
+fichero, el síntoma vuelve.
+
+Los siete cables que había que soltar, y cómo quedaron:
+
+| Cable | Qué se hizo |
+|---|---|
+| `payHref: '/api/checkout?lang=…'` | apunta al checkout de la academia (`ACADEMIA`, de `data/aula.ts`), que es donde se cobra hoy |
+| El aviso de que el cobro sale del sitio | añadido **una vez**, en la ficha de precio, con el mismo texto que el resto de la tienda (`products.leaving`) |
+| `/entrar/` de la píldora | va a `entrarHref`, la misma puerta del aula que usa la cápsula de la tienda |
+| El conmutador ES/EN | va a las dos direcciones de esta página, no a la raíz de la academia |
+| Privacidad y Términos del pie (dos `#`) | cambiados por «Volver a Productos» e «Inicio», que sí existen |
+| `Analitica.astro` y el rescate del enlace mágico de Supabase | fuera: son del sitio de la membresía y acá mandarían a un 404 |
+| `STRIPE_FOUNDER_UNTIL` y el flip de precio | fuera: entra solo el precio estándar, escrito en el markup |
+
+Y dos redes que el kit recomienda y que la academia tiene en un fichero aparte,
+puestas acá dentro: **el revelado se enciende igual a 1,4 s** pase lo que pase
+—todo bloque `.reveal` arranca en `opacity: 0`, así que un fallo del script
+dejaría la carta en blanco, que es el fallo número uno al portarla— y un
+`<noscript>` que la enseña entera sin JavaScript.
+
+**Las puertas mandan sobre los botones, y hoy están cerradas.**
+`src/lib/membership.ts` trae las mismas dos fechas que la academia, con los
+mismos nombres de variable: `MEMBERSHIP_CLOSES_AT` (por defecto, 2 sep 2026
+23:59 CEST) y `MEMBERSHIP_REOPENS_AT` (1 oct 2026). Con las puertas cerradas el
+botón se queda sin `href` y sale el aviso con el enlace al newsletter; el 1 de
+octubre se abre solo, sin desplegar. Es lo que dice la carta de septiembre y lo
+que hace el `/api/checkout` de la academia, que cortaría igual con un 403.
+
+⚠️ **Cada mes que Emi cambie el ciclo hay que tocar las dos casas.** Las
+variables se ponen en Vercel, y ahora hay dos proyectos que las leen. Si se
+desalinean, la carta invita a entrar por una puerta que el checkout tiene
+cerrada.
+
+Lo comprobado el día del trasplante, con la lista del punto 8 del kit: fondo
+crema, cursor de clave de fa en toda la página, logo y foto cargando, foto en
+blanco y negro que gana color al pasar el cursor, los 22 bloques entrando con
+fundido, el relleno de tinta naciendo **donde entra el cursor** (`--mx: 14px`)
+con su magnetismo y su flecha, las notas musicales de colores, la ficha de
+precio invirtiéndose entera —botón incluido—, la FAQ con su `+` que pasa a `–`,
+los hovers en marrón de instrumento, `::selection` en negativo, una columna en
+móvil sin scroll horizontal, y el contenido entero visible tanto con «reducir
+movimiento» como sin JavaScript.
 
 ### Cómo se decide el acceso
 
@@ -493,6 +588,12 @@ antes, no después.
   capa visual de la academia —paleta cálida, cursor de clave de fa, notas
   musicales de colores— **se guarda en el repo sin enchufar** por si Emi la
   quiere recuperar; no se borra.
+
+  ⚠️ **Revocado en parte el 9 sep 2026**, y Emi la recuperó: la carta de venta de
+  la membresía va con la capa cálida enchufada, trasplantada entera. Vale para
+  esa ruta y para nada más — ver la enmienda del 9 sep en **El sistema de
+  diseño**. El resto de lo decidido acá sigue en pie: el aula, cuando llegue, es
+  de este sitio.
 - **Los cursos se abren enteros al comprar**, con acceso de por vida. Sin
   goteo por semanas.
 - **Sin certificados.** Van a ser muchos cursos.
@@ -575,7 +676,35 @@ componentes**: si hace falta uno nuevo, se añade como token.
 
 El sistema es de Emi y se puede cambiar. Lo que no se puede es cambiarlo sin
 dejar constancia, porque si no la tabla de arriba deja de ser fiable. Hasta hoy
-se ha tocado siete veces:
+se ha tocado ocho veces:
+
+- **9 sep 2026 · La carta de la membresía queda FUERA del sistema, entera.** Es
+  la enmienda más grande que se ha hecho, así que conviene decirla sin rodeos:
+  `/productos/estudiemos-juntos/` y su gemela inglesa **no siguen la tabla de
+  arriba**. Traen la crema `#faf7f1` en vez del papel `#FAFAF8`, Hanken Grotesk
+  y Space Grotesk en vez de las tres familias del sitio, un cursor propio de
+  clave de fa —que la tabla prohíbe—, notas musicales de colores, un contador de
+  cuenta atrás —que la tabla también prohíbe— y bastantes más de dos animaciones.
+
+  Lo pidió Emi con el kit de trasplante delante, y la razón es de negocio, no de
+  gusto: esa carta lleva un año vendiendo y sus animaciones son parte de lo que
+  vende. La decisión del 31 de agosto —«el aula hereda el sistema de este sitio,
+  y la capa cálida de la academia se guarda sin enchufar»— **queda revocada para
+  esta página, y solo para esta página**. La capa cálida ya no está guardada:
+  está enchufada acá.
+
+  El alcance es exacto y no se estira: **una ruta, en sus dos idiomas**. No hay
+  ningún token nuevo en `tokens.css`, ni una regla nueva en `base.css`, ni un
+  color de la academia en ningún otro componente; la carta trae su propio
+  documento y sus propios estilos, y no toca ni es tocada por el resto del
+  sitio. La costura que esto abre —una página que se ve de otra casa— es
+  conocida y aceptada: se cierra el día que Emi quiera, quitando
+  `cartaPropia: true` de la membresía en `src/data/aula.ts`, porque la versión en
+  blanco y negro sigue escrita y funcionando debajo.
+
+  Si mañana un curso quiere lo mismo, **es otra enmienda**. Esta no es un
+  permiso general para salirse del sistema: es un trasplante concreto, con su
+  kit, su inventario y su lista de comprobación.
 
 - **31 ago 2026 · El aula se revela al bajar, y eso no suma una animación
   nueva.** Los bloques de la carta y las fichas del catálogo aparecen con el
@@ -651,7 +780,12 @@ src/
     Backdrop.astro                 El contrabajo tras el cristal (solo Home)
     Home.astro · About.astro       Los bloques de cada página
     Catalogo.astro                 La rejilla de productos de la tienda
-    Producto.astro                 La carta de venta de un producto
+    Producto.astro                 La carta de venta de un producto, con el
+                                   sistema del sitio. Hoy sin ruta: la única
+                                   carta escrita es la de la membresía, y esa
+                                   va trasplantada
+    membresia/Carta.astro          La carta de la membresía, traída entera de
+                                   la academia. Imprime el documento completo
     Aula.astro                     La puerta del aula: entrar, o ir a la tienda
     Compra.astro                   El bloque de precio y el botón de comprar
     EmailArchive.astro             Fichas del newsletter + <dialog>
@@ -662,16 +796,29 @@ src/
   data/home.ts           Textos de la Home (es / en)
   data/about.ts          Textos de Sobre mí (es / en)
   data/aula.ts           El catálogo: los 7 productos y sus cartas (es / en)
+  lib/membership.ts      Las fechas de las puertas y el alta al newsletter,
+                         traídas de la academia con sus mismos nombres de
+                         variable de entorno
   i18n/ui.ts             Cadenas de interfaz + mapa de rutas
   layouts/Base.astro     <head>, cabecera, pie, revelado de frases-ancla
   pages/                 index · sobre-mi · en/index · en/about
                          productos/index · productos/[producto]
+                         productos/estudiemos-juntos (la carta trasplantada,
+                           suelta y sin layout — ver más arriba el porqué)
                          en/products/index · en/products/[producto]
+                         en/products/estudiemos-juntos
                          aulavirtual/index · en/classroom/index
   styles/tokens.css      Los tokens del sistema
   styles/base.css        Reset y primitivas compartidas
 public/logo.svg          La firma vectorizada. La usa Logo.astro de máscara
 public/favicon.svg       La E del logo. Se adapta al tema del navegador
+public/colors_and_type.css  Tipografías y tokens de la academia. SOLO los pide
+                         la carta trasplantada; el resto del sitio no lo carga
+public/img/              foto.jpg, logo_emi_alpha.png y los dos cursores de
+                         clave de fa: los recursos de esa carta
+public/emi-city.jpg      El respaldo del onerror de la foto
+docs/PORTAR-CARTA-DE-VENTAS.md  El kit del trasplante. Estaba en public/, que
+                         lo habría publicado en la raíz del sitio
 scripts/audit.mjs        Auditoría de contraste y rejilla
 scripts/audit-menu.mjs   Contraste del menú de cristal, con el panel abierto
 ```
@@ -1232,6 +1379,17 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
 ## Pendiente
 
 ### Bloquea el lanzamiento
+
+- [ ] **Decidir las fechas de las puertas de la membresía en ESTE proyecto.** La
+      carta trasplantada trae `src/lib/membership.ts` con las mismas dos fechas
+      que la academia y los mismos nombres de variable —`MEMBERSHIP_CLOSES_AT` y
+      `MEMBERSHIP_REOPENS_AT`—, pero en Vercel hay que ponerlas **también acá**;
+      sin ellas manda el valor por defecto del fichero, que es el ciclo de
+      septiembre de 2026. Hoy eso deja la carta con las puertas cerradas hasta el
+      1 de octubre, que es lo correcto — pero el mes que Emi cambie el ciclo y
+      solo lo cambie en una casa, la carta invitará a entrar por una puerta que
+      el checkout tiene cerrada. Lo sano el día de la mudanza del cobro: una sola
+      fuente para las dos.
 
 - [ ] **Conectar Klaviyo.** El formulario valida y maqueta bien, pero **no da
       de alta a nadie**. Está resuelto para que no mienta — en producción y sin

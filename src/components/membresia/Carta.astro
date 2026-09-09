@@ -1,0 +1,1491 @@
+---
+// Página de ventas de la membresía «Estudiemos Juntos» — componente bilingüe
+// (prop lang: 'es' | 'en'). Rutas: / (es) y /en/ (en).
+//
+// PRINCIPIO (ajustes de fluidez, brief jul 2026): la carta ahora RESPIRA y
+// seduce. Sigue siendo una columna de lectura, pero con jerarquía y ritmo:
+// el logo en el hero, la foto, la frase de apertura grande en cursiva, los dos
+// descubrimientos con protagonismo, la tarjeta de precio de dos columnas que se
+// invierte de color al pasar el cursor, FAQ desplegable, y fundidos al hacer scroll.
+// Paleta monocromática (tinta/crema); botones cuadrados con relleno de tinta que crece
+// desde el cursor + flecha (referencia de Emi) y notas musicales al hover. Cursor de
+// clave de fa. Único toque de color de texto: el marrón del instrumento en los hovers
+// (apertura, cierre).
+// NOTA: los botones de pago apuntan al checkout real de Stripe, que sigue
+// viviendo en la academia (emilseriosacademy.com/api/checkout?lang=es|en, GET
+// que redirige a la página de pago). El newsletter apunta al alta real
+// (Klaviyo/kmail).
+//
+// ---------------------------------------------------------------------------
+// TRASPLANTE — 9 sep 2026.
+//
+// Este fichero es `src/components/membresia/Landing.astro` del repo
+// `aguacateconqueso-projects/emilse_rios_membresias`, traído **entero** por la
+// Ruta A de `docs/PORTAR-CARTA-DE-VENTAS.md`. Esa guía manda una sola cosa: no
+// se reescribe, se trasplanta — cada `cubic-bezier`, cada `560ms`, cada `260%`
+// está elegido, y aproximarlo se nota. Así que **este componente no sigue el
+// sistema de diseño del resto del sitio** (papel #FAFAF8, tinta #0D0D0D,
+// Instrument Serif): trae el suyo, el de la academia, con su crema, su Hanken
+// Grotesk, su cursor de clave de fa y sus notas musicales. Está anotado como
+// enmienda en `progreso.md`.
+//
+// Imprime el documento entero —`<!DOCTYPE html>`, `<head>`, `<body>`— así que
+// **no puede ir dentro de `Base.astro`**, que ya imprime el suyo: saldrían dos
+// documentos anidados. Va suelto, que es lo que recomienda la guía para una
+// landing.
+//
+// Lo que se cambió del original, y solo esto (los «cables sueltos» del punto 6
+// de la guía). Cada sitio lleva su comentario:
+//   · fuera `Analitica.astro` — es del sitio de la membresía, no de este.
+//   · fuera el rescate del enlace mágico de Supabase — acá no hay `/entrar/`
+//     ni `/nueva-clave/` a los que mandar a nadie.
+//   · canónica, hreflang y og:url apuntan a `/productos/estudiemos-juntos/` y
+//     su gemela inglesa, que es donde vive la carta ahora.
+//   · el favicon es el de este sitio.
+//   · los botones de pago van al checkout de la academia, con su aviso.
+//   · fuera el precio de fundador: su ventana cerró el 23 jul 2026 y acá entra
+//     solo el estándar (decisión ya tomada, ver `progreso.md`).
+//   · la píldora de idioma y el pie enlazan a este sitio, no a la academia.
+// ---------------------------------------------------------------------------
+import { useTranslations, productPath, routePath } from '../../i18n/ui';
+import { ACADEMIA, entrarHref } from '../../data/aula';
+import { CLOSES_AT, REOPENS_AT, NEWSLETTER_URL, INVITE_PARAM, doorsClosed } from '../../lib/membership';
+
+interface Props {
+  lang?: 'es' | 'en';
+  /** El slug del producto, de donde salen la canónica y el cambio de idioma. */
+  slug?: string;
+}
+const { lang = 'es', slug = 'estudiemos-juntos' } = Astro.props;
+const isEN = lang === 'en';
+const newsHref = NEWSLETTER_URL;
+/**
+ * Las cadenas del SITIO, no las de la carta.
+ *
+ * Se llama `ui` y no `t` porque en este fichero `t` ya es el bloque de copy de
+ * la carta, que viene entero del original y ahí se queda. Lo único que se pide
+ * prestado de `src/i18n/ui.ts` es el aviso de que el cobro vive fuera, que es
+ * la misma frase que dice el resto de la tienda: una verdad, un texto.
+ */
+const ui = useTranslations(lang);
+
+// ---------------------------------------------------------------------------
+// SEO — lo que Google necesita para indexar esta carta.
+// El origen sale de `site` en astro.config.mjs. Las rutas ya **no** son la raíz
+// del sitio como en la academia: acá la carta es la página de un producto de la
+// tienda, así que salen de `productPath`, que es la misma función que usan el
+// catálogo y el conmutador de idioma. Si se cambiara el slug, esto va detrás
+// solo.
+// ---------------------------------------------------------------------------
+const SITE = Astro.site?.origin ?? 'https://contrabajoenlaciudad.com';
+const urlES = `${SITE}${productPath(slug, 'es')}`;
+const urlEN = `${SITE}${productPath(slug, 'en')}`;
+const canonical = isEN ? urlEN : urlES;
+// Imagen de las tarjetas al compartir (WhatsApp, X, Facebook…). Es el retrato
+// de Emi que ya usa el hero: vertical, así que las redes lo recortan al centro.
+const ogImage = `${SITE}/img/foto.jpg`;
+// Token de propiedad de Google Search Console. Se pone en Vercel como
+// GOOGLE_SITE_VERIFICATION (solo el `content` del meta, no la etiqueta entera).
+// Si falta, no se pinta nada: la verificación por DNS TXT no necesita esto.
+const googleVerification =
+  process.env.GOOGLE_SITE_VERIFICATION || import.meta.env.GOOGLE_SITE_VERIFICATION || '';
+
+// El precio de fundador NO se trasplantó. En la academia hay una variable
+// —STRIPE_FOUNDER_UNTIL— y un script que cambia la tarjeta de fundador a
+// estándar en el segundo del corte; esa ventana cerró el 23 de julio de 2026 y
+// el copy quedó de código inerte detrás de un `if` con una fecha. Acá entra
+// solo el precio estándar, que es lo que se decidió al montar la tienda: si Emi
+// vuelve a abrir una ventana, se añade como bloque, no como una condición
+// escondida. Es la adaptación que la propia guía propone (punto 6).
+
+// ---------------------------------------------------------------------------
+// Puertas de la membresía (src/lib/membership.ts). MISMAS fechas que usa el
+// checkout, para que la carta y el cobro no se desalineen ni un minuto.
+//
+// Tres estados, y los tres se calculan DOS veces: aquí (para el HTML del build,
+// que es lo que ve quien llega sin JS) y otra vez en el navegador con la hora
+// real del visitante (script `doors` más abajo), para que el cambio ocurra en el
+// segundo exacto del cierre sin depender de un redeploy — igual que el flip de
+// precio fundador/estándar.
+//   · abierto con cuenta atrás → falta para el cierre: botones vivos + contador.
+//   · abierto sin cuenta atrás → no hay cierre a la vista: botones vivos, sin contador.
+//   · cerrado                  → botones muertos (sin href) + salida al newsletter.
+// ---------------------------------------------------------------------------
+const closesAtMs = Date.parse(CLOSES_AT);
+const reopensAtMs = Date.parse(REOPENS_AT);
+const builtClosed = doorsClosed();
+const builtCountdown = !builtClosed && !Number.isNaN(closesAtMs) && Date.now() < closesAtMs;
+const madridLocale = isEN ? 'en-US' : 'es-ES';
+const MADRID = 'Europe/Madrid';
+
+// Formatos de la hora de Madrid. Ojo: el visitante puede estar en cualquier huso,
+// pero la promesa («23:59 CEST») está escrita en la hora de Emi, así que TODO el
+// texto se formatea en Madrid y solo el contador usa la hora local del navegador
+// (que da igual: la diferencia entre dos instantes es la misma en cualquier huso).
+const fmtMadridTime = (ms: number) => new Intl.DateTimeFormat(madridLocale,
+  { timeZone: MADRID, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date(ms));
+const fmtMadridDate = (ms: number) => new Intl.DateTimeFormat(madridLocale,
+  { timeZone: MADRID, day: 'numeric', month: 'long' }).format(new Date(ms));
+const madridDayKey = (ms: number) => new Intl.DateTimeFormat('en-CA',
+  { timeZone: MADRID, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(ms));
+// CEST en verano, CET en invierno — se deduce del desfase real de Madrid ese día,
+// así el rótulo no miente cuando el cierre cae fuera del horario de verano.
+const madridTz = (ms: number) => {
+  const parts = new Intl.DateTimeFormat('en-US', { timeZone: MADRID, timeZoneName: 'longOffset' })
+    .formatToParts(new Date(ms));
+  return (parts.find((x) => x.type === 'timeZoneName')?.value === 'GMT+01:00') ? 'CET' : 'CEST';
+};
+
+const t = isEN ? {
+  htmlLang: 'en',
+  metaTitle: "Let's Study Together — Emilse Rios Membership",
+  metaDesc: "Half an hour a day, the days you can. A new exercise every Thursday and a community doing it with you. No overwhelming library — just the present. Monthly membership for double bassists.",
+  logoAlt: 'Emilse Rios',
+  title: "Let's study together",
+  subtitle: 'The membership',
+  photoAlt: 'Emilse Rios',
+  ledeA: "The problem isn't that you're short on time to practice.",
+  ledeB: "It's that you don't know what to do with the 30 minutes you do have.",
+  // Presentación temprana, justo tras el gancho (pedido de Emi, ago 2026): qué es
+  // esto en tres líneas, para quien ya se convenció y no va a leer la carta entera.
+  // El botón de este tramo cierra ahora el bloque del mes, tras el video.
+  pitch: 'This is the first membership for bass players. And we focus on the German bow. One concept a month to keep you active with your technique: coordination, vibrato, bow strokes —legato, spiccato, staccato—. One specific exercise a week. If you want to sharpen your technique and have support while you do it, see you inside.',
+  // Video de Emi (Bunny Stream) + el mes en curso. VER `month*`: es contenido que
+  // CADUCA — se cambia cada mes con el tema nuevo (ver docs/PROGRESO.md).
+  videoLead: "I'll explain it in 1 minute",
+  videoSrc: 'https://player.mediadelivery.net/embed/741634/6123a4c3-5a29-4f00-bc9c-3630cf392f35?autoplay=false&loop=false&muted=true&preload=true&responsive=true',
+  videoTitle: 'Emilse Rios explains the membership in one minute',
+  monthIntro: [
+    'Do you know who Klaus Stoll is? For many years he was principal of the Berlin Philharmonic. A great teacher, one of my favorite pedagogues.',
+    'Well, he used to say that the bow is our main tool for communicating. Our tongue, teeth and lips.',
+  ],
+  monthBeauty: 'beau ti ful',
+  monthIntro2: [
+    "When we master the different bow strokes we can get a clear message across, move past the simplicity of just playing the notes, play great solos, bring musicality to the pieces, or simply be able to play what's actually written on the page.",
+    'That’s why this September the membership is dedicated to wrist flexibility, the most sensitive part of that whole chain reaction we set off when we play with the bow.',
+  ],
+  monthInsideH: 'What will you find inside?',
+  monthInside: [
+    'Why the wrist shouldn’t move on its own (the reaction happens in a chain) and what breaks when you ignore it.',
+    'Why the most common mistakes don’t feel like mistakes. That’s why you’ve been making them for years without realizing it.',
+    'An exercise so strange you’ve almost certainly never done it, and that makes you understand once and for all what exaggerating flexibility actually means. I explain it in under a minute, in the base concept.',
+    'Week 1 · Staccato. It’s two movements, not one like everyone thinks. This week is about exaggerating.',
+    'Week 2 · How to use flexibility so one note connects into the next, with no noise and no rattling. What we learned before now has to go unnoticed (like a singer).',
+    'Week 3 · We focus on spiccato, and watch out, because applying what came in the previous weeks isn’t enough anymore: turns out you also have to change your bow hold. (Maybe that’s why you still struggle with it.)',
+    'Week 4 · How to fix the traarrkkk, that bow rattle you can’t control. It has to do with flexibility, yes. But also with something else almost nobody looks at.',
+  ],
+  monthOutro: [
+    'All the exercises come in several levels, from beginner to advanced.',
+    'Each week builds on the one before. That’s why the doors close on Wednesday the 2nd at 23:59 CEST and nobody comes in during September. Joining halfway through the month doesn’t leave you with half the topic, it leaves you without the base for what comes next.',
+  ],
+  monthOutroLast: 'I don’t want that.',
+
+  // Puente entre el bloque del mes (que cierra con el primer botón) y la carta
+  // larga: presenta la historia, que si no arrancaba de la nada.
+  whyH: 'Want to know why I created this membership?',
+
+  storyLead: 'In 2012 my only job was to play, as well as I possibly could, the symphonies of the composer I love most in the world. But it wasn’t always like that, and in this story I’ll tell you something that might help you manage your practice time better — if you feel like you don’t have time, this might interest you.',
+  storyBody1: [
+    'That year we played all of Mahler’s symphonies. At the Walt Disney Concert Hall, with the Simón Bolívar Symphony Orchestra and the Los Angeles Philharmonic together on stage, conducted by Gustavo Dudamel.',
+    'A full month in California. A five-star hotel with such special treatment that one of the gifts they gave us was taking the whole orchestra to Disneyland — without a doubt the most fun day off of that tour — I felt like we were all ten years old again. For about four more years, my life looked more or less like that.',
+    { bold: true, text: 'And in 2016 I emigrated. I had to leave my country.' },
+    'I arrived in Argentina. And while I waited for my papers, I couldn’t audition, or play, or teach anywhere. I ended up working twelve hours a day in an ice cream shop.',
+    'I shared a flat with friends, so the only moment I had to practice was before seven in the morning. And the only place where I wouldn’t bother anyone was the rooftop of the building.',
+    'So there I was, carrying a double bass up the stairs to a rooftop in Buenos Aires. Some days I made it. Half an hour, an hour if I got up earlier. Other days exhaustion won.',
+  ],
+  discLead: 'I discovered 3 things:',
+  disc: [
+    { t: 'The first:', p: 'the excuses, complications, lack of time — they’re there, that’s life and there’s nothing we can do about it. What we can do is train our discipline and be consistent. A great way to start is with 30 minutes — some days it might be more.' },
+    { t: 'The second:', p: 'Goals matter. Without goals, you stand at the music stand, you tune, and… now what? What are you going to play? The same as always — you end up feeling like you’re not moving forward.' },
+    { t: 'The third:', p: 'There are plenty of exercises floating around the internet, but finding and organizing them takes longer than actually practicing them. The way I see it, YouTube often steals more practice time than it gives back.' },
+  ],
+  storyBody2: [
+    { bold: true, text: 'Having a goal makes us move — it makes us carve out space in the calendar, it trains our consistency. That’s my advice to you: write it down. It can be a piece you always wanted to play, or getting to know the high register of the instrument. Whatever it is, write it down. Build a plan to reach it.' },
+    { bold: true, text: 'This membership is about doing just enough — sustaining your consistency week after week, improving without piling up exercises you’ll never watch or practice (that’s what YouTube is for).' },
+    'Every Thursday, when the new exercise comes in, the previous one disappears. Yes, you read that right. I delete the previous content.',
+    'Why would I do that?',
+    'Because libraries overwhelm. Having fifty exercises archived “for later” ends up in doing none of them. And not just that — with the guilt of not doing anything.',
+  ],
+  needHelp: 'Need help? A clear guide? That’s exactly why Let’s study together exists.',
+
+  fitYesH: 'This membership is for you if…',
+  fitYes: [
+    'You have little time to practice each week but want a clear guide to keep advancing on the double bass.',
+    'You study on your own, without a teacher, and often don’t know “where to begin.”',
+    'You’ve spent years stuck on the same repertoire, the same book or method of exercises.',
+    'You struggle to be consistent with your practice.',
+    'You’ve reached a level that lets you play in orchestras and ensembles but you have technical gaps that hold you back on basic bow strokes: spiccato, staccato, legato.',
+    'You feel your technique limits you from advancing in interpretation (better vibrato, connection between notes, etc.).',
+    'You’re in the jazz world and want to learn and master the bow.',
+  ],
+  fitNoH: 'It’s not for you if…',
+  fitNo: [
+    'You’re after an endless library of exercises to save and watch “someday.” There’s no library here, no archive, no “I’ll see it later.” There’s one exercise this week. If you don’t do it, it’s gone and another arrives — no guilt, simple.',
+    'You’re looking for help toward a specific goal: getting into a conservatory or an orchestra. That would call for private lessons. This membership is meant to keep you fit and technically active. We won’t work through specific repertoire problems, though these exercises do help you build the foundations to solve them later.',
+    'And if you’re not willing to make space in your life to practice, even a couple of days a week, then don’t bother joining. This membership isn’t for you.',
+    'The exercises will be adapted for several levels, but everything starts slow, so you take it in and understand it. If you don’t have the patience to study slowly, it won’t work for you.',
+  ],
+  community: 'Courses come to an end. So do method books. This membership doesn’t: every week a new exercise comes in that keeps you active with your technique. And yes, there’s support. You ask your question in the chat and I answer it personally.',
+
+  titleEcho: 'Estudiemos juntos',
+  pricePer: '/mo',
+  // Dos estados: fundador (dentro de la ventana) y estándar (cuando cierra).
+  // La ventana de fundador CERRÓ el 23 jul 2026, así que hoy solo se pinta el
+  // estándar; el copy de fundador ($57) se conserva tal cual quedó, inerte, y no
+  // se repinta nunca: al trasplantar la carta se quitó la condición y acá solo
+  // entra el estándar (ver la nota del trasplante, arriba). El copy de fundador
+  // se conserva tal cual quedó por si Emi vuelve a abrir una ventana, que sería
+  // un bloque nuevo y no un `if` escondido.
+  priceLabelFounder: 'Founder price',
+  priceLabelStd: 'Price',
+  priceAmountFounder: '$57',
+  priceAmountStd: '€65',
+  priceInBoxLeadFounder: 'The membership opens at founder price: $57/month, only from July 16 to 23.',
+  priceInBoxLeadStd: 'The membership is €65/month.',
+  priceInBoxRestFounder: 'That price freezes for you: even when it goes up (and it will), you keep paying the same for as long as you stay in.',
+  priceInBoxRestStd: 'That price freezes for you: the day it goes up, you keep paying the same for as long as you stay in.',
+  priceFeatures: [
+    'A new exercise every Thursday on the platform, based on a core concept.',
+    'Every month I explain one topic — a core technical concept — so you understand where the movements, coordination, and sound come from. Just one concept. Simple.',
+    'Platform access, 24/7, wherever you are.',
+    'A questions forum — I answer personally, and you can see other members’ questions too; you learn from the group as well.',
+  ],
+  priceReassure: 'Cancel anytime, no questions asked.',
+  priceBelow: 'You pay each month on the date you joined. For example, if you join on the 20th, your month runs from the 20th to the 20th. You never lose days. You can cancel whenever you want, no explanations needed. One thing though: if you leave and later want to come back, you join at whatever price is in force at that moment.',
+  pay: 'Join here',
+  payHref: `${ACADEMIA}/api/checkout?lang=en`,
+  // Cuenta atrás bajo cada botón + estado «puertas cerradas» (ver
+  // src/lib/membership.ts). Los marcadores los rellenan el build y el script con
+  // la hora de MADRID: {time} = 23:59, {tz} = CEST/CET, {date} = September 2.
+  closeLeadToday: 'Doors close today at {time} {tz}',
+  closeLeadDay: 'Doors close on {date} at {time} {tz}',
+  payClosed: 'Doors closed',
+  closedNote: 'The doors are closed. They open on {date}.',
+  closedNoteNoDate: 'The doors are closed for now.',
+  closedLink: 'Tell me when they open',
+
+  pdLabel: 'P.S.',
+  pdText: 'I made this membership for the Emilse of 2016 — the one carrying her double bass up the stairs of that rooftop, full of determination not to give up the instrument, but who over time was left not knowing what to study. I owed it to her. If you’ve ever felt like you don’t know where to begin or what to study, then this is for you too.',
+  pdSign: '— Emilse',
+
+  faqH: 'Frequently asked questions',
+  faq: [
+    { q: 'Can I pay in my own currency?', a: 'Payments run through Stripe. When you join, it automatically detects your card’s currency and you pay in it. Right now it’s €65 a month, about $75 USD. The price you join at stays frozen for you as long as you’re a member.' },
+    { q: 'Do I need to be advanced to join?', a: 'No, but you should at least know the first positions of the instrument. I’ll leave each exercise adapted to a beginner, intermediate or advanced level. These are basic concepts we all need to study throughout our careers, whatever our level — and the sooner you start, the better.' },
+    { q: 'I play French bow. Does this membership work for me?', a: 'This membership is designed specifically for the German bow. Some left-hand concepts will help you either way, but I teach bow strokes with German technique only. Why? Because I consider it easier, faster, and more natural for the body. It’s the one I recommend.' },
+    { q: 'What happens if I join mid-month?', a: 'It depends on the month. When a topic’s exercises are independent from one another, the membership stays open and you can join any day: you get that week’s exercise until the next one replaces it, and the base concept stays available all month long. But some topics are progressive. Each week builds on the one before, and joining late doesn’t leave you with half of it, it leaves you without the base for what comes next. In those months I close the doors and nobody comes in during that month. September is one of them: wrist flexibility, doors closed from Wednesday the 2nd at 23:59 CEST.' },
+    { q: 'How does payment work?', a: 'It’s a monthly subscription, just like your others (Netflix, Disney, etc.) — an automatic monthly charge. In this case you pay the day you join and that becomes your billing day each month. The price you join with freezes for you as long as you’re a member.' },
+    { q: 'Can I cancel anytime?', a: 'Yes, from your account, with no explanation. You keep access until the end of the period you already paid for. If you later want to come back, you join at the price in force at that moment, not your previous one — you’d lose the founder price.' },
+    { q: 'How do I ask my questions?', a: 'In the classroom chat. I answer them, everyone can read each other’s questions and answers — that’s another place you learn.' },
+    { q: 'What language is it in?', a: 'This version is in English and Spanish; you can register in the language you prefer.' },
+    { q: 'How much time do I need?', a: 'Half an hour a day, the days you can — that’s enough. Simple as that.' },
+    { q: 'What hours can I access the platform?', a: 'It’s available to you 24/7.' },
+    { q: 'I have a question that isn’t listed here:', a1: 'Write to me and I’ll answer you personally at ', email: 'info@emilserios.com' },
+  ],
+
+  finalMsgLead: 'A lot for a lot of you.',
+  finalMsgRest: 'A gift for anyone who wants to learn the technical concepts that help you improve your double bass playing exponentially, and enjoy the sound of your instrument. Simple as that. Let’s study together!',
+  newsPre: 'Not subscribed to the newsletter yet?',
+  newsLink: 'Subscribe here',
+
+  footBack: 'Back to Products', footHome: 'Home',
+  footLegal: '© 2026 Emilse Rios',
+  enter: 'Log in',
+} : {
+  htmlLang: 'es',
+  metaTitle: 'Estudiemos Juntos — Membresía de Emilse Rios',
+  metaDesc: 'Media hora al día, los días que puedas. Un ejercicio nuevo cada jueves y una comunidad haciéndolo contigo. Sin biblioteca que abrume — solo el presente. Membresía mensual para contrabajistas.',
+  logoAlt: 'Emilse Rios',
+  title: 'Estudiemos juntos',
+  subtitle: 'La membresía',
+  photoAlt: 'Emilse Rios',
+  ledeA: 'El problema no es que te falte tiempo para estudiar.',
+  ledeB: 'Es que no sabes qué hacer con los 30 minutos que sí tienes.',
+  // Presentación temprana, justo tras el gancho (pedido de Emi, ago 2026): qué es
+  // esto en tres líneas, para quien ya se convenció y no va a leer la carta entera.
+  // El botón de este tramo cierra ahora el bloque del mes, tras el video.
+  pitch: 'Esta es la primera membresía para contrabajistas. Y nos enfocamos en el arco alemán. Cada mes un concepto para mantenerte activo con la técnica: coordinación, vibrato, golpes de arco —legato, spiccato, staccato—. Cada semana un ejercicio específico. Si quieres perfeccionar tu técnica y tener acompañamiento mientras lo haces, nos vemos dentro.',
+  // Video de Emi (Bunny Stream) + el mes en curso. VER `month*`: es contenido que
+  // CADUCA — se cambia cada mes con el tema nuevo (ver docs/PROGRESO.md).
+  videoLead: 'Te lo explico en 1 minuto',
+  videoSrc: 'https://player.mediadelivery.net/embed/741634/90981ada-e857-4d0d-aa33-df542bdc6dc3?autoplay=false&loop=false&muted=true&preload=true&responsive=true',
+  videoTitle: 'Emilse Rios te explica la membresía en un minuto',
+  monthIntro: [
+    '¿Sabes quién es Klaus Stoll? Por muchos años fue principal de la Filarmónica de Berlín. Un gran docente, uno de mis pedagogos favoritos.',
+    'Pues él solía decir que el arco es nuestra principal herramienta para comunicar. Nuestra lengua, dientes y labios.',
+  ],
+  monthBeauty: 'her mo so',
+  monthIntro2: [
+    'Cuando dominamos los diferentes golpes de arco podemos transmitir un mensaje claro, salir de la simplicidad de solo tocar las notas, hacer grandes solos, aportar musicalidad a las obras, o simplemente poder tocar lo que realmente está escrito en la partitura.',
+    'Por eso septiembre esta membresía está dedicada a la flexibilidad de la muñeca, la parte más sensible de toda esa reacción en cadena que tenemos al tocar con arco.',
+  ],
+  monthInsideH: '¿Qué vas a encontrar dentro?',
+  monthInside: [
+    'Por qué la muñeca no debe moverse sola (la reacción es en cadena) y qué se rompe cuando la ignoras.',
+    'Por qué los errores más comunes no se sienten como errores. Por eso llevas años haciéndolos sin darte cuenta.',
+    'Un ejercicio tan raro que seguro nunca lo has hecho, y que te hace entender de una vez qué es exagerar la flexibilidad. Te lo explico en menos de un minuto, en el concepto base.',
+    'Semana 1 · Staccato. Son dos movimientos, no uno como todos piensan. Esta semana va de exagerar.',
+    'Semana 2 · Cómo usar la flexibilidad para que una nota conecte con la siguiente, sin ruidos ni vibraciones. Lo que aprendimos antes ahora tiene que pasar desapercibido (como un cantante).',
+    'Semana 3 · Nos centramos en el spiccato, y ojo, que aplicar lo de las semanas anteriores ya no es suficiente: resulta que también hay que cambiar la toma del arco. (Tal vez por eso aún te cuesta dominarlo.)',
+    'Semana 4 · Cómo se arregla el traarrkkk, esa vibración del arco que no puedes controlar. Tiene que ver con la flexibilidad, sí. Pero también con otra cosa que casi nadie mira.',
+  ],
+  monthOutro: [
+    'Todos los ejercicios vienen en varios niveles, de inicial a avanzado.',
+    'Cada semana se apoya en la anterior. Por eso las puertas se cierran el miércoles 2 a las 23:59 CEST y durante septiembre no entra nadie. Entrar a mitad de mes no te deja con la mitad del tema, te deja sin la base de lo que viene después.',
+  ],
+  monthOutroLast: 'No quiero eso.',
+
+  // Puente entre el bloque del mes (que cierra con el primer botón) y la carta
+  // larga: presenta la historia, que si no arrancaba de la nada.
+  whyH: '¿Quieres saber por qué creé esta membresía?',
+
+  storyLead: 'En 2012 mi único trabajo era tocar lo mejor posible las sinfonías del compositor que más amo en la vida. Pero no siempre fue así, y en esta historia te cuento algo que te va a ayudar a gestionar mejor tu tiempo de estudio, si sientes que no tienes tiempo, tal vez te interese.',
+  storyBody1: [
+    'Ese año tocamos todas las sinfonías de Mahler. En el Walt Disney Concert Hall, con la orquesta sinfónica Simón Bolívar y la Filarmónica de Los Ángeles juntas en el escenario, dirigidas por Gustavo Dudamel.',
+    'Un mes completo en California. Hotel cinco estrellas con un trato especial, tan especial, que uno de los regalos que nos dieron fue llevar a toda la orquesta a Disney, el día libre más divertido de ese tour sin duda, sentí que todos volvimos a tener 10 años. Durante unos cuatro años más, mi vida fue más o menos así.',
+    { bold: true, text: 'Y en 2016 emigré. Tuve que dejar mi país.' },
+    'Llegué a Argentina. Y mientras esperaba el trámite para tener documentos, no podía audicionar, ni tocar ni dar clases en ningún lado. Me tocó trabajar doce horas al día en una heladería.',
+    'Vivía en un departamento compartido con amigos, así que el único momento que tenía para estudiar era antes de las siete de la mañana. Y el único lugar donde no molestaba a nadie era la azotea del edificio.',
+    'Ahí estaba yo ahora subiendo un contrabajo por las escaleras de una azotea en Buenos Aires. Algunos días lo lograba. Media hora, una hora si me levantaba más temprano. Otros días el cansancio me ganaba.',
+  ],
+  discLead: 'Descubrí 3 cosas:',
+  disc: [
+    { t: 'La primera:', p: 'las excusas, complicaciones, falta de tiempo, están, así es la vida y no podemos hacer nada al respecto. Lo que sí podemos es entrenar nuestra disciplina y ser constantes. Una excelente manera de comenzar es con 30 min, tal vez algunos días podría ser más.' },
+    { t: 'La segunda:', p: 'Las metas son importantes. Sin metas, Te paras frente al atril, afinas, ¿y? ¿Qué vas a tocar? Lo mismo de siempre, terminas sintiendo que no avanzas.' },
+    { t: 'La tercera:', p: 'Si bien hay muchos ejercicios dando vueltas en internet, te toma más tiempo encontrarlos y organizarlos que estudiarlos, como lo veo, YouTube muchas veces más que aportar se convierte en un ladrón del tiempo de estudio.' },
+  ],
+  storyBody2: [
+    { bold: true, text: 'Tener una meta nos hace movernos, nos hace abrir espacio en la agenda, nos entrena la constancia. Es mi consejo para ti, anótala, puede ser una obra que siempre quisiste tocar, o conocer la región aguda del instrumento. Lo que sea, anótala. Ármate un plan para llegar a ella.' },
+    { bold: true, text: 'Esta es una membresía para hacer lo justo, para sostener tu constancia semana a semana, para mejorar sin acumular ejercicios que nunca vas a ver ni a practicar (ya para eso está YouTube).' },
+    'Cada jueves, cuando entra el ejercicio nuevo, el anterior desaparece. Sí, leíste bien. Yo borro el contenido anterior.',
+    '¿Por qué haría eso?',
+    'Porque las bibliotecas abruman. Tener cincuenta ejercicios archivados “para después” termina en no hacer ninguno. Y no solo eso, sino con la culpa de que no estás haciendo nada.',
+  ],
+  needHelp: '¿Necesitas ayuda? ¿Una guía clara? Para eso existe Estudiemos Juntos.',
+
+  fitYesH: 'Esta membresía es para ti si…',
+  fitYes: [
+    'Tienes poco tiempo para estudiar a la semana pero quieres una guía clara de cómo seguir avanzando con el contrabajo.',
+    'Eres de los que estudia por su cuenta, sin profesor, y muchas veces no sabe “por dónde comenzar”.',
+    'Tienes años estancado en el mismo repertorio, el mismo libro o método de ejercicios.',
+    'Te cuesta ser constante con el estudio del contrabajo.',
+    'Has alcanzado un nivel que te permite tocar en orquestas y ensambles pero tienes muchos vacíos técnicos que te detienen en golpes de arco básicos: spiccato, staccato, legato.',
+    'Sientes que tu técnica te limita en avanzar en la interpretación (mejor vibrato, conexión entre las notas, etc.).',
+    'Estás en el mundo del jazz y quieres aprender y dominar el arco.',
+  ],
+  fitNoH: 'No es para ti si…',
+  fitNo: [
+    'Buscas una biblioteca infinita de ejercicios para guardar y ver “algún día”. Acá no hay biblioteca, no hay archivo, no hay “lo veo después”. Hay un ejercicio esta semana. Si no lo haces, se va y viene otro, sin culpas, simple.',
+    'Estás buscando ayuda para lograr una meta específica: entrar a un conservatorio o una orquesta. Para eso necesitarías clases particulares. Esta membresía está pensada para mantenerte en forma y activo técnicamente. No veremos cómo resolver problemas de repertorio específico, aunque estos ejercicios sí te ayudan a crear bases para resolver esos problemas después.',
+    'Y si no estás dispuesto a abrir espacio en tu vida para estudiar, aunque sea un par de días a la semana, entonces no te molestes en entrar. Esta membresía no es para ti.',
+    'Los ejercicios estarán adaptados para varios niveles, pero todo se comienza lento, para incorporar y entender. Si no tienes paciencia para estudiar lento, no te va a funcionar.',
+  ],
+  community: 'Los cursos se terminan. Los libros de métodos también. Esta membresía no: cada semana entra un ejercicio nuevo que te mantiene activo con la técnica. Y sí, hay acompañamiento. Haces tu pregunta en el chat y la contesto yo personalmente.',
+
+  titleEcho: 'Let’s study together',
+  pricePer: '/mes',
+  // Dos estados: fundador (dentro de la ventana) y estándar (cuando cierra).
+  // La ventana de fundador CERRÓ el 23 jul 2026, así que hoy solo se pinta el
+  // estándar; el copy de fundador ($57) se conserva tal cual quedó, inerte, y no
+  // se repinta nunca: al trasplantar la carta se quitó la condición y acá solo
+  // entra el estándar (ver la nota del trasplante, arriba). El copy de fundador
+  // se conserva tal cual quedó por si Emi vuelve a abrir una ventana, que sería
+  // un bloque nuevo y no un `if` escondido.
+  priceLabelFounder: 'Precio de fundador',
+  priceLabelStd: 'Precio',
+  priceAmountFounder: '$57',
+  priceAmountStd: '€65',
+  priceInBoxLeadFounder: 'La membresía abre con precio de fundador: $57 al mes, solo del 16 al 23 de julio.',
+  priceInBoxLeadStd: 'La membresía cuesta €65 al mes.',
+  priceInBoxRestFounder: 'Ese precio se congela para ti: aunque suba (y va a subir), tú sigues pagando lo mismo durante todo el tiempo que estés dentro.',
+  priceInBoxRestStd: 'Ese precio se congela para ti: el día que suba, tú sigues pagando lo mismo durante todo el tiempo que estés dentro.',
+  priceFeatures: [
+    'Cada jueves un ejercicio nuevo en la plataforma basado en un concepto base.',
+    'Cada mes te explico un tema, un concepto base técnico, para que entiendas de dónde vienen los movimientos, la coordinación, el sonido, solo un concepto. Simple.',
+    'El acceso a la plataforma lo tienes 24/7 estés donde estés.',
+    'Foro de preguntas, las respondo personalmente, y puedes ver preguntas de otros miembros, del grupo también se aprende.',
+  ],
+  priceReassure: 'Cancela cuando quieras, sin explicar nada.',
+  priceBelow: 'Pagas cada mes en la fecha que entraste. Por ejemplo, si entras un 20, tu mes va del 20 al 20. Nunca pierdes días. Te puedes dar de baja cuando quieras, sin explicaciones. Eso sí: si te vas y luego quieres volver, entras con el precio que esté vigente en ese momento.',
+  pay: 'Acá te unes',
+  payHref: `${ACADEMIA}/api/checkout?lang=es`,
+  // Cuenta atrás bajo cada botón + estado «puertas cerradas» (ver
+  // src/lib/membership.ts). Los marcadores los rellenan el build y el script con
+  // la hora de MADRID: {time} = 23:59, {tz} = CEST/CET, {date} = 2 de septiembre.
+  closeLeadToday: 'Cierra hoy a las {time} {tz}',
+  closeLeadDay: 'Cierra el {date} a las {time} {tz}',
+  payClosed: 'Puertas cerradas',
+  closedNote: 'Las puertas están cerradas. Abren el {date}.',
+  closedNoteNoDate: 'Las puertas están cerradas por ahora.',
+  closedLink: 'Avísame cuando abran',
+
+  pdLabel: 'P.D.',
+  pdText: 'Esta membresía la hice para la Emilse del 2016, la que subía el contrabajo por las escaleras de esa azotea con todas las ganas de no abandonar el instrumento, pero que con el paso del tiempo fue quedándose sin saber qué estudiar. Se la debía. Si alguna vez has sentido que no sabes por dónde comenzar o qué estudiar, entonces también es para ti.',
+  pdSign: '— Emilse',
+
+  faqH: 'Preguntas frecuentes',
+  faq: [
+    { q: '¿Puedo pagar en mi moneda?', a: 'El pago se procesa con Stripe. Al suscribirte, detecta automáticamente la moneda de tu tarjeta y pagas en ella. Hoy son €65 al mes, unos $75 USD. El precio con el que entras se congela para ti mientras seas miembro.' },
+    { q: '¿Debo tener un nivel avanzado para entrar?', a: 'No, pero sí debes tener conocimiento de por lo menos las primeras posiciones del instrumento. Yo dejaré el ejercicio para adaptarlo a un nivel inicial, intermedio o avanzado. Son conceptos básicos que todos debemos estudiar a lo largo de nuestra carrera, sin importar el nivel, y entre más rápido comiences mejor.' },
+    { q: '¿Si toco arco francés, esta membresía me sirve?', a: 'Esta membresía está diseñada específicamente para arco alemán. Algunos conceptos de mano izquierda te servirán igual, pero los golpes de arco los enseño solo con técnica alemana. ¿Por qué? Porque considero que es más fácil, más rápida y más natural para el cuerpo. Es la que recomiendo.' },
+    { q: '¿Qué pasa si entro a mitad del mes?', a: 'Depende del mes. Cuando los ejercicios de un tema son independientes entre sí, la membresía permanece abierta, y puedes entrar cualquier día: tienes el ejercicio de esa semana hasta que lo reemplace el siguiente, y el concepto base queda disponible todo el mes. Pero hay temas que son progresivos. Cada semana se apoya en la anterior y entrar tarde no te deja con la mitad, te deja sin la base de lo que viene después. En esos meses cierro las puertas y durante ese mes no entra nadie. Septiembre es uno de esos: flexibilidad de la muñeca, puertas cerradas desde el miércoles 2 a las 23:59 CEST.' },
+    { q: '¿Cómo funciona el pago?', a: 'Es una suscripción mensual, así como tus otras suscripciones (Netflix, Disney, etc.), es un pago automático mensual. En este caso pagas el día que entras y ese será tu día de cobro cada mes. El precio con el que entras se congela para ti mientras seas miembro.' },
+    { q: '¿Puedo cancelar cuando quiera?', a: 'Sí, desde tu cuenta, sin explicar nada. Mantienes el acceso hasta el final del período que ya pagaste. Si luego quieres volver, entras con el precio vigente en ese momento, no con el tuyo anterior, perderías el precio de fundador.' },
+    { q: '¿Cómo hago mis preguntas?', a: 'En el chat del aula. Yo las respondo, todos pueden leer las preguntas y respuestas de los demás — ahí también se aprende.' },
+    { q: '¿En qué idioma es?', a: 'Esta versión está en inglés y español, puedes registrarte en el idioma de tu preferencia.' },
+    { q: '¿Cuánto tiempo necesito?', a: 'Media hora al día, los días que puedas, con eso es suficiente. Así de simple.' },
+    { q: '¿En qué horarios puedo ingresar a la plataforma?', a: 'Está disponible para ti 24/7.' },
+    { q: 'Tengo una pregunta que no aparece acá:', a1: 'Escríbeme y te la contesto personalmente ', email: 'info@emilserios.com' },
+  ],
+
+  finalMsgLead: 'Mucho para muchos.',
+  finalMsgRest: 'Un regalo para el que quiera aprender esos conceptos técnicos que te ayudan a mejorar exponencialmente tu nivel de contrabajo, y poder disfrutar del sonido de tu instrumento. Así de simple. ¡Estudiemos juntos!',
+  newsPre: '¿Aún no estás suscrito al newsletter?',
+  newsLink: 'Acá te suscribes',
+
+  footBack: 'Volver a Productos', footHome: 'Inicio',
+  footLegal: '© 2026 Emilse Rios',
+  enter: 'Entrar',
+};
+
+// Textos de las puertas ya resueltos para el HTML del build (sin JS). El script
+// del navegador vuelve a calcularlos con la hora real del visitante y los pisa;
+// las dos versiones usan las mismas plantillas y la misma zona (Madrid), así que
+// solo cambian si el visitante llega justo del otro lado del corte.
+const closeLeadBuilt = Number.isNaN(closesAtMs) ? '' : (
+  madridDayKey(closesAtMs) === madridDayKey(Date.now()) ? t.closeLeadToday : t.closeLeadDay)
+    .replace('{date}', fmtMadridDate(closesAtMs))
+    .replace('{time}', fmtMadridTime(closesAtMs))
+    .replace('{tz}', madridTz(closesAtMs));
+const closedNoteBuilt = Number.isNaN(reopensAtMs)
+  ? t.closedNoteNoDate
+  : t.closedNote.replace('{date}', fmtMadridDate(reopensAtMs));
+// Con las puertas cerradas el botón deja de ser un enlace: Astro omite el
+// atributo cuando el valor es undefined, así que ni con JS desactivado se puede
+// llegar al checkout desde aquí — y el `/api/checkout` de la academia lo corta
+// igual por su lado, con las mismas fechas.
+const payHref = builtClosed ? undefined : t.payHref;
+
+// ---------------------------------------------------------------------------
+// Datos estructurados (JSON-LD). Le explican a Google QUÉ es esta página:
+//   · WebPage  → esta carta y su idioma. En la academia era `WebSite`, porque
+//     allí la carta ERA el sitio; acá es una página de la tienda, y decirle a
+//     Google que es el sitio entero sería mentirle.
+//   · Person   → Emilse, la autora, enlazada a su web principal.
+//   · FAQPage  → las preguntas frecuentes que ya están en la carta. Es la única
+//     que puede ganar un resultado enriquecido (las preguntas desplegables bajo
+//     el enlace en Google), y por eso reutiliza EXACTAMENTE el mismo texto
+//     visible: si el marcado no coincide con lo que se ve, Google lo descarta.
+//
+// A propósito NO se marca el precio (Product/Offer): mientras el cobro viva en
+// la academia, un importe horneado acá se desfasaría el día que allá cambie —
+// y un precio que no coincide con el visible es justo lo que Google castiga.
+const faqEntries = t.faq.filter((f: any) => typeof f.a === 'string');
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebPage',
+      '@id': `${canonical}#webpage`,
+      url: canonical,
+      name: t.metaTitle,
+      description: t.metaDesc,
+      inLanguage: t.htmlLang,
+      publisher: { '@id': `${SITE}/#emilse` },
+    },
+    {
+      '@type': 'Person',
+      '@id': `${SITE}/#emilse`,
+      name: 'Emilse Rios',
+      jobTitle: isEN ? 'Double bassist and teacher' : 'Contrabajista y profesora',
+      image: ogImage,
+      url: 'https://emilserios.com',
+      sameAs: ['https://emilserios.com'],
+    },
+    {
+      '@type': 'FAQPage',
+      '@id': `${canonical}#faq`,
+      inLanguage: t.htmlLang,
+      mainEntity: faqEntries.map((f: any) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+  ],
+};
+---
+<!DOCTYPE html>
+<html lang={t.htmlLang}>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script is:inline>
+  // El rescate del enlace mágico de Supabase se quedó en la academia: allí esta
+  // carta vive en la raíz, que es el Site URL adonde Supabase reenvía los tokens,
+  // y había que empujarlos a /entrar/ o a /nueva-clave/. Acá no existe ninguna de
+  // las dos páginas —la sesión sigue siendo la de la academia—, así que traerlo
+  // solo serviría para mandar a alguien a un 404.
+
+  // Cambio de idioma sin saltar al inicio: si venimos de un toggle EN/ES,
+  // pre-ocultamos el contenido antes de pintar para reposicionar sin parpadeo.
+  // Red de seguridad: se revela igual a los 1.5s por si algo falla.
+  try {
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    if (sessionStorage.getItem('langSwitch')) {
+      document.documentElement.classList.add('lang-enter');
+      setTimeout(function () { document.documentElement.classList.remove('lang-enter'); }, 1500);
+    }
+  } catch (e) {}
+</script>
+<title>{t.metaTitle}</title>
+<meta name="description" content={t.metaDesc} />
+{/* La «E» del logo de Emi, la misma que el resto del sitio. */}
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+<!-- ---------------------------------------------------------------------
+     Registro en Google. Acá la carta es la página de venta de un producto de
+     la tienda —/productos/estudiemos-juntos/ y su gemela inglesa—, no la
+     portada: la canónica y los hreflang salen de `productPath`.
+     --------------------------------------------------------------------- -->
+<meta name="robots" content="index, follow, max-image-preview:large" />
+<link rel="canonical" href={canonical} />
+<!-- Las dos versiones son la misma página en dos idiomas, no contenido
+     duplicado. Cada una declara a las dos (Google lo exige) + x-default. -->
+<link rel="alternate" hreflang="es" href={urlES} />
+<link rel="alternate" hreflang="en" href={urlEN} />
+<link rel="alternate" hreflang="x-default" href={urlES} />
+{googleVerification && <meta name="google-site-verification" content={googleVerification} />}
+
+<!-- Tarjeta al compartir el enlace (WhatsApp, X, Facebook, LinkedIn…) -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Estudiemos Juntos" />
+<meta property="og:title" content={t.metaTitle} />
+<meta property="og:description" content={t.metaDesc} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:alt" content={t.photoAlt} />
+<meta property="og:locale" content={isEN ? 'en_US' : 'es_ES'} />
+<meta property="og:locale:alternate" content={isEN ? 'es_ES' : 'en_US'} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={t.metaTitle} />
+<meta name="twitter:description" content={t.metaDesc} />
+<meta name="twitter:image" content={ogImage} />
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
+
+<link rel="stylesheet" href="/colors_and_type.css" />
+<style is:inline>
+  /* ---------------------------------------------------------------------------
+     Carta editorial con ritmo. Un solo lienzo crema, una columna de lectura, pero
+     con jerarquía: logo, foto, apertura grande, dos descubrimientos, cuadro
+     comparativo, cuadro de precio que se invierte, FAQ desplegable y fundidos.
+     Acentos: terracota (botones) + marrón instrumento (hovers de texto).
+     --------------------------------------------------------------------------- */
+  :root {
+    --ink: #17140f;            /* casi negro, cálido — contraste alto */
+    --paper: #faf7f1;          /* crema muy suave */
+    --soft: #6f6a61;           /* gris para notas menores y footer */
+    --accent: #a94f2b;         /* terracota — botones */
+    --accent-strong: #8f4222;
+    --wood: #6b3f2a;           /* marrón del instrumento — hovers de texto */
+    --measure: 680px;          /* ancho máximo de lectura */
+    --edge: clamp(22px, 6vw, 40px);
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body), system-ui, sans-serif;
+    font-size: clamp(17px, 0.4vw + 16px, 19px);
+    line-height: 1.66;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    /* 14 · Cursor: clave de fa (clave del contrabajo) */
+    cursor: url('/img/clef-cursor.svg') 11 13, auto;
+  }
+  /* El cursor de clave de fa se mantiene también sobre enlaces y botones (no vuelve a la manito) */
+  /* Cuando el fondo se pone oscuro, el cursor cambia a su versión clara para no perderse: */
+  /*  · la tarjeta de precio al invertirse a negro */
+  .pricecard:hover, .pricecard:hover * { cursor: url('/img/clef-cursor-light.svg') 11 13, auto; }
+  /*  · los botones al rellenarse de tinta (el relleno nace bajo el cursor) */
+  .btn:hover { cursor: url('/img/clef-cursor-light.svg') 11 13, auto; }
+  /*  · excepción: el botón DENTRO de la tarjeta negra se rellena de crema → cursor oscuro */
+  .pricecard:hover .btn:hover { cursor: url('/img/clef-cursor.svg') 11 13, auto; }
+  ::selection { background: var(--ink); color: var(--paper); }
+  img { display: block; max-width: 100%; }
+
+  .page { max-width: var(--measure); margin: 0 auto; padding: clamp(28px, 7vw, 56px) var(--edge) clamp(48px, 9vw, 88px);
+          transition: opacity 300ms ease; }
+
+  /* Píldora de idioma — fija, esquina superior derecha. Solo EN/ES. */
+  .langpill { position: fixed; top: clamp(14px, 2.6vw, 22px); right: clamp(14px, 2.6vw, 22px); z-index: 50;
+              display: inline-flex; align-items: center; gap: 2px;
+              background: rgba(250, 247, 241, 0.72);
+              -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4);
+              border: 1px solid rgba(23, 20, 15, 0.10); border-radius: 999px; padding: 4px 5px;
+              box-shadow: 0 6px 22px rgba(23, 20, 15, 0.09); }
+  .langpill a { text-decoration: none; color: var(--soft); font-size: 0.82rem; font-weight: 600;
+                letter-spacing: 0.04em; line-height: 1; padding: 6px 12px; border-radius: 999px;
+                transition: color 200ms ease, background 200ms ease; }
+  .langpill a:hover { color: var(--ink); }
+  /* Separador y acceso "Entrar" (miembros que ya pagaron y vuelven). */
+  .langpill__sep { width: 1px; align-self: stretch; margin: 4px 2px;
+                   background: rgba(23, 20, 15, 0.14); }
+  .langpill__enter { color: var(--ink) !important; }
+  .langpill__enter:hover { background: rgba(23, 20, 15, 0.06); }
+  .langpill a[aria-current="true"] { color: var(--ink); background: rgba(23, 20, 15, 0.06); }
+
+  /* Fundido del texto al cambiar de idioma */
+  .page.is-leaving { opacity: 0; }
+  html.lang-enter .page { opacity: 0; }
+
+  /* 13 · Fundido al hacer scroll (reveal) */
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .reveal.is-visible { opacity: 1; transform: none; }
+
+  /* 1 · Logo (reemplaza la firma en texto) */
+  .logo { text-align: center; margin: 0; }
+  .logo__img { display: inline-block; width: clamp(260px, 66vw, 400px); height: auto; margin: 0 auto; }
+  .logo__text { font-size: 0.95rem; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; }
+
+  /* 2 · Foto — misma distancia al logo (arriba) que al título (abajo); el logo tiene
+     aire interno propio, así que el margen inferior compensa ese hueco. Drop shadow
+     marcado para que no se vea plana. B&W → color al hacer hover (solo donde hay hover;
+     en táctil se ve siempre a color). */
+  .logo { line-height: 0; }
+  .photo { margin: 0 auto clamp(46px, 8vw, 66px); width: clamp(190px, 48vw, 250px); }
+  .photo img { width: 100%; height: auto; border-radius: 0;
+               box-shadow: 0 26px 56px -12px rgba(23, 20, 15, 0.34), 0 10px 20px -8px rgba(23, 20, 15, 0.22);
+               transition: filter 0.7s ease, box-shadow 0.5s ease, transform 0.5s ease; }
+  @media (hover: hover) {
+    .photo img { filter: grayscale(1) contrast(1.02); }
+    .photo img:hover { filter: grayscale(0); box-shadow: 0 34px 70px -14px rgba(23, 20, 15, 0.4), 0 12px 24px -8px rgba(23, 20, 15, 0.24);
+                       transform: translateY(-4px); }
+  }
+
+  /* 3 · Titular + apertura */
+  .title { font-size: clamp(2.2rem, 7.6vw, 3rem); line-height: 1.06; letter-spacing: -0.025em;
+           font-weight: 600; margin: 0; text-align: center; text-wrap: balance; }
+  .subtitle { font-size: clamp(1.15rem, 3.4vw, 1.5rem); font-weight: 500; color: var(--ink);
+              text-align: center; margin: 0.35em 0 0; letter-spacing: -0.01em; }
+  /* La primera oración va en UNA línea; el resto se balancea en dos. Más pequeña
+     que el título para que no compita con él. */
+  .lede { margin: clamp(28px, 6vw, 40px) 0 0; text-align: center;
+          font-style: italic; font-weight: 700; font-size: clamp(1.12rem, 3vw, 1.5rem); line-height: 1.38;
+          letter-spacing: -0.005em; transition: color 0.45s ease; }
+  .lede:hover { color: var(--wood); }
+  .lede__a { display: block; white-space: nowrap; }
+  .lede__b { display: block; text-wrap: balance; }
+  @media (max-width: 440px) { .lede__a { white-space: normal; text-wrap: balance; } }
+
+  /* 3b · Presentación temprana — justo debajo de la apertura. Resume qué es la
+     membresía sin obligar a leer la carta entera. Va alineada a la IZQUIERDA como
+     el resto del cuerpo (centrado solo queda la apertura, que es el subtítulo).
+     El botón de este tramo ya no cuelga de aquí: ahora cierra el bloque del mes,
+     después del video (ver 3c y 3d). */
+  .pitch { margin: clamp(26px, 5vw, 38px) 0 0; }
+  .pitch__p { margin: 0; text-wrap: pretty; }
+
+  /* 3c · Video de un minuto (Bunny Stream) — entrada al tema del mes.
+     El rótulo va centrado, como invitación; el marco es 16:9 fluido (relleno del
+     56.25%) con la misma sombra marcada de la foto, esquinas cuadradas como todo
+     lo demás. Se sale un poco de la columna de lectura para que respire, sin
+     llegar al ancho del cuadro comparativo. */
+  .videolead { text-align: center; font-weight: 700; font-style: italic;
+               font-size: clamp(1.08rem, 2.8vw, 1.32rem); line-height: 1.35;
+               margin: clamp(30px, 5.5vw, 44px) 0 clamp(16px, 3vw, 22px);
+               text-wrap: balance; transition: color 0.4s ease; }
+  .videolead:hover { color: var(--wood); }
+  .video { width: min(780px, 94vw);
+           margin-left: calc((100% - min(780px, 94vw)) / 2);
+           margin-right: calc((100% - min(780px, 94vw)) / 2); }
+  .video__frame { position: relative; padding-top: 56.25%; background: var(--ink);
+                  box-shadow: 0 26px 56px -12px rgba(23, 20, 15, 0.34), 0 10px 20px -8px rgba(23, 20, 15, 0.22); }
+  .video__frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+  /* 3d · Tema del mes — lo que se explica en el video, por escrito. Cuerpo normal
+     alineado a la izquierda; el «her mo so» es un respiro: sílabas separadas,
+     centrado y en el marrón del instrumento (el único acento de color de la carta),
+     para que se lea igual de lento que se dice. La lista usa la raya como viñeta,
+     igual que el copy original de Emi. */
+  .month { margin-top: clamp(34px, 6.5vw, 52px); }
+  .month > p:last-of-type { margin-bottom: 0; }
+  .month__beauty { text-align: center; color: var(--wood);
+                   font-style: italic; font-weight: 700;
+                   font-size: clamp(1.5rem, 5.4vw, 2.3rem); line-height: 1.2;
+                   letter-spacing: 0.22em; word-spacing: 0.5em;
+                   margin: clamp(20px, 4vw, 32px) 0 clamp(22px, 4.4vw, 34px); }
+  .month__h { font-weight: 700; font-style: italic; font-size: clamp(1.18rem, 3vw, 1.42rem);
+              line-height: 1.3; margin: clamp(24px, 4.5vw, 34px) 0 0.7em; text-wrap: balance; }
+  .month__list { list-style: none; padding: 0; margin: 0 0 1.15em; }
+  .month__list li { position: relative; padding-left: 1.5em; margin-bottom: 0.85em; text-wrap: pretty; }
+  .month__list li:last-child { margin-bottom: 0; }
+  .month__list li::before { content: "—"; position: absolute; left: 0; color: var(--soft); }
+  .month__last { font-weight: 700; }
+  .cta--month { margin: clamp(28px, 5vw, 40px) 0 0; }
+
+  /* Cuerpo corrido */
+  p { margin: 0 0 1.15em; }
+  .body { margin-top: clamp(36px, 7vw, 56px); }
+  .body p:last-child { margin-bottom: 0; }
+
+  /* 4 · Los dos descubrimientos — con protagonismo */
+  .disc { margin-top: clamp(34px, 7vw, 52px); }
+  .disc__lead { font-size: clamp(1.6rem, 5.2vw, 2.15rem); font-weight: 800; line-height: 1.12;
+                letter-spacing: -0.02em; margin: 0 0 0.9em; text-wrap: balance; }
+  .disc__item { margin-bottom: 1.3em; }
+  .disc__item:last-child { margin-bottom: 0; }
+  .disc__t { font-weight: 700; font-style: italic; font-size: clamp(1.12rem, 2.6vw, 1.32rem);
+             line-height: 1.3; margin: 0 0 0.35em; color: var(--ink); }
+  .disc__p { margin: 0; }
+
+  .body2 { margin-top: clamp(30px, 6vw, 44px); }
+  .body2 p:last-child { margin-bottom: 0; }
+  .community { font-style: italic; text-align: center; }
+
+  /* 5 · «¿Necesitas ayuda para llegar?» — centrada, protagónica */
+  .needhelp { text-align: center; font-weight: 700; font-style: italic; font-size: clamp(1.3rem, 4vw, 1.7rem);
+              line-height: 1.32; margin: clamp(32px, 6vw, 46px) 0 0; text-wrap: balance;
+              transition: color 0.4s ease; }
+  .needhelp:hover { color: var(--wood); }
+
+  /* 6 · Cuadro comparativo — para ti / no es para ti.
+     Rompe la columna de lectura (680px) para respirar más ancho y centrado. */
+  .compare { margin-top: clamp(36px, 7vw, 56px);
+             width: min(880px, 94vw);
+             margin-left: calc((100% - min(880px, 94vw)) / 2);
+             margin-right: calc((100% - min(880px, 94vw)) / 2);
+             display: grid; grid-template-columns: 1fr 1fr;
+             gap: clamp(18px, 3vw, 28px); align-items: start; }
+  .compare__col { border: 1px solid rgba(23, 20, 15, 0.16); border-radius: 0; padding: clamp(22px, 3.4vw, 34px);
+                  background: rgba(255, 255, 255, 0.5); }
+  .compare__col--no { background: rgba(23, 20, 15, 0.035); }
+  .compare__h { font-weight: 700; margin: 0 0 1em; font-size: 1.05em; line-height: 1.25; text-wrap: balance; }
+  .compare__col ul { list-style: none; padding: 0; margin: 0; }
+  .compare__col li { position: relative; padding-left: 1.5em; margin-bottom: 0.9em; font-size: 0.96em; line-height: 1.55; }
+  .compare__col li:last-child { margin-bottom: 0; }
+  .compare__col--yes li::before { content: "✓"; position: absolute; left: 0; color: var(--ink); font-weight: 700; }
+  .compare__col--no li::before { content: "–"; position: absolute; left: 0; color: var(--soft); font-weight: 700; }
+  @media (max-width: 560px) { .compare { grid-template-columns: 1fr; } }
+
+  /* 7 · Tarjeta de precio — formato de dos columnas (referencia de Emi):
+     izquierda = nombre + precio + nota; derecha = qué incluye + botón. Cuadrada
+     (coherente con la página) y se invierte de color al pasar el cursor. */
+  .plan { margin-top: clamp(40px, 8vw, 60px); }
+  .pricecard { width: min(940px, 96vw);
+               margin-left: calc((100% - min(940px, 96vw)) / 2);
+               margin-right: calc((100% - min(940px, 96vw)) / 2);
+               border: 1.5px solid var(--ink); border-radius: 0; overflow: hidden;
+               background: #fff; color: #17140f;
+               display: grid; grid-template-columns: 1.05fr 0.95fr;
+               transition: background 0.45s ease, color 0.45s ease; }
+  .pricecard:hover { background: var(--ink); color: var(--paper); }
+  .pricecard__left { padding: clamp(28px, 4vw, 50px); border-right: 1px solid rgba(23, 20, 15, 0.14);
+                     transition: border-color 0.45s ease; }
+  .pricecard:hover .pricecard__left { border-right-color: rgba(250, 247, 241, 0.18); }
+  .pricecard__name { font-weight: 700; font-size: clamp(1.4rem, 3vw, 1.8rem); letter-spacing: -0.02em;
+                     margin: 0; line-height: 1.1; }
+  .pricecard__name .echo { font-style: italic; font-weight: 400; color: var(--soft); font-size: 0.66em;
+                           letter-spacing: 0; transition: color 0.45s ease; }
+  .pricecard:hover .pricecard__name .echo { color: rgba(250, 247, 241, 0.7); }
+  .pricecard__plan { text-transform: uppercase; letter-spacing: 0.16em; font-size: 0.74rem; font-weight: 700;
+                     margin: clamp(18px, 3vw, 26px) 0 0.4em; opacity: 0.8; }
+  .pricecard__price { display: flex; align-items: baseline; gap: 10px; margin: 0 0 4px; }
+  .pricecard__price .num { font-size: clamp(3.2rem, 8vw, 5rem); font-weight: 800; letter-spacing: -0.04em; line-height: 0.9; }
+  .pricecard__price .per { font-size: 1.05rem; opacity: 0.62; }
+  .pricecard__note { font-size: 0.9em; margin: clamp(14px, 2.5vw, 20px) 0 0; opacity: 0.82; line-height: 1.55; }
+  .pricecard__right { padding: clamp(28px, 4vw, 50px); display: flex; flex-direction: column; justify-content: space-between;
+                      gap: clamp(22px, 3vw, 32px); }
+  .pricecard__feat { list-style: none; padding: 0; margin: 0; }
+  .pricecard__feat li { position: relative; padding-left: 1.9em; margin-bottom: 0.9em; font-size: 0.96em; line-height: 1.45; }
+  .pricecard__feat li:last-child { margin-bottom: 0; }
+  .pricecard__feat li::before { content: "→"; position: absolute; left: 0; top: 0; opacity: 0.7; }
+  .pricecard__action { display: flex; flex-direction: column; gap: 12px; }
+  .pricecard__fine { font-size: 0.82em; color: var(--soft); text-align: center; margin: 0; transition: color 0.45s ease; }
+  .pricecard:hover .pricecard__fine { color: rgba(250, 247, 241, 0.6); }
+  /* El aviso de que el cobro vive fuera: la misma letra pequeña, con aire
+     encima para que no se lea como una coletilla de «cancela cuando quieras». */
+  .pricecard__away { margin-top: 4px; }
+  /* Fila inferior a todo el ancho: info de facturación destacada (negrita, centrada).
+     max-width: none anula el límite global de <p> (var(--measure)) para que ocupe
+     todo el ancho de la tarjeta y el texto quede centrado de verdad. */
+  .pricecard__foot { grid-column: 1 / -1; max-width: none; border-top: 1px solid rgba(23, 20, 15, 0.14);
+                     margin: 0; padding: clamp(20px, 3vw, 30px) clamp(40px, 6vw, 80px);
+                     text-align: center; font-weight: 700; font-size: clamp(1rem, 1.6vw, 1.12rem);
+                     line-height: 1.5; text-wrap: pretty; transition: border-color 0.45s ease; }
+  .pricecard:hover .pricecard__foot { border-top-color: rgba(250, 247, 241, 0.18); }
+  @media (max-width: 620px) {
+    .pricecard { grid-template-columns: 1fr; }
+    .pricecard__left { border-right: 0; border-bottom: 1px solid rgba(23, 20, 15, 0.14); }
+    .pricecard:hover .pricecard__left { border-bottom-color: rgba(250, 247, 241, 0.18); }
+  }
+
+  /* Botones — cuadrados, monocromáticos. Animación (referencia de Emi): al pasar
+     el cursor, un relleno de tinta crece DESDE la posición del cursor y la flecha
+     se desliza. Sin color de acento. */
+  .cta { text-align: center; margin: clamp(32px, 6vw, 48px) 0; }
+  .cta--inbox { margin: 0; }
+  .btn { --fill: var(--ink); --fg: var(--ink); --fg-hover: var(--paper); --mx: 50%; --my: 50%;
+         position: relative; isolation: isolate; overflow: hidden;
+         display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+         background: transparent; color: var(--fg);
+         text-decoration: none; font-family: var(--font-body), system-ui, sans-serif; font-weight: 600;
+         font-size: 0.92rem; letter-spacing: 0.16em; text-transform: uppercase;
+         padding: 20px 46px; border: 1.5px solid currentColor; border-radius: 0; cursor: inherit;
+         transition: color 360ms cubic-bezier(.22,1,.36,1), border-color 360ms ease,
+                     transform 420ms cubic-bezier(.22,1,.36,1); will-change: transform; }
+  .btn__fill { position: absolute; top: var(--my); left: var(--mx); width: 260%; aspect-ratio: 1; z-index: -1;
+               background: var(--fill); border-radius: 50%; transform: translate(-50%, -50%) scale(0);
+               transition: transform 560ms cubic-bezier(.22,1,.36,1); }
+  .btn__label, .btn__ar { position: relative; z-index: 1; }
+  .btn__ar { transition: transform 360ms cubic-bezier(.22,1,.36,1); }
+  .btn, .btn:hover { text-decoration: none; }
+  .btn:hover { color: var(--fg-hover); }
+  .btn:hover .btn__fill { transform: translate(-50%, -50%) scale(1); }
+  .btn:hover .btn__ar { transform: translateX(6px); }
+  .btn:active { transform: translateY(1px) scale(0.99); }
+  /* Dentro de la tarjeta invertida, el botón usa la paleta contraria para verse */
+  .pricecard:hover .btn { --fill: var(--paper); --fg: var(--paper); --fg-hover: var(--ink); }
+  /* Botón de compra standalone — ancho */
+  .cta:not(.cta--inbox) .btn { min-width: min(420px, 80%); }
+
+  /* Título puente — presenta la historia larga que viene después del primer
+     botón. Mismo registro que «¿Necesitas ayuda para llegar?»: centrado, cursiva,
+     y el marrón del instrumento al pasar el cursor. */
+  .whyh { text-align: center; font-weight: 700; font-style: italic;
+          font-size: clamp(1.3rem, 4vw, 1.7rem); line-height: 1.32;
+          margin: clamp(40px, 7.5vw, 62px) 0 0; text-wrap: balance;
+          transition: color 0.4s ease; }
+  .whyh:hover { color: var(--wood); }
+
+  /* Cuenta atrás bajo cada botón de pago. Habla el mismo idioma que el botón
+     (mayúsculas, letra muy espaciada, tinta): la urgencia la ponen los números,
+     no un rojo de rebajas. Los dígitos van en cifras tabulares para que el
+     contador no baile de ancho a cada segundo.
+     El estado lo manda `data-doors` en <main> (build + script): `soon` = falta
+     para el cierre, `closed` = puertas cerradas, `open` = no hay cierre a la
+     vista y el bloque entero desaparece. */
+  .timer { display: none; margin: 14px 0 0; text-align: center;
+           font-size: 0.76rem; letter-spacing: 0.14em; text-transform: uppercase;
+           color: var(--soft); line-height: 1.7; }
+  [data-doors="soon"] .timer,
+  [data-doors="closed"] .timer { display: block; }
+  .timer__lead { display: block; }
+  .timer__clock { display: inline-flex; align-items: baseline; justify-content: center;
+                  gap: 13px; margin-top: 4px; color: var(--ink); }
+  .timer__u { display: inline-flex; align-items: baseline; gap: 3px; }
+  /* El `display` de arriba le gana al `[hidden]` del navegador, así que la
+     casilla de los días (que solo aparece cuando faltan 24h o más) necesita
+     su propia regla o se vería un «0 d» permanente. */
+  .timer__u[hidden] { display: none; }
+  .timer__u b { font-size: 1.16rem; font-weight: 700; letter-spacing: 0.04em;
+                font-variant-numeric: tabular-nums; }
+  .timer__u i { font-style: normal; font-size: 0.7rem; opacity: 0.62; }
+  .timer__closed { display: none; }
+  /* La salida para quien llega tarde: línea propia y subrayada, que si no se
+     confunde con el aviso (todo va en mayúsculas y del mismo color). */
+  .timer__news { display: block; margin-top: 6px; color: var(--ink);
+                 text-decoration: underline; text-underline-offset: 4px;
+                 transition: color 0.3s ease; }
+  .timer__news:hover { color: var(--wood); }
+  [data-doors="closed"] .timer__lead,
+  [data-doors="closed"] .timer__clock { display: none; }
+  [data-doors="closed"] .timer__closed { display: block; }
+
+  /* Puertas cerradas: el botón sigue ahí (la carta se lee igual) pero deja de
+     ser un botón — sin href, sin relleno al pasar el cursor, sin flecha. */
+  .btn__label--closed { display: none; }
+  [data-doors="closed"] .btn--pay { color: var(--soft); border-color: rgba(23, 20, 15, 0.28);
+                                    pointer-events: none; }
+  [data-doors="closed"] .btn--pay .btn__label { display: none; }
+  [data-doors="closed"] .btn--pay .btn__label--closed { display: inline; }
+  [data-doors="closed"] .btn--pay .btn__ar { display: none; }
+  [data-doors="closed"] .pricecard:hover .btn--pay { color: rgba(250, 247, 241, 0.55); }
+
+  /* Dentro de la tarjeta de precio, que se invierte a tinta al pasar el cursor,
+     el contador tiene que invertirse con ella. */
+  .pricecard .timer { margin-top: 2px; transition: color 0.45s ease; }
+  .pricecard:hover .timer { color: rgba(250, 247, 241, 0.6); }
+  .pricecard:hover .timer__clock { color: var(--paper); }
+
+  /* Notas musicales de colores que flotan al pasar el cursor por los botones */
+  .note-pop { position: fixed; z-index: 60; pointer-events: none; font-weight: 700;
+              will-change: transform, opacity; animation: notefloat 1s ease-out forwards; }
+  @keyframes notefloat {
+    0%   { opacity: 0; transform: translate(0, 0) scale(0.6) rotate(0deg); }
+    18%  { opacity: 1; }
+    100% { opacity: 0; transform: translate(var(--dx, 0), -66px) scale(1.15) rotate(var(--rot, 0deg)); }
+  }
+
+  /* 8 · Posdata — cursiva, más pequeña, fuera del cuadro */
+  .pd { margin-top: clamp(34px, 7vw, 50px); font-style: italic; font-size: 0.94em; color: var(--soft); }
+  .pd__label { font-style: normal; letter-spacing: 0.16em; text-transform: uppercase; font-size: 0.78em;
+               color: var(--soft); margin: 0 0 0.6em; }
+  .pd__sign { margin-top: 0.5em; }
+
+  /* 9 · FAQ desplegable (click para ver la respuesta) */
+  .faq { margin-top: clamp(44px, 8vw, 68px); }
+  .faq__h { font-size: clamp(1.5rem, 5vw, 1.9rem); font-weight: 600; letter-spacing: -0.015em;
+            margin: 0 0 clamp(10px, 2vw, 16px); }
+  .qa { border-top: 1px solid rgba(23, 20, 15, 0.12); }
+  .qa:last-of-type { border-bottom: 1px solid rgba(23, 20, 15, 0.12); }
+  .qa summary { list-style: none; padding: clamp(15px, 3vw, 19px) 2em clamp(15px, 3vw, 19px) 0; position: relative;
+                font-weight: 600; line-height: 1.4; }
+  .qa summary::-webkit-details-marker { display: none; }
+  .qa summary .n { color: var(--soft); margin-right: 0.5em; }
+  .qa summary::after { content: "+"; position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+                       font-size: 1.4em; line-height: 1; color: var(--ink); transition: transform 0.25s ease; }
+  .qa[open] summary::after { content: "–"; }
+  .qa summary:hover { color: var(--wood); }
+  .qa__a { margin: 0; padding: 0 0 clamp(15px, 3vw, 19px); color: var(--ink); animation: faqin 0.32s ease; }
+  @keyframes faqin { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
+
+  /* 11 · Mensaje final — grande, bold, italic */
+  .finalmsg { text-align: center; font-weight: 800; font-style: italic; font-size: clamp(1.7rem, 6.5vw, 2.5rem);
+              line-height: 1.14; letter-spacing: -0.02em; margin: clamp(36px, 7vw, 52px) 0 0; text-wrap: balance;
+              transition: color 0.4s ease; }
+  .finalmsg:hover { color: var(--wood); }
+  .finalmsg__a, .finalmsg__b { display: block; }
+  .finalmsg__b { margin-top: 0.28em; }
+
+  /* Referidos — texto suave centrado */
+  .referral { margin-top: clamp(24px, 5vw, 34px); text-align: center; font-size: 0.94em; color: var(--soft); text-wrap: pretty; }
+
+  /* 12 · Newsletter — centrado, botón que lleva al alta real */
+  .news { margin-top: clamp(34px, 7vw, 50px); text-align: center; }
+  .news__pre { margin: 0 0 1em; color: var(--soft); }
+  .btn--news { font-size: 0.8rem; padding: 15px 40px; }
+
+  /* Footer mínimo */
+  .foot { margin-top: clamp(48px, 9vw, 80px); font-size: 0.8rem; color: var(--soft);
+          display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
+  .foot a { color: var(--soft); text-decoration: none; }
+  .foot a:hover { text-decoration: underline; }
+  .foot .sep { opacity: 0.5; }
+  .foot .lang { margin-left: auto; display: inline-flex; gap: 6px; }
+  .foot .lang a[aria-current="true"] { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+
+  @media (max-width: 460px) {
+    .btn { display: block; padding: 18px 24px; }
+    .btn--news { display: inline-block; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .photo img { transition: filter 0.3s ease; }
+    .photo img:hover { transform: none; }
+  }
+</style>
+<noscript>
+  <!-- Sin JavaScript no corre el observador y `.reveal` se quedaría en
+       opacity: 0 para siempre: la carta entera invisible. Esto la enseña
+       quieta y completa, que es lo mismo que ve quien pide reducir el
+       movimiento. -->
+  <style>
+    .reveal { opacity: 1 !important; transform: none !important; }
+    .page { opacity: 1 !important; }
+  </style>
+</noscript>
+</head>
+<body>
+
+  {/*
+    La píldora es la única navegación de la carta, que va suelta y sin la
+    cabecera del sitio. Cambian los destinos, no la pieza: ES/EN son ahora las
+    dos direcciones de ESTA página —`/productos/estudiemos-juntos/` y su gemela
+    inglesa—, y «Entrar» sigue siendo la puerta del aula, que hoy es la de la
+    academia (`entrarHref`, la misma que usa la cápsula de la tienda).
+  */}
+  <nav class="langpill" aria-label="Idioma / Language">
+    <a href={productPath(slug, 'es')} aria-current={(!isEN).toString()} data-lang-switch>ES</a>
+    <a href={productPath(slug, 'en')} aria-current={isEN.toString()} data-lang-switch>EN</a>
+    <span class="langpill__sep" aria-hidden="true"></span>
+    <a class="langpill__enter" href={entrarHref[lang]}>{t.enter}</a>
+  </nav>
+
+  <main class="page" data-doors={builtClosed ? 'closed' : (builtCountdown ? 'soon' : 'open')}>
+
+    <p class="logo">
+      <img class="logo__img" src="/img/logo_emi_alpha.png" alt={t.logoAlt}
+           onerror="this.style.display='none';var f=this.parentNode&&this.parentNode.querySelector('.logo__text');if(f)f.hidden=false;" />
+      <span class="logo__text" hidden>{t.logoAlt}</span>
+    </p>
+
+    <figure class="photo reveal">
+      <img src="/img/foto.jpg" alt={t.photoAlt} onerror="this.onerror=null;this.src='/emi-city.jpg';" />
+    </figure>
+
+    <h1 class="title reveal">{t.title}</h1>
+    <p class="subtitle reveal">{t.subtitle}</p>
+    <p class="lede reveal">
+      <span class="lede__a">{t.ledeA}</span>
+      <span class="lede__b">{t.ledeB}</span>
+    </p>
+
+    <div class="pitch reveal">
+      <p class="pitch__p">{t.pitch}</p>
+    </div>
+
+    <p class="videolead reveal">{t.videoLead}</p>
+
+    <div class="video reveal">
+      <div class="video__frame">
+        <iframe src={t.videoSrc} title={t.videoTitle} loading="lazy"
+                allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;fullscreen;"
+                allowfullscreen></iframe>
+      </div>
+    </div>
+
+    <div class="month reveal">
+      {t.monthIntro.map((p) => (<p>{p}</p>))}
+      <p class="month__beauty">{t.monthBeauty}</p>
+      {t.monthIntro2.map((p) => (<p>{p}</p>))}
+      <p class="month__h">{t.monthInsideH}</p>
+      <ul class="month__list">{t.monthInside.map((li) => (<li>{li}</li>))}</ul>
+      {t.monthOutro.map((p) => (<p>{p}</p>))}
+      <p class="month__last">{t.monthOutroLast}</p>
+      <div class="cta cta--month">
+        <a class="btn btn--pay" href={payHref} aria-disabled={builtClosed ? 'true' : undefined} tabindex={builtClosed ? '-1' : undefined}>
+          <span class="btn__fill" aria-hidden="true"></span>
+          <span class="btn__label">{t.pay}</span>
+          <span class="btn__label btn__label--closed">{t.payClosed}</span>
+          <span class="btn__ar" aria-hidden="true">→</span>
+        </a>
+        <p class="timer">
+          <span class="timer__lead">{closeLeadBuilt}</span>
+          <span class="timer__clock" aria-hidden="true">
+            <span class="timer__u" data-cd-dbox hidden><b data-cd-d>0</b><i>d</i></span>
+            <span class="timer__u"><b data-cd-h>00</b><i>h</i></span>
+            <span class="timer__u"><b data-cd-m>00</b><i>m</i></span>
+            <span class="timer__u"><b data-cd-s>00</b><i>s</i></span>
+          </span>
+          <span class="timer__closed">{closedNoteBuilt} <a class="timer__news" href={newsHref} target="_blank" rel="noopener">{t.closedLink} →</a></span>
+        </p>
+      </div>
+    </div>
+
+    <p class="whyh reveal">{t.whyH}</p>
+
+    <div class="body reveal">
+      <p>{t.storyLead}</p>
+      {t.storyBody1.map((p) => (
+        typeof p === 'string' ? <p>{p}</p> : <p><strong>{p.text}</strong></p>
+      ))}
+    </div>
+
+    <div class="disc reveal">
+      <p class="disc__lead">{t.discLead}</p>
+      {t.disc.map((d) => (
+        <div class="disc__item">
+          <p class="disc__t">{d.t}</p>
+          <p class="disc__p">{d.p}</p>
+        </div>
+      ))}
+    </div>
+
+    <div class="body2 reveal">
+      {t.storyBody2.map((p) => (
+        typeof p === 'string' ? <p>{p}</p> : <p><strong>{p.text}</strong></p>
+      ))}
+    </div>
+
+    <p class="needhelp reveal">{t.needHelp}</p>
+
+    <div class="compare reveal">
+      <div class="compare__col compare__col--yes">
+        <p class="compare__h">{t.fitYesH}</p>
+        <ul>{t.fitYes.map((li) => (<li>{li}</li>))}</ul>
+      </div>
+      <div class="compare__col compare__col--no">
+        <p class="compare__h">{t.fitNoH}</p>
+        <ul>{t.fitNo.map((li) => (<li>{li}</li>))}</ul>
+      </div>
+    </div>
+
+    <div class="body2 reveal">
+      <p class="community">{t.community}</p>
+    </div>
+
+    <div class="plan reveal">
+      <div class="pricecard">
+        <div class="pricecard__left">
+          <p class="pricecard__name">{t.title} <span class="echo">{t.titleEcho}</span></p>
+          <p class="pricecard__plan">{t.priceLabelStd}</p>
+          <p class="pricecard__price"><span class="num">{t.priceAmountStd}</span><span class="per">{t.pricePer}</span></p>
+          <p class="pricecard__note"><strong>{t.priceInBoxLeadStd}</strong> {t.priceInBoxRestStd}</p>
+        </div>
+        <div class="pricecard__right">
+          <ul class="pricecard__feat">{t.priceFeatures.map((f) => (<li>{f}</li>))}</ul>
+          <div class="pricecard__action">
+            <a class="btn btn--pay" href={payHref} aria-disabled={builtClosed ? 'true' : undefined} tabindex={builtClosed ? '-1' : undefined}>
+              <span class="btn__fill" aria-hidden="true"></span>
+              <span class="btn__label">{t.pay}</span>
+              <span class="btn__label btn__label--closed">{t.payClosed}</span>
+              <span class="btn__ar" aria-hidden="true">→</span>
+            </a>
+            <p class="timer">
+              <span class="timer__lead">{closeLeadBuilt}</span>
+              <span class="timer__clock" aria-hidden="true">
+                <span class="timer__u" data-cd-dbox hidden><b data-cd-d>0</b><i>d</i></span>
+                <span class="timer__u"><b data-cd-h>00</b><i>h</i></span>
+                <span class="timer__u"><b data-cd-m>00</b><i>m</i></span>
+                <span class="timer__u"><b data-cd-s>00</b><i>s</i></span>
+              </span>
+              <span class="timer__closed">{closedNoteBuilt} <a class="timer__news" href={newsHref} target="_blank" rel="noopener">{t.closedLink} →</a></span>
+            </p>
+            <p class="pricecard__fine">{t.priceReassure}</p>
+            {/*
+              Añadido de esta casa, y se dice UNA sola vez, en la ficha de
+              precio: el botón sale del sitio porque el cobro todavía vive en la
+              academia. Decirlo acá es mejor que dejar que la lectora descubra
+              sola que cambió de dominio a mitad de una compra.
+            */}
+            <p class="pricecard__fine pricecard__away">{ui('products.leaving')}</p>
+          </div>
+        </div>
+        <p class="pricecard__foot">{t.priceBelow}</p>
+      </div>
+    </div>
+
+    {/*
+      Acá iba el script del flip fundador ↔ estándar, que en la academia repinta
+      la tarjeta en el segundo del corte sin redeploy. No se trasplantó: la
+      ventana de fundador cerró en julio de 2026 y en esta casa el precio se
+      escribe en el markup, que es lo que la guía propone cuando la variable
+      STRIPE_FOUNDER_UNTIL no existe en el destino.
+    */}
+
+    <p class="finalmsg reveal">
+      <span class="finalmsg__a">{t.finalMsgLead}</span>
+      <span class="finalmsg__b">{t.finalMsgRest}</span>
+    </p>
+
+    <div class="cta reveal">
+      <a class="btn btn--pay" href={payHref} aria-disabled={builtClosed ? 'true' : undefined} tabindex={builtClosed ? '-1' : undefined}>
+        <span class="btn__fill" aria-hidden="true"></span>
+        <span class="btn__label">{t.pay}</span>
+        <span class="btn__label btn__label--closed">{t.payClosed}</span>
+        <span class="btn__ar" aria-hidden="true">→</span>
+      </a>
+      <p class="timer">
+        <span class="timer__lead">{closeLeadBuilt}</span>
+        <span class="timer__clock" aria-hidden="true">
+          <span class="timer__u" data-cd-dbox hidden><b data-cd-d>0</b><i>d</i></span>
+          <span class="timer__u"><b data-cd-h>00</b><i>h</i></span>
+          <span class="timer__u"><b data-cd-m>00</b><i>m</i></span>
+          <span class="timer__u"><b data-cd-s>00</b><i>s</i></span>
+        </span>
+        <span class="timer__closed">{closedNoteBuilt} <a class="timer__news" href={newsHref} target="_blank" rel="noopener">{t.closedLink} →</a></span>
+      </p>
+    </div>
+
+    <div class="pd reveal">
+      <p class="pd__label">{t.pdLabel}</p>
+      <p>{t.pdText}</p>
+      <p class="pd__sign">{t.pdSign}</p>
+    </div>
+
+    <section class="faq reveal">
+      <h2 class="faq__h">{t.faqH}</h2>
+      {t.faq.map((f, i) => (
+        <details class="qa">
+          <summary><span class="n">{i + 1}.</span>{f.q}</summary>
+          <p class="qa__a">{f.email ? (<Fragment>{f.a1}<a href={`mailto:${f.email}`}>{f.email}</a></Fragment>) : f.a}</p>
+        </details>
+      ))}
+    </section>
+
+    <div class="cta reveal">
+      <a class="btn btn--pay" href={payHref} aria-disabled={builtClosed ? 'true' : undefined} tabindex={builtClosed ? '-1' : undefined}>
+        <span class="btn__fill" aria-hidden="true"></span>
+        <span class="btn__label">{t.pay}</span>
+        <span class="btn__label btn__label--closed">{t.payClosed}</span>
+        <span class="btn__ar" aria-hidden="true">→</span>
+      </a>
+      <p class="timer">
+        <span class="timer__lead">{closeLeadBuilt}</span>
+        <span class="timer__clock" aria-hidden="true">
+          <span class="timer__u" data-cd-dbox hidden><b data-cd-d>0</b><i>d</i></span>
+          <span class="timer__u"><b data-cd-h>00</b><i>h</i></span>
+          <span class="timer__u"><b data-cd-m>00</b><i>m</i></span>
+          <span class="timer__u"><b data-cd-s>00</b><i>s</i></span>
+        </span>
+        <span class="timer__closed">{closedNoteBuilt} <a class="timer__news" href={newsHref} target="_blank" rel="noopener">{t.closedLink} →</a></span>
+      </p>
+    </div>
+
+    <div class="news reveal">
+      <p class="news__pre">{t.newsPre}</p>
+      <a class="btn btn--news" href={newsHref} target="_blank" rel="noopener">
+        <span class="btn__fill" aria-hidden="true"></span>
+        <span class="btn__label">{t.newsLink}</span>
+        <span class="btn__ar" aria-hidden="true">→</span>
+      </a>
+    </div>
+
+    {/*
+      El pie de la academia llevaba dos enlaces a `#` —privacidad y términos, que
+      allí tampoco iban a ninguna parte— y el aviso legal. Acá esos dos huecos se
+      cambian por las dos salidas que sí existen y que la carta necesita, porque
+      va suelta: volver a la tienda y volver al inicio. Es la regla de la casa:
+      nada que no funcione se publica enlazado.
+    */}
+    <footer class="foot">
+      <a href={routePath('products', lang)}>{t.footBack}</a>
+      <span class="sep" aria-hidden="true">·</span>
+      <a href={routePath('home', lang)}>{t.footHome}</a>
+      <span class="sep" aria-hidden="true">·</span>
+      <span>{t.footLegal}</span>
+      <span class="lang" aria-label="Idioma / Language">
+        <a href={productPath(slug, 'es')} aria-current={(!isEN).toString()} data-lang-switch>ES</a>
+        <a href={productPath(slug, 'en')} aria-current={isEN.toString()} data-lang-switch>EN</a>
+      </span>
+    </footer>
+
+  </main>
+
+<script is:inline define:vars={{ closesAt: CLOSES_AT, reopensAt: REOPENS_AT,
+                                 locale: madridLocale, payHrefOpen: t.payHref,
+                                 paseParam: INVITE_PARAM,
+                                 copy: { leadToday: t.closeLeadToday, leadDay: t.closeLeadDay } }}>
+  // Puertas de la membresía en el cliente — cuenta atrás + cierre en vivo.
+  //
+  // Por qué en el navegador y no solo en el build: si el estado se horneara, la
+  // carta seguiría diciendo «entra» hasta el siguiente deploy. Así el corte
+  // ocurre en el segundo exacto, y a quien tenga la página abierta se le cierran
+  // las puertas delante. El cobro NO depende de esto: /api/checkout comprueba las
+  // mismas fechas en el servidor (src/lib/membership.ts).
+  //
+  // Todo el texto se formatea en la hora de MADRID (la promesa está escrita en la
+  // hora de Emi: «23:59 CEST»); el contador usa la diferencia entre dos instantes,
+  // que es la misma en cualquier huso, así que sirve igual en Caracas o en Tokio.
+  (function () {
+    var main = document.querySelector('.page');
+    if (!main) return;
+    var closes = Date.parse(closesAt);
+    var reopens = Date.parse(reopensAt);
+
+    // Pase de invitación (?pase=…): quien llega con uno ve la carta ABIERTA y sus
+    // botones se lo llevan al checkout. Aquí NO se comprueba el código —hacerlo
+    // exigiría traer el secreto al navegador, o sea publicarlo—; quien decide es
+    // /api/checkout en el servidor. Un `?pase=loquesea` inventado, por tanto, solo
+    // consigue ver los botones encendidos y chocar con el 403 de puertas cerradas.
+    var pase = '';
+    try { pase = new URLSearchParams(location.search).get(paseParam) || ''; } catch (e) {}
+    var payHref = pase ? payHrefOpen + '&' + paseParam + '=' + encodeURIComponent(pase) : payHrefOpen;
+    var MADRID = 'Europe/Madrid';
+    var dayOpts = { timeZone: MADRID, year: 'numeric', month: '2-digit', day: '2-digit' };
+    var timeOpts = { timeZone: MADRID, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' };
+    var dateOpts = { timeZone: MADRID, day: 'numeric', month: 'long' };
+
+    // Si el navegador no sabe de husos horarios, devolvemos '' y dejamos intacto
+    // el texto del build (que ya trae la fecha bien): mejor eso que un hueco.
+    function part(ms, opts, loc) {
+      try { return new Intl.DateTimeFormat(loc || locale, opts).format(new Date(ms)); }
+      catch (e) { return ''; }
+    }
+    function tzName(ms) {
+      try {
+        var ps = new Intl.DateTimeFormat('en-US', { timeZone: MADRID, timeZoneName: 'longOffset' })
+          .formatToParts(new Date(ms));
+        for (var i = 0; i < ps.length; i++) {
+          if (ps[i].type === 'timeZoneName') return ps[i].value === 'GMT+01:00' ? 'CET' : 'CEST';
+        }
+      } catch (e) {}
+      return 'CEST';
+    }
+    // «Cierra hoy» solo si el cierre cae hoy EN MADRID, no en el huso del que lee.
+    function leadText(now) {
+      var date = part(closes, dateOpts), time = part(closes, timeOpts);
+      if (!date || !time) return '';
+      var sameDay = part(closes, dayOpts, 'en-CA') === part(now, dayOpts, 'en-CA');
+      return (sameDay ? copy.leadToday : copy.leadDay)
+        .replace('{date}', date).replace('{time}', time).replace('{tz}', tzName(closes));
+    }
+
+    function doorsState(now) {
+      if (isNaN(closes)) return 'open';
+      if (now <= closes) return 'soon';
+      if (!isNaN(reopens) && now >= reopens) return 'open';
+      return pase ? 'open' : 'closed';
+    }
+
+    var leads = main.querySelectorAll('.timer__lead');
+    var dboxes = main.querySelectorAll('[data-cd-dbox]');
+    var ds = main.querySelectorAll('[data-cd-d]');
+    var hs = main.querySelectorAll('[data-cd-h]');
+    var ms_ = main.querySelectorAll('[data-cd-m]');
+    var ss = main.querySelectorAll('[data-cd-s]');
+    function each(list, fn) { for (var i = 0; i < list.length; i++) fn(list[i]); }
+    function setText(list, txt) { each(list, function (el) { if (el.textContent !== txt) el.textContent = txt; }); }
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+    var lastState = '';
+    var lastLead = '';
+    function tick() {
+      var now = Date.now();
+      var st = doorsState(now);
+      if (st !== lastState) {
+        lastState = st;
+        main.setAttribute('data-doors', st);
+        // No basta con apagarlo en CSS: al cerrar le quitamos el href para que
+        // tampoco se pueda abrir con el teclado, con el menú del botón derecho ni
+        // copiarlo. Y al revés, si reabre con la página abierta, se lo devolvemos.
+        each(main.querySelectorAll('.btn--pay'), function (b) {
+          if (st === 'closed') {
+            b.removeAttribute('href');
+            b.setAttribute('aria-disabled', 'true');
+            b.setAttribute('tabindex', '-1');
+          } else {
+            b.setAttribute('href', payHref);
+            b.removeAttribute('aria-disabled');
+            b.removeAttribute('tabindex');
+          }
+        });
+      }
+      if (st !== 'soon') return;
+      var lead = leadText(now);
+      if (lead && lead !== lastLead) { lastLead = lead; setText(leads, lead); }
+      var left = Math.max(0, Math.floor((closes - now) / 1000));
+      var d = Math.floor(left / 86400);
+      setText(ds, String(d));
+      each(dboxes, function (el) { el.hidden = d === 0; });
+      setText(hs, pad(Math.floor((left % 86400) / 3600)));
+      setText(ms_, pad(Math.floor((left % 3600) / 60)));
+      setText(ss, pad(left % 60));
+    }
+
+    tick();
+    setInterval(tick, 1000);
+  })();
+</script>
+
+<script is:inline>
+  // 13 · Fundido al hacer scroll + notas musicales al hover de los botones.
+  (function () {
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Reveal por IntersectionObserver
+    var revs = document.querySelectorAll('.reveal');
+    if (reduce || !('IntersectionObserver' in window)) {
+      revs.forEach(function (el) { el.classList.add('is-visible'); });
+    } else {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) { en.target.classList.add('is-visible'); io.unobserve(en.target); }
+        });
+      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.06 });
+      revs.forEach(function (el) { io.observe(el); });
+    }
+
+    // Red de seguridad, la que pide el punto 4.3 de la guía del trasplante y que
+    // en la academia vive en public/membresia-ui.js. Todo bloque `.reveal`
+    // arranca en opacity: 0, así que si el observador falla —o si un error de
+    // otro script corta la ejecución antes— la carta se queda EN BLANCO, que es
+    // el fallo número uno al portarla. A 1,4 s aparece todo, pase lo que pase.
+    setTimeout(function () {
+      document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('is-visible'); });
+    }, 1400);
+
+    var fine = window.matchMedia('(pointer: fine)').matches;
+
+    // Relleno de tinta que crece desde el cursor (--mx/--my) + magnético sutil.
+    document.querySelectorAll('.btn').forEach(function (btn) {
+      btn.addEventListener('pointermove', function (e) {
+        var r = btn.getBoundingClientRect();
+        var x = e.clientX - r.left, y = e.clientY - r.top;
+        btn.style.setProperty('--mx', x + 'px');
+        btn.style.setProperty('--my', y + 'px');
+        if (fine && !reduce) {
+          var dx = (x - r.width / 2) / r.width, dy = (y - r.height / 2) / r.height;
+          btn.style.transform = 'translate(' + (dx * 8).toFixed(1) + 'px,' + (dy * 6).toFixed(1) + 'px)';
+        }
+      });
+      btn.addEventListener('pointerleave', function () { btn.style.transform = ''; });
+    });
+
+    // Notas musicales de colores que salen de los botones al hacer hover.
+    if (!reduce && fine) {
+      var GLYPHS = ['♪', '♫', '♩', '♬'];
+      var COLORS = ['#a94f2b', '#6b3f2a', '#c9a24a', '#7a8b5a', '#4a6d8c', '#b5504a'];
+      function pop(btn) {
+        var r = btn.getBoundingClientRect();
+        var count = 2 + Math.floor(Math.random() * 2);
+        for (var i = 0; i < count; i++) {
+          var s = document.createElement('span');
+          s.className = 'note-pop';
+          s.textContent = GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
+          s.style.left = (r.left + 12 + Math.random() * (r.width - 24)) + 'px';
+          s.style.top = (r.top + r.height * 0.3) + 'px';
+          s.style.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+          s.style.fontSize = (15 + Math.random() * 13) + 'px';
+          s.style.setProperty('--dx', ((Math.random() * 2 - 1) * 46).toFixed(0) + 'px');
+          s.style.setProperty('--rot', ((Math.random() * 2 - 1) * 40).toFixed(0) + 'deg');
+          document.body.appendChild(s);
+          s.addEventListener('animationend', function () { this.remove(); });
+        }
+      }
+      document.querySelectorAll('.btn').forEach(function (btn) {
+        var timer = null;
+        btn.addEventListener('pointerenter', function () {
+          pop(btn);
+          timer = setInterval(function () { pop(btn); }, 460);
+        });
+        btn.addEventListener('pointerleave', function () { if (timer) { clearInterval(timer); timer = null; } });
+      });
+    }
+  })();
+</script>
+<script is:inline>
+  (function () {
+    // Cambio de idioma EN/ES sin volver al inicio. Las dos páginas son SSR
+    // independientes (/ y /en/): al togglear guardamos DÓNDE está el scroll
+    // (anclado a un bloque + offset, porque el texto mide distinto entre
+    // idiomas), hacemos fade-out, navegamos, y en la otra página restauramos
+    // la posición y hacemos fade-in.
+    var page = document.querySelector('.page');
+    var html = document.documentElement;
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function blocks() { return page ? Array.prototype.slice.call(page.children) : []; }
+    function absTop(el) { return el.getBoundingClientRect().top + (window.scrollY || window.pageYOffset || 0); }
+
+    // AL ENTRAR: si venimos de un toggle, restaurar posición y revelar.
+    try {
+      var saved = sessionStorage.getItem('langSwitch');
+      if (saved) {
+        sessionStorage.removeItem('langSwitch');
+        var d = JSON.parse(saved);
+        var bs = blocks();
+        var anchor = bs[d.i];
+        var y = anchor ? absTop(anchor) + d.d : d.y;
+        var prev = html.style.scrollBehavior; html.style.scrollBehavior = 'auto';
+        window.scrollTo(0, Math.max(0, y));
+        html.style.scrollBehavior = prev;
+        requestAnimationFrame(function () { html.classList.remove('lang-enter'); });
+      } else {
+        html.classList.remove('lang-enter');
+      }
+    } catch (e) { html.classList.remove('lang-enter'); }
+
+    // AL SALIR: guardar sección/offset, fade-out y navegar.
+    document.querySelectorAll('[data-lang-switch]').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (a.getAttribute('aria-current') === 'true') return; // ya estamos en ese idioma
+        var href = a.getAttribute('href');
+        var bs = blocks();
+        var sy = window.scrollY || window.pageYOffset || 0;
+        var idx = 0;
+        for (var k = 0; k < bs.length; k++) { if (absTop(bs[k]) <= sy + 2) idx = k; else break; }
+        var delta = bs[idx] ? sy - absTop(bs[idx]) : 0;
+        try { sessionStorage.setItem('langSwitch', JSON.stringify({ i: idx, d: delta, y: sy })); } catch (err) {}
+        if (page && !reduce) page.classList.add('is-leaving');
+        setTimeout(function () { window.location.href = href; }, reduce ? 0 : 300);
+      });
+    });
+  })();
+</script>
+</body>
+</html>
