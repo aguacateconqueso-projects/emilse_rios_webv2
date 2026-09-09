@@ -83,6 +83,10 @@ receta más abajo. **Lo siguiente sin dueño, del sitio, es el cierre para
 producción**, en «Próximos PRs»; de la plataforma, traer el repo de la
 membresía.
 
+El trabajo del 9 sep va en el PR
+[#23](https://github.com/aguacateconqueso-projects/emilse_rios_webv2/pull/23),
+abierto y sin revisar cuando se escribió esto.
+
 ---
 
 ## La plataforma
@@ -1468,6 +1472,15 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
       siete productos, la carta de la membresía, el botón de comprar y la puerta
       de ingresar, en los dos idiomas. Sin backend. La opción del menú dejó de
       estar apagada. Ver **La plataforma → La tienda, y el recorrido de compra**.
+
+- [x] **La carta de la membresía se trasplanta entera.** PR
+      [#23](https://github.com/aguacateconqueso-projects/emilse_rios_webv2/pull/23),
+      9 sep 2026. `/productos/estudiemos-juntos/` y su gemela inglesa dejan de
+      pintarse con el sistema del sitio y pasan a ser el fichero de la academia,
+      traído por la Ruta A de `docs/PORTAR-CARTA-DE-VENTAS.md`. Ver **La
+      plataforma → La carta trasplantada** y la enmienda del 9 sep en **El
+      sistema de diseño**. ⚠️ Trae las puertas de la membresía: hoy cerradas
+      hasta el 1 de octubre, así que el botón de comprar sale apagado.
 
 - [x] **La tienda se separa del aula.** Hecho el 9 sep 2026: el catálogo y las
       cartas se mudaron a **Productos** —`/productos/` y `/en/products/`—, que
