@@ -45,6 +45,26 @@ export default defineConfig({
     },
   },
 
+  /**
+   * Las cartas de venta vivían bajo el aula —`/aulavirtual/<slug>/`— hasta que
+   * el aula pasó a pedir sesión y la tienda se mudó a `/productos/`. Esas
+   * direcciones ya están publicadas y Emi las pega en sus correos, así que no
+   * se rompen: Astro genera una página de redirección por cada producto con
+   * carta, tomando los caminos del propio catálogo.
+   *
+   * Son redirecciones de cliente —`<meta refresh>` con su canonical—, no un 301
+   * de servidor: el sitio es estático. Sirven, pero si algún día el dominio
+   * queda detrás de un servidor que sepa responder 301, es mejor hacerlas ahí.
+   *
+   * El destino va **sin barra final**, aunque el resto del sitio la lleve:
+   * Astro valida el destino contra sus rutas y con la barra falla el build con
+   * `InvalidRedirectDestination`. No es un descuido, no hace falta arreglarlo.
+   */
+  redirects: {
+    '/aulavirtual/[producto]': '/productos/[producto]',
+    '/en/classroom/[producto]': '/en/products/[producto]',
+  },
+
   build: {
     // Una sola hoja de estilos, sin <style> repartidos por el HTML.
     inlineStylesheets: 'never',

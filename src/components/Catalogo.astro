@@ -1,6 +1,12 @@
 ---
 /**
- * El catálogo del Aula Virtual — la portada de la tienda.
+ * El catálogo de Productos — la portada de la tienda.
+ *
+ * Vive **afuera del aula y no pide nada**: es lo que ve quien todavía no ha
+ * pagado. El aula, que es lo que se compra, quedó del otro lado del inicio de
+ * sesión — ver `Aula.astro`. Por eso el único enlace de esta página hacia
+ * dentro es la línea de «¿ya compraste?», que es un atajo para quien vuelve,
+ * no una puerta abierta.
  *
  * Cada producto lleva su foto arriba, el nombre, una línea de qué es y su
  * estado. La forma es la que pidió Emi con el sitio viejo delante: una rejilla
@@ -17,7 +23,7 @@
  * llegar **no lo son**, y se ven apagadas: es la misma regla que tuvo apagada
  * esta sección entera hasta hoy.
  */
-import { type Lang, useTranslations, productPath } from '../i18n/ui';
+import { type Lang, useTranslations, productPath, routePath } from '../i18n/ui';
 import { catalogo } from '../data/aula';
 import MediaSlot from './MediaSlot.astro';
 
@@ -36,8 +42,9 @@ const t = useTranslations(lang);
 */}
 <section class="tienda__wrap reveal">
   <div class="mono-plain soft" aria-hidden="true">00</div>
-  <h1 class="tienda__title">{t('aula.title')}</h1>
-  <p class="tienda__lead">{t('aula.description')}</p>
+  <h1 class="tienda__title">{t('products.title')}</h1>
+  <p class="tienda__lead">{t('products.description')}</p>
+  <a class="mono tienda__in" href={routePath('aula', lang)}>{t('products.enrolled')}</a>
 </section>
 
 <section class="tienda__wrap block">
@@ -72,7 +79,7 @@ const t = useTranslations(lang);
                       {copia.precio} <span class="soft">{copia.cadencia}</span>
                     </span>
                   ) : (
-                    <span class="soft">{t('aula.soon')}</span>
+                    <span class="soft">{t('products.soon')}</span>
                   )
                 }
               </span>
@@ -87,7 +94,7 @@ const t = useTranslations(lang);
               */}
               {venta && (
                 <span class="mono cat__cta">
-                  {producto.tipo === 'membresia' ? t('aula.seeMembership') : t('aula.see')}
+                  {producto.tipo === 'membresia' ? t('products.seeMembership') : t('products.see')}
                 </span>
               )}
             </Ficha>
@@ -112,6 +119,19 @@ const t = useTranslations(lang);
     margin-top: var(--space-3);
     max-width: var(--measure);
     text-wrap: pretty;
+  }
+
+  /* El atajo de quien ya pagó. Va acá arriba y no abajo del todo: quien vuelve
+     a comprar entra por esta página, y hacerle bajar siete fichas para
+     encontrar la puerta es hacerle buscar lo que ya tiene. */
+  .tienda__in {
+    display: inline-block;
+    margin-top: var(--space-3);
+    border-bottom: 1px solid var(--ink-soft);
+  }
+
+  .tienda__in:hover {
+    border-bottom-color: currentColor;
   }
 
   /* --- La rejilla ----------------------------------------------------------

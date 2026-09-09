@@ -1,6 +1,6 @@
 ---
 /**
- * La página de cada producto del aula, en español.
+ * La carta de venta de cada producto, en español.
  *
  * `getStaticPaths` solo genera las de los productos **a la venta y con carta
  * escrita**. Los que están por llegar no tienen página: si la tuvieran, habría
@@ -29,9 +29,9 @@ const copia = producto.copia[lang];
 
 <Base
   lang={lang}
-  title={`${copia.nombre} · ${t('aula.title')}`}
+  title={`${copia.nombre} · ${t('products.title')}`}
   description={copia.resumen}
-  route="aula"
+  route="products"
   pathEs={productPath(producto.slug, 'es')}
   pathEn={productPath(producto.slug, 'en')}
 >

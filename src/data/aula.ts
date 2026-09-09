@@ -3,7 +3,8 @@ import type { Lang } from '../i18n/ui';
 import membresiaFoto from '../assets/img/emilse-membresia.jpg';
 
 /**
- * El catálogo del Aula Virtual y las cartas de venta de sus productos.
+ * El catálogo de la tienda —`/productos/`— y las cartas de venta de cada uno,
+ * más la dirección de la puerta del aula.
  *
  * Esto es **la fachada**: lo que se ve antes de pagar y antes de entrar. No hay
  * base de datos detrás todavía, ni derechos de acceso, ni webhook. El día que
@@ -148,7 +149,12 @@ export const ACADEMIA = 'https://emilseriosacademy.com';
  */
 const NEWSLETTER = 'https://manage.kmail-lists.com/subscriptions/subscribe?a=TPxGBg&g=SaE8Px';
 
-/** El botón de arriba a la derecha del aula. Lleva al aula que ya funciona. */
+/**
+ * La puerta del aula: el botón de la página `/aulavirtual/` y el de la cápsula
+ * de la cabecera en la tienda. Lleva al inicio de sesión de la academia, que es
+ * donde el aula funciona hoy. El día que la sesión viva acá, esto pasa a ser
+ * una ruta interna y nada más cambia.
+ */
 export const entrarHref: Record<Lang, string> = {
   es: `${ACADEMIA}/entrar/`,
   en: `${ACADEMIA}/entrar/en/`,

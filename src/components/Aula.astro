@@ -1,0 +1,155 @@
+---
+/**
+ * La puerta del Aula Virtual — lo que ve quien no ha iniciado sesión.
+ *
+ * El aula **es lo que se compra**, así que desde ahora vive detrás del inicio
+ * de sesión, igual que la membresía hoy. Esta página es lo único que queda del
+ * lado de fuera: dice qué hay dentro, ofrece la puerta y, para quien todavía no
+ * ha comprado nada, señala la tienda. Nada más. El catálogo y las cartas de
+ * venta se mudaron a `/productos/`, que es donde tienen que estar — una carta
+ * de ventas detrás de un inicio de sesión no vende nada.
+ *
+ * **No hay sesión en este repo todavía.** La sesión, el aula y el cobro viven
+ * en `emilseriosacademy.com`, así que el botón sale del sitio, a la misma
+ * puerta que usan hoy las miembros, y la página lo dice en vez de dejar que la
+ * alumna descubra sola el cambio de dominio. Cuando el aula se mude acá, lo que
+ * cambia es `ACADEMIA` en `src/data/aula.ts` y esta página pasa a ser el
+ * formulario de verdad; la forma no cambia.
+ */
+import { type Lang, useTranslations, routePath } from '../i18n/ui';
+import { entrarHref } from '../data/aula';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const entrar = entrarHref[lang];
+---
+
+<section class="row row--wide puerta__head reveal">
+  <div class="mono-plain soft row__num" aria-hidden="true">00</div>
+  <div class="row__body">
+    <h1 class="puerta__title">{t('aula.title')}</h1>
+    <p class="puerta__lead">{t('aula.lead')}</p>
+  </div>
+</section>
+
+{/*
+  El bloque de la puerta se encuadra igual que el de compra: regla de tinta
+  plena arriba, regla suave abajo, y dentro el único botón macizo. Es el mismo
+  gesto porque es el mismo tipo de final de recorrido — allí se paga, acá se
+  entra a lo que ya se pagó.
+*/}
+<section class="row row--wide block reveal">
+  <div class="row__num" aria-hidden="true"></div>
+  <div class="row__body">
+    <div class="puerta">
+      <p class="mono soft puerta__label">{t('aula.locked')}</p>
+      <a class="mono puerta__cta" href={entrar} rel="noopener">{t('nav.enter')}</a>
+      <p class="soft puerta__hint">{t('aula.hint')}</p>
+      <p class="puerta__away">{t('aula.away')}</p>
+    </div>
+  </div>
+</section>
+
+{/*
+  Y la salida hacia la tienda, para quien llegó acá sin haber comprado nada.
+  Misma forma que el pie del newsletter de las cartas de venta: una frase en la
+  tipografía de titulares y un enlace debajo.
+*/}
+<section class="row row--wide block reveal">
+  <div class="row__num" aria-hidden="true"></div>
+  <div class="row__body">
+    <div class="fuera">
+      <p class="fuera__pre">{t('aula.noAccount')}</p>
+      <a class="mono fuera__cta" href={routePath('products', lang)}>{t('aula.toProducts')}</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* La entrada arranca donde arrancan los heros del sitio, no pegada a la
+     cápsula del menú. */
+  .puerta__head {
+    margin-top: var(--space-8);
+  }
+
+  .puerta__title {
+    margin-top: var(--space-3);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--text-hero);
+    line-height: var(--leading-hero);
+    letter-spacing: var(--tracking-hero);
+  }
+
+  .puerta__lead {
+    margin-top: var(--space-3);
+    max-width: var(--measure);
+    text-wrap: pretty;
+  }
+
+  /* --- La puerta ----------------------------------------------------------- */
+  .puerta {
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--rule);
+    padding: var(--space-4) 0;
+    max-width: var(--measure);
+  }
+
+  /* El botón macizo, el mismo del bloque de compra: es el final del recorrido
+     y no hay color de acento con el que destacarlo de otra manera. */
+  .puerta__cta {
+    display: inline-block;
+    margin-top: var(--space-3);
+    padding: var(--space-2) var(--space-4);
+    background: var(--ink);
+    color: var(--paper);
+    border-bottom: 0;
+  }
+
+  .puerta__cta:hover {
+    background: var(--ink-soft);
+  }
+
+  .puerta__hint {
+    margin-top: var(--space-3);
+    max-width: var(--measure);
+    font-size: var(--text-small);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  .puerta__away {
+    margin-top: var(--space-4);
+    max-width: var(--measure);
+    font-size: var(--text-small);
+    line-height: 1.5;
+    color: var(--ink-soft);
+    text-wrap: pretty;
+  }
+
+  /* --- La salida hacia la tienda -------------------------------------------- */
+  .fuera {
+    border-top: 1px solid var(--rule);
+    padding-top: var(--space-4);
+  }
+
+  .fuera__pre {
+    font-family: var(--font-display);
+    font-size: var(--text-section);
+    line-height: var(--leading-section);
+    letter-spacing: var(--tracking-section);
+  }
+
+  .fuera__cta {
+    display: inline-block;
+    margin-top: var(--space-3);
+    border-bottom: 1px solid var(--ink-soft);
+  }
+
+  .fuera__cta:hover {
+    border-bottom-color: currentColor;
+  }
+</style>

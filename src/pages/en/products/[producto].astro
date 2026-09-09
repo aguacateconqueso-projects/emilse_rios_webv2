@@ -1,8 +1,8 @@
 ---
 /**
- * La página de cada producto del aula, en inglés.
+ * La carta de venta de cada producto, en inglés.
  *
- * Gemela de `/aulavirtual/[producto].astro`: mismos productos, mismos slugs
+ * Gemela de `/productos/[producto].astro`: mismos productos, mismos slugs
  * —el slug es la identidad del producto y no se traduce—, y la copia sale del
  * mismo fichero de datos. Lo único que cambia es el idioma.
  */
@@ -29,9 +29,9 @@ const copia = producto.copia[lang];
 
 <Base
   lang={lang}
-  title={`${copia.nombre} · ${t('aula.title')}`}
+  title={`${copia.nombre} · ${t('products.title')}`}
   description={copia.resumen}
-  route="aula"
+  route="products"
   pathEs={productPath(producto.slug, 'es')}
   pathEn={productPath(producto.slug, 'en')}
 >
