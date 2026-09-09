@@ -1,0 +1,26 @@
+---
+/**
+ * La carta de venta de la membresía, en español.
+ *
+ * Cuatro líneas y ni una más, a propósito. La carta es
+ * `src/components/membresia/Carta.astro`, trasplantada entera desde
+ * `emilse_rios_membresias` siguiendo `docs/PORTAR-CARTA-DE-VENTAS.md`, y ese
+ * componente **imprime el documento completo**: `<!DOCTYPE html>`, `<head>` y
+ * `<body>` con sus estilos y sus scripts. Por eso no hay `Base.astro` acá.
+ *
+ * Y por eso tampoco hay ningún otro `import`. Astro recoge el CSS de todo lo
+ * que una página importa, aunque no lo pinte: nombrar `Base.astro` en este
+ * fichero bastaría para colar la hoja del sistema del sitio detrás de la de la
+ * carta y pisarle el fondo crema, la tipografía y la medida de los párrafos.
+ * Esta página existe justo para que eso no pueda pasar — la hermana dinámica,
+ * `[producto].astro`, se ocupa de los productos que sí usan el sistema del
+ * sitio, y se salta los que traen carta propia.
+ *
+ * La dirección es la misma de siempre —`/productos/estudiemos-juntos/`—, así
+ * que el catálogo, el conmutador de idioma y las direcciones viejas del aula
+ * siguen valiendo sin enterarse de nada.
+ */
+import Carta from '../../components/membresia/Carta.astro';
+---
+
+<Carta lang="es" slug="estudiemos-juntos" />
