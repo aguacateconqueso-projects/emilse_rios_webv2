@@ -42,15 +42,20 @@ const { lang, route = 'home', hrefEs, hrefEn } = Astro.props;
 const t = useTranslations(lang);
 
 /*
-  El botón de ingresar sale solo dentro del aula. En la Home y en Sobre mí no
-  pinta nada: quien llega ahí viene a leer, no a entrar a estudiar. Y hoy lleva
-  fuera del sitio, a la academia, que es donde el aula funciona de verdad.
+  El botón de ingresar sale solo en la tienda. En la Home y en Sobre mí no pinta
+  nada: quien llega ahí viene a leer, no a entrar a estudiar. Y **en la puerta
+  del aula tampoco**, aunque parezca el sitio natural: esa página entera ya es
+  la puerta, con su botón en el cuerpo, y una segunda cápsula arriba diciendo lo
+  mismo es repetir la única acción que hay. Donde sí hace falta es en el
+  catálogo, que es donde entra quien ya compró algo y viene a comprar otra cosa.
+
+  Hoy lleva fuera del sitio, a la academia, que es donde el aula funciona.
 */
-const enAula = route === 'aula';
+const enTienda = route === 'products';
 const entrar = entrarHref[lang];
 ---
 
-<header class:list={['header', enAula && 'header--aula']}>
+<header class:list={['header', enTienda && 'header--tienda']}>
   <details class="menu" data-menu>
     <summary class="menu__trigger" title={t('nav.menu')}>
       {/*
@@ -96,6 +101,11 @@ const entrar = entrarHref[lang];
           >
           <a
             class="menu__item"
+            href={routePath('products', lang)}
+            aria-current={route === 'products' ? 'page' : undefined}>{t('nav.products')}</a
+          >
+          <a
+            class="menu__item"
             href={routePath('aula', lang)}
             aria-current={route === 'aula' ? 'page' : undefined}>{t('nav.aula')}</a
           >
@@ -105,7 +115,7 @@ const entrar = entrarHref[lang];
             Es la misma puerta por otra puerta, no una segunda cosa.
           */}
           {
-            enAula && (
+            enTienda && (
               <a class="menu__item menu__item--enter" href={entrar} rel="noopener">
                 {t('nav.enter')}
               </a>
@@ -120,7 +130,7 @@ const entrar = entrarHref[lang];
   </details>
 
   {
-    enAula && (
+    enTienda && (
       <a class="mono enter" href={entrar} rel="noopener">
         {t('nav.enter')}
       </a>
@@ -382,7 +392,7 @@ const entrar = entrarHref[lang];
      en el flujo, porque la del menú tiene que quedarse centrada en la página,
      no centrada en lo que sobre.
 
-     Solo aparece en el aula. La cabecera no captura el ratón, así que esta
+     Solo aparece en la tienda. La cabecera no captura el ratón, así que esta
      recupera el suyo, igual que hace la cápsula del menú. */
   .enter {
     position: absolute;
@@ -422,7 +432,7 @@ const entrar = entrarHref[lang];
       display: block;
     }
 
-    .header--aula .menu__item--enter {
+    .header--tienda .menu__item--enter {
       display: none;
     }
   }

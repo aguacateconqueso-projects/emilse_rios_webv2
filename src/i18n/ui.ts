@@ -15,6 +15,7 @@ export const ui = {
     'site.name': 'Emilse Ríos',
 
     'nav.about': 'Sobre mí',
+    'nav.products': 'Productos',
     'nav.aula': 'Aula Virtual',
     'nav.enter': 'Ingresar al aula',
     'nav.home': 'Ir al inicio',
@@ -44,16 +45,33 @@ export const ui = {
     'media.still': 'Fotograma del video',
     'about.description':
       'Le dijeron que el contrabajo no era para ella. Esta es la historia de por qué se equivocaron: veinte años tocando y formando contrabajistas, de El Sistema a Madrid.',
+
+    /* --- La tienda, que está afuera y no pide nada ---------------------- */
+    'products.title': 'Productos',
+    'products.description':
+      'Los cursos y la membresía de Emilse Ríos. Aprende contrabajo a tu ritmo, con acompañamiento de verdad.',
+    'products.soon': 'Próximamente',
+    'products.see': 'Ver el curso',
+    'products.seeMembership': 'Ver la membresía',
+    'products.buy': 'Comprar',
+    'products.back': 'Volver a Productos',
+    'products.leaving':
+      'El cobro todavía vive en emilseriosacademy.com. Se muda a esta casa con el cambio de dominio, y quien ya esté dentro no tiene que hacer nada.',
+    'products.enrolled': '¿Ya compraste? El aula es por acá',
+
+    /* --- El aula, que está adentro y pide haber pagado ------------------- */
     'aula.title': 'Aula Virtual',
     'aula.description':
-      'Los cursos y la membresía de Emilse Ríos. Aprende contrabajo a tu ritmo, con acompañamiento de verdad.',
-    'aula.soon': 'Próximamente',
-    'aula.see': 'Ver el curso',
-    'aula.seeMembership': 'Ver la membresía',
-    'aula.buy': 'Comprar',
-    'aula.back': 'Volver al Aula Virtual',
-    'aula.leaving':
-      'La membresía todavía vive en emilseriosacademy.com. Se muda a esta casa con el cambio de dominio, y quien ya esté dentro no tiene que hacer nada.',
+      'El aula de Emilse Ríos. Acá entran quienes ya son miembros o compraron un curso.',
+    'aula.lead':
+      'Acá dentro está lo que ya compraste: el ejercicio de esta semana, el concepto del mes y tus cursos.',
+    'aula.locked': 'Esta parte pide iniciar sesión',
+    'aula.hint':
+      'Si ya eres miembro o compraste un curso, entras con el correo con el que pagaste.',
+    'aula.away':
+      'El aula todavía vive en emilseriosacademy.com. Se muda a esta casa con el cambio de dominio, y quien ya esté dentro no tiene que hacer nada.',
+    'aula.noAccount': '¿Todavía no estudias con Emi?',
+    'aula.toProducts': 'Mira lo que hay a la venta',
     'footer.email': 'hola@contrabajoenlaciudad.com',
     'footer.instagram': 'Instagram',
     'footer.youtube': 'YouTube',
@@ -65,6 +83,7 @@ export const ui = {
     'site.name': 'Emilse Ríos',
 
     'nav.about': 'About',
+    'nav.products': 'Products',
     'nav.aula': 'Virtual Classroom',
     'nav.enter': 'Enter the classroom',
     'nav.home': 'Go to the home page',
@@ -94,16 +113,33 @@ export const ui = {
     'media.still': 'Video still',
     'about.description':
       'They told her the double bass wasn\'t for her. This is the story of why they were wrong: twenty years playing and training bassists, from El Sistema to Madrid.',
+
+    /* --- La tienda, que está afuera y no pide nada ---------------------- */
+    'products.title': 'Products',
+    'products.description':
+      "Emilse Ríos's courses and membership. Learn double bass at your own pace, with real guidance.",
+    'products.soon': 'Coming soon',
+    'products.see': 'View the course',
+    'products.seeMembership': 'View the membership',
+    'products.buy': 'Buy',
+    'products.back': 'Back to Products',
+    'products.leaving':
+      'Payment still lives at emilseriosacademy.com. It moves into this house with the domain change, and anyone already inside has nothing to do.',
+    'products.enrolled': 'Already bought? The classroom is this way',
+
+    /* --- El aula, que está adentro y pide haber pagado ------------------- */
     'aula.title': 'Virtual Classroom',
     'aula.description':
-      "Emilse Ríos's courses and membership. Learn double bass at your own pace, with real guidance.",
-    'aula.soon': 'Coming soon',
-    'aula.see': 'View the course',
-    'aula.seeMembership': 'View the membership',
-    'aula.buy': 'Buy',
-    'aula.back': 'Back to the Virtual Classroom',
-    'aula.leaving':
-      'The membership still lives at emilseriosacademy.com. It moves into this house with the domain change, and anyone already inside has nothing to do.',
+      "Emilse Ríos's classroom. This is where members and course students come in.",
+    'aula.lead':
+      "Inside is everything you already bought: this week's exercise, the month's concept and your courses.",
+    'aula.locked': 'This part asks you to sign in',
+    'aula.hint':
+      'If you are already a member or bought a course, you come in with the email you paid with.',
+    'aula.away':
+      'The classroom still lives at emilseriosacademy.com. It moves into this house with the domain change, and anyone already inside has nothing to do.',
+    'aula.noAccount': 'Not studying with Emi yet?',
+    'aula.toProducts': "See what's on sale",
     'footer.email': 'hola@contrabajoenlaciudad.com',
     'footer.instagram': 'Instagram',
     'footer.youtube': 'YouTube',
@@ -126,6 +162,7 @@ export function useTranslations(lang: Lang) {
 export const routes = {
   home: { es: '/', en: '/' },
   about: { es: '/sobre-mi', en: '/about' },
+  products: { es: '/productos', en: '/products' },
   aula: { es: '/aulavirtual', en: '/classroom' },
 } as const satisfies Record<string, Record<Lang, string>>;
 
@@ -139,13 +176,15 @@ export function routePath(route: Route, lang: Lang): string {
 }
 
 /**
- * Dirección de la página de un producto del aula.
+ * Dirección de la carta de venta de un producto.
  *
- * El slug de la sección se traduce —`/aulavirtual/` y `/en/classroom/`—, pero
- * **el del producto no**: el slug es la identidad del producto, la misma que
- * llevará su fila en la base de datos y la que aparecerá en el enlace que Emi
- * pegue en un correo. Un producto, un slug, en los dos idiomas.
+ * Cuelga de la tienda, que está afuera y no pide sesión — `/productos/` y
+ * `/en/products/` —, no del aula, que desde ahora pide haber pagado. El slug
+ * de la sección se traduce, pero **el del producto no**: el slug es la
+ * identidad del producto, la misma que llevará su fila en la base de datos y
+ * la que aparecerá en el enlace que Emi pegue en un correo. Un producto, un
+ * slug, en los dos idiomas.
  */
 export function productPath(slug: string, lang: Lang): string {
-  return `${routePath('aula', lang)}${slug}/`;
+  return `${routePath('products', lang)}${slug}/`;
 }

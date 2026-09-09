@@ -84,13 +84,13 @@ const ficha = variante === 'precio' && !!compra;
                 <span class="mono soft buy__per">{compra?.cadenciaCorta ?? copia.cadencia}</span>
               </p>
               <a class="mono buy__cta" href={href} rel={fuera ? 'noopener' : undefined}>
-                {compra?.etiqueta ?? t('aula.buy')}
+                {compra?.etiqueta ?? t('products.buy')}
               </a>
               {compra && <p class="mono soft buy__note">{compra.nota}</p>}
             </>
           )}
 
-          {fuera && aviso && <p class="buy__away">{t('aula.leaving')}</p>}
+          {fuera && aviso && <p class="buy__away">{t('products.leaving')}</p>}
         </div>
       </div>
     </div>

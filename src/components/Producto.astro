@@ -3,8 +3,10 @@
  * La página de venta de un producto — el paso 2 del recorrido.
  *
  * Es a la vez la carta y el destino de la ficha del catálogo: una sola cosa con
- * dos usos. El botón de comprar va dentro, y aparece varias veces, donde la
- * carta lo pida — eso lo decide el texto, en `data/aula.ts`, no este fichero.
+ * dos usos. Cuelga de la tienda —`/productos/<slug>/`—, que está afuera y no
+ * pide sesión: una carta de ventas tras un inicio de sesión no vende nada. El
+ * botón de comprar va dentro, y aparece varias veces, donde la carta lo pida —
+ * eso lo decide el texto, en `data/aula.ts`, no este fichero.
  *
  * **El texto de la membresía es el de `emilseriosacademy.com`, tal cual.** Lo
  * que cambia es la ropa: se pinta con el sistema de este sitio, en blanco y
@@ -41,7 +43,7 @@ let primerCta = true;
   <header class="prod__hero">
     <div class="prod__intro">
       <div class="prod__introInner">
-        <a class="mono soft prod__back" href={routePath('aula', lang)}>{t('aula.back')}</a>
+        <a class="mono soft prod__back" href={routePath('products', lang)}>{t('products.back')}</a>
         <h1 class="prod__title">{pagina.titulo}</h1>
         <p class="mono soft prod__sub">{pagina.subtitulo}</p>
       </div>

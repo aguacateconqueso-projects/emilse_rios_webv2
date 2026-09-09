@@ -4,7 +4,8 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 31 de agosto de 2026 · abre el Aula Virtual, en fachada
+**Última actualización:** 9 de septiembre de 2026 · la tienda se muda a
+**Productos** y el Aula Virtual queda detrás del inicio de sesión
 
 ---
 
@@ -14,14 +15,19 @@ de cero debería poder seguir trabajando sin preguntar nada.
 |---|---|
 | **Publicado** | Sí, en Vercel. Despliega solo en cada merge a `main`. |
 | **Dominio** | Pendiente. Todavía se ve en la URL de Vercel. El destino es `emilserios.com`. |
-| **Páginas** | Home, Sobre mí y el Aula Virtual, las tres en español e inglés. |
+| **Páginas** | Home, Sobre mí, Productos y la puerta del Aula Virtual, en español e inglés. |
 | **Identidad** | El logo de Emi, vectorizado, en cabecera, pie, entrada y favicon. |
 | **Alcance** | Desde el 31 ago 2026 esto deja de ser solo el sitio: aquí van también el aula, la membresía y los cursos. Ver **La plataforma**. |
 | **Lo que falta para lanzar** | Conectar Klaviyo. El formulario **no da de alta a nadie**. |
 
-Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/` · `/aulavirtual/` ·
-`/en/classroom/` · `/aulavirtual/estudiemos-juntos/` ·
-`/en/classroom/estudiemos-juntos/`
+Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/` · `/productos/` ·
+`/en/products/` · `/productos/estudiemos-juntos/` ·
+`/en/products/estudiemos-juntos/` · `/aulavirtual/` · `/en/classroom/`
+
+Las dos direcciones viejas de la carta de la membresía
+—`/aulavirtual/estudiemos-juntos/` y su gemela inglesa— **siguen funcionando**:
+redirigen a la nueva. Están puestas en `astro.config.mjs` y salen del propio
+catálogo, así que valen para cualquier producto que se publique.
 
 **Lo que está en marcha ahora mismo** es la plataforma: se decidió el alcance,
 se dibujó el aula, y Emi le mandó a Edu —quien hizo la web original y controla
@@ -29,16 +35,25 @@ el dominio— la pedida completa para recuperar `emilserios.com`. **Se espera su
 respuesta.** Nada de las primeras cinco fases depende de eso, así que se puede
 avanzar mientras. Todo está en la sección siguiente.
 
-Y ya hay algo puesto: **el Aula Virtual abrió en fachada**. Está el catálogo con
-los siete productos, la página de venta de la membresía y el botón de comprar,
-que hoy lleva al cobro que ya funciona en la academia. Sin base de datos, sin
-webhook y sin tocar nada de lo que está cobrando. Es **La tienda, y el recorrido
-de compra**, más abajo.
+Y ya hay algo puesto: **la tienda abrió, y desde el 9 sep 2026 tiene página
+propia**. Se llama **Productos**, vive en `/productos/` y `/en/products/`, y en
+ella están los siete productos, la carta de venta de la membresía y el botón de
+comprar, que hoy lleva al cobro que ya funciona en la academia. Sin base de
+datos, sin webhook y sin tocar nada de lo que está cobrando. Es **La tienda, y
+el recorrido de compra**, más abajo.
+
+**El Aula Virtual dejó de ser la tienda.** Es lo que se compra, así que ahora
+está detrás del inicio de sesión, igual que la membresía: `/aulavirtual/` ya no
+enseña el catálogo, es una puerta con el botón de ingresar y un enlace a la
+tienda para quien todavía no ha comprado nada. La sesión de verdad sigue siendo
+la de la academia — acá no hay sesión todavía —, así que el botón sale del sitio
+y la página lo dice.
 
 Del sitio en sí, lo último que se tocó fue **el menú**. La cabecera dejó de ser
 una barra: ahora es una cápsula de cristal que flota sobre la página, con la
 firma de Emi en el centro y la palabra «MENÚ» al lado. Al pulsarla crece hacia
-abajo y descubre Inicio, Sobre mí, Aula Virtual y el conmutador de idioma, que
+abajo y descubre Inicio, Sobre mí, Productos, Aula Virtual y el conmutador de
+idioma, que
 antes estaban sueltos a la derecha. Copia el comportamiento del sitio que Emi pasó de
 referencia, y trajo dos enmiendas al sistema —radio y sombra, solo para esta
 cápsula— anotadas más abajo.
@@ -121,9 +136,10 @@ sigue siendo suyo, y a partir de ahí el DNS se controla desde acá para siempre
 Una sola aula para las dos cosas que vende Emi: la membresía y los cursos.
 
 **La parte de fuera ya existe** —el catálogo y las cartas de venta, en
-`/aulavirtual/`, sin sesión— y está descrita en **La tienda, y el recorrido de
+`/productos/`, sin sesión— y está descrita en **La tienda, y el recorrido de
 compra**, aquí abajo. Lo que sigue es la parte de dentro, la que pide haber
-pagado y haber entrado:
+pagado y haber entrado, y que hoy está entera en la academia. `/aulavirtual/` es
+su puerta: lo único de esta parte que se ve sin sesión.
 
 ```
 /aula/                   Mi escritorio
@@ -150,7 +166,7 @@ pagado y haber entrado:
 /panel/                  La consola de Emi (solo admin, solo español)
 ```
 
-`/aula/tienda/` y `/aulavirtual/` **son el mismo catálogo leído desde dos
+`/aula/tienda/` y `/productos/` **son el mismo catálogo leído desde dos
 sitios**: los mismos productos, los mismos precios, la misma página de venta.
 Lo único que cambia es que dentro se sabe qué compró ya quien mira, y por eso
 una ficha comprada dice «Entrar» en vez de «Comprar». No son dos catálogos que
@@ -177,8 +193,8 @@ El Aula Virtual es, por fuera, una tienda. El recorrido entero, de la primera
 mirada hasta estar dentro estudiando, son siete pasos:
 
 ```
-1  Catálogo            /aulavirtual/            ✅ hecho
-2  Página de venta     /aulavirtual/<slug>/     ✅ hecho (la de la membresía)
+1  Catálogo            /productos/              ✅ hecho
+2  Página de venta     /productos/<slug>/       ✅ hecho (la de la membresía)
 3  Botón de comprar    dentro de esa página     ✅ hecho
 4  Enlace de pago      Stripe · PayPal          ◻︎ Stripe sí, pero en la academia
 5  Confirmación                                 ◻︎ existe en la academia
@@ -352,15 +368,17 @@ necesita.
 
 ### Las cartas de venta de los cursos
 
-Cada curso tiene su página pública propia, **`/aulavirtual/<slug>/`** —y
-`/en/classroom/<slug>/`—, indexable, con el sistema de diseño de este sitio. Emi
+Cada curso tiene su página pública propia, **`/productos/<slug>/`** —y
+`/en/products/<slug>/`—, indexable, con el sistema de diseño de este sitio. Emi
 la escribe desde su panel. Esa página es a la vez la carta de ventas y el destino
 del botón de la tienda: una sola cosa con dos usos.
 
-Cuelga del aula y no de un `/cursos/` aparte, que es donde se dibujó primero,
-porque el recorrido es uno solo: se entra al Aula Virtual, se mira el catálogo,
-se abre un producto y se compra. Una segunda rama de URLs para el mismo paso
-obligaba a decidir en cada enlace a cuál de las dos mandar.
+Cuelga de la tienda y no de un `/cursos/` aparte, que es donde se dibujó
+primero, porque el recorrido es uno solo: se mira el catálogo, se abre un
+producto y se compra. Una segunda rama de URLs para el mismo paso obligaba a
+decidir en cada enlace a cuál de las dos mandar. Y **no cuelga del aula**, que
+es donde estuvo hasta el 9 sep 2026: el aula pide sesión, y una carta de ventas
+detrás de un inicio de sesión no vende nada.
 
 Al publicar, el anuncio va por dos vías distintas y **cada herramienta hace lo
 suyo**: la plataforma avisa a los usuarios que ya tienen cuenta, cada uno en su
@@ -571,7 +589,7 @@ se ha tocado siete veces:
 - **31 ago 2026 · El radio y la sombra del menú valen para la cápsula de
   ingresar al aula.** La enmienda del 20 de agosto decía «solo para la cápsula
   del menú», y esto la amplía a un segundo objeto: el botón de arriba a la
-  derecha del Aula Virtual. No es un permiso nuevo, es el mismo: son los dos
+  derecha de la tienda —hasta el 9 sep 2026 estuvo en el Aula Virtual—. No es un permiso nuevo, es el mismo: son los dos
   únicos objetos del sitio que **flotan sobre la página** en vez de dividirla, y
   se parecen a propósito, porque son las dos cosas que se pueden pulsar sin
   haber bajado. Siguen siendo `--menu-radius` y `--menu-shadow`; `--radius` y
@@ -632,8 +650,9 @@ src/
     Intro.astro                    Animación de entrada (solo Home)
     Backdrop.astro                 El contrabajo tras el cristal (solo Home)
     Home.astro · About.astro       Los bloques de cada página
-    Catalogo.astro                 La rejilla de productos del Aula Virtual
+    Catalogo.astro                 La rejilla de productos de la tienda
     Producto.astro                 La carta de venta de un producto
+    Aula.astro                     La puerta del aula: entrar, o ir a la tienda
     Compra.astro                   El bloque de precio y el botón de comprar
     EmailArchive.astro             Fichas del newsletter + <dialog>
     SubscribeForm.astro            Campo de suscripción
@@ -646,8 +665,9 @@ src/
   i18n/ui.ts             Cadenas de interfaz + mapa de rutas
   layouts/Base.astro     <head>, cabecera, pie, revelado de frases-ancla
   pages/                 index · sobre-mi · en/index · en/about
-                         aulavirtual/index · aulavirtual/[producto]
-                         en/classroom/index · en/classroom/[producto]
+                         productos/index · productos/[producto]
+                         en/products/index · en/products/[producto]
+                         aulavirtual/index · en/classroom/index
   styles/tokens.css      Los tokens del sistema
   styles/base.css        Reset y primitivas compartidas
 public/logo.svg          La firma vectorizada. La usa Logo.astro de máscara
@@ -684,7 +704,7 @@ No hay que tocar código. Se ordenan solos de mayor a menor. Quitar
 
 ### Poner un curso a la venta
 
-Todo el catálogo del Aula Virtual sale de `src/data/aula.ts`. Un curso pasa de
+Todo el catálogo de la tienda sale de `src/data/aula.ts`. Un curso pasa de
 «Próximamente» a estar a la venta cambiando su entrada:
 
 1. `estado: 'venta'` en vez de `'proximamente'`.
@@ -713,7 +733,7 @@ Todo el catálogo del Aula Virtual sale de `src/data/aula.ts`. Un curso pasa de
 6. `comprarHref` con el enlace de pago de cada idioma.
 
 Con eso, la ficha del catálogo se vuelve un enlace y `getStaticPaths` genera
-`/aulavirtual/<slug>/` y `/en/classroom/<slug>/` sola. **No hay que tocar
+`/productos/<slug>/` y `/en/products/<slug>/` sola. **No hay que tocar
 ninguna página.** Si falta la `pagina`, el producto no se genera aunque esté en
 `'venta'`: es la red que impide publicar un enlace a una carta que no existe.
 
@@ -823,8 +843,8 @@ De ahí salen solos los enlaces, el `canonical` y las alternativas `hreflang`.
 node scripts/audit.mjs http://localhost:4321/sobre-mi/ 390
 ```
 
-Estado en las cuatro rutas, a 1440 y a 390 px de ancho, vuelto a pasar con la
-lámina puesta:
+Estado en todas las rutas, a 1440 y a 390 px de ancho — vuelto a pasar el
+9 sep 2026 con Productos y la puerta del aula recién hechas:
 
 ```
 CONTRASTE por debajo de AA .................. 0
@@ -876,12 +896,25 @@ Están discutidas y resueltas. No hace falta volver sobre ellas salvo que Emi
 pida lo contrario. Las que tienen que ver con la plataforma —dominio, aula,
 cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
 
-- **La tienda vive en `/aulavirtual/` y las cartas cuelgan de ella**, en
-  `/aulavirtual/<slug>/`. Un solo recorrido: catálogo, producto, comprar. El
-  slug de la sección se traduce —`/en/classroom/`— pero **el del producto no**:
+- **La tienda vive en `/productos/` y las cartas cuelgan de ella**, en
+  `/productos/<slug>/`. Un solo recorrido: catálogo, producto, comprar. El
+  slug de la sección se traduce —`/en/products/`— pero **el del producto no**:
   el slug es la identidad del producto, la misma que llevará su fila en la base
   de datos y la que Emi pegue en un correo. Un producto, un slug, dos idiomas.
   La membresía es `estudiemos-juntos`, que es su nombre, no `membresia`.
+
+- **9 sep 2026 · Lo que se vende y lo que se compra son dos sitios distintos.**
+  Hasta ese día el Aula Virtual era las dos cosas: el catálogo público y el
+  nombre de lo que hay dentro. Ahora la tienda es **Productos**, abierta y sin
+  sesión, y **el Aula Virtual es solo lo de dentro**, detrás del inicio de
+  sesión, como funciona hoy la membresía. Las direcciones viejas de las cartas
+  redirigen a las nuevas, y las redirecciones salen del catálogo, no de una
+  lista escrita a mano.
+
+  La puerta de ingresar **no se repite**: la cápsula de la cabecera sale en la
+  tienda, que es donde entra quien ya compró y viene a comprar otra cosa, y no
+  en `/aulavirtual/`, porque esa página entera ya es la puerta y tiene su botón
+  en el cuerpo.
 
 - **El revelado lleva una red de seguridad, y hacía falta de verdad.** El
   `IntersectionObserver` solo avisa cuando **cambia** si el elemento cruza el
@@ -1240,13 +1273,16 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
       de verdad, pero el cuerpo es de muestra — marcados `borrador: true`.
 - [ ] **Los tres testimonios** de *Sobre mí*.
 - [ ] **Enlaces reales de Instagram y YouTube.** Apuntan a las portadas.
-- [ ] **El nombre, el precio, la foto y la carta de los 6 cursos.** Es lo que
-      bloquea el catálogo: hoy las seis fichas dicen «Curso 1» a «Curso 6», con
-      el marco de la foto vacío, y salen como «Próximamente», sin enlace, porque
-      no hay nada a lo que enlazar. De cada uno hace falta el nombre, una línea
-      de resumen, el precio, **una foto** y la carta de ventas. En cuanto lleguen se escriben en `src/data/aula.ts` y la página
-      aparece sola. **Depende de que Emi haga su estrategia de venta**, que es
-      lo que está esperando.
+- [ ] **El nombre, el precio, el enlace de pago, la foto y la carta de los 6
+      cursos.** Es lo único que le falta a la página de Productos: hoy las seis
+      fichas dicen «Curso 1» a «Curso 6», con el marco de la foto vacío, y salen
+      como «Próximamente», sin enlace, porque no hay nada a lo que enlazar. De
+      cada uno hace falta el nombre, una línea de resumen, el precio, **una
+      foto**, **el enlace de pago** —Stripe o PayPal, pago único— y la carta de
+      ventas. En cuanto lleguen se escriben en `src/data/aula.ts` y su página de
+      ventas aparece sola, con su botón; no hay que tocar ninguna página. La
+      receta está en **Recetas → Poner un curso a la venta**. **Depende de que
+      Emi haga su estrategia de venta**, que es lo que está esperando.
 
 - [ ] **La estructura de los 4 cursos.** Para la fase 5: qué lecciones, en qué
       orden, con qué enlace de Vimeo y qué PDF. Lo tiene Emi, que maneja el
@@ -1274,6 +1310,19 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
       siete productos, la carta de la membresía, el botón de comprar y la puerta
       de ingresar, en los dos idiomas. Sin backend. La opción del menú dejó de
       estar apagada. Ver **La plataforma → La tienda, y el recorrido de compra**.
+
+- [x] **La tienda se separa del aula.** Hecho el 9 sep 2026: el catálogo y las
+      cartas se mudaron a **Productos** —`/productos/` y `/en/products/`—, que
+      es una página del sitio como Sobre mí, y el Aula Virtual quedó detrás del
+      inicio de sesión. Las direcciones viejas redirigen. Sigue sin haber
+      backend: la sesión que abre la puerta es la de la academia.
+
+- [ ] **Que el aula pida la sesión acá.** Hoy `/aulavirtual/` es una puerta
+      honesta, no un candado: el botón sale a `emilseriosacademy.com/entrar/`,
+      que es donde está la sesión de verdad. Nada de este repo está protegido,
+      porque nada de lo de dentro vive todavía en este repo. Va con la mudanza
+      del código de la membresía, no antes: poner un formulario de acceso acá
+      sin nada detrás sería una puerta pintada en la pared.
 
 - [ ] **Que el botón de comprar cobre en casa.** Hoy «Comprar» y «Ingresar»
       llevan a `emilseriosacademy.com`, que es donde el cobro y el aula
