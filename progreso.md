@@ -622,6 +622,83 @@ Y dos cosas que hay que arreglar al mudar, encontradas leyendo:
 La capa visual de la academia que se guarda sin enchufar son dos ficheros:
 `public/membresia-ui.css` y `public/membresia-ui.js`.
 
+### La mudanza de la sesión
+
+Decidido el **11 de septiembre de 2026**, al preguntarse si había que copiar las
+credenciales de la academia a una base de datos nueva.
+
+**No se copia nada, y no se crea un Supabase nuevo.** Un proyecto de Supabase no
+está atado a un dominio: es un backend al que se le habla desde donde sea. Lo
+único que hoy lo ata a `emilseriosacademy.com` son **dos campos de configuración
+en el panel de Auth** —Site URL y Redirect URLs—, no la base de datos.
+
+Así que el aula de `emilserios.com` apunta al **mismo proyecto**. Usuarios,
+contraseñas, suscripciones, los `customer_id` de Stripe y las políticas RLS se
+quedan exactamente donde están. Cero migración. Es la otra cara de lo que ya
+sabíamos leyendo el código: *la lógica de acceso está toda en la base de datos,
+no en el frontend*, y por eso el frontend se puede reescribir entero sin tocar
+una regla de acceso.
+
+⚠️ **Dos proyectos con usuarios copiados es el peor escenario posible**, y ni
+por un día. Bifurca la verdad desde el minuto uno: alguien cambia su contraseña
+en uno, una suscripción se cancela en el otro, y no hay manera de reconciliar
+eso sin tocar filas a mano. (Sí, técnicamente se pueden exportar e importar los
+hashes bcrypt de `auth.users` entre proyectos. Es la respuesta correcta a otra
+pregunta.)
+
+**Lo único que la alumna va a notar: queda deslogueada una vez.** No hay forma
+de evitarlo y no es culpa de Supabase — el token vive en `localStorage` bajo la
+clave `sb-<ref>-auth-token`, y `localStorage` es **por origen**.
+`emilserios.com` no puede leer el de `emilseriosacademy.com`. Lo que sí se puede
+es hacer que volver a entrar cueste un clic y no una contraseña olvidada, con
+tres capas:
+
+1. **El puente de traspaso**, mientras el dominio viejo siga vivo. Una página en
+   `emilseriosacademy.com/pasar/` lee la sesión con `getSession()` y redirige a
+   `https://emilserios.com/entrar/#access_token=…&refresh_token=…`; el sitio
+   nuevo hace `setSession(...)` y ya está dentro. **No es un invento: la
+   academia ya usa `flowType: 'implicit'`**, que es exactamente esto — los
+   tokens viajan en el hash. Dos cosas obligatorias: que la redirección la
+   inicie la alumna (un `<iframe>` lo rompe el particionado de almacenamiento de
+   los navegadores) y borrar el hash con `history.replaceState` en cuanto se
+   consume, para que no quede en el historial.
+2. **Entrar con el correo, sin contraseña** (enlace mágico) en el aula nueva.
+   Cubre a quien no pase por el puente o no recuerde su clave, y además sirve
+   para siempre, no solo para la mudanza.
+3. **El correo de aviso, antes del cambio y no después.** Convierte un susto en
+   un trámite.
+
+Con las tres, el peor caso de cualquier miembro es *volver a entrar*, nunca
+*perder la cuenta*: la identidad es el correo, y el correo no se toca.
+
+**El orden, que acá sí importa:**
+
+```
+1  No tocar la base de datos. Mismo proyecto, misma URL, misma clave anon.
+2  AÑADIR emilserios.com a Site URL y Redirect URLs de Supabase Auth.
+   Es aditivo: el dominio viejo sigue funcionando.
+3  Desplegar el aula nueva en emilserios.com contra ese mismo Supabase.
+4  MANTENER emilseriosacademy.com viva, con la app vieja + el puente.
+   Si se apaga antes, el puente no existe.
+5  El correo de aviso.
+6  Semanas después, la academia pasa a ser un 301 al sitio nuevo.
+```
+
+Tres trampas, y las tres muerden si no se ven venir:
+
+- **El buzón antes que la autenticación.** Ya está apuntado para el traspaso de
+  Edu que `info@emilserios.com` probablemente vive dentro del plan de Hostinger.
+  Acá se agrava: si Supabase manda sus correos con SMTP del dominio, tocar los
+  DNS justo cuando todo el mundo necesita un enlace de acceso deja sin el único
+  canal de rescate. **El correo se resuelve primero. Nunca al revés.**
+- **Stripe.** Los `customer_id` están en la base de datos y no se mueven, pero
+  **el endpoint del webhook y las URLs de retorno del portal de cliente apuntan
+  al dominio viejo** y se cambian a mano en su panel.
+- **`trialing`.** Tocar la autenticación deja a un paso de `has_active_sub()`,
+  donde sigue el desajuste ya apuntado: `subGrantsAccess()` da acceso a
+  `trialing` y `has_active_sub()` no. Hoy no está roto porque no hay pruebas. No
+  se despierta sin decidirlo.
+
 ### Las fases
 
 ```
@@ -1612,6 +1689,16 @@ enseñárselo.
       Emi contesta— y la pantalla donde Emi las lee y responde. Sigue en pie lo
       decidido el 31 de agosto: en el hilo de un curso Emi puede responder con
       video y con audio.
+
+- [ ] **Que el aula pida la sesión acá, contra el MISMO Supabase de la
+      academia.** No se migra nada ni se crea un proyecto nuevo: se añade
+      `emilserios.com` a Site URL y Redirect URLs, y listo. El plan entero —las
+      tres capas para que reentrar cueste un clic, el orden de los seis pasos y
+      las tres trampas— está en **La plataforma → La mudanza de la sesión**.
+
+- [ ] **El puente de traspaso en la academia** (`/pasar/`), que es lo que
+      convierte el deslogueo forzoso en un clic. Vive en el repo de la
+      membresía, no en este, y solo sirve mientras el dominio viejo esté vivo.
 
 - [ ] **Las tipografías del aula vienen de Google Fonts.** `colors_and_type.css`
       las trae con un `@import` remoto, igual que en la carta trasplantada,
