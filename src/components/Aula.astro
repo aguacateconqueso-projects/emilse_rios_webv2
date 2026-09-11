@@ -18,6 +18,7 @@
  */
 import { type Lang, useTranslations, routePath } from '../i18n/ui';
 import { entrarHref } from '../data/aula';
+import { panelPath } from '../i18n/aula';
 
 interface Props {
   lang: Lang;
@@ -49,6 +50,26 @@ const entrar = entrarHref[lang];
       <a class="mono puerta__cta" href={entrar} rel="noopener">{t('nav.enter')}</a>
       <p class="soft puerta__hint">{t('aula.hint')}</p>
       <p class="puerta__away">{t('aula.away')}</p>
+    </div>
+  </div>
+</section>
+
+{/*
+  El aula nueva, la que se está construyendo dentro de este repo. Va acá y no
+  escondida en una rama: Emi tiene que poder verla, recorrerla y opinar sin
+  pedirle a nadie que le levante un servidor. Y va dicha como lo que es —una
+  maqueta con contenido de muestra— para que nadie entre esperando estudiar.
+
+  Cuando el aula funcione de verdad, este bloque desaparece y el botón de
+  arriba deja de salir del sitio.
+*/}
+<section class="row row--wide block reveal">
+  <div class="row__num" aria-hidden="true"></div>
+  <div class="row__body">
+    <div class="obra">
+      <p class="mono soft">{t('aula.previewLabel')}</p>
+      <p class="obra__p">{t('aula.preview')}</p>
+      <a class="mono obra__cta" href={panelPath(lang)}>{t('aula.previewCta')}</a>
     </div>
   </div>
 </section>
@@ -128,6 +149,31 @@ const entrar = entrarHref[lang];
     line-height: 1.5;
     color: var(--ink-soft);
     text-wrap: pretty;
+  }
+
+  /* --- El aula en obra ------------------------------------------------------ */
+  .obra {
+    border-top: 1px solid var(--rule);
+    padding-top: var(--space-3);
+    max-width: var(--measure);
+  }
+
+  .obra__p {
+    margin-top: var(--space-2);
+    font-size: var(--text-small);
+    line-height: 1.5;
+    color: var(--ink-soft);
+    text-wrap: pretty;
+  }
+
+  .obra__cta {
+    display: inline-block;
+    margin-top: var(--space-2);
+    border-bottom: 1px solid var(--ink-soft);
+  }
+
+  .obra__cta:hover {
+    border-bottom-color: currentColor;
   }
 
   /* --- La salida hacia la tienda -------------------------------------------- */

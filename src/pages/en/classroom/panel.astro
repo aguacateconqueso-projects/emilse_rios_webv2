@@ -1,0 +1,22 @@
+---
+/**
+ * El escritorio del aula, en inglés. Gemelo de `/aulavirtual/panel.astro`:
+ * lo único que cambia es el idioma que se le pasa al marco y al componente.
+ */
+import AulaLayout from '../../../layouts/Aula.astro';
+import Escritorio from '../../../components/aula/Escritorio.astro';
+import { useAula, panelPath } from '../../../i18n/aula';
+
+const lang = 'en' as const;
+const a = useAula(lang);
+---
+
+<AulaLayout
+  lang={lang}
+  title={a('app.desk')}
+  seccion="panel"
+  pathEs={panelPath('es')}
+  pathEn={panelPath('en')}
+>
+  <Escritorio lang={lang} />
+</AulaLayout>
