@@ -1,0 +1,428 @@
+---
+/**
+ * El escritorio — la primera pantalla después de iniciar sesión.
+ *
+ * Responde una sola pregunta, y la responde arriba del todo: **¿qué estaba
+ * haciendo yo?** Todo lo demás —la membresía, el resto de mis cursos, la
+ * tienda— va después, en ese orden, porque ese es el orden en que importan.
+ *
+ * La membresía y los cursos **viven juntos acá y se ven distintos a propósito**.
+ * Son dos maneras distintas de estudiar con Emi: la membresía es un flujo que
+ * no termina —un ejercicio nuevo cada jueves, y el de la semana pasada
+ * desaparece— y un curso es un camino con final. Pintarlos iguales, con la
+ * misma barra de progreso, mentiría sobre lo que son: una membresía no se
+ * «completa».
+ *
+ * ⚠️ Lo que se pinta en el servidor es el estado **de partida**: cero avance y
+ * la primera clase del primer curso. El avance real vive en el navegador de
+ * cada alumna, así que el script de abajo lo reescribe al cargar. Está hecho
+ * así, y no al revés, para que quien llegue sin JS vea un escritorio que
+ * funciona en vez de un hueco.
+ */
+import type { Lang } from '../../i18n/ui';
+import { routePath } from '../../i18n/ui';
+import { useAula, cursoPath } from '../../i18n/aula';
+import { ACADEMIA } from '../../data/aula';
+import {
+  ALUMNA_DEMO,
+  buscarCurso,
+  cursosPorComprar,
+  leccionesDe,
+  misCursos,
+  reloj,
+} from '../../data/cursos';
+import Boton from './Boton.astro';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const a = useAula(lang);
+
+const mios = misCursos();
+const porComprar = cursosPorComprar();
+
+/**
+ * Cada curso comprado, con su contenido al lado.
+ *
+ * `lecciones` es la lista de ids en orden, y es lo que el script necesita para
+ * calcular el avance sin volver a preguntarle nada al servidor: cuenta cuántas
+ * de esas ids están marcadas y divide. Va por `data-` en el HTML, que es la
+ * manera de pasarle datos a un script sin duplicar el catálogo en JSON.
+ */
+const mesa = mios.map((p) => {
+  const curso = buscarCurso(p.slug);
+  const lecciones = curso ? leccionesDe(curso) : [];
+  return {
+    slug: p.slug,
+    nombre: p.copia[lang].nombre,
+    /* La línea de adentro, no la de la tienda. Ver `Curso.copia` en
+       `src/data/cursos.ts`: quien ya compró no necesita que le vendan. */
+    resumen: curso?.copia?.[lang].resumen ?? p.copia[lang].resumen,
+    lecciones,
+    ids: lecciones.map((x) => x.id).join(','),
+    /** Cuánto dura el curso entero, para la ficha. */
+    duracion: lecciones.reduce((t, x) => t + (x.duracion ?? 0), 0),
+  };
+});
+
+/** El punto de partida sin JS: la primera clase del primer curso que tenga. */
+const arranque = mesa.find((c) => c.lecciones.length > 0);
+const primera = arranque?.lecciones[0];
+
+const membresiaHref = `${ACADEMIA}/aula/`;
+---
+
+<section class="wrap saludo reveal">
+  <p class="eyebrow">{a('app.desk')}</p>
+  <h1 class="saludo__h">{a('desk.hello')}, {ALUMNA_DEMO.nombre}.</h1>
+  <p class="saludo__lead">{a('desk.lead')}</p>
+</section>
+
+{/*
+  Retomar. Es la única acción de la pantalla que se escribe grande, porque es
+  la que hace el 90 % de las visitas: se entra al aula a seguir, no a explorar.
+*/}
+<section class="wrap reveal" aria-labelledby="retomar-h">
+  <div class="retomar card card--live" data-retomar>
+    <div class="retomar__txt">
+      <p class="eyebrow" id="retomar-h">{a('desk.resume')}</p>
+      {
+        arranque && primera ? (
+          <>
+            <p class="retomar__curso" data-retomar-curso>
+              {arranque.nombre}
+            </p>
+            <p class="retomar__clase" data-retomar-clase>
+              {primera.copia[lang].titulo}
+            </p>
+            <p class="retomar__meta soft tnum" data-retomar-meta>
+              {reloj(primera.duracion)}
+            </p>
+          </>
+        ) : (
+          <p class="retomar__clase">{a('desk.resumeNone')}</p>
+        )
+      }
+    </div>
+    {
+      arranque && primera && (
+        <Boton
+          href={`${cursoPath(arranque.slug, lang)}#${primera.id}`}
+          etiqueta={a('desk.resumeCta')}
+          variante="solid"
+          data-retomar-cta
+        />
+      )
+    }
+  </div>
+</section>
+
+<div class="wrap"><hr class="hr" /></div>
+
+{/*
+  La membresía. Va en una ficha ancha y sin barra de avance, que es lo que la
+  separa de un curso: no hay un final que perseguir.
+*/}
+<section class="wrap reveal" aria-labelledby="memb-h">
+  <div class="memb card card--live">
+    <div class="memb__txt">
+      <p class="eyebrow">{a('app.membership')}</p>
+      <h2 class="card__title memb__h" id="memb-h">{a('desk.membershipTitle')}</h2>
+      <p class="card__lead">{a('desk.membershipLead')}</p>
+      {/*
+        El salto de dominio se avisa, no se descubre. Es la misma regla que ya
+        sigue la tienda con el botón de comprar: nadie debería enterarse a mitad
+        de camino de que cambió de casa.
+      */}
+      <p class="memb__away soft">{a('desk.membershipAway')}</p>
+    </div>
+    <Boton href={membresiaHref} etiqueta={a('desk.membershipCta')} externo />
+  </div>
+</section>
+
+<div class="wrap"><hr class="hr" /></div>
+
+{/* Mis cursos. */}
+<section class="wrap reveal" aria-labelledby="mios-h">
+  <p class="eyebrow" id="mios-h">{a('desk.mine')}</p>
+  <ul class="rejilla" role="list">
+    {
+      mesa.map((c) => (
+        <li>
+          <a class="curso card" href={cursoPath(c.slug, lang)} data-curso={c.ids}>
+            <h3 class="card__title">{c.nombre}</h3>
+            <p class="card__lead">{c.resumen}</p>
+            <div class="curso__pie">
+              <div class="meter" data-meter>
+                <span class="meter__fill" />
+              </div>
+              <p class="curso__cifras soft tnum">
+                <span data-curso-pct>0 %</span>
+                <span aria-hidden="true"> · </span>
+                <span>
+                  {c.lecciones.length} {a('course.lessons')}
+                </span>
+                {c.duracion > 0 && (
+                  <>
+                    <span aria-hidden="true"> · </span>
+                    <span>{reloj(c.duracion)}</span>
+                  </>
+                )}
+              </p>
+            </div>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+{/* La tienda, para quien ya está dentro. Mismo catálogo, leído desde acá. */}
+<section class="wrap tienda reveal" aria-labelledby="tienda-h">
+  <div class="tienda__txt">
+    <h2 class="tienda__h" id="tienda-h">{a('desk.storeTitle')}</h2>
+    <p class="card__lead">{a('desk.storeLead')}</p>
+    <p class="tienda__lista soft">
+      {porComprar.map((p) => p.copia[lang].nombre).join(' · ')}
+    </p>
+  </div>
+  <Boton href={routePath('products', lang)} etiqueta={a('desk.storeCta')} />
+</section>
+
+{/*
+  El avance real. Llega del navegador, no del servidor, así que se pinta encima
+  de lo que ya está en pantalla en vez de dejar huecos esperándolo.
+*/}
+<script is:inline define:vars={{ lang, mesa: mesa.map((c) => ({ slug: c.slug, nombre: c.nombre, lecciones: c.lecciones.map((l) => ({ id: l.id, titulo: l.copia[lang].titulo, duracion: l.duracion ?? 0 })) })), etiquetaContinuar: a('desk.resumeCta'), etiquetaEmpezar: a('desk.startCta'), etiquetaHecho: a('course.done'), etiquetaSinEmpezar: a('course.notStarted') }}>
+  (function () {
+    var A = window.Aula;
+    if (!A) return;
+
+    var reloj = A.reloj;
+
+    /* --- La barra de cada curso ---------------------------------------- */
+    function pintarCursos() {
+      document.querySelectorAll('[data-curso]').forEach(function (tarjeta) {
+        var ids = (tarjeta.getAttribute('data-curso') || '').split(',').filter(Boolean);
+        if (!ids.length) return;
+        var hechas = ids.filter(function (id) { return A.de(id).hecho; }).length;
+        var pct = Math.round((hechas / ids.length) * 100);
+        var barra = tarjeta.querySelector('[data-meter]');
+        if (barra) {
+          barra.querySelector('.meter__fill').style.setProperty('--pct', pct + '%');
+          barra.classList.toggle('meter--done', pct === 100);
+        }
+        var cifra = tarjeta.querySelector('[data-curso-pct]');
+        if (cifra) cifra.textContent = pct + ' %';
+      });
+    }
+
+    /* --- Por dónde iba -------------------------------------------------- */
+    function pintarRetomar() {
+      var caja = document.querySelector('[data-retomar]');
+      if (!caja) return;
+
+      /* El curso que se tocó más recientemente gana. Con varios cursos a la
+         vez, «seguir» tiene que llevar al último que se estaba viendo, no
+         siempre al primero de la lista. */
+      var mejor = null;
+      mesa.forEach(function (curso) {
+        curso.lecciones.forEach(function (lec) {
+          var p = A.de(lec.id);
+          if (p.ts && (!mejor || p.ts > mejor.ts)) {
+            mejor = { ts: p.ts, curso: curso, lec: lec, p: p };
+          }
+        });
+      });
+
+      /* Sin nada tocado, se queda lo que pintó el servidor: la primera clase
+         del primer curso, con el botón diciendo «empezar» en vez de «seguir». */
+      var cta = caja.querySelector('[data-retomar-cta]');
+      if (!mejor) {
+        if (cta) {
+          var et = cta.querySelector('.btn__label');
+          if (et) et.textContent = etiquetaEmpezar;
+        }
+        return;
+      }
+
+      /* Si la clase donde se quedó ya está vista, lo útil es la SIGUIENTE, no
+         volver a ponerle la que acaba de terminar. */
+      var destino = mejor.lec;
+      var cursoDestino = mejor.curso;
+      if (mejor.p.hecho) {
+        var lista = cursoDestino.lecciones;
+        var i = lista.findIndex(function (l) { return l.id === mejor.lec.id; });
+        var siguiente = lista.slice(i + 1).find(function (l) { return !A.de(l.id).hecho; });
+        if (siguiente) destino = siguiente;
+      }
+
+      var elCurso = caja.querySelector('[data-retomar-curso]');
+      var elClase = caja.querySelector('[data-retomar-clase]');
+      var elMeta = caja.querySelector('[data-retomar-meta]');
+      if (elCurso) elCurso.textContent = cursoDestino.nombre;
+      if (elClase) elClase.textContent = destino.titulo;
+
+      if (elMeta) {
+        var avance = A.de(destino.id);
+        var total = destino.duracion || avance.d;
+        if (avance.hecho) {
+          elMeta.textContent = etiquetaHecho + (total ? ' · ' + reloj(total) : '');
+        } else if (avance.s > 5) {
+          elMeta.textContent = reloj(avance.s) + (total ? ' / ' + reloj(total) : '');
+        } else {
+          elMeta.textContent = total ? reloj(total) : etiquetaSinEmpezar;
+        }
+      }
+
+      if (cta) {
+        var raiz = lang === 'es' ? '/aulavirtual/curso/' : '/en/classroom/course/';
+        cta.setAttribute('href', raiz + cursoDestino.slug + '/#' + destino.id);
+        var etq = cta.querySelector('.btn__label');
+        if (etq) etq.textContent = etiquetaContinuar;
+      }
+    }
+
+    function pintar() {
+      pintarCursos();
+      pintarRetomar();
+    }
+
+    pintar();
+    /* Volver con el botón de atrás no recarga la página en algunos navegadores,
+       y el avance puede haber cambiado en la pestaña del curso. */
+    window.addEventListener('pageshow', pintar);
+    document.addEventListener('aula:cambio', pintar);
+  })();
+</script>
+
+<style>
+  /* --- El saludo --------------------------------------------------------- */
+  .saludo {
+    margin-bottom: clamp(28px, 4.5vw, 44px);
+  }
+
+  .saludo__h {
+    margin-top: 8px;
+    font-size: clamp(1.9rem, 5.2vw, 2.7rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+  }
+
+  .saludo__lead {
+    margin-top: 8px;
+    max-width: 36rem;
+    color: var(--soft);
+    text-wrap: pretty;
+  }
+
+  /* --- Retomar ----------------------------------------------------------- */
+  .retomar,
+  .memb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px clamp(24px, 4vw, 48px);
+  }
+
+  .retomar__txt,
+  .memb__txt {
+    flex: 1 1 22rem;
+    min-width: 0;
+  }
+
+  .retomar__curso {
+    margin-top: 12px;
+    font-size: 0.86rem;
+    color: var(--soft);
+  }
+
+  .retomar__clase {
+    margin-top: 4px;
+    font-size: clamp(1.25rem, 3.4vw, 1.6rem);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    text-wrap: pretty;
+  }
+
+  .retomar__meta {
+    margin-top: 8px;
+    font-size: 0.85rem;
+  }
+
+  /* --- La membresía ------------------------------------------------------ */
+  .memb__h {
+    margin-top: 8px;
+    font-size: clamp(1.3rem, 3.4vw, 1.6rem);
+  }
+
+  .memb__away {
+    margin-top: 16px;
+    max-width: 34rem;
+    font-size: 0.8rem;
+    line-height: 1.55;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule-soft);
+    text-wrap: pretty;
+  }
+
+  /* --- Mis cursos -------------------------------------------------------- */
+  .rejilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+    gap: 16px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .curso {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .curso__pie {
+    margin-top: auto;
+    padding-top: 24px;
+  }
+
+  .curso__cifras {
+    margin-top: 8px;
+    font-size: 0.78rem;
+  }
+
+  /* --- La tienda --------------------------------------------------------- */
+  .tienda {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px 40px;
+    margin-top: clamp(48px, 8vw, 84px);
+    padding-top: clamp(32px, 5vw, 48px);
+    border-top: 1px solid var(--rule);
+  }
+
+  .tienda__txt {
+    flex: 1 1 24rem;
+    min-width: 0;
+  }
+
+  .tienda__h {
+    font-size: clamp(1.3rem, 3.6vw, 1.7rem);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  .tienda__lista {
+    margin-top: 12px;
+    font-size: 0.8rem;
+    line-height: 1.7;
+    text-wrap: pretty;
+  }
+</style>

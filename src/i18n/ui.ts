@@ -72,6 +72,10 @@ export const ui = {
       'El aula todavía vive en emilseriosacademy.com. Se muda a esta casa con el cambio de dominio, y quien ya esté dentro no tiene que hacer nada.',
     'aula.noAccount': '¿Todavía no estudias con Emi?',
     'aula.toProducts': 'Mira lo que hay a la venta',
+    'aula.previewLabel': 'En construcción',
+    'aula.preview':
+      'El aula nueva —la que vivirá acá dentro— ya se puede recorrer. Es una maqueta con contenido de muestra: sirve para verla y opinar, todavía no para estudiar.',
+    'aula.previewCta': 'Recorrer la maqueta del aula',
     'footer.email': 'hola@contrabajoenlaciudad.com',
     'footer.instagram': 'Instagram',
     'footer.youtube': 'YouTube',
@@ -140,6 +144,10 @@ export const ui = {
       'The classroom still lives at emilseriosacademy.com. It moves into this house with the domain change, and anyone already inside has nothing to do.',
     'aula.noAccount': 'Not studying with Emi yet?',
     'aula.toProducts': "See what's on sale",
+    'aula.previewLabel': 'Under construction',
+    'aula.preview':
+      "The new classroom — the one that will live in this house — can already be walked through. It's a mock-up with sample content: good for looking and giving notes, not yet for studying.",
+    'aula.previewCta': 'Walk through the classroom mock-up',
     'footer.email': 'hola@contrabajoenlaciudad.com',
     'footer.instagram': 'Instagram',
     'footer.youtube': 'YouTube',

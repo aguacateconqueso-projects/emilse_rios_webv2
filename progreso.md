@@ -16,7 +16,7 @@ la membresía se **trasplanta entera** desde la academia
 |---|---|
 | **Publicado** | Sí, en Vercel. Despliega solo en cada merge a `main`. |
 | **Dominio** | Pendiente. Todavía se ve en la URL de Vercel. El destino es `emilserios.com`. |
-| **Páginas** | Home, Sobre mí, Productos y la puerta del Aula Virtual, en español e inglés. |
+| **Páginas** | Home, Sobre mí, Productos, la puerta del Aula Virtual y —desde el 11 sep 2026— **el aula por dentro**, en español e inglés. |
 | **Identidad** | El logo de Emi, vectorizado, en cabecera, pie, entrada y favicon. |
 | **Alcance** | Desde el 31 ago 2026 esto deja de ser solo el sitio: aquí van también el aula, la membresía y los cursos. Ver **La plataforma**. |
 | **Lo que falta para lanzar** | Conectar Klaviyo. El formulario **no da de alta a nadie**. |
@@ -24,6 +24,11 @@ la membresía se **trasplanta entera** desde la academia
 Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/` · `/productos/` ·
 `/en/products/` · `/productos/estudiemos-juntos/` ·
 `/en/products/estudiemos-juntos/` · `/aulavirtual/` · `/en/classroom/`
+
+Y el aula por dentro, que es **maqueta navegable** y no pide sesión todavía:
+`/aulavirtual/panel/` · `/aulavirtual/curso/<slug>/` · `/en/classroom/panel/` ·
+`/en/classroom/course/<slug>/`. Van con `noindex`, y se llega a ellas desde la
+propia puerta.
 
 Las dos direcciones viejas de la carta de la membresía
 —`/aulavirtual/estudiemos-juntos/` y su gemela inglesa— **siguen funcionando**:
@@ -396,6 +401,86 @@ los hovers en marrón de instrumento, `::selection` en negativo, una columna en
 móvil sin scroll horizontal, y el contenido entero visible tanto con «reducir
 movimiento» como sin JavaScript.
 
+### El aula por dentro
+
+Construida el **11 de septiembre de 2026**. Es una **maqueta navegable**: las
+pantallas están terminadas y el recorrido entero se puede hacer de principio a
+fin, pero no hay sesión, ni base de datos, ni videos. Sirve para que Emi la vea,
+la use y opine; no para estudiar.
+
+```
+/aulavirtual/panel/              Mi escritorio
+/aulavirtual/curso/<slug>/       El reproductor del curso
+/en/classroom/panel/             Sus gemelas inglesas
+/en/classroom/course/<slug>/
+```
+
+Las cuatro llevan `noindex`: están detrás de una puerta, no tienen nada que
+hacer en un buscador. Se llega desde `/aulavirtual/`, que sigue siendo lo único
+de esta parte que se ve sin haber pagado.
+
+**La membresía y los cursos viven juntos, y se ven distintos a propósito.** El
+escritorio los pone uno debajo del otro —primero por dónde ibas, después la
+membresía, después tus cursos, y al final la tienda— pero la ficha de la
+membresía **no lleva barra de avance**. No es un olvido: la membresía es un
+flujo que no termina —un ejercicio nuevo cada jueves, y el de la semana pasada
+desaparece— y un curso es un camino con final. Una barra de progreso en la
+membresía mentiría sobre lo que es. Su botón sale hoy a `emilseriosacademy.com`
+y **la ficha lo dice**, igual que ya hace el botón de comprar de la tienda:
+nadie debería enterarse del salto de dominio a mitad de camino.
+
+Cinco decisiones que conviene no volver a discutir:
+
+1. **Una página por curso, no una por clase.** Cambiar de clase es cambiar el
+   `#hash`, sin recargar. El índice no parpadea, el scroll no se pierde, y pasar
+   de la clase 4 a la 5 es instantáneo — que es como se estudia de verdad. El
+   hash además es una dirección pegable en un correo (`…/curso-01/#m2-l1`) sin
+   que existan cuarenta páginas que mantener.
+2. **El progreso se guarda solo.** El reproductor avisa del minuto, se apunta
+   cada cinco segundos y al volver se retoma ahí. Pasado el 92 % la clase se da
+   por vista sola: los últimos segundos no los mira nadie. El botón de «marcar
+   como vista» sigue estando, pero para corregir a la máquina, no para hacerle
+   el trabajo.
+3. **Entrar a un curso sin hash abre la última clase vista, no la primera.**
+4. **Un hilo de preguntas por alumna y por curso**, no uno por clase. Una duda
+   que nace en la clase 3 casi siempre sigue en la 4. El **botón de preguntar sí
+   vive en cada clase**, y lo que se escribe viaja con el curso, la clase y el
+   minuto pegados — que es exactamente lo que Emi necesita para responder sin
+   preguntar «¿dónde?». El minuto se puede quitar con una casilla.
+5. **La clave del progreso es el `id` de la clase, y se escribe a mano.** No se
+   calcula del orden: reordenar las clases no puede mover el avance de nadie.
+
+**Los videos son de Bunny Stream, no de Vimeo.** Emi está migrando el material.
+Mientras tanto ninguna clase tiene identificador y todas se dibujan como el
+marco vacío que el sitio ya usa para las fotos que faltan — con una diferencia:
+ese marco trae **una barra de prueba arrastrable** que hace de minuto del video,
+para poder validar el guardado del avance sin un solo video subido. El puente
+con el reproductor de Bunny (protocolo `player.js` por `postMessage`) está
+escrito y **sin probar contra un video real**; ver el pendiente.
+
+Lo que hoy es mentira piadosa, y dónde se deshace el día que haya servidor:
+
+| Finge | Dónde vive | Qué lo sustituye |
+|---|---|---|
+| Quién eres | `ALUMNA_DEMO` en `src/data/cursos.ts` | La sesión |
+| Qué compraste | `ALUMNA_DEMO.cursos` | La tabla de derechos de acceso |
+| Tu avance | `window.Aula` → `localStorage` | `lesson_progress` |
+| Tus preguntas | `window.Aula` → `localStorage` | La tabla del hilo + correo a Emi |
+
+`window.Aula` —en `src/layouts/Aula.astro`— está escrito para que **ese día solo
+cambie ese bloque**: las pantallas llaman a `Aula.ver()`, `Aula.marcar()` o
+`Aula.preguntar()` sin saber si detrás hay `localStorage` o un `fetch`. Las
+formas guardadas ya son las filas que tendrán las tablas, y están documentadas
+ahí mismo.
+
+⚠️ **`localStorage` es de un navegador.** No viaja entre dispositivos y se va con
+los datos del sitio. Está bien en una maqueta y no lo está el día del estreno: el
+progreso tiene que vivir en el servidor, atado al usuario.
+
+⚠️ **Esta es la única parte del proyecto que necesita JavaScript.** Todo lo
+demás —portada, tienda, cartas— se lee entero sin él. Acá no hay manera honesta
+de evitarlo: un reproductor que recuerda el minuto es una aplicación.
+
 ### Cómo se decide el acceso
 
 Hoy, en la membresía, el acceso es una sola pregunta binaria: `has_active_sub()`.
@@ -676,7 +761,33 @@ componentes**: si hace falta uno nuevo, se añade como token.
 
 El sistema es de Emi y se puede cambiar. Lo que no se puede es cambiarlo sin
 dejar constancia, porque si no la tabla de arriba deja de ser fiable. Hasta hoy
-se ha tocado ocho veces:
+se ha tocado nueve veces:
+
+- **11 sep 2026 · El aula se pinta con la ropa de la membresía, menos el
+  cursor.** Segunda enmienda grande, y la hermana de la del 9 de septiembre:
+  `/aulavirtual/panel/` y `/aulavirtual/curso/<slug>/`, con sus gemelas
+  inglesas, **tampoco siguen la tabla de arriba**. Traen la crema `#faf7f1`, la
+  tinta cálida `#17140f`, Hanken Grotesk y los botones de la carta con su
+  relleno que nace bajo el cursor y sus notas musicales.
+
+  La razón: la alumna que entra al aula **acaba de leer esa carta** y lleva un
+  año entrando a esa casa. Si el aula se viera como el sitio público, notaría la
+  costura justo al pasar de pagar a estudiar. La decisión del 31 de agosto —«el
+  aula hereda el sistema de este sitio»— queda revocada, ahora también para el
+  aula. Lo que se hereda es la carta, no la web.
+
+  **Lo que NO se trajo, y es lo único que se dejó fuera: el cursor de clave de
+  fa.** Lo pidió Emi. En una carta de ventas es una gracia que dura dos minutos;
+  en el aula se pasan horas, se arrastran barras, se marcan casillas y se
+  escribe, y el cursor del sistema es el que dice qué se puede hacer con cada
+  cosa. Los dos SVG siguen en `public/img/` porque la carta los usa.
+
+  El alcance: las cuatro rutas del aula. Ni un token nuevo en `tokens.css`, ni
+  una regla nueva en `base.css`. El aula trae su propio marco —`layouts/Aula.astro`,
+  que no usa `Base.astro`— y su propia hoja, `styles/aula.css`, cuyas reglas
+  **cuelgan todas de `html.aula`** para ganarle por especificidad a
+  `colors_and_type.css` sin depender del orden de carga. Fuera de esas rutas no
+  se aplica nada de esto.
 
 - **9 sep 2026 · La carta de la membresía queda FUERA del sistema, entera.** Es
   la enmienda más grande que se ha hecho, así que conviene decirla sin rodeos:
@@ -787,6 +898,9 @@ src/
     membresia/Carta.astro          La carta de la membresía, traída entera de
                                    la academia. Imprime el documento completo
     Aula.astro                     La puerta del aula: entrar, o ir a la tienda
+    aula/Escritorio.astro          El escritorio: retomar, membresía, mis cursos
+    aula/Curso.astro               El reproductor: índice, clase, hilo de dudas
+    aula/Boton.astro               El botón de la carta (relleno + flecha + notas)
     Compra.astro                   El bloque de precio y el botón de comprar
     EmailArchive.astro             Fichas del newsletter + <dialog>
     SubscribeForm.astro            Campo de suscripción
@@ -796,11 +910,18 @@ src/
   data/home.ts           Textos de la Home (es / en)
   data/about.ts          Textos de Sobre mí (es / en)
   data/aula.ts           El catálogo: los 7 productos y sus cartas (es / en)
+                         — la FACHADA, lo que se vende
+  data/cursos.ts         Módulos, clases y videos de Bunny — lo que se COMPRA.
+                         Se ata a data/aula.ts por el slug
   lib/membership.ts      Las fechas de las puertas y el alta al newsletter,
                          traídas de la academia con sus mismos nombres de
                          variable de entorno
   i18n/ui.ts             Cadenas de interfaz + mapa de rutas
+  i18n/aula.ts           Las cadenas y las rutas del aula, aparte: afuera se
+                         habla de comprar y adentro de estudiar
   layouts/Base.astro     <head>, cabecera, pie, revelado de frases-ancla
+  layouts/Aula.astro     El marco del aula: barra, pie, y `window.Aula` —el
+                         almacén del progreso, maqueta de la base de datos
   pages/                 index · sobre-mi · en/index · en/about
                          productos/index · productos/[producto]
                          productos/estudiemos-juntos (la carta trasplantada,
@@ -808,12 +929,16 @@ src/
                          en/products/index · en/products/[producto]
                          en/products/estudiemos-juntos
                          aulavirtual/index · en/classroom/index
+                         aulavirtual/panel · aulavirtual/curso/[curso]
+                         en/classroom/panel · en/classroom/course/[curso]
   styles/tokens.css      Los tokens del sistema
   styles/base.css        Reset y primitivas compartidas
+  styles/aula.css        El sistema del aula: la crema de la membresía. Todo
+                         cuelga de `html.aula` — ver la enmienda del 11 sep
 public/logo.svg          La firma vectorizada. La usa Logo.astro de máscara
 public/favicon.svg       La E del logo. Se adapta al tema del navegador
-public/colors_and_type.css  Tipografías y tokens de la academia. SOLO los pide
-                         la carta trasplantada; el resto del sitio no lo carga
+public/colors_and_type.css  Tipografías y tokens de la academia. Los piden la
+                         carta trasplantada y el aula; el resto del sitio no
 public/img/              foto.jpg, logo_emi_alpha.png y los dos cursores de
                          clave de fa: los recursos de esa carta
 public/emi-city.jpg      El respaldo del onerror de la foto
@@ -1006,6 +1131,31 @@ todo. La nueva mide sobre los píxeles ya pintados — apaga el texto, fotograf�
 cada renglón dos veces (con el fondo y sin él) y solo juzga los píxeles que el
 fondo cambia. Así las reglas de 1 px del diseño, que salen iguales en las dos
 capturas, no cuentan como fondo de nada.
+
+### La auditoría y el aula
+
+`npm run audit` mide el sitio público, que va en rejilla de 8 px. **Las páginas
+del aula dan decenas de avisos de rejilla, y son esperados**: el aula sigue la
+base de la academia —`colors_and_type.css`—, que declara rejilla de 8 px *con
+4 px para detalle fino*, así que valores como 12, 20 o 36 están dentro de su
+sistema y fuera del de aquí. Es la misma frontera que abre la enmienda del
+11 sep 2026.
+
+Lo que sí hay que mirar en el aula, y tiene que salir en cero:
+
+```bash
+npm run audit -- http://localhost:4321/aulavirtual/panel/
+npm run audit -- http://localhost:4321/aulavirtual/curso/curso-01/
+```
+
+- **CONTRASTE por debajo de AA** → cero. No es negociable.
+- **CONTRASTE contra el fondo ya pintado** → cero.
+- **ESPACIADOS fuera de la rejilla** → se leen, no se obedecen. Un valor que no
+  sea múltiplo de 4 sí es un error.
+
+⚠️ Ese aviso de contraste ya cazó uno de verdad: «Saltar al contenido» salió
+tinta sobre tinta porque `.aula a { color: inherit }` le gana por especificidad
+a `.skip`. Toda regla del aula que pinte un enlace va prefijada con `.aula`.
 
 ### La auditoría del menú
 
@@ -1420,6 +1570,56 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
       ahí salen el `<link rel="canonical">`, las URLs absolutas y el futuro
       sitemap. Cambiarlo es una línea, pero conviene hacerlo cuando se sepa el
       destino y en su propio PR.
+
+### El aula, para que deje de ser maqueta
+
+Por orden: sin lo primero no hay nada que ver, y sin lo segundo no hay a quién
+enseñárselo.
+
+- [ ] **Que Emi termine de pasar los videos de Vimeo a Bunny Stream**, y que
+      llegue el identificador de la biblioteca. Se pone en Vercel como
+      `PUBLIC_BUNNY_LIBRARY` y cada clase estrena su `bunny` —el GUID del
+      video— en `src/data/cursos.ts`. Sin eso, todas las clases se ven como
+      marco vacío, que es lo que hay hoy. **Y hay que añadir `emilserios.com` a
+      los *allowed referrers* de la biblioteca**, o los embeds se bloquean
+      aunque el código esté bien: es la misma trampa que ya tiene anotada Vimeo.
+
+- [ ] **Probar el puente con el reproductor de Bunny contra un video real.**
+      Está escrito contra su documentación (`player.js` por `postMessage`) y
+      **nunca se ha ejecutado con un video**. Hay que comprobar dos cosas: que
+      llegan los avisos de `timeupdate` y que `setCurrentTime` salta de verdad.
+      Vive entero en la función `puente()` de `src/components/aula/Curso.astro`
+      y se arregla ahí y en ningún otro sitio. Si falla, el aula sigue
+      sirviendo: lo que se pierde es el guardado automático, no la clase — por
+      eso el botón de marcar a mano nunca se esconde.
+
+- [ ] **El contenido de verdad de los cursos.** Los tres módulos y las once
+      clases de `curso-01` son **de muestra**: están escritos con la forma que
+      tienen los cursos de Emi para que el diseño se juzgue con textos de largo
+      realista, pero los títulos son marcadores. Emi manda por curso: módulos,
+      clases en orden, duración, y el material descargable de cada una.
+
+- [ ] **Sacar el progreso del navegador.** Hoy vive en `localStorage`, que es de
+      un equipo y se va con los datos del sitio. El día que haya sesión, el
+      avance y las preguntas se mudan al servidor. Está preparado: todo pasa por
+      `window.Aula` en `src/layouts/Aula.astro`, y las formas guardadas ya son
+      las filas de las tablas futuras. **Ese día se cambia ese bloque y nada
+      más.**
+
+- [ ] **El otro lado del hilo: el panel de Emi y los correos.** Una pregunta sin
+      respuesta no es una función, es un buzón roto. Hacen falta las dos
+      direcciones —aviso a Emi cuando entra una duda, aviso a la alumna cuando
+      Emi contesta— y la pantalla donde Emi las lee y responde. Sigue en pie lo
+      decidido el 31 de agosto: en el hilo de un curso Emi puede responder con
+      video y con audio.
+
+- [ ] **Las tipografías del aula vienen de Google Fonts.** `colors_and_type.css`
+      las trae con un `@import` remoto, igual que en la carta trasplantada,
+      mientras el resto del sitio las sirve desde `src/assets/fonts/`. Funciona,
+      pero es una petición bloqueante a un tercero en la pantalla donde la
+      alumna pasa más tiempo — y un fallo de red la deja con la tipografía del
+      sistema. Cuando toque, Hanken Grotesk se descarga y se sirve desde acá
+      como las otras tres.
 
 ### Contenido que falta (de Emi)
 

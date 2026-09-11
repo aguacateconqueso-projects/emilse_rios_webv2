@@ -1,0 +1,27 @@
+---
+/**
+ * El escritorio del aula, en español.
+ *
+ * Cuelga de `/aulavirtual/`, que es la puerta —lo único de esta parte que se ve
+ * sin sesión— y se queda donde está. El día que la sesión viva acá, la puerta
+ * pasa a ser el formulario de entrada y manda a esta página; hoy manda a la
+ * academia, y por eso el panel se puede visitar directamente mientras es
+ * maqueta.
+ */
+import AulaLayout from '../../layouts/Aula.astro';
+import Escritorio from '../../components/aula/Escritorio.astro';
+import { useAula, panelPath } from '../../i18n/aula';
+
+const lang = 'es' as const;
+const a = useAula(lang);
+---
+
+<AulaLayout
+  lang={lang}
+  title={a('app.desk')}
+  seccion="panel"
+  pathEs={panelPath('es')}
+  pathEn={panelPath('en')}
+>
+  <Escritorio lang={lang} />
+</AulaLayout>
