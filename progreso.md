@@ -20,6 +20,7 @@ la membresía se **trasplanta entera** desde la academia
 | **Identidad** | El logo de Emi, vectorizado, en cabecera, pie, entrada y favicon. |
 | **Alcance** | Desde el 31 ago 2026 esto deja de ser solo el sitio: aquí van también el aula, la membresía y los cursos. Ver **La plataforma**. |
 | **Lo que falta para lanzar** | Conectar Klaviyo. El formulario **no da de alta a nadie**. |
+| **En vuelo** | El aula por dentro, en el PR #24. Verde y desplegada en su preview. **Esperando la prueba con Emi** — ver abajo. |
 
 Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/` · `/productos/` ·
 `/en/products/` · `/productos/estudiemos-juntos/` ·
@@ -29,6 +30,13 @@ Y el aula por dentro, que es **maqueta navegable** y no pide sesión todavía:
 `/aulavirtual/panel/` · `/aulavirtual/curso/<slug>/` · `/en/classroom/panel/` ·
 `/en/classroom/course/<slug>/`. Van con `noindex`, y se llega a ellas desde la
 propia puerta.
+
+**Lo siguiente, y de quién depende (12 sep 2026):** Emi sube el material a
+Bunny Stream y recorre la maqueta para decir qué funciona y qué no. Hasta que
+vuelva esa respuesta **no se toca el aula**: cualquier arreglo antes de la
+prueba es adivinar. Lo que sí se puede adelantar sin ella son las tres cosas
+que no dependen de nadie de fuera — Klaviyo, el dominio y el puente de la
+sesión.
 
 Las dos direcciones viejas de la carta de la membresía
 —`/aulavirtual/estudiemos-juntos/` y su gemela inglesa— **siguen funcionando**:
@@ -1085,6 +1093,63 @@ Con eso, la ficha del catálogo se vuelve un enlace y `getStaticPaths` genera
 `/productos/<slug>/` y `/en/products/<slug>/` sola. **No hay que tocar
 ninguna página.** Si falta la `pagina`, el producto no se genera aunque esté en
 `'venta'`: es la red que impide publicar un enlace a una carta que no existe.
+
+### Cargar un curso en el aula
+
+La otra mitad de la receta de arriba: aquella pone el curso **a la venta**, esta
+pone lo que hay **adentro**. Son dos ficheros distintos a propósito —
+`src/data/aula.ts` es la fachada, `src/data/cursos.ts` es lo que se compra — y
+se atan por el `slug`, que es la misma cadena en los dos.
+
+1. **Subir los videos a Bunny Stream** y anotar el GUID de cada uno. Está en su
+   panel, en la ficha del video.
+2. **Poner la biblioteca en Vercel**, una sola vez: `PUBLIC_BUNNY_LIBRARY`. Sin
+   ella todas las clases salen como marco vacío, aunque los GUID estén puestos.
+3. **Añadir `emilserios.com` a los *allowed referrers*** de la biblioteca en
+   Bunny. Si no, los embeds se bloquean con el código correcto y se pierde una
+   tarde buscando el fallo donde no está. Es la misma trampa de Vimeo.
+4. **Escribir el curso** en `src/data/cursos.ts`, dentro de `cursos`:
+
+   ```ts
+   {
+     slug: 'curso-02',              // el mismo del catálogo
+     copia: { es: { resumen: '…' }, en: { resumen: '…' } },
+     modulos: [
+       {
+         id: 'm1',
+         copia: { es: { titulo: '…' }, en: { titulo: '…' } },
+         lecciones: [
+           l('m1-l1', 412, 'Título en español', 'Title in English', [
+             'El resumen en español, opcional.',
+             'The English summary, optional.',
+           ]),
+         ],
+       },
+     ],
+   }
+   ```
+
+   El atajo `l()` es `(id, duración en segundos, título es, título en, [resumen
+   es, resumen en])`. Para poner el video, se le añade `bunny: '<GUID>'` a la
+   lección; para material descargable, `recursos`.
+
+5. **Dárselo a la alumna**: hoy es añadir el slug a `ALUMNA_DEMO.cursos`.
+   Cuando exista la sesión, esto lo hará la tabla de derechos de acceso y este
+   paso desaparece.
+
+Con eso, `/aulavirtual/curso/<slug>/` y su gemela inglesa se generan solas —
+`getStaticPaths` sale del catálogo, así que **no hay que tocar ninguna página**.
+Un curso que está en el catálogo pero todavía no acá se abre igual y dice que
+sus clases no están cargadas: eso está diseñado, no es un fallo.
+
+⚠️ **El `id` de cada clase no se cambia nunca.** Es la clave con la que se
+guarda el avance de cada alumna. Reordenar las clases es mover su posición en la
+lista, jamás renumerar las ids: quien lo haga le borra el progreso a todo el
+mundo sin que salte ningún error.
+
+⚠️ **Cero no es lo mismo que no saber.** Una lección sin `duracion` no muestra
+su tiempo, y eso está bien mientras no se sepa; poner `0` a ojo hace que la
+barra de avance mienta.
 
 ### Poner una imagen donde hay un marco vacío
 
