@@ -51,8 +51,8 @@ export const aulaUi = {
 
     /* --- Estado de un curso ---------------------------------------------- */
     'course.progress': 'de progreso',
-    'course.lessons': 'lecciones',
-    'course.lesson': 'lección',
+    'course.lessons': 'clases',
+    'course.lesson': 'clase',
     'course.done': 'Terminado',
     'course.notStarted': 'Sin empezar',
     'course.enter': 'Entrar al curso',
@@ -64,7 +64,6 @@ export const aulaUi = {
       'Emi está pasando los videos a su nuevo hogar. Cuando terminen de subirse, aparecen acá solas.',
 
     /* --- Reproductor ------------------------------------------------------ */
-    'player.module': 'Módulo',
     'player.contents': 'Contenido del curso',
     'player.about': 'Sobre esta clase',
     'player.resources': 'Material de la clase',
@@ -143,8 +142,8 @@ export const aulaUi = {
 
     /* --- Estado de un curso ---------------------------------------------- */
     'course.progress': 'complete',
-    'course.lessons': 'lessons',
-    'course.lesson': 'lesson',
+    'course.lessons': 'classes',
+    'course.lesson': 'class',
     'course.done': 'Finished',
     'course.notStarted': 'Not started',
     'course.enter': 'Enter the course',
@@ -156,7 +155,6 @@ export const aulaUi = {
       'Emi is moving the videos to their new home. Once they finish uploading, they show up here on their own.',
 
     /* --- Reproductor ------------------------------------------------------ */
-    'player.module': 'Module',
     'player.contents': 'Course contents',
     'player.about': 'About this class',
     'player.resources': 'Class material',

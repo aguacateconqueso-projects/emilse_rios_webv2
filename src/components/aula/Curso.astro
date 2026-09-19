@@ -3,7 +3,7 @@
  * El reproductor de un curso — el índice, la clase y el hilo de preguntas.
  *
  * Hace lo mismo que hacía Tutor LMS en el WordPress viejo, que es lo que Emi
- * y sus alumnas conocen: un curso, sus módulos, sus clases, y el video en el
+ * y sus alumnas conocen: un curso, sus unidades, sus clases, y el video en el
  * centro. Lo que cambia es todo lo demás.
  *
  * Las tres decisiones que mandan sobre el resto:
@@ -44,7 +44,7 @@
 import type { Lang } from '../../i18n/ui';
 import { useAula, panelPath } from '../../i18n/aula';
 import { buscarProducto } from '../../data/aula';
-import { bunnySrc, buscarCurso, leccionesDe, reloj } from '../../data/cursos';
+import { bunnySrc, buscarCurso, clasesDe, reloj } from '../../data/cursos';
 import Boton from './Boton.astro';
 
 interface Props {
@@ -57,7 +57,7 @@ const a = useAula(lang);
 const producto = buscarProducto(slug);
 const curso = buscarCurso(slug);
 const nombre = producto?.copia[lang].nombre ?? slug;
-const clases = curso ? leccionesDe(curso) : [];
+const clases = curso ? clasesDe(curso) : [];
 const vacio = clases.length === 0;
 
 /**
@@ -69,11 +69,11 @@ const vacio = clases.length === 0;
 const paraJs = {
   slug,
   nombre,
-  modulos: (curso?.modulos ?? []).map((m, im) => ({
+  unidades: (curso?.unidades ?? []).map((m, im) => ({
     id: m.id,
     num: im + 1,
     titulo: m.copia[lang].titulo,
-    lecciones: m.lecciones.map((l, il) => ({
+    clases: m.clases.map((l, il) => ({
       id: l.id,
       num: il + 1,
       titulo: l.copia[lang].titulo,
@@ -87,7 +87,6 @@ const paraJs = {
 
 /** Los textos que el script escribe en caliente. */
 const textos = {
-  modulo: a('player.module'),
   clase: a('course.lesson'),
   hecha: a('player.markUndone'),
   marcar: a('player.markDone'),
@@ -165,8 +164,8 @@ const primera = clases[0];
           </noscript>
 
           <div class="clase">
-            <p class="eyebrow" data-clase-modulo>
-              {a('player.module')} 1
+            <p class="eyebrow" data-clase-unidad>
+              {paraJs.unidades[0]?.titulo}
             </p>
             <h2 class="clase__h" data-clase-titulo>
               {primera?.copia[lang].titulo}
@@ -209,14 +208,14 @@ const primera = clases[0];
         <aside class="indice" aria-label={a('player.contents')}>
           <p class="eyebrow indice__h">{a('player.contents')}</p>
           <div class="indice__cuerpo">
-            {paraJs.modulos.map((m) => (
-              <section class="modulo">
-                <h3 class="modulo__h">
-                  <span class="modulo__n soft tnum">{String(m.num).padStart(2, '0')}</span>
+            {paraJs.unidades.map((m) => (
+              <section class="unidad">
+                <h3 class="unidad__h">
+                  <span class="unidad__n soft tnum">{String(m.num).padStart(2, '0')}</span>
                   {m.titulo}
                 </h3>
-                <ol class="modulo__lista" role="list">
-                  {m.lecciones.map((l) => (
+                <ol class="unidad__lista" role="list">
+                  {m.clases.map((l) => (
                     <li>
                       <a class="fila" href={`#${l.id}`} data-fila={l.id}>
                         <span class="fila__tic" aria-hidden="true" />
@@ -293,13 +292,13 @@ const primera = clases[0];
 <script is:inline define:vars={{ CURSO: paraJs, T: textos }}>
   (function () {
     var A = window.Aula;
-    if (!A || !CURSO.modulos.length) return;
+    if (!A || !CURSO.unidades.length) return;
 
-    /** Todas las clases en orden, con su módulo al lado. Se calcula una vez. */
+    /** Todas las clases en orden, con su unidad al lado. Se calcula una vez. */
     var CLASES = [];
-    CURSO.modulos.forEach(function (m) {
-      m.lecciones.forEach(function (l) {
-        CLASES.push(Object.assign({}, l, { modNum: m.num, modTitulo: m.titulo }));
+    CURSO.unidades.forEach(function (m) {
+      m.clases.forEach(function (l) {
+        CLASES.push(Object.assign({}, l, { uniTitulo: m.titulo }));
       });
     });
 
@@ -318,7 +317,7 @@ const primera = clases[0];
 
     /**
      * Al entrar sin hash: la clase donde se quedó, no la primera.
-     * Llegar al curso y que te ponga la lección 1 cuando ibas por la 9 es el
+     * Llegar al curso y que te ponga la clase 1 cuando ibas por la 9 es el
      * fallo que más se nota de estas plataformas.
      */
     function alEntrar() {
@@ -498,8 +497,8 @@ const primera = clases[0];
        ===================================================================== */
 
     function pintarClase(clase) {
-      $('[data-clase-modulo]').textContent =
-        T.modulo + ' ' + clase.modNum + ' · ' + clase.modTitulo;
+      $('[data-clase-unidad]').textContent =
+        clase.uniTitulo;
       $('[data-clase-titulo]').textContent = clase.titulo;
 
       var p = A.de(clase.id);
@@ -595,7 +594,7 @@ const primera = clases[0];
       }
 
       mias.forEach(function (q) {
-        var clase = CLASES.find(function (c) { return c.id === q.leccion; });
+        var clase = CLASES.find(function (c) { return c.id === q.clase; });
         var li = document.createElement('li');
         li.className = 'msj';
 
@@ -670,7 +669,7 @@ const primera = clases[0];
       var conMinuto = $('[data-duda-con-minuto]').checked;
       A.preguntar({
         curso: CURSO.slug,
-        leccion: actual.id,
+        clase: actual.id,
         minuto: conMinuto ? Number(dlg.dataset.minuto) : null,
         texto: texto,
       });
@@ -1042,11 +1041,11 @@ const primera = clases[0];
     border-bottom: 1px solid var(--ink);
   }
 
-  .modulo {
+  .unidad {
     margin-top: 24px;
   }
 
-  .modulo__h {
+  .unidad__h {
     display: flex;
     gap: 8px;
     font-size: 0.86rem;
@@ -1055,12 +1054,12 @@ const primera = clases[0];
     letter-spacing: 0.01em;
   }
 
-  .modulo__n {
+  .unidad__n {
     flex: 0 0 auto;
     font-weight: 400;
   }
 
-  .modulo__lista {
+  .unidad__lista {
     margin: 8px 0 0;
     padding: 0;
     list-style: none;

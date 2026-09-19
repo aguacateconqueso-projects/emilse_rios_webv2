@@ -2,7 +2,7 @@ import type { Lang } from '../i18n/ui';
 import { catalogo, type Product } from './aula';
 
 /**
- * El CONTENIDO de los cursos: módulos, clases y dónde vive cada video.
+ * El CONTENIDO de los cursos: unidades, clases y dónde vive cada video.
  *
  * Es el gemelo de `src/data/aula.ts` del otro lado de la puerta. Aquel fichero
  * es la **fachada** —lo que se vende: nombre, precio, carta—; este es lo que se
@@ -19,7 +19,7 @@ import { catalogo, type Product } from './aula';
  *
  * El día que haya base de datos, este fichero es lo que se sustituye por una
  * consulta. Por eso las formas de abajo ya se parecen a las filas que tendrán
- * `courses`, `modules` y `lessons`, y por eso cada lección lleva un `id`
+ * `courses`, `modules` y `lessons`, y por eso cada clase lleva un `id`
  * estable: **ese id es la clave del progreso**, y si se renumera al reordenar
  * las clases, todo el mundo pierde por dónde iba.
  */
@@ -74,12 +74,12 @@ export type Recurso = {
   copia: Record<Lang, { nombre: string }>;
 };
 
-export type Leccion = {
+export type Clase = {
   /**
    * La identidad de la clase, y **la clave con la que se guarda el progreso**.
    *
    * Se escribe, no se calcula a partir del orden: reordenar las clases no debe
-   * mover el avance de nadie. Formato `m<módulo>-l<clase>` por comodidad de
+   * mover el avance de nadie. Formato `u<unidad>-c<clase>` por comodidad de
    * lectura, pero lo único que importa es que sea único dentro del curso y que
    * no cambie nunca.
    */
@@ -92,9 +92,9 @@ export type Leccion = {
   copia: Record<Lang, { titulo: string; resumen?: string }>;
 };
 
-export type Modulo = {
+export type Unidad = {
   id: string;
-  lecciones: Leccion[];
+  clases: Clase[];
   copia: Record<Lang, { titulo: string }>;
 };
 
@@ -111,7 +111,7 @@ export type Curso = {
    * de qué va lo que compró.
    */
   copia?: Record<Lang, { resumen: string }>;
-  modulos: Modulo[];
+  unidades: Unidad[];
 };
 
 /* ==========================================================================
@@ -125,7 +125,7 @@ const l = (
   es: string,
   en: string,
   resumen?: [string, string],
-): Leccion => ({
+): Clase => ({
   id,
   duracion,
   copia: {
@@ -140,55 +140,55 @@ const l = (
  * guarde el minuto, marcar como vista y preguntar.
  *
  * **Los títulos son marcadores.** Están escritos con la forma que tienen los
- * cursos de Emi —arco alemán, técnica, un concepto por módulo— para que el
- * diseño se juzgue con textos de largo realista, no con «Lección 1».
+ * cursos de Emi —arco alemán, técnica, un concepto por unidad— para que el
+ * diseño se juzgue con textos de largo realista, no con «Clase 1».
  */
-const cursoDeMuestra: Modulo[] = [
+const cursoDeMuestra: Unidad[] = [
   {
-    id: 'm1',
+    id: 'u1',
     copia: {
       es: { titulo: 'Antes de tocar una nota' },
       en: { titulo: 'Before you play a note' },
     },
-    lecciones: [
-      l('m1-l1', 412, 'Cómo se presenta este curso', 'How this course works', [
+    clases: [
+      l('u1-c1', 412, 'Cómo se presenta este curso', 'How this course works', [
         'Qué vamos a hacer estas seis semanas, en qué orden y por qué ese orden y no otro.',
         "What we'll do over these six weeks, in what order, and why that order and not another.",
       ]),
-      l('m1-l2', 736, 'La altura del instrumento', 'Setting the instrument height', [
+      l('u1-c2', 736, 'La altura del instrumento', 'Setting the instrument height', [
         'La mitad de los problemas de arco son de altura. Ajustamos el pie y medimos con el arco.',
         'Half of all bow problems are height problems. We set the endpin and measure with the bow.',
       ]),
-      l('m1-l3', 598, 'Cómo se sostiene el arco alemán', 'Holding the German bow'),
+      l('u1-c3', 598, 'Cómo se sostiene el arco alemán', 'Holding the German bow'),
     ],
   },
   {
-    id: 'm2',
+    id: 'u2',
     copia: {
       es: { titulo: 'El peso y el punto de contacto' },
       en: { titulo: 'Weight and contact point' },
     },
-    lecciones: [
-      l('m2-l1', 845, 'De dónde sale el sonido', 'Where the sound comes from', [
+    clases: [
+      l('u2-c1', 845, 'De dónde sale el sonido', 'Where the sound comes from', [
         'El peso no se hace con la mano. Buscamos de dónde viene, y lo sentimos sin el instrumento primero.',
         "Weight doesn't come from the hand. We find where it comes from, and feel it without the instrument first.",
       ]),
-      l('m2-l2', 1024, 'Las cuatro avenidas del arco', 'The four lanes of the bow'),
-      l('m2-l3', 690, 'Ejercicio: cuerdas al aire con metrónomo', 'Exercise: open strings with a metronome'),
-      l('m2-l4', 533, 'Los errores que vas a cometer', "The mistakes you're going to make"),
+      l('u2-c2', 1024, 'Las cuatro avenidas del arco', 'The four lanes of the bow'),
+      l('u2-c3', 690, 'Ejercicio: cuerdas al aire con metrónomo', 'Exercise: open strings with a metronome'),
+      l('u2-c4', 533, 'Los errores que vas a cometer', "The mistakes you're going to make"),
     ],
   },
   {
-    id: 'm3',
+    id: 'u3',
     copia: {
       es: { titulo: 'Coordinación de las dos manos' },
       en: { titulo: 'Coordinating both hands' },
     },
-    lecciones: [
-      l('m3-l1', 912, 'Por qué la izquierda llega tarde', 'Why the left hand arrives late'),
-      l('m3-l2', 1180, 'Legato sin costuras', 'Seamless legato'),
-      l('m3-l3', 764, 'Ejercicio: escala de dos octavas', 'Exercise: two-octave scale'),
-      l('m3-l4', 486, 'Cómo seguir tú sola desde acá', 'How to carry on by yourself from here'),
+    clases: [
+      l('u3-c1', 912, 'Por qué la izquierda llega tarde', 'Why the left hand arrives late'),
+      l('u3-c2', 1180, 'Legato sin costuras', 'Seamless legato'),
+      l('u3-c3', 764, 'Ejercicio: escala de dos octavas', 'Exercise: two-octave scale'),
+      l('u3-c4', 486, 'Cómo seguir tú sola desde acá', 'How to carry on by yourself from here'),
     ],
   },
 ];
@@ -207,14 +207,14 @@ export const cursos: Curso[] = [
     copia: {
       es: {
         resumen:
-          'Tres módulos sobre la base de todo: la altura del instrumento, de dónde sale el peso y cómo dejan de pelearse las dos manos.',
+          'Tres unidades sobre la base de todo: la altura del instrumento, de dónde sale el peso y cómo dejan de pelearse las dos manos.',
       },
       en: {
         resumen:
           'Three modules on the foundation of everything: instrument height, where the weight comes from, and how the two hands stop fighting each other.',
       },
     },
-    modulos: cursoDeMuestra,
+    unidades: cursoDeMuestra,
   },
 ];
 
@@ -226,8 +226,8 @@ export const buscarCurso = (slug: string): Curso | undefined =>
   cursos.find((c) => c.slug === slug);
 
 /** Todas las clases de un curso, en el orden en que se estudian. */
-export const leccionesDe = (curso: Curso): Leccion[] =>
-  curso.modulos.flatMap((m) => m.lecciones);
+export const clasesDe = (curso: Curso): Clase[] =>
+  curso.unidades.flatMap((m) => m.clases);
 
 /**
  * Los cursos que esta alumna tiene comprados.

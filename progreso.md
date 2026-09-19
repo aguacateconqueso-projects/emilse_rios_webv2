@@ -6,7 +6,8 @@ de cero debería poder seguir trabajando sin preguntar nada.
 
 **Última actualización:** 19 de septiembre de 2026 · **Edu contestó** —el
 dominio está en Namecheap, no en Hostinger—, llegó **la forma real del primer
-curso** (tres niveles) y se decidió **el master panel de Emi**
+curso** y con ella **el vocabulario corregido**, y se decidió **el master panel
+de Emi**
 
 ---
 
@@ -42,10 +43,12 @@ de 2026 se movieron tres cosas a la vez:
   en Hostinger solo está el hosting. Propone mudar el hosting primero y el
   dominio después — y ese orden, tal cual, **es el que rompe el correo de Emi**.
   Está contado entero en **El dominio, y Edu**.
-- **Llegó la forma real del primer curso**, y trae una sorpresa de modelo: son
-  **tres niveles** —de 4, 5 y 3 módulos—, y hasta ahora el proyecto solo sabía
-  de módulos y clases. Los videos **ya están todos en Bunny**: la migración
-  desde Vimeo está terminada. Ver **El primer curso, y los niveles**.
+- **Llegó la forma real del primer curso**: tres niveles de 4, 5 y 3 clases,
+  **un solo producto**, y los videos **ya están todos en Bunny** — la migración
+  desde Vimeo está terminada. No cambia el modelo, pero sí **el vocabulario**:
+  lo que Emi llama «módulo» es un video, o sea lo que el proyecto llamaba
+  lección. Ya está corregido en el código. Ver **El primer curso, y las
+  palabras**.
 - **Se decidió el master panel de Emi**: ella maneja sola cursos, tienda,
   cartas, personas y accesos; nosotros mantenemos el código y el diseño. La
   línea exacta entre una cosa y otra, y las cinco capas en las que se construye,
@@ -252,8 +255,7 @@ su puerta: lo único de esta parte que se ve sin sesión.
                          (ejercicio de la semana · concepto base · bonus)
 
 /aula/curso/<slug>/      El reproductor
-                         ├─ Columna: niveles → módulos → lecciones, con sus ✓
-                         │  (los niveles son opcionales; ver más abajo)
+                         ├─ Columna: unidades y clases, con sus ✓
                          ├─ Centro: video, descripción, PDF
                          ├─ «Marcar como completada»
                          └─ Hilo privado con Emi
@@ -517,7 +519,7 @@ Cinco decisiones que conviene no volver a discutir:
 1. **Una página por curso, no una por clase.** Cambiar de clase es cambiar el
    `#hash`, sin recargar. El índice no parpadea, el scroll no se pierde, y pasar
    de la clase 4 a la 5 es instantáneo — que es como se estudia de verdad. El
-   hash además es una dirección pegable en un correo (`…/curso-01/#m2-l1`) sin
+   hash además es una dirección pegable en un correo (`…/curso-01/#u2-c1`) sin
    que existan cuarenta páginas que mantener.
 2. **El progreso se guarda solo.** El reproductor avisa del minuto, se apunta
    cada cinco segundos y al volver se retoma ahí. Pasado el 92 % la clase se da
@@ -564,7 +566,7 @@ progreso tiene que vivir en el servidor, atado al usuario.
 demás —portada, tienda, cartas— se lee entero sin él. Acá no hay manera honesta
 de evitarlo: un reproductor que recuerda el minuto es una aplicación.
 
-### El primer curso, y los niveles
+### El primer curso, y las palabras
 
 Llegó el **19 de septiembre de 2026**, y es la primera vez que el proyecto ve la
 forma de un curso de verdad en vez de la maqueta:
@@ -573,69 +575,86 @@ forma de un curso de verdad en vez de la maqueta:
 |---|---|
 | **Idiomas** | Los dos, **ES y EN**, como todo lo demás |
 | **Niveles** | **Tres** |
-| **Módulos** | Nivel 1 → **4** · Nivel 2 → **5** · Nivel 3 → **3** · total **12** |
+| **Clases** | Nivel 1 → **4** · Nivel 2 → **5** · Nivel 3 → **3** · total **12** |
+| **Se vende** | **Como un solo producto.** No se compra nivel por nivel |
 | **Videos** | **Ya están todos en Bunny.** La migración desde Vimeo está terminada |
 
-Y trae una novedad de modelo: **hay un nivel por encima del módulo**. Hasta hoy
-el proyecto solo sabía de `Curso → Módulo → Lección` —así está escrito
-`src/data/cursos.ts` y así se dibuja el índice del reproductor—. Ahora son
-cuatro pisos, no tres.
+⚠️ **Corrección de lo que se escribió acá primero.** En la primera lectura se
+entendió que el curso tenía *tres niveles de 4, 5 y 3 módulos*, con las clases
+colgando de cada módulo, y se dio por hecho que hacía falta **un piso más** en
+el modelo: una tabla `course_levels`, el índice plegado en tres alturas y un
+esquema de `id` nuevo. **Nada de eso hace falta.** Emi lo aclaró en el acto: lo
+que ella llama «módulo» **es un video**. El curso son doce clases repartidas en
+tres grupos, que es exactamente la forma que el proyecto ya tenía.
 
-**El nivel se añade como opcional, no como obligatorio.** Un curso sin niveles
-tiene que seguir funcionando exactamente igual que hoy: los otros cursos de Emi
-no tienen por qué estar partidos así, y obligar a inventar «Nivel único» en cada
-uno es la clase de impuesto que se paga para siempre. En la base de datos:
+#### El modelo no cambia; el vocabulario sí
+
+El problema nunca fue la estructura, era que las mismas palabras significaban
+cosas distintas de cada lado de la mesa:
+
+| Emi dice | El proyecto decía | Qué queda, desde hoy |
+|---|---|---|
+| Curso | Curso | **Curso** |
+| Nivel | Módulo | **Unidad** |
+| Módulo | Lección | **Clase** |
+
+Y el mapa de siempre, con los nombres nuevos:
 
 ```
-courses
-course_levels   course_id · idx · title_es · title_en      ← puede no haber ninguno
-modules         course_id · level_id (NULL si el curso no tiene niveles) · idx · títulos
-lessons         module_id · idx · títulos · bunny · duración · pdf
+Curso  →  Unidad  →  Clase          (el video, y la clave del progreso)
 ```
 
-Consecuencias en lo que ya está escrito:
+**Por qué «unidad» y no otra cosa.** «Nivel» es la palabra de *este* curso y no
+de todos: obligar a un curso organizado por temas a inventar «Nivel único» es un
+impuesto que se paga para siempre. «Sección» ya está tomada — el layout del aula
+usa `seccion` para decir en qué parte del aula estás—, y «bloque» también, por
+los bloques de las cartas de venta. «Unidad» estaba libre, es la palabra
+corriente en enseñanza, y no choca con ninguna de las dos acepciones de
+«módulo».
 
-- **El índice del reproductor pasa a tener tres niveles de anidación.** Con 12
-  módulos, la columna de la izquierda no cabe abierta entera: los niveles se
-  pliegan, y se abre el del punto donde iba la alumna.
-- **El esquema de `id` de las lecciones cambia**, de `m2-l1` a algo que soporte
-  el nivel (`n1-m2-l1`). Sigue mandando la regla: **el id se escribe, no se
-  calcula del orden**, y no cambia nunca. Hoy es gratis cambiarlo porque no hay
-  ni una lección real cargada; en cuanto exista la primera alumna con progreso,
-  cambiarlo le borra por dónde iba.
-- **El hash de la URL** (`…/curso-01/#m2-l1`) se mueve con él.
+**Y en pantalla no aparece ninguna de las tres.** Hasta hoy el reproductor
+imprimía la palabra «Módulo» encima del título de la clase, sacada de la cadena
+`player.module`. Esa cadena **se borró**: ahora se muestra el título que Emi le
+puso al grupo. Si escribe «Nivel 1 — Fundamentos», eso es lo que se lee; si el
+día de mañana un curso va por temas, se lee el tema. **La palabra la pone Emi,
+no el código**, y así no hay nada que traducir ni que discutir. El número
+ordinal sigue estando en el índice de la izquierda, que es donde sirve para
+orientarse.
 
-⚠️ **Dos cosas hay que preguntarle a Emi antes de escribir una línea**, porque
-las dos cambian el trabajo de arriba abajo:
+Lo que se tocó, el mismo 19 sep 2026 y con el build verde:
 
-1. **¿Los tres niveles son un producto o son tres?** ¿Se compra el curso entero
-   o se compra nivel por nivel? La tabla de derechos de acceso soporta las dos
-   —tres niveles vendidos aparte son tres `products` con su propio derecho—,
-   pero cambian el precio, la ficha del catálogo, la URL y lo que ve quien entró
-   con solo uno. **Lo barato es decidirlo ahora; lo caro es cambiar de opinión
-   después de vender.** Por defecto, y hasta que Emi diga otra cosa, se asume
-   **un producto**: es lo coherente con «los cursos se abren enteros al comprar,
-   con acceso de por vida».
-2. **¿Un módulo agrupa clases, o el módulo *es* la clase?** «Nivel 1 tiene 4
-   módulos» no dice si dentro de cada módulo hay tres videos o uno solo. Si el
-   módulo es el video, la jerarquía real es `Curso → Nivel → Clase` y sobra un
-   piso. Se resuelve con la lista de videos de Bunny delante.
+- `src/data/cursos.ts` — los tipos `Modulo` y `Leccion` pasan a `Unidad` y
+  `Clase`, y con ellos `modulos` → `unidades`, `lecciones` → `clases`,
+  `leccionesDe()` → `clasesDe()`.
+- `src/components/aula/Curso.astro` y `Escritorio.astro` — lo mismo, incluidas
+  las clases de CSS (`.modulo__h` → `.unidad__h`) y el dato del hilo de
+  preguntas (`leccion` → `clase`).
+- `src/i18n/aula.ts` — fuera `player.module`; y «lecciones» pasa a «clases» en
+  las dos lenguas (`lessons` → `classes`), que además **arregla una
+  incoherencia que ya estaba**: el reproductor decía «Siguiente clase» y el
+  escritorio, dos pantallas antes, contaba «11 lecciones».
+- Los `id` de muestra, de `m2-l1` a `u2-c1`, y el hash con ellos
+  (`…/curso-01/#u2-c1`).
 
-#### Cargar 12 módulos a mano, o pedírselos a Bunny
+**El `id` sigue siendo la clave del progreso y se escribe a mano**, como siempre.
+Cambiar su forma hoy es gratis porque no hay ni una clase real cargada ni una
+alumna con avance guardado; el día que la haya, cambiarlo le borra por dónde iba.
+Por eso se hizo ahora y no después.
 
-Antes se dijo acá que los cursos «se cargan a mano en una tarde». Con 12 módulos
-en dos idiomas, esa cuenta ya no sale sola. Pero hay un atajo que ahora existe y
-antes no: **la API de Bunny Stream lista los videos de una biblioteca con su
-GUID, su título, su duración y su colección**. Si Emi los organizó en colecciones
-—una por módulo—, la estructura del curso **se genera** en vez de teclearse, y lo
-único que queda a mano son los textos que ella quiera afinar.
+#### El curso es más pequeño de lo que parecía
 
-Es un script de una tarde que se escribe una vez y sirve para los tres cursos
-que vienen. Merece la pena antes de teclear sesenta filas.
+Doce clases, en dos idiomas: **veinticuatro videos**, no los sesenta y pico que
+salían de la primera lectura. Eso devuelve la cuenta a donde estaba: **cargar el
+curso a mano es una tarde**, y el script que saca la estructura de la API de
+Bunny —que lista la biblioteca con GUID, título, duración y colección— pasa de
+ser necesario a ser **cómodo**. Sigue valiendo la pena si los otros dos cursos
+son más grandes o si copiar veinticuatro GUID a mano empieza a producir erratas,
+pero ya no bloquea nada.
 
 Sigue faltando, de Bunny: el **identificador de la biblioteca** —va a Vercel como
 `PUBLIC_BUNNY_LIBRARY`— y añadir `emilserios.com` a los *allowed referrers*, o
-los embeds se bloquean aunque el código esté perfecto.
+los embeds se bloquean aunque el código esté bien: es la misma trampa que ya
+tiene anotada Vimeo.
 
 #### Cuántos cursos, y cuándo
 
@@ -900,7 +919,7 @@ de datos**. Y ahí hay una línea que conviene no cruzar.
 | A la base de datos → lo maneja Emi | En código → lo mantenemos nosotros |
 |---|---|
 | Cursos: nombre, precio, foto, estado, orden | Las páginas, las rutas, el layout |
-| Niveles, módulos y clases: título, video, PDF, duración | El sistema de diseño |
+| Unidades y clases: título, video, PDF, duración | El sistema de diseño |
 | El **texto** de las cartas de venta | Los **tipos de bloque** que existen |
 | Personas: altas y bajas a mano, quién compró qué | La lógica de acceso, el webhook, los correos |
 | Qué está a la venta / próximamente / cerrado | Idiomas nuevos, páginas nuevas |
@@ -918,7 +937,7 @@ los componentes*.
 
   Hoy         Activos, ventas del mes, preguntas sin responder, qué está en vivo
   Membresía   Lo de hoy, INTACTO: semana · concepto base · bonus
-  Cursos      NUEVO · crear, niveles/módulos/clases, reordenar, abrir y cerrar
+  Cursos      NUEVO · crear, unidades y clases, reordenar, abrir y cerrar
   Tienda      NUEVO · lo que se ve en /productos/: orden, precio, estado, foto
   Cartas      NUEVO · el editor por bloques de cada carta de venta (ES + EN)
   Personas    Miembros + quién compró qué curso · dar y quitar acceso a mano
@@ -967,10 +986,11 @@ panel actual tal cual. Al terminar esta capa **la membresía ya vive en
 `emilserios.com` y Emi sigue trabajando igual**, que es el hito que de verdad
 importa.
 
-**B · Los cursos.** `products` / `course_levels` / `modules` / `lessons` /
+**B · Los cursos.** `products` / `courses` / `units` / `lessons` /
 `lesson_progress`, migrar el catálogo de `aula.ts` a `products` —siete filas— y
 el editor de cursos en el panel. Las páginas públicas pasan a leer de la base de
-datos.
+datos. **En el panel, la unidad no se llama «unidad»:** se llama como Emi la
+titule, igual que en el aula.
 
 **C · La venta.** Pago único de Stripe escribiendo en `entitlements`; el espejo
 de Stripe ya está aislado en `stripe-sync.ts` precisamente para esto. Más los
@@ -1030,8 +1050,10 @@ se escribe en él sea bilingüe.
 
 La razón no es de esfuerzo, es de información: **hoy `curso-01` es de muestra**,
 y escribir el editor antes de ver un curso de verdad es adivinar qué campos
-necesita. Ya se cobró una lección de esto: el modelo no tenía niveles hasta que
-llegó el primer curso real y resultó que tiene tres.
+necesita. Ya se cobró un aviso de esto el mismo día: al ver el primer curso real
+se dio por hecho que el modelo necesitaba un piso más, y lo que necesitaba era
+**cambiar dos palabras**. Un editor escrito sobre esa primera lectura habría
+nacido con una tabla de sobra.
 
 ### Las fases
 
@@ -1039,8 +1061,8 @@ llegó el primer curso real y resultó que tiene tres.
 Fase 0   Pedir el dominio a Edu (CONTESTÓ el 19 sep) + traer el repo de la
          membresía · y resolver el correo antes que nada
 Fase 1   Derechos de acceso + mudar el aula y el panel a este repo   (capa A)
-Fase 2   Cursos: modelo con niveles, reproductor, progreso, hilo privado con
-         video y audio                                              (capa B)
+Fase 2   Cursos: modelo, reproductor, progreso, hilo privado con video y
+         audio                                                      (capa B)
 Fase 3   Tienda + pago único + los cuatro estados de lanzamiento     (capa C)
 Fase 4   Cartas de venta + editor por bloques + botón de anuncio     (capa D)
 Fase 5   Cargar los cursos y las alumnas que ya compraron
@@ -1062,12 +1084,12 @@ fontanería, y no toca nada de lo que hoy cobra.
 concede a mano desde la pantalla de miembros que ya existe, y escribir una
 herramienta para eso costaría más que hacerlo.
 
-Con los cursos, en cambio, la cuenta cambió el 19 sep 2026. Ya no son «4 cursos
-que se cargan en una tarde»: el primero solo trae **tres niveles y doce
-módulos**, en dos idiomas. Sigue sin hacer falta una migración —de Tutor LMS no
-sale nada— pero sí conviene **generar la estructura desde la API de Bunny** en
-vez de teclearla. Está contado en **El primer curso, y los niveles**. De Emi
-sigue haciendo falta el orden y los textos, y los correos de quienes compraron.
+Con los cursos la cuenta se mantiene: el primero son **doce clases en tres
+unidades**, o sea veinticuatro videos contando los dos idiomas, y eso **sí es
+una tarde**. De Tutor LMS no sale nada. Generar la estructura desde la API de
+Bunny es cómodo pero ya no hace falta — ver **El primer curso, y las palabras**.
+De Emi sigue haciendo falta el orden y los textos, y los correos de quienes
+compraron.
 
 **El cambio de dominio va al final**, aunque el control del dominio se pida ya:
 son cosas distintas. El día del cambio hay que tocar, todo junto:
@@ -1332,7 +1354,7 @@ src/
   data/about.ts          Textos de Sobre mí (es / en)
   data/aula.ts           El catálogo: los 7 productos y sus cartas (es / en)
                          — la FACHADA, lo que se vende
-  data/cursos.ts         Módulos, clases y videos de Bunny — lo que se COMPRA.
+  data/cursos.ts         Unidades, clases y videos de Bunny — lo que se COMPRA.
                          Se ata a data/aula.ts por el slug
   lib/membership.ts      Las fechas de las puertas y el alta al newsletter,
                          traídas de la academia con sus mismos nombres de
@@ -1623,8 +1645,21 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
 
 - **19 sep 2026 · El editor de cursos se escribe DESPUÉS de cargar el primero
   a mano.** No por ahorro sino por información: escribirlo antes de ver un curso
-  real es adivinar qué campos necesita. La prueba llegó el mismo día — el modelo
-  no tenía niveles hasta que el primer curso real resultó tener tres.
+  real es adivinar qué campos necesita. La prueba llegó el mismo día — al ver el
+  primer curso se dio por hecho que el modelo necesitaba un piso más, y lo que
+  necesitaba era cambiar dos palabras.
+
+- **19 sep 2026 · El primer curso se vende entero, no por niveles.** Sus tres
+  niveles son **un solo producto**, con un precio y un derecho de acceso. Lo
+  confirmó Emi. Es lo coherente con «los cursos se abren enteros al comprar, con
+  acceso de por vida», y **cambiar esto después de vender sale caro**: habría
+  que partir el producto y reconciliar quién compró qué.
+
+- **19 sep 2026 · El vocabulario es el de Emi, y la palabra del grupo la escribe
+  ella.** `Curso → Unidad → Clase` en el código; en pantalla, el título que Emi
+  le ponga a cada unidad («Nivel 1 — Fundamentos»), sin ninguna palabra fija
+  delante. Lo que Emi llama «módulo» es un video, o sea una clase. El porqué de
+  «unidad» y lo que se tocó están en **El primer curso, y las palabras**.
 
 - **19 sep 2026 · El hosting de Edu no se muda: se apaga, y de último.** Él
   ofreció mudarlo primero; eso apaga el plan de Hostinger y con él,
@@ -2042,10 +2077,11 @@ enseñárselo.
       embeds se bloquean aunque el código esté bien: es la misma trampa que ya
       tiene anotada Vimeo.
 
-- [ ] **El script que genera la estructura del curso desde la API de Bunny.**
-      Lista los videos de la biblioteca con GUID, título, duración y colección.
-      Con 12 módulos en dos idiomas, generar gana a teclear — y se escribe una
-      vez para los tres cursos. Ver **El primer curso, y los niveles**.
+- [ ] **Opcional: el script que genera la estructura del curso desde la API de
+      Bunny.** Lista los videos de la biblioteca con GUID, título, duración y
+      colección. Con doce clases en dos idiomas **ya no hace falta** —copiar
+      veinticuatro GUID es una tarde—, pero evita erratas y sirve igual para los
+      otros dos cursos. Ver **El primer curso, y las palabras**.
 
 - [ ] **Probar el puente con el reproductor de Bunny contra un video real.**
       Está escrito contra su documentación (`player.js` por `postMessage`) y
@@ -2056,28 +2092,24 @@ enseñárselo.
       sirviendo: lo que se pierde es el guardado automático, no la clase — por
       eso el botón de marcar a mano nunca se esconde.
 
-- [ ] **El contenido de verdad de los cursos.** Los tres módulos y las once
-      clases de `curso-01` son **de muestra**: están escritos con la forma que
+- [ ] **El contenido de verdad de los cursos.** Las tres unidades y las once
+      clases de `curso-01` son **de muestra**: están escritas con la forma que
       tienen los cursos de Emi para que el diseño se juzgue con textos de largo
       realista, pero los títulos son marcadores. Del primer curso ya se sabe el
-      esqueleto —**3 niveles · 4, 5 y 3 módulos · ES y EN**— y los videos están
+      esqueleto —**3 unidades · 4, 5 y 3 clases · ES y EN**— y los videos están
       en Bunny; faltan los títulos, el orden fino y el material descargable.
 
-- [ ] **Añadir el nivel al modelo de los cursos.** `src/data/cursos.ts` solo sabe
-      de `Curso → Módulo → Lección` y el primer curso real tiene un piso más.
-      El nivel entra como **opcional**, y con él cambia el esquema de `id` de las
-      lecciones (`m2-l1` → `n1-m2-l1`) y el hash de la URL. **Hoy es gratis;
-      en cuanto haya una alumna con progreso guardado, cambiarlo le borra por
-      dónde iba.** Ver **El primer curso, y los niveles**.
+- [x] **Corregir la nomenclatura de los cursos.** Hecho el 19 sep 2026:
+      `Modulo` → `Unidad` y `Leccion` → `Clase` en los tipos, los componentes,
+      el CSS, los `id` de muestra y las dos lenguas, y fuera la palabra fija
+      «Módulo» del reproductor. Ver **El primer curso, y las palabras**.
 
-- [ ] **Preguntarle a Emi: ¿los tres niveles son un producto o son tres?**
-      ¿Se compra el curso entero o nivel por nivel? Cambia el precio, la ficha,
-      la URL y los derechos de acceso. Por defecto se asume **un producto**.
-      **Lo caro es cambiar de opinión después de vender.**
+- [x] **¿Los tres niveles son un producto o son tres?** Uno solo. Confirmado por
+      Emi el 19 sep 2026.
 
-- [ ] **Preguntarle a Emi: ¿un módulo agrupa clases, o el módulo *es* la
-      clase?** Si es lo segundo sobra un piso de la jerarquía. Se resuelve con
-      la lista de videos de Bunny delante.
+- [x] **¿Un módulo agrupa clases, o el módulo *es* la clase?** Es la clase — un
+      video. Confirmado por Emi el 19 sep 2026, y de ahí salió el cambio de
+      vocabulario.
 
 - [ ] **El cuarto estado del catálogo: `borrador`.** Emi tiene tres cursos
       completos y va a publicarlos de a uno, así que un curso tiene que poder

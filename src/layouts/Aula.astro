@@ -134,15 +134,15 @@ const salirHref = routePath('home', lang);
 
       Las formas guardadas son ya las filas que tendrán las tablas:
 
-        progreso[leccionId] = { s, d, hecho, ts }
+        progreso[claseId] = { s, d, hecho, ts }
             s      segundo en el que se quedó       → lesson_progress.position
             d      duración conocida del video      → lessons.duration
             hecho  marcada como vista               → lesson_progress.completed
             ts     cuándo se tocó por última vez    → updated_at
 
-        ultima[cursoSlug] = leccionId               → enrollments.last_lesson
+        ultima[cursoSlug] = claseId               → enrollments.last_lesson
 
-        preguntas[] = { id, curso, leccion, minuto, texto, ts, estado }
+        preguntas[] = { id, curso, clase, minuto, texto, ts, estado }
             todo lo que Emi necesita ver en su panel: quién, en qué curso, en
             qué clase y en qué minuto. El «quién» no está porque no hay sesión;
             lo pone el servidor, nunca el navegador.
