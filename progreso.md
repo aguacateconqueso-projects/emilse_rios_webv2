@@ -4,9 +4,9 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 9 de septiembre de 2026 · la tienda se muda a
-**Productos**, el Aula Virtual queda detrás del inicio de sesión, y la carta de
-la membresía se **trasplanta entera** desde la academia
+**Última actualización:** 19 de septiembre de 2026 · **Edu contestó** —el
+dominio está en Namecheap, no en Hostinger—, llegó **la forma real del primer
+curso** (tres niveles) y se decidió **el master panel de Emi**
 
 ---
 
@@ -35,11 +35,21 @@ Las dos direcciones viejas de la carta de la membresía
 redirigen a la nueva. Están puestas en `astro.config.mjs` y salen del propio
 catálogo, así que valen para cualquier producto que se publique.
 
-**Lo que está en marcha ahora mismo** es la plataforma: se decidió el alcance,
-se dibujó el aula, y Emi le mandó a Edu —quien hizo la web original y controla
-el dominio— la pedida completa para recuperar `emilserios.com`. **Se espera su
-respuesta.** Nada de las primeras cinco fases depende de eso, así que se puede
-avanzar mientras. Todo está en la sección siguiente.
+**Lo que está en marcha ahora mismo** es la plataforma, y el 19 de septiembre
+de 2026 se movieron tres cosas a la vez:
+
+- **Edu contestó.** El dominio no está donde creíamos: está en **Namecheap**, y
+  en Hostinger solo está el hosting. Propone mudar el hosting primero y el
+  dominio después — y ese orden, tal cual, **es el que rompe el correo de Emi**.
+  Está contado entero en **El dominio, y Edu**.
+- **Llegó la forma real del primer curso**, y trae una sorpresa de modelo: son
+  **tres niveles** —de 4, 5 y 3 módulos—, y hasta ahora el proyecto solo sabía
+  de módulos y clases. Los videos **ya están todos en Bunny**: la migración
+  desde Vimeo está terminada. Ver **El primer curso, y los niveles**.
+- **Se decidió el master panel de Emi**: ella maneja sola cursos, tienda,
+  cartas, personas y accesos; nosotros mantenemos el código y el diseño. La
+  línea exacta entre una cosa y otra, y las cinco capas en las que se construye,
+  están en **El panel de Emi**.
 
 Lo último que se hizo, el 9 sep 2026, fue **trasplantar la carta de venta de la
 membresía**: la página a la que lleva la ficha de la membresía en Productos ya no
@@ -110,44 +120,116 @@ Lo que hoy está repartido, y qué le pasa a cada cosa:
 
 La membresía existe en un dominio aparte por una sola razón: el DNS de
 `emilserios.com` lo controlaba un tercero difícil de localizar y no se pudo
-crear un subdominio. Recuperar ese control es lo que destraba la fusión.
+crear un subdominio. Ese tercero es Edu, **y el 19 de septiembre de 2026
+contestó**. Recuperar ese control es lo que destraba la fusión.
 
 ### El dominio, y Edu
 
-`emilserios.com` está registrado en **Hostinger**, en la cuenta de Edu, que
-hizo la web original. **Emi le envió el 31 de agosto de 2026 el correo con
-todo lo que hace falta, en una sola pedida.** Se le pidió:
+**Edu contestó el 19 de septiembre de 2026**, y lo primero que hace su respuesta
+es corregir un dato que este documento daba por bueno:
 
-1. **El dominio.** Vía preferente: mover el dominio a una cuenta de Hostinger
-   de Emi, que en hPanel es inmediato y no pasa por códigos ni esperas. Vía
-   alterna: código de autorización (EPP) + quitar el bloqueo de traspaso.
-2. **La zona DNS entera**, exportada: A, CNAME, **MX**, TXT (SPF/DKIM/DMARC) y
-   subdominios.
-3. **Dónde vive `info@emilserios.com`**, cuántos buzones hay y quién los paga.
-4. **Acceso al hosting** y una copia completa del sitio (ficheros + BD).
-5. **Search Console y Analytics**, y el listado de URLs publicadas.
-6. Cualquier otro servicio colgado del dominio.
-7. Una fecha de corte y estar localizable el día del cambio.
+> «En este momento el dominio lo tenemos con **Namecheap** y el hosting con
+> **Hostinger**. Mudar el hosting es sencillo porque solo tendría que eliminar
+> la página del mío y se habilita en el tuyo. Podemos hacer eso primero y luego
+> el dominio.»
 
-**Estado: enviado, esperando respuesta.** Nada de las fases 1 a 5 depende de
-esto, así que se puede avanzar entretanto; lo único que bloquea de verdad es la
-fase 6.
+`emilserios.com` **no está registrado en Hostinger**, como decía acá hasta hoy.
+Está en **Namecheap**; en Hostinger solo está el alojamiento del WordPress. Son
+dos casas distintas y eso cambia las dos vías del traspaso:
 
-Tres trampas apuntadas para cuando conteste:
+- **Vía preferente, y es la buena:** el **push entre cuentas de Namecheap**
+  —«transfer to another Namecheap user»—. Es el equivalente exacto de lo que
+  aquí se había planeado para hPanel: instantáneo, gratis, sin código EPP, sin
+  espera, y **sin salir del registrador**, así que no dispara el bloqueo ICANN
+  de 60 días que sí dispara un traspaso entre registradores. Hace falta que Emi
+  tenga una cuenta de Namecheap y que Edu sepa su usuario. (Confirmar el nombre
+  exacto de la opción en el panel de él; la mecánica es esa.)
+- **Vía alterna:** código de autorización (EPP) + quitar el bloqueo, y traspaso
+  a otro registrador. Tarda hasta cinco días y deja el dominio bloqueado 60 días
+  después. Solo si el push no se puede.
 
-- **El orden importa.** Primero el traspaso, después cambiar el contacto del
-  titular. Al revés se activa un bloqueo ICANN de 60 días.
-- **Traspasar el dominio no mueve el DNS.** El registrador de destino arranca
-  con sus nameservers por defecto. La zona hay que replicarla **antes** de que
-  el traspaso se complete, o se cae el correo de Emi el mismo día.
-- **El correo probablemente vive dentro del plan de hosting.** Si es el correo
-  incluido de Hostinger, apagar el hosting apaga el buzón — y ese buzón es el
-  `reply-to` de todos los correos de la academia. Hay que decidir dónde vive el
-  correo antes de tocar nada.
+#### Su propuesta es correcta en la intención y peligrosa en el orden
 
-Si Edu solo diera **una** cosa, la útil es delegar los nameservers a Cloudflare
-bajo una cuenta de Emi: es un cambio de dos minutos por su parte, el dominio
-sigue siendo suyo, y a partir de ahí el DNS se controla desde acá para siempre.
+Edu ofrece hacer el hosting primero y el dominio después. **Hay que decirle que
+no, y por qué.** Tres razones, y las tres muerden:
+
+1. **«Eliminar la página del mío» apaga el plan de Hostinger, y con él
+   probablemente el correo.** Ya estaba apuntado acá como trampa y su propuesta
+   la pisa de frente: si `info@emilserios.com` es el correo incluido del plan de
+   Hostinger, borrar el hosting borra el buzón. Y ese buzón es el `reply-to` de
+   **todos** los correos de la academia, y el canal de rescate el día que toda
+   la membresía tenga que volver a iniciar sesión.
+2. **No queremos el hosting.** Ya está decidido —«nada del WordPress viejo hace
+   falta, salvo el dominio y el correo»— y sigue en pie: el sitio nuevo vive en
+   Vercel. Mudar el WordPress a un Hostinger de Emi es pagar y mantener durante
+   meses un sitio que vamos a tirar. **El hosting no se muda: se apaga, y al
+   final.**
+3. **Apagar el hosting puede llevarse el DNS por delante, no solo la web.** El
+   dominio está en Namecheap, pero la **zona** puede estar en Hostinger. Si los
+   nameservers apuntan a Hostinger, borrar el plan deja el dominio sin zona:
+   cae la web, cae el correo y caen los subdominios, aunque el registro siga
+   intacto en Namecheap. Registrador y zona DNS son cosas distintas y pueden
+   vivir en casas distintas — y acá, aparentemente, viven en casas distintas.
+
+#### La comprobación que hay que hacer antes que nada
+
+**A qué nameservers apunta hoy `emilserios.com`.** Es un minuto y decide todo lo
+demás:
+
+| Si apunta a… | La zona vive en | Borrar el hosting… |
+|---|---|---|
+| `dns1.registrar-servers.com` · `dns2…` | Namecheap (BasicDNS) | no toca el DNS |
+| `ns1.dns-parking.com` · `ns2…` | **Hostinger** | **se lleva el DNS entero** |
+| Otros (Cloudflare, etc.) | Ese tercero | hay que preguntarle a Edu quién es |
+
+⚠️ **Sin comprobar.** Se intentó el 19 sep 2026 desde la sesión de trabajo y la
+red del entorno bloquea las consultas DNS. Es un `dig NS emilserios.com` desde
+cualquier terminal, o whatsmydns.net desde el navegador.
+
+#### El orden correcto, que es el suyo al revés
+
+```
+1  Edu dice a QUÉ NAMESERVERS apunta el dominio y DÓNDE vive
+   info@emilserios.com — cuántos buzones hay y quién los paga
+2  Edu exporta la ZONA DNS entera: A, CNAME, MX, TXT (SPF/DKIM/DMARC),
+   subdominios
+3  Se decide dónde vive el correo y SE MUDA. No se toca nada más hasta que
+   llegue un correo de prueba al buzón nuevo.
+4  Edu hace el PUSH del dominio a la cuenta de Namecheap de Emi (instantáneo)
+5  Se delegan los nameservers a Cloudflare bajo cuenta de Emi, con la zona
+   replicada ANTES de delegar
+6  emilserios.com apunta a Vercel — el cambio de dominio, que es la fase 6
+7  RECIÉN AHORA Edu borra el hosting. Es el último paso, no el primero.
+```
+
+**Lo que sí conviene aceptarle ya**: una copia del sitio (ficheros + base de
+datos) y **el listado de URLs publicadas**. No para levantarlo en ningún lado,
+sino para los 301: son las direcciones que la gente tiene guardadas y que Google
+tiene indexadas. Sin esa lista, cada enlace viejo cae en un 404 el día del
+cambio, y esa lista se pierde para siempre en cuanto él borre el sitio.
+
+**Lo que hay que pedirle explícitamente: que no borre nada todavía.** Es la
+única parte de su respuesta que urge contestar.
+
+Del resto de la pedida del 31 de agosto siguen sin respuesta los puntos 5
+(Search Console y Analytics), 6 (otros servicios colgados del dominio) y 7 (una
+fecha de corte y estar localizable ese día).
+
+#### Las trampas, actualizadas
+
+- **El correo antes que nada.** Se resuelve primero, siempre. No es negociable
+  y ahora tiene nombre propio: la primera frase de Edu es una oferta de borrarlo
+  sin saberlo.
+- **Mover el dominio no mueve el DNS.** La zona se replica **antes** de delegar,
+  nunca después.
+- **El contacto del titular, al final.** Con el push dentro de Namecheap se
+  esquiva el bloqueo de 60 días de los traspasos entre registradores, pero
+  **cambiar el registrante puede activar su propio bloqueo de 60 días**. Si hay
+  que cambiar el contacto, que sea lo último de todo.
+- Si Edu solo diera **una** cosa, la útil sigue siendo la misma: delegar los
+  nameservers a Cloudflare bajo una cuenta de Emi. Dos minutos por su parte, el
+  dominio sigue donde está, y a partir de ahí el DNS se controla desde acá para
+  siempre.
 
 ### El aula
 
@@ -170,7 +252,8 @@ su puerta: lo único de esta parte que se ve sin sesión.
                          (ejercicio de la semana · concepto base · bonus)
 
 /aula/curso/<slug>/      El reproductor
-                         ├─ Columna: módulos y lecciones, con sus ✓
+                         ├─ Columna: niveles → módulos → lecciones, con sus ✓
+                         │  (los niveles son opcionales; ver más abajo)
                          ├─ Centro: video, descripción, PDF
                          ├─ «Marcar como completada»
                          └─ Hilo privado con Emi
@@ -481,6 +564,94 @@ progreso tiene que vivir en el servidor, atado al usuario.
 demás —portada, tienda, cartas— se lee entero sin él. Acá no hay manera honesta
 de evitarlo: un reproductor que recuerda el minuto es una aplicación.
 
+### El primer curso, y los niveles
+
+Llegó el **19 de septiembre de 2026**, y es la primera vez que el proyecto ve la
+forma de un curso de verdad en vez de la maqueta:
+
+| | |
+|---|---|
+| **Idiomas** | Los dos, **ES y EN**, como todo lo demás |
+| **Niveles** | **Tres** |
+| **Módulos** | Nivel 1 → **4** · Nivel 2 → **5** · Nivel 3 → **3** · total **12** |
+| **Videos** | **Ya están todos en Bunny.** La migración desde Vimeo está terminada |
+
+Y trae una novedad de modelo: **hay un nivel por encima del módulo**. Hasta hoy
+el proyecto solo sabía de `Curso → Módulo → Lección` —así está escrito
+`src/data/cursos.ts` y así se dibuja el índice del reproductor—. Ahora son
+cuatro pisos, no tres.
+
+**El nivel se añade como opcional, no como obligatorio.** Un curso sin niveles
+tiene que seguir funcionando exactamente igual que hoy: los otros cursos de Emi
+no tienen por qué estar partidos así, y obligar a inventar «Nivel único» en cada
+uno es la clase de impuesto que se paga para siempre. En la base de datos:
+
+```
+courses
+course_levels   course_id · idx · title_es · title_en      ← puede no haber ninguno
+modules         course_id · level_id (NULL si el curso no tiene niveles) · idx · títulos
+lessons         module_id · idx · títulos · bunny · duración · pdf
+```
+
+Consecuencias en lo que ya está escrito:
+
+- **El índice del reproductor pasa a tener tres niveles de anidación.** Con 12
+  módulos, la columna de la izquierda no cabe abierta entera: los niveles se
+  pliegan, y se abre el del punto donde iba la alumna.
+- **El esquema de `id` de las lecciones cambia**, de `m2-l1` a algo que soporte
+  el nivel (`n1-m2-l1`). Sigue mandando la regla: **el id se escribe, no se
+  calcula del orden**, y no cambia nunca. Hoy es gratis cambiarlo porque no hay
+  ni una lección real cargada; en cuanto exista la primera alumna con progreso,
+  cambiarlo le borra por dónde iba.
+- **El hash de la URL** (`…/curso-01/#m2-l1`) se mueve con él.
+
+⚠️ **Dos cosas hay que preguntarle a Emi antes de escribir una línea**, porque
+las dos cambian el trabajo de arriba abajo:
+
+1. **¿Los tres niveles son un producto o son tres?** ¿Se compra el curso entero
+   o se compra nivel por nivel? La tabla de derechos de acceso soporta las dos
+   —tres niveles vendidos aparte son tres `products` con su propio derecho—,
+   pero cambian el precio, la ficha del catálogo, la URL y lo que ve quien entró
+   con solo uno. **Lo barato es decidirlo ahora; lo caro es cambiar de opinión
+   después de vender.** Por defecto, y hasta que Emi diga otra cosa, se asume
+   **un producto**: es lo coherente con «los cursos se abren enteros al comprar,
+   con acceso de por vida».
+2. **¿Un módulo agrupa clases, o el módulo *es* la clase?** «Nivel 1 tiene 4
+   módulos» no dice si dentro de cada módulo hay tres videos o uno solo. Si el
+   módulo es el video, la jerarquía real es `Curso → Nivel → Clase` y sobra un
+   piso. Se resuelve con la lista de videos de Bunny delante.
+
+#### Cargar 12 módulos a mano, o pedírselos a Bunny
+
+Antes se dijo acá que los cursos «se cargan a mano en una tarde». Con 12 módulos
+en dos idiomas, esa cuenta ya no sale sola. Pero hay un atajo que ahora existe y
+antes no: **la API de Bunny Stream lista los videos de una biblioteca con su
+GUID, su título, su duración y su colección**. Si Emi los organizó en colecciones
+—una por módulo—, la estructura del curso **se genera** en vez de teclearse, y lo
+único que queda a mano son los textos que ella quiera afinar.
+
+Es un script de una tarde que se escribe una vez y sirve para los tres cursos
+que vienen. Merece la pena antes de teclear sesenta filas.
+
+Sigue faltando, de Bunny: el **identificador de la biblioteca** —va a Vercel como
+`PUBLIC_BUNNY_LIBRARY`— y añadir `emilserios.com` a los *allowed referrers*, o
+los embeds se bloquean aunque el código esté perfecto.
+
+#### Cuántos cursos, y cuándo
+
+**Uno solo sale a la venta ahora.** Emi tiene **tres cursos completos**, pero
+cada uno necesita su propio proceso de venta y los va a ir sacando de a poco.
+
+El plan, decidido el 19 sep 2026: **se montan los tres en la plataforma y se
+dejan cargados pero invisibles**, de modo que el día que Emi quiera lanzar uno
+solo tenga que darle a publicar. Eso obliga a una cosa concreta en el catálogo,
+que hoy no existe: **un curso tiene que poder estar completo y no verse**. Ver
+los cuatro estados en **El panel de Emi**.
+
+Ojo con el número, que sigue sin cuadrar: el catálogo de `src/data/aula.ts`
+tiene **seis** huecos de curso, acá se habla de **tres**. Hay que ajustar los que
+sobren cuando se sepa el plan de Emi.
+
 ### Cómo se decide el acceso
 
 Hoy, en la membresía, el acceso es una sola pregunta binaria: `has_active_sub()`.
@@ -699,17 +870,186 @@ Tres trampas, y las tres muerden si no se ven venir:
   `trialing` y `has_active_sub()` no. Hoy no está roto porque no hay pruebas. No
   se despierta sin decidirlo.
 
+### El panel de Emi
+
+Decidido el **19 de septiembre de 2026**, y es la pieza que le da autonomía:
+**un solo panel desde el que Emi maneja toda su plataforma** — la membresía
+semana a semana como hoy, más los cursos, la tienda, las cartas de venta, las
+personas y los accesos.
+
+#### Por qué hoy no puede, y no es por ella
+
+En el proyecto conviven dos mundos, y la diferencia no es de dificultad sino de
+dónde vive el contenido:
+
+| | Dónde vive | Quién lo cambia | Qué cuesta un cambio |
+|---|---|---|---|
+| **La membresía** (en la academia) | Base de datos | Emi sola, cada jueves | Un formulario |
+| **El catálogo y los cursos** (acá) | `src/data/aula.ts` · `cursos.ts` | Nosotros | Commit, PR y despliegue |
+
+Emi ya carga sola, cada semana, videos de Bunny, PDFs y textos en dos idiomas
+con ventanas de publicación. **No es que no pueda: es que en este repo no hay
+dónde escribirlo.** Mientras el catálogo viva en ficheros de código, la respuesta
+a «¿lo hace Emi o lo hacemos nosotros?» está forzada.
+
+Así que la pregunta de verdad no es *quién*, es **qué se muda de fichero a base
+de datos**. Y ahí hay una línea que conviene no cruzar.
+
+#### La línea
+
+| A la base de datos → lo maneja Emi | En código → lo mantenemos nosotros |
+|---|---|
+| Cursos: nombre, precio, foto, estado, orden | Las páginas, las rutas, el layout |
+| Niveles, módulos y clases: título, video, PDF, duración | El sistema de diseño |
+| El **texto** de las cartas de venta | Los **tipos de bloque** que existen |
+| Personas: altas y bajas a mano, quién compró qué | La lógica de acceso, el webhook, los correos |
+| Qué está a la venta / próximamente / cerrado | Idiomas nuevos, páginas nuevas |
+
+**Emi rellena plantillas; no inventa maquetación.** Si el panel le deja escribir
+HTML o texto con formato libre, el sistema de diseño se muere en tres semanas y
+cada arreglo vuelve a pasar por nosotros — que es justo lo que este panel existe
+para evitar. Es la misma regla que ya manda en el repo: *los textos no viven en
+los componentes*.
+
+#### Las pestañas
+
+```
+/panel/          solo admin · solo español · noindex
+
+  Hoy         Activos, ventas del mes, preguntas sin responder, qué está en vivo
+  Membresía   Lo de hoy, INTACTO: semana · concepto base · bonus
+  Cursos      NUEVO · crear, niveles/módulos/clases, reordenar, abrir y cerrar
+  Tienda      NUEVO · lo que se ve en /productos/: orden, precio, estado, foto
+  Cartas      NUEVO · el editor por bloques de cada carta de venta (ES + EN)
+  Personas    Miembros + quién compró qué curso · dar y quitar acceso a mano
+  Mensajes    El foro de la membresía + los hilos privados de los cursos
+  Textos      AL FINAL · el copy de Home y Sobre mí
+```
+
+**Membresía**, **Personas** y **Mensajes** ya existen y funcionan en la academia
+—son sus pestañas Ejercicios, Miembros y Foro—. El resto es lo que hay que
+construir.
+
+Dos cosas del panel actual que se conservan tal cual, porque están bien
+resueltas: el formulario de contenido es **de dos columnas, ES y EN lado a
+lado**, y el normalizador de video acepta la URL, el enlace de gestión, el ID
+pelado o el `<iframe>` entero — porque Emi pega algo distinto cada vez. Se
+reutiliza sin tocarlo para las clases de los cursos.
+
+⚠️ **El panel de la academia es un solo fichero de 1.059 líneas.** Con tres
+pestañas ya está en el límite; con ocho no se sostiene. Al mudarlo se parte en
+un componente por pestaña. No es refactor por gusto: es la diferencia entre
+poder añadir la novena y no.
+
+#### Los cuatro estados de un producto
+
+Hoy el catálogo solo conoce dos, `venta` y `proximamente`. Con tres cursos
+cargados que se publican de a uno, hacen falta cuatro:
+
+| Estado | ¿Se ve en la tienda? | ¿Se puede comprar? | ¿Quien ya compró entra? |
+|---|---|---|---|
+| `borrador` | No | No | — |
+| `proximamente` | Sí, sin enlace | No | — |
+| `venta` | Sí | Sí | Sí |
+| `cerrado` | Sí | No | **Sí** |
+
+`borrador` es el que falta y el que pidió la realidad: **un curso completo que
+todavía no existe para nadie**, listo para que Emi le dé a publicar el día del
+lanzamiento. Y `cerrado` es la regla que no se rompe: **cerrar un curso quita el
+botón de comprar, nunca el acceso de quien ya lo compró.**
+
+#### Las cinco capas, en orden
+
+**A · El cimiento.** Adaptador de Vercel en este repo, traer `supabase.ts`,
+`auth.ts` y `supabase-admin.ts`, la tabla `entitlements` y reescribir
+`has_active_sub()` encima — **una función, no siete migraciones**—, y mudar el
+panel actual tal cual. Al terminar esta capa **la membresía ya vive en
+`emilserios.com` y Emi sigue trabajando igual**, que es el hito que de verdad
+importa.
+
+**B · Los cursos.** `products` / `course_levels` / `modules` / `lessons` /
+`lesson_progress`, migrar el catálogo de `aula.ts` a `products` —siete filas— y
+el editor de cursos en el panel. Las páginas públicas pasan a leer de la base de
+datos.
+
+**C · La venta.** Pago único de Stripe escribiendo en `entitlements`; el espejo
+de Stripe ya está aislado en `stripe-sync.ts` precisamente para esto. Más los
+cuatro estados manejados desde el panel.
+
+**D · El editor de cartas.** El único con trampa: el tipo `Bloque` de `aula.ts`
+tiene diez formas (`lede`, `prose`, `hitos`, `contraste`, `lista`, `faq`, `pd`,
+`news`, `cta`, `anchor`). Un editor honesto es un constructor de bloques —añadir,
+elegir tipo, rellenar campos—, y es la pieza que más ganas da de resolver con un
+campo de texto libre. **No se hace así:** el campo libre produce cartas que no
+se parecen a las de Emi. Se arranca con los cuatro que usa una carta de curso
+—`lede`, `prose`, `lista`, `faq`, `cta`— y se añaden los demás cuando hagan
+falta.
+
+**E · El copy del sitio.** Home y Sobre mí a una tabla `site_copy`, campo a
+campo con la forma que ya tienen `home.ts` y `about.ts`. **Es lo más ambicioso y
+lo de menos valor por hora invertida**: Emi cambia ese copy dos veces al año, y
+el texto está medido contra la maqueta —se maqueta con el español, que es el más
+largo—. Va al final y se decide entonces, con la experiencia de haber visto
+cuánto usa el panel de verdad.
+
+#### Tres decisiones técnicas que condicionan el resto
+
+1. **Cómo se publica lo que Emi escribe.** Hoy el sitio es 100 % estático. Con
+   el catálogo en base de datos hay dos caminos: **SSR con caché de 60 s en
+   Vercel** —Emi guarda y al minuto está en la web— o **estático más un botón
+   que dispara un rebuild** —sirve más rápido, pero son dos minutos de espera y,
+   si el build falla, el contenido se queda atascado sin que ella entienda por
+   qué—. **Se elige el primero** para `/productos/` y `/productos/<slug>/`. Home
+   y Sobre mí siguen estáticas mientras su copy siga en código.
+2. **El panel habla directo con Supabase desde el navegador**, como ya hace hoy:
+   la clave `anon` es pública a propósito y quien manda es la RLS. Solo lo que
+   necesita `service_role` —crear cuentas, mandar correos— va por rutas de API,
+   que es el patrón ya probado en `add-member.ts`. **Esto es lo que hace barato
+   todo el proyecto: no hay que escribir un backend.**
+3. **Las fotos de los cursos van a Supabase Storage**, donde ya van los PDFs.
+   Hoy las imágenes del catálogo son `import` desde `src/assets/`, o sea código,
+   y Emi no puede tocarlas. El precio de moverlas es perder el optimizador de
+   imágenes de Astro en esas fotos. Es pequeño, pero se sabe antes y no después.
+
+#### Lo que el panel NO hace
+
+**Contabilidad.** El panel muestra quién compró y quién está activo leyendo
+`entitlements` y `subscriptions`, pero **la verdad del dinero es Stripe**. Para
+cualquier cosa financiera, un enlace a su panel. Es la diferencia entre un panel
+que se mantiene solo y uno que hay que reconciliar a mano cada mes.
+
+Y no se traduce: **el panel es solo en español**, aunque todo el contenido que
+se escribe en él sea bilingüe.
+
+#### El orden acordado, y por qué
+
+1. **Capa A**, que es lo que quita `emilseriosacademy.com` de encima.
+2. **El primer curso se carga sin editor** — a mano, o generado desde la API de
+   Bunny. Son tres cursos y hay que cargarlos una vez.
+3. **Con cursos reales delante, se escribe el editor una vez y bien** (capa B).
+
+La razón no es de esfuerzo, es de información: **hoy `curso-01` es de muestra**,
+y escribir el editor antes de ver un curso de verdad es adivinar qué campos
+necesita. Ya se cobró una lección de esto: el modelo no tenía niveles hasta que
+llegó el primer curso real y resultó que tiene tres.
+
 ### Las fases
 
 ```
-Fase 0   Pedir el dominio a Edu (enviado) + traer el repo de la membresía
-Fase 1   Derechos de acceso + mudar el aula y el panel a este repo
-Fase 2   Cursos: modelo, reproductor, progreso, hilo privado con video y audio
-Fase 3   Tienda + pago único + los estados de lanzamiento
-Fase 4   Cartas de venta + botón de anuncio
-Fase 5   Cargar los 4 cursos y las alumnas que ya compraron
+Fase 0   Pedir el dominio a Edu (CONTESTÓ el 19 sep) + traer el repo de la
+         membresía · y resolver el correo antes que nada
+Fase 1   Derechos de acceso + mudar el aula y el panel a este repo   (capa A)
+Fase 2   Cursos: modelo con niveles, reproductor, progreso, hilo privado con
+         video y audio                                              (capa B)
+Fase 3   Tienda + pago único + los cuatro estados de lanzamiento     (capa C)
+Fase 4   Cartas de venta + editor por bloques + botón de anuncio     (capa D)
+Fase 5   Cargar los cursos y las alumnas que ya compraron
 Fase 6   El cambio de dominio, con todo lo demás funcionando
+Fase 7   El copy del sitio al panel, si resulta que hace falta       (capa E)
 ```
+
+Las «capas» entre paréntesis son las de **El panel de Emi**: son la misma
+escalera contada desde el lado de quien la va a usar.
 
 **De las fases 3 y 4 ya está la mitad de fuera**: el catálogo, los tres estados
 de la ficha y la carta de venta de la membresía, sin backend. Lo que les queda
@@ -718,12 +1058,16 @@ cambia desde el panel, y el botón de anuncio—, y eso va detrás de la fase 1.
 adelantó a propósito: es lo que se puede ver y aprobar antes de gastar en
 fontanería, y no toca nada de lo que hoy cobra.
 
-**No hay fase de migración automática.** Son **4 cursos y unas 5 alumnas**: se
-cargan a mano en una tarde desde el panel, y el acceso se concede desde la
-pantalla de miembros que ya existe. Escribir una herramienta para eso costaría
-más que hacerlo. De Tutor LMS solo hace falta que Emi pase la estructura de
-cada curso —qué lecciones, en qué orden, con qué enlace de Vimeo— y los correos
-de quienes compraron.
+**No hay fase de migración automática.** Son **unas 5 alumnas**: el acceso se
+concede a mano desde la pantalla de miembros que ya existe, y escribir una
+herramienta para eso costaría más que hacerlo.
+
+Con los cursos, en cambio, la cuenta cambió el 19 sep 2026. Ya no son «4 cursos
+que se cargan en una tarde»: el primero solo trae **tres niveles y doce
+módulos**, en dos idiomas. Sigue sin hacer falta una migración —de Tutor LMS no
+sale nada— pero sí conviene **generar la estructura desde la API de Bunny** en
+vez de teclearla. Está contado en **El primer curso, y los niveles**. De Emi
+sigue haciendo falta el orden y los textos, y los correos de quienes compraron.
 
 **El cambio de dominio va al final**, aunque el control del dominio se pida ya:
 son cosas distintas. El día del cambio hay que tocar, todo junto:
@@ -1270,6 +1614,24 @@ Están discutidas y resueltas. No hace falta volver sobre ellas salvo que Emi
 pida lo contrario. Las que tienen que ver con la plataforma —dominio, aula,
 cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
 
+- **19 sep 2026 · Emi maneja su plataforma sola, y la línea está trazada.**
+  Contenido —cursos, clases, precios, estados, cartas, personas y accesos— a la
+  base de datos, y lo maneja ella desde un solo panel. Estructura —páginas,
+  rutas, sistema de diseño, lógica de acceso— en código, y lo mantenemos
+  nosotros. **Emi rellena plantillas; no inventa maquetación.** Las cinco capas
+  en las que se construye están en **La plataforma → El panel de Emi**.
+
+- **19 sep 2026 · El editor de cursos se escribe DESPUÉS de cargar el primero
+  a mano.** No por ahorro sino por información: escribirlo antes de ver un curso
+  real es adivinar qué campos necesita. La prueba llegó el mismo día — el modelo
+  no tenía niveles hasta que el primer curso real resultó tener tres.
+
+- **19 sep 2026 · El hosting de Edu no se muda: se apaga, y de último.** Él
+  ofreció mudarlo primero; eso apaga el plan de Hostinger y con él,
+  probablemente, `info@emilserios.com` y quizá la zona DNS entera. **El correo
+  se resuelve primero, siempre.** El orden completo está en **El dominio, y
+  Edu**.
+
 - **La tienda vive en `/productos/` y las cartas cuelgan de ella**, en
   `/productos/<slug>/`. Un solo recorrido: catálogo, producto, comprar. El
   slug de la sección se traduce —`/en/products/`— pero **el del producto no**:
@@ -1633,11 +1995,27 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
       `POST` a su API de perfiles. Hay que elegir además **a qué lista entra**
       quien se suscribe. Conviene contarlo antes de estimar.
 
-- [ ] **Recuperar `emilserios.com`.** Emi le mandó a Edu la pedida completa el
-      31 de agosto de 2026 — dominio, zona DNS, correo, hosting y Google, todo
-      en un solo correo. **Esperando respuesta.** Es lo único del proyecto que
-      depende de alguien de fuera, y es lo que más puede tardar. Los detalles y
-      las tres trampas del traspaso están en **La plataforma → El dominio, y Edu**.
+- [ ] **Contestarle a Edu, y lo primero es «no borres nada».** Contestó el 19 sep
+      2026 y ofrece **mudar el hosting primero**; ese orden apaga el plan de
+      Hostinger, y con él probablemente `info@emilserios.com` y quizá la zona DNS
+      entera. La respuesta es sí pero al revés, y los siete pasos en orden están
+      en **La plataforma → El dominio, y Edu**. Lo que hay que pedirle ahora:
+      **a qué nameservers apunta el dominio**, **dónde vive el correo**, la zona
+      DNS exportada y **el listado de URLs publicadas** —para los 301, y porque
+      esa lista se pierde el día que borre el sitio—.
+
+- [ ] **Comprobar a qué nameservers apunta `emilserios.com`.** Un minuto, y
+      decide si apagar el hosting de Edu se lleva el DNS por delante o no. Se
+      intentó el 19 sep 2026 desde la sesión de trabajo y **la red del entorno
+      bloquea las consultas DNS**: hay que hacerlo desde fuera (`dig NS
+      emilserios.com` o whatsmydns.net). La tabla de qué significa cada respuesta
+      está en **El dominio, y Edu**.
+
+- [ ] **Decidir dónde vive `info@emilserios.com` y mudarlo.** Es el primer paso
+      real del traspaso y bloquea a todos los demás: es el `reply-to` de todos
+      los correos de la academia y el canal de rescate el día que toda la
+      membresía tenga que volver a iniciar sesión. Nada se toca hasta que llegue
+      un correo de prueba al buzón nuevo.
 
 - [ ] **Decidir qué pasa con `contrabajoenlaciudad.com`.** Quedó abierto el
       31 ago 2026. El dominio principal es `emilserios.com`, ya decidido; falta
@@ -1653,13 +2031,21 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
 Por orden: sin lo primero no hay nada que ver, y sin lo segundo no hay a quién
 enseñárselo.
 
-- [ ] **Que Emi termine de pasar los videos de Vimeo a Bunny Stream**, y que
-      llegue el identificador de la biblioteca. Se pone en Vercel como
-      `PUBLIC_BUNNY_LIBRARY` y cada clase estrena su `bunny` —el GUID del
-      video— en `src/data/cursos.ts`. Sin eso, todas las clases se ven como
-      marco vacío, que es lo que hay hoy. **Y hay que añadir `emilserios.com` a
-      los *allowed referrers* de la biblioteca**, o los embeds se bloquean
-      aunque el código esté bien: es la misma trampa que ya tiene anotada Vimeo.
+- [x] **Pasar los videos de Vimeo a Bunny Stream.** Hecho por Emi; confirmado el
+      19 sep 2026. La migración está terminada.
+
+- [ ] **El identificador de la biblioteca de Bunny.** Va a Vercel como
+      `PUBLIC_BUNNY_LIBRARY`, y cada clase estrena su `bunny` —el GUID del
+      video— en `src/data/cursos.ts`. Sin él, todas las clases se ven como marco
+      vacío, que es lo que hay hoy aunque los videos ya existan. **Y hay que
+      añadir `emilserios.com` a los *allowed referrers* de la biblioteca**, o los
+      embeds se bloquean aunque el código esté bien: es la misma trampa que ya
+      tiene anotada Vimeo.
+
+- [ ] **El script que genera la estructura del curso desde la API de Bunny.**
+      Lista los videos de la biblioteca con GUID, título, duración y colección.
+      Con 12 módulos en dos idiomas, generar gana a teclear — y se escribe una
+      vez para los tres cursos. Ver **El primer curso, y los niveles**.
 
 - [ ] **Probar el puente con el reproductor de Bunny contra un video real.**
       Está escrito contra su documentación (`player.js` por `postMessage`) y
@@ -1673,8 +2059,31 @@ enseñárselo.
 - [ ] **El contenido de verdad de los cursos.** Los tres módulos y las once
       clases de `curso-01` son **de muestra**: están escritos con la forma que
       tienen los cursos de Emi para que el diseño se juzgue con textos de largo
-      realista, pero los títulos son marcadores. Emi manda por curso: módulos,
-      clases en orden, duración, y el material descargable de cada una.
+      realista, pero los títulos son marcadores. Del primer curso ya se sabe el
+      esqueleto —**3 niveles · 4, 5 y 3 módulos · ES y EN**— y los videos están
+      en Bunny; faltan los títulos, el orden fino y el material descargable.
+
+- [ ] **Añadir el nivel al modelo de los cursos.** `src/data/cursos.ts` solo sabe
+      de `Curso → Módulo → Lección` y el primer curso real tiene un piso más.
+      El nivel entra como **opcional**, y con él cambia el esquema de `id` de las
+      lecciones (`m2-l1` → `n1-m2-l1`) y el hash de la URL. **Hoy es gratis;
+      en cuanto haya una alumna con progreso guardado, cambiarlo le borra por
+      dónde iba.** Ver **El primer curso, y los niveles**.
+
+- [ ] **Preguntarle a Emi: ¿los tres niveles son un producto o son tres?**
+      ¿Se compra el curso entero o nivel por nivel? Cambia el precio, la ficha,
+      la URL y los derechos de acceso. Por defecto se asume **un producto**.
+      **Lo caro es cambiar de opinión después de vender.**
+
+- [ ] **Preguntarle a Emi: ¿un módulo agrupa clases, o el módulo *es* la
+      clase?** Si es lo segundo sobra un piso de la jerarquía. Se resuelve con
+      la lista de videos de Bunny delante.
+
+- [ ] **El cuarto estado del catálogo: `borrador`.** Emi tiene tres cursos
+      completos y va a publicarlos de a uno, así que un curso tiene que poder
+      estar **cargado entero y no verse**. Hoy `src/data/aula.ts` solo conoce
+      `venta` y `proximamente`; hacen falta cuatro. La tabla está en **El panel
+      de Emi**.
 
 - [ ] **Sacar el progreso del navegador.** Hoy vive en `localStorage`, que es de
       un equipo y se va con los datos del sitio. El día que haya sesión, el
@@ -1718,24 +2127,31 @@ enseñárselo.
       de verdad, pero el cuerpo es de muestra — marcados `borrador: true`.
 - [ ] **Los tres testimonios** de *Sobre mí*.
 - [ ] **Enlaces reales de Instagram y YouTube.** Apuntan a las portadas.
-- [ ] **El nombre, el precio, el enlace de pago, la foto y la carta de los 6
-      cursos.** Es lo único que le falta a la página de Productos: hoy las seis
-      fichas dicen «Curso 1» a «Curso 6», con el marco de la foto vacío, y salen
-      como «Próximamente», sin enlace, porque no hay nada a lo que enlazar. De
-      cada uno hace falta el nombre, una línea de resumen, el precio, **una
-      foto**, **el enlace de pago** —Stripe o PayPal, pago único— y la carta de
-      ventas. En cuanto lleguen se escriben en `src/data/aula.ts` y su página de
-      ventas aparece sola, con su botón; no hay que tocar ninguna página. La
-      receta está en **Recetas → Poner un curso a la venta**. **Depende de que
-      Emi haga su estrategia de venta**, que es lo que está esperando.
+- [ ] **El nombre, el precio, el enlace de pago, la foto y la carta del PRIMER
+      curso.** Es lo único que le falta a la página de Productos para dejar de
+      ser un catálogo de marcadores: hoy las seis fichas dicen «Curso 1» a
+      «Curso 6», con el marco de la foto vacío, y salen como «Próximamente»,
+      sin enlace, porque no hay nada a lo que enlazar. Hace falta el nombre, una
+      línea de resumen, el precio, **una foto**, **el enlace de pago** —Stripe o
+      PayPal, pago único— y la carta de ventas. En cuanto lleguen se escriben en
+      `src/data/aula.ts` y su página de ventas aparece sola, con su botón; no hay
+      que tocar ninguna página. La receta está en **Recetas → Poner un curso a
+      la venta**.
 
-- [ ] **La estructura de los 4 cursos.** Para la fase 5: qué lecciones, en qué
-      orden, con qué enlace de Vimeo y qué PDF. Lo tiene Emi, que maneja el
-      Tutor LMS y el Vimeo directamente. Ojo con el número: el catálogo tiene
-      **seis** huecos de curso y aquí se hablaba de **cuatro**. Hay que
-      preguntarle a Emi cuántos son de verdad y ajustar el que sobre.
+      **Solo uno sale a la venta ahora** (19 sep 2026). Los otros dos se montan
+      y se quedan en `borrador` hasta que Emi tenga su proceso de venta de cada
+      uno; **eso es lo que está esperando**, no el código.
+
+- [ ] **La estructura de los otros dos cursos.** Emi tiene **tres cursos
+      completos** (19 sep 2026) y solo va a poner **uno a la venta ahora**; los
+      otros dos se montan y se dejan en `borrador`, listos para que ella los
+      publique el día que tenga su proceso de venta. Del primero ya está el
+      esqueleto; de los otros dos falta todo. Ojo con el número: el catálogo
+      tiene **seis** huecos de curso y ahora se habla de **tres**. Hay que
+      ajustar los que sobren.
 - [ ] **Los correos de quienes ya compraron un curso** (unas 5 personas), para
-      concederles el acceso a mano en la plataforma nueva.
+      concederles el acceso a mano en la plataforma nueva. Adrián los pasa en
+      cuanto los tenga (19 sep 2026).
 
 ### Próximos PRs
 
@@ -1748,8 +2164,18 @@ enseñárselo.
 - [ ] **Mudar el código de la membresía a este repo.** El repositorio ya está
       localizado y leído entero (`aguacateconqueso-projects/emilse_rios_membresias`,
       31 ago 2026) — ver **La plataforma → El código de la membresía, ya leído**.
-      Es el siguiente paso real y no depende de Edu. Empieza por la migración de
-      derechos de acceso, que es una función y no siete migraciones.
+      **Es el siguiente PR y no depende de Edu.** Es la capa A de **El panel de
+      Emi**, y lleva dentro, en este orden: el adaptador de Vercel, los tres
+      ficheros de Supabase, la tabla `entitlements` con `has_active_sub()`
+      reescrita encima —una función, no siete migraciones— y el panel mudado tal
+      cual, partido en un componente por pestaña. Al terminarlo, **la membresía
+      ya vive en `emilserios.com`**.
+
+- [ ] **El adaptador de Vercel.** Hoy este repo es 100 % estático: no tiene
+      `@astrojs/vercel` ni una sola ruta de API, así que **no puede tener panel
+      ni sesión ni webhook**. El repo de la membresía sí lo tiene, con
+      `output: 'static'` y `prerender = false` solo donde hace falta; se copia
+      ese mismo patrón. Es media hora y es lo primero de la capa A.
 
 - [x] **Aula Virtual, la fachada.** Hecho el 31 ago 2026: el catálogo con los
       siete productos, la carta de la membresía, el botón de comprar y la puerta
