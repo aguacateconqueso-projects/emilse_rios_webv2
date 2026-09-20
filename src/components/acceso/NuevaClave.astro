@@ -1,0 +1,210 @@
+---
+/**
+ * Poner la contraseña — el destino del enlace que llega por correo.
+ *
+ * Sirve para las dos veces que hace falta: la primera, cuando la cuenta se creó
+ * al pagar y nació sin clave, y la vez que alguien la olvidó. Por eso el texto
+ * no dice «restablecer»: para media de la gente que llega acá no hay nada que
+ * restablecer.
+ *
+ * **Funciona porque el correo trae una sesión en el `#hash`.** El cliente la
+ * recoge solo (`detectSessionInUrl`), y por eso `updateUser` puede cambiar la
+ * contraseña sin pedir la anterior. Sin ese hash no hay sesión y la pantalla lo
+ * dice en vez de enseñar un formulario que va a fallar.
+ */
+import type { Lang } from '../../i18n/ui';
+import { useAula, entrarPath, escritorioPath } from '../../i18n/aula';
+import { isSupabaseConfigured } from '../../lib/supabase';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const a = useAula(lang);
+---
+
+<section
+  class="clave"
+  data-clave-pantalla
+  data-destino={escritorioPath(lang)}
+  data-entrar={entrarPath(lang)}
+  data-t-short={a('pass.short')}
+  data-t-mismatch={a('pass.mismatch')}
+>
+  <p class="eyebrow">{a('pass.eyebrow')}</p>
+  <h1 class="clave__h">{a('pass.title')}</h1>
+  <p class="soft clave__lead">{a('pass.lead')}</p>
+
+  {
+    !isSupabaseConfigured && (
+      <p class="aviso" role="status">
+        <b>{a('off.badge')}</b> — {a('off.lead')}
+      </p>
+    )
+  }
+
+  {/* Se enseña solo si el enlace trajo sesión. Nace oculto: enseñar el
+      formulario y esconderlo después haría parpadear una promesa falsa. */}
+  <form class="campos" data-form hidden novalidate>
+    <label class="campo">
+      <span class="campo__t">{a('pass.new')}</span>
+      <input type="password" autocomplete="new-password" required data-c1 />
+    </label>
+    <label class="campo">
+      <span class="campo__t">{a('pass.repeat')}</span>
+      <input type="password" autocomplete="new-password" required data-c2 />
+    </label>
+    <p class="error" data-error hidden></p>
+    <button class="btn btn--solid" type="submit" data-guardar>
+      <span class="btn__fill" aria-hidden="true"></span>
+      <span class="btn__label">{a('pass.save')}</span>
+    </button>
+  </form>
+
+  <div class="sinlink" data-sinlink hidden>
+    <p>{a('pass.noLink')}</p>
+    <a class="btn" href={entrarPath(lang)}>
+      <span class="btn__fill" aria-hidden="true"></span>
+      <span class="btn__label">{a('pass.askAgain')}</span>
+    </a>
+  </div>
+</section>
+
+<script>
+  import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+
+  const caja = document.querySelector<HTMLElement>('[data-clave-pantalla]');
+
+  if (caja && isSupabaseConfigured) {
+    const destino = caja.getAttribute('data-destino')!;
+    const T = {
+      short: caja.getAttribute('data-t-short')!,
+      mismatch: caja.getAttribute('data-t-mismatch')!,
+    };
+    const $ = (s: string) => caja.querySelector(s) as HTMLElement | null;
+    const form = $('[data-form]')!;
+    const sinlink = $('[data-sinlink]')!;
+
+    /**
+     * El token viaja en el `#hash`. El cliente lo consume solo, pero puede
+     * tardar un instante, así que se espera al evento en vez de mirar una vez.
+     */
+    supabase.auth.onAuthStateChange((_evento, sesion) => {
+      if (sesion) {
+        form.hidden = false;
+        sinlink.hidden = true;
+        /* Fuera el hash del historial: lleva un token de acceso y no tiene por
+           qué quedar en la barra ni en el botón de atrás. */
+        if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+      }
+    });
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        form.hidden = false;
+        if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+      } else if (!location.hash) {
+        /* Sin hash no hay enlace que valga: no se espera a nada. */
+        sinlink.hidden = false;
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const c1 = ($('[data-c1]') as HTMLInputElement).value;
+      const c2 = ($('[data-c2]') as HTMLInputElement).value;
+      const err = $('[data-error]')!;
+      const btn = $('[data-guardar]') as HTMLButtonElement;
+
+      err.hidden = true;
+      if (c1.length < 8) {
+        err.textContent = T.short;
+        err.hidden = false;
+        return;
+      }
+      if (c1 !== c2) {
+        err.textContent = T.mismatch;
+        err.hidden = false;
+        return;
+      }
+
+      btn.disabled = true;
+      const { error } = await supabase.auth.updateUser({ password: c1 });
+      btn.disabled = false;
+
+      if (error) {
+        err.textContent = error.message;
+        err.hidden = false;
+        return;
+      }
+      location.assign(destino);
+    });
+  }
+</script>
+
+<style>
+  .clave__h {
+    font-size: clamp(1.9rem, 4.4vw, 2.6rem);
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    margin: 0.4rem 0 0.5rem;
+  }
+
+  .clave__lead {
+    margin: 0 0 clamp(24px, 4vh, 36px);
+  }
+
+  .aviso {
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    padding: 14px 16px;
+    font-size: 0.92rem;
+    margin: 0 0 clamp(24px, 4vh, 36px);
+  }
+
+  .campos {
+    display: grid;
+    gap: 18px;
+  }
+
+  .campo {
+    display: grid;
+    gap: 7px;
+  }
+
+  .campo__t {
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+
+  .campo input {
+    font: inherit;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    padding: 12px 14px;
+    width: 100%;
+    transition: border-color var(--fast) var(--ease);
+  }
+
+  .campo input:focus {
+    outline: none;
+    border-color: var(--ink);
+  }
+
+  .error {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--accent-strong);
+  }
+
+  .campos .btn,
+  .sinlink .btn {
+    justify-self: start;
+  }
+
+  .sinlink p {
+    margin: 0 0 18px;
+  }
+</style>

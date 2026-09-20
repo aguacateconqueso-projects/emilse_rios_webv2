@@ -106,6 +106,61 @@ export const aulaUi = {
       'Esto es el aula en construcción, con contenido de muestra. Tu avance y tus preguntas se guardan en este navegador para que puedas probarla; nada sale de tu equipo todavía.',
     'demo.reset': 'Borrar mi avance de prueba',
     'demo.resetAsk': '¿Borramos el avance y las preguntas de prueba de este navegador?',
+
+    /* --- La puerta: entrar, salir, poner la clave ------------------------- */
+    'gate.checking': 'Comprobando tu acceso…',
+    'gate.wait': 'Un momento.',
+    'gate.needed': 'Esto es para quien ya entró',
+    'gate.neededLead':
+      'Inicia sesión con el correo con el que compraste. Si todavía no tienes nada, la tienda está acá al lado.',
+    'gate.signin': 'Iniciar sesión',
+    'gate.adminOnly': 'Esta parte es solo de Emi',
+    'gate.adminOnlyLead':
+      'Has entrado, pero esta pantalla es el panel de control y no está a tu nombre. Tu sitio es el escritorio.',
+
+    'signin.eyebrow': 'Acceso',
+    'signin.title': 'Entra al aula',
+    'signin.lead': 'Con el correo con el que compraste.',
+    'signin.email': 'Tu correo',
+    'signin.pass': 'Tu contraseña',
+    'signin.remember': 'Mantener la sesión iniciada',
+    'signin.rememberHelp':
+      'En un equipo compartido, déjala sin marcar: la sesión se cierra al cerrar el navegador.',
+    'signin.go': 'Entrar',
+    'signin.first': '¿Primera vez, o se te olvidó la clave?',
+    'signin.firstLead':
+      'Te mandamos un correo con un enlace para ponerla. Sirve igual si tu cuenta se creó al pagar y nunca tuvo contraseña.',
+    'signin.send': 'Mandarme el enlace',
+    'signin.sent':
+      'Si ese correo tiene cuenta, el enlace ya va en camino. Revisa también la carpeta de no deseados.',
+    'signin.bad': 'Ese correo o esa contraseña no son correctos.',
+    'signin.noEmail': 'Escribe tu correo.',
+    'signin.store': 'Todavía no he comprado nada',
+    'signin.leaving': 'Cerrando tu sesión…',
+
+    'pass.eyebrow': 'Tu contraseña',
+    'pass.title': 'Pon tu contraseña',
+    'pass.lead': 'La usarás para entrar al aula de ahora en adelante.',
+    'pass.new': 'Contraseña nueva',
+    'pass.repeat': 'Otra vez, para estar seguros',
+    'pass.short': 'Que tenga ocho caracteres por lo menos.',
+    'pass.mismatch': 'Las dos no coinciden.',
+    'pass.save': 'Guardar y entrar',
+    'pass.noLink':
+      'Este enlace ya se usó o caducó. Pide uno nuevo desde la pantalla de acceso.',
+    'pass.askAgain': 'Pedir otro enlace',
+
+    /* --- El panel de Emi --------------------------------------------------- */
+    'panel.title': 'Panel',
+    'panel.seeAula': 'Ver el aula →',
+    'panel.back': '← Volver al panel',
+    'panel.who': 'Vista de Emi · Admin',
+    'panel.soon': 'Lo que viene acá',
+
+    /* --- Sin backend ------------------------------------------------------- */
+    'off.badge': 'Sin conectar',
+    'off.lead':
+      'El aula todavía no está enchufada a su base de datos, así que esta pantalla se puede mirar sin sesión. Lo que ves es de muestra.',
   },
   en: {
     /* --- Marco de la aplicación ----------------------------------------- */
@@ -197,6 +252,60 @@ export const aulaUi = {
       'This is the classroom under construction, with sample content. Your progress and questions are saved in this browser so you can try it out; nothing leaves your machine yet.',
     'demo.reset': 'Clear my test progress',
     'demo.resetAsk': 'Clear the test progress and questions from this browser?',
+
+    /* --- La puerta: entrar, salir, poner la clave ------------------------- */
+    'gate.checking': 'Checking your access…',
+    'gate.wait': 'One moment.',
+    'gate.needed': 'This is for people who are already in',
+    'gate.neededLead':
+      'Sign in with the email you bought with. If you have nothing yet, the store is right next door.',
+    'gate.signin': 'Sign in',
+    'gate.adminOnly': "This part is Emi's only",
+    'gate.adminOnlyLead':
+      "You're signed in, but this screen is the control panel and it isn't in your name. Your place is the desk.",
+
+    'signin.eyebrow': 'Access',
+    'signin.title': 'Come into the classroom',
+    'signin.lead': 'With the email you bought with.',
+    'signin.email': 'Your email',
+    'signin.pass': 'Your password',
+    'signin.remember': 'Keep me signed in',
+    'signin.rememberHelp':
+      'On a shared computer, leave it unticked: the session ends when you close the browser.',
+    'signin.go': 'Sign in',
+    'signin.first': 'First time, or forgot your password?',
+    'signin.firstLead':
+      "We'll email you a link to set it. It works the same if your account was created when you paid and never had a password.",
+    'signin.send': 'Email me the link',
+    'signin.sent':
+      "If that address has an account, the link is on its way. Check your spam folder too.",
+    'signin.bad': "That email or password isn't right.",
+    'signin.noEmail': 'Type your email.',
+    'signin.store': "I haven't bought anything yet",
+    'signin.leaving': 'Signing you out…',
+
+    'pass.eyebrow': 'Your password',
+    'pass.title': 'Set your password',
+    'pass.lead': "You'll use it to sign in from now on.",
+    'pass.new': 'New password',
+    'pass.repeat': 'Once more, to be sure',
+    'pass.short': 'Make it at least eight characters.',
+    'pass.mismatch': "The two don't match.",
+    'pass.save': 'Save and sign in',
+    'pass.noLink': 'This link has been used already, or it expired. Ask for a new one from the sign-in screen.',
+    'pass.askAgain': 'Ask for another link',
+
+    /* --- El panel de Emi --------------------------------------------------- */
+    'panel.title': 'Panel',
+    'panel.seeAula': 'See the classroom →',
+    'panel.back': '← Back to panel',
+    'panel.who': "Emi's view · Admin",
+    'panel.soon': 'What goes here',
+
+    /* --- Sin backend ------------------------------------------------------- */
+    'off.badge': 'Not connected',
+    'off.lead':
+      "The classroom isn't plugged into its database yet, so this screen can be viewed without signing in. What you see is sample content.",
   },
 } as const;
 
@@ -220,6 +329,9 @@ export function useAula(lang: Lang) {
 const raiz: Record<Lang, string> = { es: '/aulavirtual', en: '/en/classroom' };
 const segmentoCurso: Record<Lang, string> = { es: 'curso', en: 'course' };
 const segmentoEscritorio: Record<Lang, string> = { es: 'escritorio', en: 'desk' };
+const segmentoEntrar: Record<Lang, string> = { es: 'entrar', en: 'signin' };
+const segmentoClave: Record<Lang, string> = { es: 'nueva-clave', en: 'new-password' };
+const segmentoSalir: Record<Lang, string> = { es: 'salir', en: 'signout' };
 
 /** La puerta: la única página del aula que se ve sin haber pagado. */
 export const puertaPath = (lang: Lang): string => `${raiz[lang]}/`;
@@ -239,3 +351,27 @@ export const escritorioPath = (lang: Lang): string =>
 /** El reproductor de un curso. */
 export const cursoPath = (slug: string, lang: Lang): string =>
   `${raiz[lang]}/${segmentoCurso[lang]}/${slug}/`;
+
+/** La pantalla de acceso. Cuelga del aula, como todo lo de esta parte. */
+export const entrarPath = (lang: Lang): string => `${raiz[lang]}/${segmentoEntrar[lang]}/`;
+
+/**
+ * Donde se pone la contraseña nueva.
+ *
+ * Es el destino del enlace que llega por correo, así que **su dirección tiene
+ * que estar en las Redirect URLs de Supabase Auth**, con el dominio delante. Si
+ * no está, el enlace del correo no lleva a ninguna parte.
+ */
+export const clavePath = (lang: Lang): string => `${raiz[lang]}/${segmentoClave[lang]}/`;
+
+/** Salir. Cierra la sesión y devuelve a la puerta. */
+export const salirPath = (lang: Lang): string => `${raiz[lang]}/${segmentoSalir[lang]}/`;
+
+/**
+ * La consola de Emi.
+ *
+ * **Solo en español y sin gemela inglesa**, a propósito: la usan dos personas y
+ * las dos hablan español. El contenido que se escribe desde ella sí es
+ * bilingüe; la herramienta no.
+ */
+export const panelPath = (): string => '/panel/';

@@ -4,11 +4,10 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 20 de septiembre de 2026 · **Edu contestó** —el
-dominio está en Namecheap, no en Hostinger—, llegó **la forma real del primer
-curso** y con ella **el vocabulario corregido**, se decidió **el master panel de
-Emi** —quién entra y cómo se va y se vuelve— y **la palabra «panel» quedó
-reservada** para su consola
+**Última actualización:** 20 de septiembre de 2026 · **la capa A está en pie**:
+el repo lleva adaptador de Vercel, habla con el Supabase de la academia, y el
+aula **ya pide sesión de verdad** — con `/panel/` para Emi y el enlace de ida y
+vuelta que ya conoce
 
 ---
 
@@ -29,9 +28,16 @@ Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/` · `/productos/` ·
 
 Y el aula por dentro, que es **maqueta navegable** y no pide sesión todavía:
 `/aulavirtual/escritorio/` · `/aulavirtual/curso/<slug>/` ·
-`/en/classroom/desk/` · `/en/classroom/course/<slug>/`. Van con `noindex`, y se
-llega a ellas desde la propia puerta. **Las direcciones viejas —`…/panel/`—
-redirigen**: esa palabra quedó reservada para la consola de Emi.
+`/en/classroom/desk/` · `/en/classroom/course/<slug>/`. Van con `noindex`, y
+**desde el 20 sep 2026 piden sesión** — salvo si falta la configuración de
+Supabase, y entonces lo dicen. Las direcciones viejas —`…/panel/`— redirigen:
+esa palabra quedó reservada para la consola de Emi.
+
+Y las de la puerta, nuevas del mismo día: `/aulavirtual/entrar/` ·
+`/aulavirtual/nueva-clave/` · `/aulavirtual/salir/` con sus gemelas
+`/en/classroom/signin/` · `/en/classroom/new-password/` ·
+`/en/classroom/signout/`, más **`/panel/`**, la consola de Emi, solo en
+español.
 
 Las dos direcciones viejas de la carta de la membresía
 —`/aulavirtual/estudiemos-juntos/` y su gemela inglesa— **siguen funcionando**:
@@ -567,6 +573,99 @@ progreso tiene que vivir en el servidor, atado al usuario.
 ⚠️ **Esta es la única parte del proyecto que necesita JavaScript.** Todo lo
 demás —portada, tienda, cartas— se lee entero sin él. Acá no hay manera honesta
 de evitarlo: un reproductor que recuerda el minuto es una aplicación.
+
+### La capa A, en pie
+
+Hecha el **20 de septiembre de 2026**. Es el cimiento del panel de Emi y, de
+paso, lo que convierte `/aulavirtual/` de puerta pintada en puerta de verdad.
+
+**La sesión ya vive acá**, contra el **mismo Supabase de la academia** — mismo
+proyecto, mismos usuarios, mismas contraseñas, ni una fila copiada. Lo que se
+construyó:
+
+| | |
+|---|---|
+| `astro.config.mjs` | **Adaptador de Vercel.** El sitio sigue siendo estático; lo que cambia es que ahora una página puede pedir servidor con `prerender = false`. Sin esto no hay panel, ni webhook, ni nada de lo que viene |
+| `src/lib/supabase.ts` | El cliente del navegador. `flowType: 'implicit'` y el almacén que obedece a la casilla de «mantener la sesión iniciada», los dos traídos igual que en la academia |
+| `src/lib/auth.ts` | Sesión, perfil, entrar, pedir clave, fijarla, salir |
+| `src/lib/supabase-admin.ts` | Lo de servidor, para las rutas de API que vengan |
+| `/aulavirtual/entrar/` · `/en/classroom/signin/` | La pantalla de acceso, con la ropa de este sitio |
+| `/aulavirtual/nueva-clave/` · `…/new-password/` | Donde aterriza el enlace del correo |
+| `/aulavirtual/salir/` · `…/signout/` | Cierra sesión de verdad y devuelve a la puerta |
+| **`/panel/`** | La consola de Emi: su portero, su barra y las siete pestañas anunciadas y apagadas |
+| `src/layouts/Aula.astro` | El portero del aula, y el enlace `← Volver al panel` |
+| `.env.example` | Las variables, documentadas |
+
+#### Un efecto secundario que conviene saber
+
+Con el adaptador, **las redirecciones de `astro.config.mjs` dejaron de ser
+páginas con `<meta refresh>` y pasaron a ser 301 de servidor** — que es lo que
+su propio comentario venía pidiendo. Comprobado en `.vercel/output/config.json`:
+las específicas se escriben antes que el comodín `[producto]`, así que
+`/aulavirtual/panel` sigue llegando a `/aulavirtual/escritorio` y no a
+`/productos/panel`.
+
+#### Sin backend no se rompe nada, y lo dice
+
+`isSupabaseConfigured` es `false` cuando faltan las dos variables. En ese caso
+**el aula se comporta como la maqueta que era** —se puede mirar sin sesión— y
+cada pantalla pinta un aviso de «Sin conectar» en vez de un formulario que no
+va a funcionar. Es lo mismo que ya hace el formulario del newsletter: se avisa,
+no se finge.
+
+⚠️ **Esa puerta abierta tiene fecha de caducidad.** Hoy no esconde nada porque
+el contenido de las clases es de muestra y va escrito en el HTML. **El día que
+entre el curso de verdad, «sin backend» tiene que significar cerrado, no
+abierto** — y, más importante, las clases tienen que llegar por consulta a
+Supabase con la RLS decidiendo, en vez de venir horneadas en la página. Está en
+el pendiente que cierra la capa B.
+
+#### Lo que estos porteros son y lo que no
+
+El portero del aula y el del panel deciden **qué se dibuja**. No protegen nada:
+quien fuerce uno desde la consola del navegador verá una pantalla vacía, porque
+las consultas se las rechaza la base de datos. **La puerta de verdad es la RLS**
+—`is_admin()`, `has_active_sub()`— y las rutas de API, que empezarán todas por
+`adminDeLaPeticion()`, que sí corre en el servidor.
+
+Dos detalles que se cuidaron porque se notan:
+
+- **El enlace `← Volver al panel` nace `hidden`** y lo enseña el script tras leer
+  el rol. Al revés, una alumna vería parpadear un enlace al panel de Emi cada
+  vez que entra.
+- **El portón nace visible** y se quita al confirmar la sesión. Al revés, se
+  vería el aula un instante antes de que le digan que no puede.
+
+Y uno que es de seguridad aunque parezca de copy: **al pedir el enlace de la
+contraseña siempre se contesta lo mismo**, exista la cuenta o no. Si dijera «esa
+cuenta no existe», cualquiera podría averiguar quién es miembro probando
+correos.
+
+#### Lo que hay que hacer en los paneles de fuera
+
+Nada de esto funciona hasta que:
+
+1. **En Supabase → Authentication → URL Configuration**, añadir a **Redirect
+   URLs** el dominio nuevo y la URL de Vercel, con las cuatro rutas que reciben
+   el enlace del correo:
+   `…/aulavirtual/nueva-clave/` y `…/en/classroom/new-password/`.
+   Es **aditivo**: la academia sigue funcionando igual.
+2. **En Vercel**, poner `PUBLIC_SUPABASE_URL` y `PUBLIC_SUPABASE_ANON_KEY`. Sin
+   ellas todo sigue en modo maqueta.
+3. **Los dos admins**: que Emi y Adrián entren una vez cada uno —el perfil se
+   crea en ese momento— y después ejecutar `supabase/set_admin.sql`.
+
+#### Lo que NO entró, y por qué
+
+**La tabla `entitlements` y la reescritura de `has_active_sub()`.** Estaban en la
+capa A y se sacan a su propio PR a propósito: esa función es la puerta de una
+membresía que **está cobrando ahora mismo**, con miembros de verdad. Una
+migración que la toca no se revisa de paso, entre un adaptador y un formulario.
+Y antes hay que decidir lo de `trialing`, que sigue abierto.
+
+**Las tres pestañas del panel de la academia.** El armazón está y las pestañas
+se anuncian apagadas; traer Membresía, Miembros y Foro es el siguiente PR, cada
+una en su componente.
 
 ### El primer curso, y las palabras
 
@@ -1127,7 +1226,8 @@ nacido con una tabla de sobra.
 ```
 Fase 0   Pedir el dominio a Edu (CONTESTÓ el 19 sep) + traer el repo de la
          membresía · y resolver el correo antes que nada
-Fase 1   Derechos de acceso + mudar el aula y el panel a este repo   (capa A)
+Fase 1   Sesión + adaptador + el armazón del panel  ✅ 20 sep 2026  (capa A)
+         Derechos de acceso y las tres pestañas de la academia: su propio PR
 Fase 2   Cursos: modelo, reproductor, progreso, hilo privado con video y
          audio                                                      (capa B)
 Fase 3   Tienda + pago único + los cuatro estados de lanzamiento     (capa C)
@@ -2300,11 +2400,36 @@ enseñárselo.
       aborta sin tocar nada si falta alguno de los dos perfiles. Ver **El panel
       de Emi → Quién entra**.
 
-- [ ] **El adaptador de Vercel.** Hoy este repo es 100 % estático: no tiene
-      `@astrojs/vercel` ni una sola ruta de API, así que **no puede tener panel
-      ni sesión ni webhook**. El repo de la membresía sí lo tiene, con
-      `output: 'static'` y `prerender = false` solo donde hace falta; se copia
-      ese mismo patrón. Es media hora y es lo primero de la capa A.
+- [x] **El adaptador de Vercel.** Hecho el 20 sep 2026, con el mismo patrón de
+      la academia: `output: 'static'` y `prerender = false` solo donde haga
+      falta. De regalo, las redirecciones pasaron a ser 301 de servidor.
+
+- [ ] **Poner las dos variables de Supabase en Vercel** —`PUBLIC_SUPABASE_URL` y
+      `PUBLIC_SUPABASE_ANON_KEY`— y **añadir las Redirect URLs** en Supabase →
+      Authentication → URL Configuration: el dominio nuevo y la URL de Vercel,
+      con `…/aulavirtual/nueva-clave/` y `…/en/classroom/new-password/`. Es
+      aditivo: la academia sigue igual. **Sin esto, el aula queda en modo
+      maqueta** y lo dice en pantalla.
+
+- [ ] **Cerrar la puerta del modo maqueta antes de que entre el curso de
+      verdad.** Hoy, si faltan las variables de Supabase, el aula se deja mirar
+      sin sesión — y está bien, porque el contenido es de muestra y va escrito
+      en el HTML, así que el portero no esconde nada que no se vea igual con la
+      consola abierta. **El día que entre el curso real eso se invierte:** «sin
+      backend» tiene que significar cerrado, y las clases tienen que llegar por
+      consulta a Supabase con la RLS decidiendo, no horneadas en la página. Es
+      lo que cierra la capa B.
+
+- [ ] **La tabla `entitlements` y reescribir `has_active_sub()` encima.** Salió
+      de la capa A a propósito: esa función es la puerta de una membresía que
+      **está cobrando ahora mismo**. Va en su propio PR, revisada despacio, y
+      **antes hay que decidir lo de `trialing`** — `subGrantsAccess()` da acceso
+      a `trialing` y `has_active_sub()` no; hoy no está roto porque no hay
+      pruebas, y no se despierta sin decidirlo.
+
+- [ ] **Traer las tres pestañas del panel de la academia** —Membresía, Miembros
+      y Foro— cada una en su componente. El armazón de `/panel/` ya está y las
+      anuncia apagadas.
 
 - [x] **Aula Virtual, la fachada.** Hecho el 31 ago 2026: el catálogo con los
       siete productos, la carta de la membresía, el botón de comprar y la puerta

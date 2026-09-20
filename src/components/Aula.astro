@@ -9,12 +9,10 @@
  * venta se mudaron a `/productos/`, que es donde tienen que estar — una carta
  * de ventas detrás de un inicio de sesión no vende nada.
  *
- * **No hay sesión en este repo todavía.** La sesión, el aula y el cobro viven
- * en `emilseriosacademy.com`, así que el botón sale del sitio, a la misma
- * puerta que usan hoy las miembros, y la página lo dice en vez de dejar que la
- * alumna descubra sola el cambio de dominio. Cuando el aula se mude acá, lo que
- * cambia es `ACADEMIA` en `src/data/aula.ts` y esta página pasa a ser el
- * formulario de verdad; la forma no cambia.
+ * **Desde la capa A la sesión vive acá.** El botón ya no sale del sitio: lleva
+ * a `/aulavirtual/entrar/`, que habla con el mismo Supabase de la academia — el
+ * mismo proyecto, los mismos usuarios, las mismas contraseñas. Lo único que
+ * sigue afuera es el cobro, y eso se ve en la tienda, no acá.
  */
 import { type Lang, useTranslations, routePath } from '../i18n/ui';
 import { entrarHref } from '../data/aula';
@@ -47,7 +45,7 @@ const entrar = entrarHref[lang];
   <div class="row__body">
     <div class="puerta">
       <p class="mono soft puerta__label">{t('aula.locked')}</p>
-      <a class="mono puerta__cta" href={entrar} rel="noopener">{t('nav.enter')}</a>
+      <a class="mono puerta__cta" href={entrar}>{t('nav.enter')}</a>
       <p class="soft puerta__hint">{t('aula.hint')}</p>
       <p class="puerta__away">{t('aula.away')}</p>
     </div>

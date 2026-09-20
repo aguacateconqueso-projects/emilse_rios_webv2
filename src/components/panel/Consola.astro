@@ -1,0 +1,320 @@
+---
+/**
+ * La consola de Emi — el armazón, con su portero y sus pestañas.
+ *
+ * Esto es la capa A: el marco, quién entra y la ida y vuelta al aula. Las
+ * pestañas de verdad —Membresía, Cursos, Tienda, Cartas, Personas, Mensajes—
+ * llegan después, y **cada una será su propio componente**. El panel de la
+ * academia es un solo fichero de 1.059 líneas: con tres pestañas ya está en el
+ * límite y con ocho no se sostiene.
+ *
+ * **Solo en español.** Lo usan dos personas y las dos hablan español. El
+ * contenido que se escribe desde acá sí es bilingüe; la herramienta no.
+ *
+ * ⚠️ **El portero de esta pantalla NO es la seguridad.** Decide qué se dibuja.
+ * Quien de verdad protege los datos es la RLS de la base de datos, con
+ * `is_admin()`: alguien que fuerce este gate desde la consola del navegador
+ * verá una pantalla vacía, porque las consultas se las rechaza Supabase. El
+ * mismo criterio vale para las rutas de API que vengan: todas empiezan por
+ * `adminDeLaPeticion()`, que sí corre en el servidor.
+ */
+import { useAula, escritorioPath, entrarPath, salirPath } from '../../i18n/aula';
+import { isSupabaseConfigured } from '../../lib/supabase';
+
+const lang = 'es' as const;
+const a = useAula(lang);
+
+/** Lo que va a vivir acá. Se dibuja apagado: se anuncia, no se finge. */
+const pestanas = [
+  { t: 'Hoy', d: 'Activas, ventas del mes, preguntas sin responder, qué está en vivo.' },
+  { t: 'Membresía', d: 'El ejercicio de la semana, el concepto base y el bonus. Como hoy.' },
+  { t: 'Cursos', d: 'Crear, unidades y clases, reordenar, abrir y cerrar.' },
+  { t: 'Tienda', d: 'Lo que se ve en Productos: orden, precio, estado, foto.' },
+  { t: 'Cartas', d: 'El editor por bloques de cada carta de venta, en los dos idiomas.' },
+  { t: 'Personas', d: 'Miembros y quién compró qué. Dar y quitar acceso a mano.' },
+  { t: 'Mensajes', d: 'El foro de la membresía y los hilos privados de los cursos.' },
+];
+---
+
+<div
+  class="consola"
+  data-consola
+  data-gate-needed={a('gate.needed')}
+  data-gate-needed-lead={a('gate.neededLead')}
+  data-gate-admin={a('gate.adminOnly')}
+  data-gate-admin-lead={a('gate.adminOnlyLead')}
+>
+  {/* --- El portero ---------------------------------------------------- */}
+  <div class="porton" data-porton>
+    <div class="porton__caja">
+      <img class="porton__logo" src="/logo.svg" alt="Emilse Ríos" width="1631" height="487" />
+      <p class="eyebrow">{a('panel.title')}</p>
+      <h1 class="porton__h" data-porton-h>{a('gate.checking')}</h1>
+      <p class="soft" data-porton-p>{a('gate.wait')}</p>
+      <div class="porton__actos" data-porton-actos hidden>
+        <a class="btn btn--solid" href={entrarPath(lang)} data-porton-entrar>
+          <span class="btn__fill" aria-hidden="true"></span>
+          <span class="btn__label">{a('gate.signin')}</span>
+        </a>
+        <a class="btn" href={escritorioPath(lang)}>
+          <span class="btn__fill" aria-hidden="true"></span>
+          <span class="btn__label">{a('app.desk')}</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {/* --- La consola, oculta hasta que el portero abre -------------------- */}
+  <div class="consola__cuerpo" data-cuerpo hidden>
+    <header class="pbar">
+      <div class="pbar__in">
+        <a class="pbar__logo" href="/panel/" aria-label={a('panel.title')}>
+          <img src="/logo.svg" alt="Emilse Ríos" width="1631" height="487" />
+          <small>{a('panel.title')}</small>
+        </a>
+        <div class="pbar__end">
+          <span class="chip"><span class="chip__dot" aria-hidden="true"></span>{a('panel.who')}</span>
+          {/* El enlace que Emi ya conoce, en el mismo sitio que en la academia. */}
+          <a class="pbar__link" href={escritorioPath(lang)}>{a('panel.seeAula')}</a>
+          <a class="pbar__link" href={salirPath(lang)}>{a('app.leave')}</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="wrap consola__main">
+      <p class="eyebrow">{a('panel.title')}</p>
+      <h1 class="consola__h">Tu plataforma, de punta a punta.</h1>
+
+      {
+        !isSupabaseConfigured && (
+          <p class="aviso">
+            <b>{a('off.badge')}</b> — {a('off.lead')}
+          </p>
+        )
+      }
+
+      <p class="soft consola__lead">{a('panel.soon')}:</p>
+      <ul class="lista" role="list">
+        {
+          pestanas.map((p) => (
+            <li class="card lista__i">
+              <p class="card__title">{p.t}</p>
+              <p class="soft lista__d">{p.d}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </main>
+  </div>
+</div>
+
+<script>
+  import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+
+  const caja = document.querySelector<HTMLElement>('[data-consola]');
+  if (caja) {
+    const $ = (s: string) => caja.querySelector(s) as HTMLElement | null;
+    const porton = $('[data-porton]')!;
+    const cuerpo = $('[data-cuerpo]')!;
+
+    function abrir() {
+      porton.hidden = true;
+      cuerpo.hidden = false;
+    }
+
+    function cerrar(titulo: string, texto: string, ofrecerEntrar: boolean) {
+      $('[data-porton-h]')!.textContent = titulo;
+      $('[data-porton-p]')!.textContent = texto;
+      $('[data-porton-actos]')!.hidden = false;
+      ($('[data-porton-entrar]') as HTMLElement).hidden = !ofrecerEntrar;
+    }
+
+    (async () => {
+      // Sin backend no hay a quién preguntarle el rol. Se abre y se avisa dentro
+      // de que esto no está enchufado: es una maqueta y no esconde nada, porque
+      // todavía no hay nada que esconder.
+      if (!isSupabaseConfigured) {
+        abrir();
+        return;
+      }
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        cerrar(caja.getAttribute('data-gate-needed')!, caja.getAttribute('data-gate-needed-lead')!, true);
+        return;
+      }
+
+      const { data: perfil } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .maybeSingle();
+
+      if (perfil?.role !== 'admin') {
+        cerrar(caja.getAttribute('data-gate-admin')!, caja.getAttribute('data-gate-admin-lead')!, false);
+        return;
+      }
+
+      abrir();
+    })();
+  }
+</script>
+
+<style>
+  .porton {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    background: var(--paper);
+    padding: var(--edge);
+  }
+
+  .porton__caja {
+    max-width: 30rem;
+    text-align: center;
+  }
+
+  .porton__logo {
+    width: 132px;
+    height: auto;
+    margin: 0 auto 1.6rem;
+  }
+
+  .porton__h {
+    font-size: clamp(1.5rem, 3.4vw, 2rem);
+    letter-spacing: -0.02em;
+    line-height: 1.12;
+    margin: 0.4rem 0 0.6rem;
+  }
+
+  .porton__actos {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 1.8rem;
+  }
+
+  /* --- La barra del panel ------------------------------------------------ */
+  .pbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--bar-veil);
+    backdrop-filter: saturate(140%) blur(12px);
+    -webkit-backdrop-filter: saturate(140%) blur(12px);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .pbar__in {
+    max-width: var(--wrap);
+    margin-inline: auto;
+    padding: 0.9rem var(--edge);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .pbar__logo {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.6em;
+    text-decoration: none;
+  }
+
+  .pbar__logo img {
+    width: 104px;
+    height: auto;
+  }
+
+  .pbar__logo small {
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--soft);
+  }
+
+  .pbar__end {
+    display: flex;
+    align-items: center;
+    gap: clamp(12px, 2vw, 20px);
+    flex-wrap: wrap;
+  }
+
+  .pbar__link {
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 12px;
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    font-size: 0.82rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .chip__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--ink);
+  }
+
+  /* --- El cuerpo ---------------------------------------------------------- */
+  .consola__main {
+    padding-block: clamp(32px, 6vh, 56px) clamp(48px, 10vh, 96px);
+  }
+
+  .consola__h {
+    font-size: clamp(1.9rem, 4.6vw, 2.8rem);
+    letter-spacing: -0.03em;
+    line-height: 1.04;
+    margin: 0.4rem 0 1.4rem;
+  }
+
+  .aviso {
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    padding: 14px 16px;
+    font-size: 0.92rem;
+    margin: 0 0 1.6rem;
+  }
+
+  .consola__lead {
+    margin: 0 0 1rem;
+  }
+
+  .lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  }
+
+  .lista__i {
+    /* Apagadas a propósito: se anuncia lo que viene, no se finge que ya está. */
+    opacity: 0.55;
+  }
+
+  .lista__d {
+    margin: 0.35rem 0 0;
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+</style>

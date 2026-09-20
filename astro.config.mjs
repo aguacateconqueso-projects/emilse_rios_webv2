@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig, fontProviders } from 'astro/config';
+import vercel from '@astrojs/vercel';
 
 /**
  * Rangos de caracteres de cada subconjunto. Son los mismos que publica Google
@@ -36,6 +37,24 @@ function cut(slug, weight, style) {
 export default defineConfig({
   site: 'https://contrabajoenlaciudad.com',
 
+  /**
+   * El sitio sigue siendo **estático**: cada página se genera en el build, igual
+   * que antes. Lo que añade el adaptador es la posibilidad de que una página o
+   * una ruta diga `export const prerender = false` y pase a resolverse en el
+   * servidor — y eso es lo que hace falta para el panel de Emi, el webhook de
+   * Stripe y todo lo que venga después. Hasta que alguna lo pida, el resultado
+   * del build es el mismo de siempre.
+   *
+   * Es el mismo patrón que ya usa el repo de la membresía, a propósito: cuanto
+   * menos se diferencien los dos mientras dure la mudanza, menos sorpresas.
+   *
+   * Efecto secundario bienvenido: las redirecciones de aquí abajo dejan de ser
+   * páginas con `<meta refresh>` y pasan a ser redirecciones de verdad, que es
+   * justo lo que su comentario pedía.
+   */
+  output: 'static',
+  adapter: vercel(),
+
   i18n: {
     locales: ['es', 'en'],
     defaultLocale: 'es',
@@ -52,9 +71,9 @@ export default defineConfig({
    * se rompen: Astro genera una página de redirección por cada producto con
    * carta, tomando los caminos del propio catálogo.
    *
-   * Son redirecciones de cliente —`<meta refresh>` con su canonical—, no un 301
-   * de servidor: el sitio es estático. Sirven, pero si algún día el dominio
-   * queda detrás de un servidor que sepa responder 301, es mejor hacerlas ahí.
+   * Desde que el proyecto lleva el adaptador de Vercel, estas redirecciones se
+   * resuelven **en el servidor**, que es lo que aquí se pedía cuando eran
+   * páginas con `<meta refresh>`.
    *
    * El destino va **sin barra final**, aunque el resto del sitio la lleve:
    * Astro valida el destino contra sus rutas y con la barra falla el build con

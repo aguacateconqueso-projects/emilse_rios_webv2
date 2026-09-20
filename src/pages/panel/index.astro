@@ -1,0 +1,17 @@
+---
+/**
+ * `/panel/` — la consola de Emi.
+ *
+ * Vive en la raíz y no bajo `/aulavirtual/` porque no es parte del aula: el
+ * aula es donde se estudia y esto es donde se administra. Es además la misma
+ * dirección que en la academia, así que Emi no tiene que aprender otra.
+ *
+ * Sin gemela inglesa, a propósito: ver el porqué en el componente.
+ */
+import Panel from '../../layouts/Panel.astro';
+import Consola from '../../components/panel/Consola.astro';
+---
+
+<Panel title="Panel">
+  <Consola />
+</Panel>

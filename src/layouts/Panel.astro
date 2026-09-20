@@ -1,0 +1,33 @@
+---
+/**
+ * El documento de la consola de Emi.
+ *
+ * Es un marco desnudo: la barra y todo lo demás los pone el propio componente,
+ * porque el panel no comparte cabecera ni pie con nada. Lleva la ropa del aula
+ * —la crema y Hanken Grotesk— para que Emi no sienta que cambia de casa al
+ * pasar de una pantalla a la otra.
+ *
+ * `noindex`, obviamente.
+ */
+import '../styles/aula.css';
+
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es" class="aula">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title} · Emilse Ríos</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/colors_and_type.css" />
+  </head>
+  <body class="aula__body">
+    <slot />
+  </body>
+</html>

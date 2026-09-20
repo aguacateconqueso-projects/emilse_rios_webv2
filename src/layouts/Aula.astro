@@ -27,7 +27,8 @@
  *     relleno de los botones y las notas musicales
  */
 import { type Lang, routePath } from '../i18n/ui';
-import { useAula, escritorioPath } from '../i18n/aula';
+import { useAula, escritorioPath, entrarPath, salirPath, panelPath } from '../i18n/aula';
+import { isSupabaseConfigured } from '../lib/supabase';
 import { ACADEMIA } from '../data/aula';
 import { ALUMNA_DEMO } from '../data/cursos';
 import '../styles/aula.css';
@@ -76,12 +77,11 @@ const fuera = membresiaHref.startsWith('http');
 /**
  * A dónde manda «Salir».
  *
- * A la portada del sitio, no a la pantalla de entrar de la academia: no hay
- * sesión que cerrar todavía, y mandar a un formulario de inicio de sesión a
- * quien acaba de pedir salir es justo lo contrario de lo que pidió. El día que
- * haya sesión, esto se convierte en la ruta que la cierra y luego trae acá.
+ * Hasta la capa A esto iba a la portada, porque no había sesión que cerrar.
+ * Ya la hay: ahora va a la pantalla que la cierra de verdad —limpia los dos
+ * almacenes y avisa a Supabase— y desde ahí devuelve a la puerta.
  */
-const salirHref = routePath('home', lang);
+const salirHref = salirPath(lang);
 ---
 
 <!doctype html>
@@ -276,8 +276,47 @@ const salirHref = routePath('home', lang);
 
   </head>
 
-  <body class="aula__body">
+  <body
+    class="aula__body"
+    data-aula
+    data-entrar={entrarPath(lang)}
+    data-gate-needed={a('gate.needed')}
+    data-gate-needed-lead={a('gate.neededLead')}
+  >
     <a class="skip" href="#aula">{a('app.skip')}</a>
+
+    {/*
+      El portero del aula.
+
+      ⚠️ **No es la seguridad, es la puerta de la casa.** Lo que esconde es la
+      pantalla, no los datos: hoy el contenido de las clases va escrito en el
+      HTML porque es de muestra, así que alguien con la consola abierta lo ve
+      igual. No importa mientras sea de muestra — y **deja de no importar el día
+      que entre el curso de verdad**. Ese día las clases tienen que llegar por
+      consulta a Supabase, con la RLS decidiendo, y no venir horneadas en la
+      página. Está anotado en `progreso.md` como lo que cierra la capa B.
+
+      Nace visible en el HTML y se quita al confirmar la sesión, no al revés:
+      así nadie ve el aula un instante antes de que le digan que no puede.
+    */}
+    <div class="porton" data-porton hidden={!isSupabaseConfigured}>
+      <div class="porton__caja">
+        <img class="porton__logo" src="/logo.svg" alt="Emilse Ríos" width="1631" height="487" />
+        <p class="eyebrow">{a('app.title')}</p>
+        <h1 class="porton__h" data-porton-h>{a('gate.checking')}</h1>
+        <p class="soft" data-porton-p>{a('gate.wait')}</p>
+        <div class="porton__actos" data-porton-actos hidden>
+          <a class="btn btn--solid" href={entrarPath(lang)}>
+            <span class="btn__fill" aria-hidden="true"></span>
+            <span class="btn__label">{a('gate.signin')}</span>
+          </a>
+          <a class="btn" href={routePath('products', lang)}>
+            <span class="btn__fill" aria-hidden="true"></span>
+            <span class="btn__label">{a('app.store')}</span>
+          </a>
+        </div>
+      </div>
+    </div>
 
     <header class="bar">
       <div class="bar__in">
@@ -303,6 +342,15 @@ const salirHref = routePath('home', lang);
         </nav>
 
         <div class="bar__end">
+          {/*
+            El enlace que Emi ya conoce de la academia, en el mismo sitio y con
+            el mismo texto. Nace OCULTO y lo enseña el script solo si el perfil
+            dice `admin`. Al revés —dibujarlo y esconderlo después— una alumna
+            vería parpadear un enlace al panel de Emi cada vez que entra.
+          */}
+          <a class="bar__link bar__admin" href={panelPath()} data-admin hidden
+            >{a('panel.back')}</a
+          >
           <a class="bar__lang" href={otroHref} hreflang={otro} lang={otro}
             >{otro === 'en' ? 'EN' : 'ES'}</a
           >
@@ -328,6 +376,7 @@ const salirHref = routePath('home', lang);
             <a href={membresiaHref} rel={fuera ? 'noopener' : undefined}>{a('app.membership')}</a>
             <a href={routePath('products', lang)}>{a('app.store')}</a>
             <a href={otroHref} hreflang={otro} lang={otro}>{otro === 'en' ? 'English' : 'Español'}</a>
+            <a href={panelPath()} data-admin hidden>{a('panel.back')}</a>
             <a href={salirHref}>{a('app.leave')}</a>
           </div>
         </details>
@@ -778,6 +827,92 @@ const salirHref = routePath('home', lang);
       .aula .foot__site:hover {
         color: var(--ink);
       }
+
+      /* --- El portero ---------------------------------------------------- */
+      .porton {
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        display: grid;
+        place-items: center;
+        background: var(--paper);
+        padding: var(--edge);
+      }
+
+      .porton[hidden] {
+        display: none;
+      }
+
+      .porton__caja {
+        max-width: 30rem;
+        text-align: center;
+      }
+
+      .porton__logo {
+        width: 132px;
+        height: auto;
+        margin: 0 auto 1.6rem;
+      }
+
+      .porton__h {
+        font-size: clamp(1.5rem, 3.4vw, 2rem);
+        letter-spacing: -0.02em;
+        line-height: 1.12;
+        margin: 0.4rem 0 0.6rem;
+      }
+
+      .porton__actos {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 1.8rem;
+      }
+
+      .aula .bar__admin[hidden] {
+        display: none;
+      }
     </style>
+
+    <script>
+      import { supabase, isSupabaseConfigured } from '../lib/supabase';
+
+      const cuerpo = document.querySelector('[data-aula]') as HTMLElement | null;
+
+      if (cuerpo && isSupabaseConfigured) {
+        const porton = cuerpo.querySelector('[data-porton]') as HTMLElement;
+
+        (async () => {
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
+
+          if (!session) {
+            (porton.querySelector('[data-porton-h]') as HTMLElement).textContent =
+              cuerpo.dataset.gateNeeded!;
+            (porton.querySelector('[data-porton-p]') as HTMLElement).textContent =
+              cuerpo.dataset.gateNeededLead!;
+            (porton.querySelector('[data-porton-actos]') as HTMLElement).hidden = false;
+            return;
+          }
+
+          porton.hidden = true;
+
+          /* El enlace de vuelta al panel: solo para Emi, y después de
+             preguntarle a la base de datos, nunca antes. */
+          const { data: perfil } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', session.user.id)
+            .maybeSingle();
+
+          if (perfil?.role === 'admin') {
+            cuerpo
+              .querySelectorAll('[data-admin]')
+              .forEach((el) => ((el as HTMLElement).hidden = false));
+          }
+        })();
+      }
+    </script>
   </body>
 </html>

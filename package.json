@@ -13,6 +13,8 @@
     "audit:menu": "node scripts/audit-menu.mjs"
   },
   "dependencies": {
+    "@astrojs/vercel": "^11.0.10",
+    "@supabase/supabase-js": "^2.116.0",
     "astro": "^7.2.0"
   },
   "devDependencies": {
