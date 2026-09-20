@@ -74,6 +74,21 @@ export default defineConfig({
      */
     '/aulavirtual/estudiemos-juntos': '/productos/estudiemos-juntos',
     '/en/classroom/estudiemos-juntos': '/en/products/estudiemos-juntos',
+
+    /*
+     * El escritorio de la alumna se llamaba `/panel/` y dejó de llamarse así el
+     * 20 sep 2026: en la academia `/panel/` es la CONSOLA DE EMI, y que las dos
+     * pantallas compartieran nombre era una confusión esperando a pasar. La
+     * palabra queda reservada para la consola.
+     *
+     * Estas dos líneas no son opcionales aunque las direcciones viejas fueran
+     * de una maqueta con `noindex`: sin ellas, `/aulavirtual/panel` cae en el
+     * patrón `[producto]` de aquí arriba y acaba en `/productos/panel`, que no
+     * existe. Una ruta estática gana a una dinámica, así que puestas acá
+     * mandan ellas.
+     */
+    '/aulavirtual/panel': '/aulavirtual/escritorio',
+    '/en/classroom/panel': '/en/classroom/desk',
   },
 
   build: {

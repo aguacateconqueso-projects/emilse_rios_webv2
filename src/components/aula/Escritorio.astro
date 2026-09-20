@@ -27,7 +27,7 @@ import {
   ALUMNA_DEMO,
   buscarCurso,
   cursosPorComprar,
-  leccionesDe,
+  clasesDe,
   misCursos,
   reloj,
 } from '../../data/cursos';
@@ -45,30 +45,30 @@ const porComprar = cursosPorComprar();
 /**
  * Cada curso comprado, con su contenido al lado.
  *
- * `lecciones` es la lista de ids en orden, y es lo que el script necesita para
+ * `clases` es la lista de ids en orden, y es lo que el script necesita para
  * calcular el avance sin volver a preguntarle nada al servidor: cuenta cuántas
  * de esas ids están marcadas y divide. Va por `data-` en el HTML, que es la
  * manera de pasarle datos a un script sin duplicar el catálogo en JSON.
  */
 const mesa = mios.map((p) => {
   const curso = buscarCurso(p.slug);
-  const lecciones = curso ? leccionesDe(curso) : [];
+  const clases = curso ? clasesDe(curso) : [];
   return {
     slug: p.slug,
     nombre: p.copia[lang].nombre,
     /* La línea de adentro, no la de la tienda. Ver `Curso.copia` en
        `src/data/cursos.ts`: quien ya compró no necesita que le vendan. */
     resumen: curso?.copia?.[lang].resumen ?? p.copia[lang].resumen,
-    lecciones,
-    ids: lecciones.map((x) => x.id).join(','),
+    clases,
+    ids: clases.map((x) => x.id).join(','),
     /** Cuánto dura el curso entero, para la ficha. */
-    duracion: lecciones.reduce((t, x) => t + (x.duracion ?? 0), 0),
+    duracion: clases.reduce((t, x) => t + (x.duracion ?? 0), 0),
   };
 });
 
 /** El punto de partida sin JS: la primera clase del primer curso que tenga. */
-const arranque = mesa.find((c) => c.lecciones.length > 0);
-const primera = arranque?.lecciones[0];
+const arranque = mesa.find((c) => c.clases.length > 0);
+const primera = arranque?.clases[0];
 
 const membresiaHref = `${ACADEMIA}/aula/`;
 ---
@@ -161,7 +161,7 @@ const membresiaHref = `${ACADEMIA}/aula/`;
                 <span data-curso-pct>0 %</span>
                 <span aria-hidden="true"> · </span>
                 <span>
-                  {c.lecciones.length} {a('course.lessons')}
+                  {c.clases.length} {a('course.lessons')}
                 </span>
                 {c.duracion > 0 && (
                   <>
@@ -194,7 +194,7 @@ const membresiaHref = `${ACADEMIA}/aula/`;
   El avance real. Llega del navegador, no del servidor, así que se pinta encima
   de lo que ya está en pantalla en vez de dejar huecos esperándolo.
 */}
-<script is:inline define:vars={{ lang, mesa: mesa.map((c) => ({ slug: c.slug, nombre: c.nombre, lecciones: c.lecciones.map((l) => ({ id: l.id, titulo: l.copia[lang].titulo, duracion: l.duracion ?? 0 })) })), etiquetaContinuar: a('desk.resumeCta'), etiquetaEmpezar: a('desk.startCta'), etiquetaHecho: a('course.done'), etiquetaSinEmpezar: a('course.notStarted') }}>
+<script is:inline define:vars={{ lang, mesa: mesa.map((c) => ({ slug: c.slug, nombre: c.nombre, clases: c.clases.map((l) => ({ id: l.id, titulo: l.copia[lang].titulo, duracion: l.duracion ?? 0 })) })), etiquetaContinuar: a('desk.resumeCta'), etiquetaEmpezar: a('desk.startCta'), etiquetaHecho: a('course.done'), etiquetaSinEmpezar: a('course.notStarted') }}>
   (function () {
     var A = window.Aula;
     if (!A) return;
@@ -228,7 +228,7 @@ const membresiaHref = `${ACADEMIA}/aula/`;
          siempre al primero de la lista. */
       var mejor = null;
       mesa.forEach(function (curso) {
-        curso.lecciones.forEach(function (lec) {
+        curso.clases.forEach(function (lec) {
           var p = A.de(lec.id);
           if (p.ts && (!mejor || p.ts > mejor.ts)) {
             mejor = { ts: p.ts, curso: curso, lec: lec, p: p };
@@ -252,7 +252,7 @@ const membresiaHref = `${ACADEMIA}/aula/`;
       var destino = mejor.lec;
       var cursoDestino = mejor.curso;
       if (mejor.p.hecho) {
-        var lista = cursoDestino.lecciones;
+        var lista = cursoDestino.clases;
         var i = lista.findIndex(function (l) { return l.id === mejor.lec.id; });
         var siguiente = lista.slice(i + 1).find(function (l) { return !A.de(l.id).hecho; });
         if (siguiente) destino = siguiente;

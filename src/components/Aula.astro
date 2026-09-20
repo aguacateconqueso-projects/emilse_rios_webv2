@@ -18,7 +18,7 @@
  */
 import { type Lang, useTranslations, routePath } from '../i18n/ui';
 import { entrarHref } from '../data/aula';
-import { panelPath } from '../i18n/aula';
+import { escritorioPath } from '../i18n/aula';
 
 interface Props {
   lang: Lang;
@@ -69,7 +69,7 @@ const entrar = entrarHref[lang];
     <div class="obra">
       <p class="mono soft">{t('aula.previewLabel')}</p>
       <p class="obra__p">{t('aula.preview')}</p>
-      <a class="mono obra__cta" href={panelPath(lang)}>{t('aula.previewCta')}</a>
+      <a class="mono obra__cta" href={escritorioPath(lang)}>{t('aula.previewCta')}</a>
     </div>
   </div>
 </section>

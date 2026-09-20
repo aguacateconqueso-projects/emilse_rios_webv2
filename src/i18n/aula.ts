@@ -51,8 +51,8 @@ export const aulaUi = {
 
     /* --- Estado de un curso ---------------------------------------------- */
     'course.progress': 'de progreso',
-    'course.lessons': 'lecciones',
-    'course.lesson': 'lección',
+    'course.lessons': 'clases',
+    'course.lesson': 'clase',
     'course.done': 'Terminado',
     'course.notStarted': 'Sin empezar',
     'course.enter': 'Entrar al curso',
@@ -64,7 +64,6 @@ export const aulaUi = {
       'Emi está pasando los videos a su nuevo hogar. Cuando terminen de subirse, aparecen acá solas.',
 
     /* --- Reproductor ------------------------------------------------------ */
-    'player.module': 'Módulo',
     'player.contents': 'Contenido del curso',
     'player.about': 'Sobre esta clase',
     'player.resources': 'Material de la clase',
@@ -143,8 +142,8 @@ export const aulaUi = {
 
     /* --- Estado de un curso ---------------------------------------------- */
     'course.progress': 'complete',
-    'course.lessons': 'lessons',
-    'course.lesson': 'lesson',
+    'course.lessons': 'classes',
+    'course.lesson': 'class',
     'course.done': 'Finished',
     'course.notStarted': 'Not started',
     'course.enter': 'Enter the course',
@@ -156,7 +155,6 @@ export const aulaUi = {
       'Emi is moving the videos to their new home. Once they finish uploading, they show up here on their own.',
 
     /* --- Reproductor ------------------------------------------------------ */
-    'player.module': 'Module',
     'player.contents': 'Course contents',
     'player.about': 'About this class',
     'player.resources': 'Class material',
@@ -221,12 +219,22 @@ export function useAula(lang: Lang) {
  */
 const raiz: Record<Lang, string> = { es: '/aulavirtual', en: '/en/classroom' };
 const segmentoCurso: Record<Lang, string> = { es: 'curso', en: 'course' };
+const segmentoEscritorio: Record<Lang, string> = { es: 'escritorio', en: 'desk' };
 
 /** La puerta: la única página del aula que se ve sin haber pagado. */
 export const puertaPath = (lang: Lang): string => `${raiz[lang]}/`;
 
-/** El escritorio: la primera pantalla después de iniciar sesión. */
-export const panelPath = (lang: Lang): string => `${raiz[lang]}/panel/`;
+/**
+ * El escritorio: la primera pantalla después de iniciar sesión.
+ *
+ * ⚠️ **No se llama «panel», y es a propósito.** En la academia `/panel/` es la
+ * consola de Emi, y Emi va a usar las dos cosas el mismo día. Que la pantalla
+ * de la alumna se llamara igual que la de ella era una confusión esperando a
+ * pasar, así que la palabra «panel» queda reservada para la consola y esta
+ * pantalla se llama por lo que el menú ya decía que era: el escritorio.
+ */
+export const escritorioPath = (lang: Lang): string =>
+  `${raiz[lang]}/${segmentoEscritorio[lang]}/`;
 
 /** El reproductor de un curso. */
 export const cursoPath = (slug: string, lang: Lang): string =>
