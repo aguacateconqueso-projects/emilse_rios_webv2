@@ -5,7 +5,7 @@
  */
 import AulaLayout from '../../../layouts/Aula.astro';
 import Escritorio from '../../../components/aula/Escritorio.astro';
-import { useAula, panelPath } from '../../../i18n/aula';
+import { useAula, escritorioPath } from '../../../i18n/aula';
 
 const lang = 'en' as const;
 const a = useAula(lang);
@@ -14,9 +14,9 @@ const a = useAula(lang);
 <AulaLayout
   lang={lang}
   title={a('app.desk')}
-  seccion="panel"
-  pathEs={panelPath('es')}
-  pathEn={panelPath('en')}
+  seccion="escritorio"
+  pathEs={escritorioPath('es')}
+  pathEn={escritorioPath('en')}
 >
   <Escritorio lang={lang} />
 </AulaLayout>

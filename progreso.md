@@ -4,10 +4,11 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 19 de septiembre de 2026 · **Edu contestó** —el
+**Última actualización:** 20 de septiembre de 2026 · **Edu contestó** —el
 dominio está en Namecheap, no en Hostinger—, llegó **la forma real del primer
-curso** y con ella **el vocabulario corregido**, y se decidió **el master panel
-de Emi**
+curso** y con ella **el vocabulario corregido**, se decidió **el master panel de
+Emi** —quién entra y cómo se va y se vuelve— y **la palabra «panel» quedó
+reservada** para su consola
 
 ---
 
@@ -27,9 +28,10 @@ Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/` · `/productos/` ·
 `/en/products/estudiemos-juntos/` · `/aulavirtual/` · `/en/classroom/`
 
 Y el aula por dentro, que es **maqueta navegable** y no pide sesión todavía:
-`/aulavirtual/panel/` · `/aulavirtual/curso/<slug>/` · `/en/classroom/panel/` ·
-`/en/classroom/course/<slug>/`. Van con `noindex`, y se llega a ellas desde la
-propia puerta.
+`/aulavirtual/escritorio/` · `/aulavirtual/curso/<slug>/` ·
+`/en/classroom/desk/` · `/en/classroom/course/<slug>/`. Van con `noindex`, y se
+llega a ellas desde la propia puerta. **Las direcciones viejas —`…/panel/`—
+redirigen**: esa palabra quedó reservada para la consola de Emi.
 
 Las dos direcciones viejas de la carta de la membresía
 —`/aulavirtual/estudiemos-juntos/` y su gemela inglesa— **siguen funcionando**:
@@ -494,9 +496,9 @@ fin, pero no hay sesión, ni base de datos, ni videos. Sirve para que Emi la vea
 la use y opine; no para estudiar.
 
 ```
-/aulavirtual/panel/              Mi escritorio
+/aulavirtual/escritorio/         Mi escritorio
 /aulavirtual/curso/<slug>/       El reproductor del curso
-/en/classroom/panel/             Sus gemelas inglesas
+/en/classroom/desk/              Sus gemelas inglesas
 /en/classroom/course/<slug>/
 ```
 
@@ -1001,18 +1003,23 @@ que entra al aula.
 Los dos existen hoy en el repo de la membresía —`src/pages/panel/index.astro` y
 `src/components/membresia/Aula.astro`— y se traen con el resto en la capa A.
 
-⚠️ **Cuidado con la palabra «panel», que en este repo significa otra cosa.** En
-la academia `/panel/` es la consola de Emi. En este repo, `/aulavirtual/panel/`
-es **el escritorio de la alumna** — la etiqueta del menú dice «Mi escritorio»,
-pero la ruta se llama `panel`. Si se deja así, Emi va a tener dos «paneles» que
-no son lo mismo, que es exactamente el tipo de confusión que este proyecto acaba
-de arreglar con lo de módulo/unidad.
+**La palabra «panel» ya está libre** (20 sep 2026). Hasta ese día
+`/aulavirtual/panel/` era **el escritorio de la alumna** —el menú decía «Mi
+escritorio» pero la ruta se llamaba `panel`—, mientras que en la academia
+`/panel/` es la consola de Emi. Dos pantallas distintas con el mismo nombre, y
+Emi las iba a usar las dos el mismo día: la misma clase de confusión que se
+acababa de arreglar con módulo/unidad.
 
-Lo sano, y ya está escrito así en el esquema del aula de más arriba: **`/panel/`
-se reserva para la consola de Emi**, y el escritorio de la alumna pasa a
-`/aulavirtual/escritorio/` (y `/en/classroom/desk/`). Es una ruta, su gemela
-inglesa, la función `panelPath()` de `src/i18n/aula.ts` y un par de
-redirecciones. Se hace antes de la capa A, no después.
+Así que el escritorio se mudó a `/aulavirtual/escritorio/` y
+`/en/classroom/desk/`, la función pasó a llamarse `escritorioPath()`, la prop
+del layout de `'panel'` a `'escritorio'`, y **`/panel/` queda reservado para la
+consola de Emi** — que es lo que el esquema del aula de más arriba ya decía.
+
+Las direcciones viejas redirigen, y esas dos líneas de `astro.config.mjs` **no
+eran opcionales** aunque fueran de una maqueta con `noindex`: sin ellas
+`/aulavirtual/panel` caía en el patrón `[producto]` que vive justo encima y
+acababa en `/productos/panel`, que no existe. Una ruta estática gana a una
+dinámica, así que puestas ahí mandan ellas.
 
 
 ⚠️ **El panel de la academia es un solo fichero de 1.059 líneas.** Con tres
@@ -1268,7 +1275,7 @@ se ha tocado nueve veces:
 
 - **11 sep 2026 · El aula se pinta con la ropa de la membresía, menos el
   cursor.** Segunda enmienda grande, y la hermana de la del 9 de septiembre:
-  `/aulavirtual/panel/` y `/aulavirtual/curso/<slug>/`, con sus gemelas
+  `/aulavirtual/escritorio/` y `/aulavirtual/curso/<slug>/`, con sus gemelas
   inglesas, **tampoco siguen la tabla de arriba**. Traen la crema `#faf7f1`, la
   tinta cálida `#17140f`, Hanken Grotesk y los botones de la carta con su
   relleno que nace bajo el cursor y sus notas musicales.
@@ -1432,8 +1439,8 @@ src/
                          en/products/index · en/products/[producto]
                          en/products/estudiemos-juntos
                          aulavirtual/index · en/classroom/index
-                         aulavirtual/panel · aulavirtual/curso/[curso]
-                         en/classroom/panel · en/classroom/course/[curso]
+                         aulavirtual/escritorio · aulavirtual/curso/[curso]
+                         en/classroom/desk · en/classroom/course/[curso]
   styles/tokens.css      Los tokens del sistema
   styles/base.css        Reset y primitivas compartidas
   styles/aula.css        El sistema del aula: la crema de la membresía. Todo
@@ -1647,7 +1654,7 @@ sistema y fuera del de aquí. Es la misma frontera que abre la enmienda del
 Lo que sí hay que mirar en el aula, y tiene que salir en cero:
 
 ```bash
-npm run audit -- http://localhost:4321/aulavirtual/panel/
+npm run audit -- http://localhost:4321/aulavirtual/escritorio/
 npm run audit -- http://localhost:4321/aulavirtual/curso/curso-01/
 ```
 
@@ -1714,6 +1721,12 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
   confirmó Emi. Es lo coherente con «los cursos se abren enteros al comprar, con
   acceso de por vida», y **cambiar esto después de vender sale caro**: habría
   que partir el producto y reconciliar quién compró qué.
+
+- **20 sep 2026 · «Panel» es la consola de Emi y nada más.** El escritorio de
+  la alumna, que hasta ese día vivía en `/aulavirtual/panel/`, se mudó a
+  `/aulavirtual/escritorio/` y `/en/classroom/desk/`. Las direcciones viejas
+  redirigen. Emi va a usar las dos pantallas el mismo día y no pueden llamarse
+  igual.
 
 - **20 sep 2026 · Al panel entran dos personas**, `emilserios.bass@gmail.com` y
   `adrianmendozam@gmail.com`, y nadie más. El mecanismo ya existe —
@@ -2276,13 +2289,10 @@ enseñárselo.
       cual, partido en un componente por pestaña. Al terminarlo, **la membresía
       ya vive en `emilserios.com`**.
 
-- [ ] **Liberar la palabra «panel» antes de la capa A.** Hoy
-      `/aulavirtual/panel/` es el **escritorio de la alumna** —el menú lo llama
-      «Mi escritorio», pero la ruta se llama `panel`— y en la academia `/panel/`
-      es **la consola de Emi**. Dos cosas distintas con el mismo nombre, y Emi
-      las va a usar las dos. El escritorio pasa a `/aulavirtual/escritorio/` y
-      `/en/classroom/desk/`; `/panel/` queda reservado. Es una ruta, su gemela
-      inglesa, `panelPath()` en `src/i18n/aula.ts` y dos redirecciones.
+- [x] **Liberar la palabra «panel».** Hecho el 20 sep 2026, antes de la capa A:
+      el escritorio de la alumna vive en `/aulavirtual/escritorio/` y
+      `/en/classroom/desk/`, las direcciones viejas redirigen, y `/panel/` queda
+      reservado para la consola de Emi.
 
 - [ ] **Poner los dos admins en el Supabase de la academia.** Emi y Adrián
       tienen que entrar una vez cada uno por la pantalla de acceso —el perfil se

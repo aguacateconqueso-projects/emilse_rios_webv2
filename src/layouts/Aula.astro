@@ -27,7 +27,7 @@
  *     relleno de los botones y las notas musicales
  */
 import { type Lang, routePath } from '../i18n/ui';
-import { useAula, panelPath } from '../i18n/aula';
+import { useAula, escritorioPath } from '../i18n/aula';
 import { ACADEMIA } from '../data/aula';
 import { ALUMNA_DEMO } from '../data/cursos';
 import '../styles/aula.css';
@@ -37,7 +37,7 @@ interface Props {
   /** Título del documento, sin el sufijo del aula. */
   title: string;
   /** Marca la opción activa de la barra. */
-  seccion?: 'panel' | 'curso';
+  seccion?: 'escritorio' | 'curso';
   /** La dirección de ESTA pantalla en cada idioma, para el conmutador. */
   pathEs: string;
   pathEn: string;
@@ -50,7 +50,7 @@ interface Props {
 const {
   lang,
   title,
-  seccion = 'panel',
+  seccion = 'escritorio',
   pathEs,
   pathEn,
   migaja,
@@ -281,7 +281,7 @@ const salirHref = routePath('home', lang);
 
     <header class="bar">
       <div class="bar__in">
-        <a class="bar__logo" href={panelPath(lang)} aria-label={a('app.backDesk')}>
+        <a class="bar__logo" href={escritorioPath(lang)} aria-label={a('app.backDesk')}>
           <img src="/logo.svg" alt="Emilse Ríos" width="1631" height="487" />
         </a>
 
@@ -293,8 +293,8 @@ const salirHref = routePath('home', lang);
         <nav class="bar__nav" aria-label={a('app.menu')}>
           <a
             class="bar__link"
-            href={panelPath(lang)}
-            aria-current={seccion === 'panel' ? 'page' : undefined}>{a('app.desk')}</a
+            href={escritorioPath(lang)}
+            aria-current={seccion === 'escritorio' ? 'page' : undefined}>{a('app.desk')}</a
           >
           <a class="bar__link" href={membresiaHref} rel={fuera ? 'noopener' : undefined}
             >{a('app.membership')}{fuera && <span class="bar__out" aria-hidden="true">↗</span>}</a
@@ -324,7 +324,7 @@ const salirHref = routePath('home', lang);
             <span class="bar__burger" aria-hidden="true"></span>
           </summary>
           <div class="bar__drawer">
-            <a href={panelPath(lang)}>{a('app.desk')}</a>
+            <a href={escritorioPath(lang)}>{a('app.desk')}</a>
             <a href={membresiaHref} rel={fuera ? 'noopener' : undefined}>{a('app.membership')}</a>
             <a href={routePath('products', lang)}>{a('app.store')}</a>
             <a href={otroHref} hreflang={otro} lang={otro}>{otro === 'en' ? 'English' : 'Español'}</a>

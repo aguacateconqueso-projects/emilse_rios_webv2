@@ -42,7 +42,7 @@
  * guardado del avance sin un solo video subido. Ver `src/data/cursos.ts`.
  */
 import type { Lang } from '../../i18n/ui';
-import { useAula, panelPath } from '../../i18n/aula';
+import { useAula, escritorioPath } from '../../i18n/aula';
 import { buscarProducto } from '../../data/aula';
 import { bunnySrc, buscarCurso, clasesDe, reloj } from '../../data/cursos';
 import Boton from './Boton.astro';
@@ -122,7 +122,7 @@ const primera = clases[0];
       <p class="eyebrow">{nombre}</p>
       <h1 class="vacio__h">{a('course.empty')}</h1>
       <p class="vacio__lead">{a('course.emptyLead')}</p>
-      <Boton href={panelPath(lang)} etiqueta={a('app.backDesk')} />
+      <Boton href={escritorioPath(lang)} etiqueta={a('app.backDesk')} />
     </section>
   ) : (
     <>
