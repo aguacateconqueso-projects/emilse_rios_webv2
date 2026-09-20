@@ -930,6 +930,33 @@ cada arreglo vuelve a pasar por nosotros — que es justo lo que este panel exis
 para evitar. Es la misma regla que ya manda en el repo: *los textos no viven en
 los componentes*.
 
+#### Quién entra
+
+**Dos personas, y nadie más** (20 sep 2026):
+
+| | |
+|---|---|
+| `emilserios.bass@gmail.com` | Emi |
+| `adrianmendozam@gmail.com` | Adrián, de apoyo |
+
+**El mecanismo ya existe y es el correcto**, así que no hay que inventar nada:
+`supabase/set_admin.sql`, en el repo de la membresía, lleva esos dos correos
+escritos y hace tres cosas cada vez que se ejecuta — comprueba que los dos
+tengan perfil y **aborta sin tocar nada si falta alguno** (un typo no deja a
+nadie fuera), pone `role = 'admin'` a los de la lista, y **baja a `member` a
+cualquier otro admin** que se haya colado. Sumar o quitar un admin es editar esa
+lista y volver a ejecutarlo.
+
+⚠️ **La comprobación no se hace nunca comparando correos en el navegador.** Quien
+decide es `role = 'admin'` en `profiles`, y quien lo hace cumplir es la función
+`is_admin()` dentro de las políticas RLS — o sea, la base de datos. El gate del
+panel lee el rol para *dibujar* la pantalla, pero aunque alguien se saltara ese
+gate no vería un solo dato: las políticas rechazan la consulta. Una lista de
+correos en el cliente es una cortina, no una puerta.
+
+El perfil se crea solo la primera vez que cada uno entra por la pantalla de
+acceso. O sea: **primero entran los dos una vez, después se ejecuta el script.**
+
 #### Las pestañas
 
 ```
@@ -954,6 +981,39 @@ resueltas: el formulario de contenido es **de dos columnas, ES y EN lado a
 lado**, y el normalizador de video acepta la URL, el enlace de gestión, el ID
 pelado o el `<iframe>` entero — porque Emi pega algo distinto cada vez. Se
 reutiliza sin tocarlo para las clases de los cursos.
+
+#### La ida y la vuelta, tal como Emi ya la usa
+
+En la academia hay un enlace arriba a la derecha que lleva del panel al aula y
+del aula al panel, y **eso se conserva igual**: es parte de cómo Emi trabaja y
+no hay ninguna razón para cambiárselo.
+
+| Dónde está | Qué dice | Cuándo se ve |
+|---|---|---|
+| Barra del panel | `Ver el aula →` | Siempre — al panel solo entra un admin |
+| Barra del aula | `← Volver al panel` · `← Back to panel` | **Solo si `role === 'admin'`** |
+
+El de vuelta nace `hidden` en el HTML y **lo revela el script después de leer el
+perfil**. Tiene que seguir siendo así y no al revés: si se dibujara visible y se
+escondiera después, una alumna vería parpadear un enlace al panel de Emi cada vez
+que entra al aula.
+
+Los dos existen hoy en el repo de la membresía —`src/pages/panel/index.astro` y
+`src/components/membresia/Aula.astro`— y se traen con el resto en la capa A.
+
+⚠️ **Cuidado con la palabra «panel», que en este repo significa otra cosa.** En
+la academia `/panel/` es la consola de Emi. En este repo, `/aulavirtual/panel/`
+es **el escritorio de la alumna** — la etiqueta del menú dice «Mi escritorio»,
+pero la ruta se llama `panel`. Si se deja así, Emi va a tener dos «paneles» que
+no son lo mismo, que es exactamente el tipo de confusión que este proyecto acaba
+de arreglar con lo de módulo/unidad.
+
+Lo sano, y ya está escrito así en el esquema del aula de más arriba: **`/panel/`
+se reserva para la consola de Emi**, y el escritorio de la alumna pasa a
+`/aulavirtual/escritorio/` (y `/en/classroom/desk/`). Es una ruta, su gemela
+inglesa, la función `panelPath()` de `src/i18n/aula.ts` y un par de
+redirecciones. Se hace antes de la capa A, no después.
+
 
 ⚠️ **El panel de la academia es un solo fichero de 1.059 líneas.** Con tres
 pestañas ya está en el límite; con ocho no se sostiene. Al mudarlo se parte en
@@ -1655,6 +1715,19 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
   acceso de por vida», y **cambiar esto después de vender sale caro**: habría
   que partir el producto y reconciliar quién compró qué.
 
+- **20 sep 2026 · Al panel entran dos personas**, `emilserios.bass@gmail.com` y
+  `adrianmendozam@gmail.com`, y nadie más. El mecanismo ya existe —
+  `supabase/set_admin.sql` lleva esos dos correos y baja a miembro a cualquier
+  otro admin— y **nunca se comprueba comparando correos en el navegador**:
+  manda `role = 'admin'` con la RLS detrás. Ver **El panel de Emi → Quién
+  entra**.
+
+- **20 sep 2026 · El enlace de ida y vuelta entre el panel y el aula se
+  conserva tal cual.** «Ver el aula →» arriba a la derecha en el panel, «←
+  Volver al panel» en el aula, este último **oculto hasta que el script
+  confirma que es admin**. Es como Emi trabaja hoy y no hay razón para
+  cambiárselo.
+
 - **19 sep 2026 · El vocabulario es el de Emi, y la palabra del grupo la escribe
   ella.** `Curso → Unidad → Clase` en el código; en pantalla, el título que Emi
   le ponga a cada unidad («Nivel 1 — Fundamentos»), sin ninguna palabra fija
@@ -2202,6 +2275,20 @@ enseñárselo.
       reescrita encima —una función, no siete migraciones— y el panel mudado tal
       cual, partido en un componente por pestaña. Al terminarlo, **la membresía
       ya vive en `emilserios.com`**.
+
+- [ ] **Liberar la palabra «panel» antes de la capa A.** Hoy
+      `/aulavirtual/panel/` es el **escritorio de la alumna** —el menú lo llama
+      «Mi escritorio», pero la ruta se llama `panel`— y en la academia `/panel/`
+      es **la consola de Emi**. Dos cosas distintas con el mismo nombre, y Emi
+      las va a usar las dos. El escritorio pasa a `/aulavirtual/escritorio/` y
+      `/en/classroom/desk/`; `/panel/` queda reservado. Es una ruta, su gemela
+      inglesa, `panelPath()` en `src/i18n/aula.ts` y dos redirecciones.
+
+- [ ] **Poner los dos admins en el Supabase de la academia.** Emi y Adrián
+      tienen que entrar una vez cada uno por la pantalla de acceso —el perfil se
+      crea en ese momento— y después se ejecuta `supabase/set_admin.sql`, que
+      aborta sin tocar nada si falta alguno de los dos perfiles. Ver **El panel
+      de Emi → Quién entra**.
 
 - [ ] **El adaptador de Vercel.** Hoy este repo es 100 % estático: no tiene
       `@astrojs/vercel` ni una sola ruta de API, así que **no puede tener panel
