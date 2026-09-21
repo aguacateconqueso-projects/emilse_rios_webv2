@@ -1,0 +1,95 @@
+---
+/**
+ * El marco de las pantallas de la puerta: entrar y poner la contraseña.
+ *
+ * Lleva la ropa del aula —la crema, Hanken Grotesk, los botones con relleno—
+ * porque quien está acá viene entrando al aula, pero **no lleva su barra**: esa
+ * barra tiene enlaces al escritorio, a la membresía y a la tienda, y todavía no
+ * se sabe quién es esta persona. Una barra que ofrece «Mi escritorio» a alguien
+ * que no ha entrado promete algo que al pulsarlo rebota.
+ *
+ * Va con `noindex`: un formulario de acceso no tiene nada que hacer en un
+ * buscador.
+ */
+import { type Lang, routePath } from '../i18n/ui';
+import { useAula, puertaPath } from '../i18n/aula';
+import '../styles/aula.css';
+
+interface Props {
+  lang: Lang;
+  title: string;
+  /** La dirección de ESTA pantalla en cada idioma, para el conmutador. */
+  pathEs: string;
+  pathEn: string;
+}
+
+const { lang, title, pathEs, pathEn } = Astro.props;
+const a = useAula(lang);
+const otro: Lang = lang === 'es' ? 'en' : 'es';
+const otroHref = otro === 'es' ? pathEs : pathEn;
+---
+
+<!doctype html>
+<html lang={lang} class="aula">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title} · {a('app.title')}</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {/* La base de la academia: de acá salen --font-body y --font-display, que
+        `aula.css` da por hechas. Sin esta línea el aula sale con la tipografía
+        del sistema. Ver el pendiente de servirlas desde casa. */}
+    <link rel="stylesheet" href="/colors_and_type.css" />
+    <link rel="alternate" hreflang="es" href={pathEs} />
+    <link rel="alternate" hreflang="en" href={pathEn} />
+  </head>
+
+  <body class="aula__body puerta__body">
+    <main class="puerta" id="main">
+      <div class="wrap wrap--narrow">
+        <a class="puerta__logo" href={routePath('home', lang)} aria-label="Emilse Ríos">
+          <img src="/logo.svg" alt="Emilse Ríos" width="1631" height="487" />
+        </a>
+
+        <slot />
+
+        <p class="puerta__pie">
+          <a href={puertaPath(lang)}>{a('app.title')}</a>
+          <span aria-hidden="true">·</span>
+          <a href={otroHref} hreflang={otro} lang={otro}>{otro === 'en' ? 'English' : 'Español'}</a>
+        </p>
+      </div>
+    </main>
+  </body>
+</html>
+
+<style>
+  .puerta {
+    min-height: 100svh;
+    display: grid;
+    place-items: center;
+    padding: clamp(32px, 7vh, 72px) 0;
+  }
+
+  .puerta__logo {
+    display: block;
+    width: 148px;
+    margin: 0 auto clamp(28px, 5vh, 44px);
+  }
+
+  .puerta__logo img {
+    width: 100%;
+    height: auto;
+  }
+
+  .puerta__pie {
+    margin-top: clamp(28px, 5vh, 44px);
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--soft);
+    display: flex;
+    gap: 0.6em;
+    justify-content: center;
+  }
+</style>

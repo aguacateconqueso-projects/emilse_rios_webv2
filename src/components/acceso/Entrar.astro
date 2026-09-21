@@ -1,0 +1,293 @@
+---
+/**
+ * La pantalla de acceso al aula.
+ *
+ * Dos caminos en la misma página, y a propósito:
+ *
+ *   1. **Correo y contraseña**, para quien ya la tiene.
+ *   2. **«Primera vez, o se te olvidó la clave»**, que manda el correo con el
+ *      enlace de un solo uso. Es UN camino, no dos, porque en la práctica es la
+ *      misma situación: la cuenta se crea al pagar y nace sin contraseña, así
+ *      que «nunca la puse» y «no me acuerdo» acaban en el mismo sitio. La
+ *      academia aprendió esto y acá no se desaprende.
+ *
+ * ⚠️ **La respuesta al pedir el enlace no dice si el correo existe.** Siempre
+ * contesta lo mismo. Si dijera «esa cuenta no existe», cualquiera podría
+ * averiguar quién es miembro probando correos.
+ */
+import type { Lang } from '../../i18n/ui';
+import { routePath } from '../../i18n/ui';
+import { useAula, clavePath, escritorioPath } from '../../i18n/aula';
+import { isSupabaseConfigured } from '../../lib/supabase';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const a = useAula(lang);
+---
+
+<section
+  class="entrar"
+  data-entrar
+  data-destino={escritorioPath(lang)}
+  data-redirect-clave={clavePath(lang)}
+  data-t-bad={a('signin.bad')}
+  data-t-noemail={a('signin.noEmail')}
+>
+  <p class="eyebrow">{a('signin.eyebrow')}</p>
+  <h1 class="entrar__h">{a('signin.title')}</h1>
+  <p class="soft entrar__lead">{a('signin.lead')}</p>
+
+  {
+    !isSupabaseConfigured && (
+      <p class="aviso" role="status">
+        <b>{a('off.badge')}</b> — {a('off.lead')}
+      </p>
+    )
+  }
+
+  <form class="campos" data-form-entrar novalidate>
+    <label class="campo">
+      <span class="campo__t">{a('signin.email')}</span>
+      <input type="email" name="email" autocomplete="email" required data-email />
+    </label>
+
+    <label class="campo">
+      <span class="campo__t">{a('signin.pass')}</span>
+      <input type="password" name="clave" autocomplete="current-password" required data-clave />
+    </label>
+
+    <label class="casilla">
+      <input type="checkbox" checked data-recordar />
+      <span>
+        {a('signin.remember')}
+        <span class="campo__ayuda soft">{a('signin.rememberHelp')}</span>
+      </span>
+    </label>
+
+    <p class="error" data-error hidden></p>
+
+    <button class="btn btn--solid" type="submit" data-enviar>
+      <span class="btn__fill" aria-hidden="true"></span>
+      <span class="btn__label">{a('signin.go')}</span>
+    </button>
+  </form>
+
+  <hr class="hr" />
+
+  <details class="olvido">
+    <summary>{a('signin.first')}</summary>
+    <p class="soft olvido__lead">{a('signin.firstLead')}</p>
+    <form class="campos" data-form-clave novalidate>
+      <label class="campo">
+        <span class="campo__t">{a('signin.email')}</span>
+        <input type="email" name="email" autocomplete="email" required data-email-clave />
+      </label>
+      <p class="error" data-error-clave hidden></p>
+      <p class="ok" data-ok-clave hidden>{a('signin.sent')}</p>
+      <button class="btn" type="submit" data-enviar-clave>
+        <span class="btn__fill" aria-hidden="true"></span>
+        <span class="btn__label">{a('signin.send')}</span>
+      </button>
+    </form>
+  </details>
+
+  <p class="entrar__tienda">
+    <a href={routePath('products', lang)}>{a('signin.store')}</a>
+  </p>
+</section>
+
+<script>
+  /**
+   * Va SIN `define:vars` a propósito: ese modificador vuelve el script inline,
+   * y un script inline no puede importar módulos. Lo que necesita saber viaja
+   * en los `data-` del contenedor, que es lo que Astro sí sabe imprimir.
+   */
+  import { supabase, isSupabaseConfigured, recordarSesion } from '../../lib/supabase';
+
+  const caja = document.querySelector<HTMLElement>('[data-entrar]');
+
+  // Sin backend la pantalla es una maqueta y lo dice arriba. Un formulario
+  // inerte es más honesto que uno que finge.
+  if (caja && isSupabaseConfigured) {
+    const destino = caja.dataset.destino;
+    const redirectClave = caja.dataset.redirectClave;
+    const T = { bad: caja.dataset.tBad, noEmail: caja.dataset.tNoemail };
+    const $ = (sel: string) => caja.querySelector(sel) as HTMLElement | null;
+
+    /* Si ya hay sesión, acá no hay nada que hacer: adentro. */
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session && destino) location.replace(destino);
+    });
+
+    /* --- Entrar --------------------------------------------------------- */
+    $('[data-form-entrar]')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = ($('[data-email]') as HTMLInputElement).value.trim();
+      const clave = ($('[data-clave]') as HTMLInputElement).value;
+      const err = $('[data-error]')!;
+      const btn = $('[data-enviar]') as HTMLButtonElement;
+
+      err.hidden = true;
+      if (!email || !clave) {
+        err.textContent = T.noEmail!;
+        err.hidden = false;
+        return;
+      }
+
+      /* La casilla decide DÓNDE se guarda el token, así que se escribe antes
+         de iniciar sesión: después ya habría nacido en el almacén que no era. */
+      recordarSesion(($('[data-recordar]') as HTMLInputElement).checked);
+
+      btn.disabled = true;
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.toLowerCase(),
+        password: clave,
+      });
+      btn.disabled = false;
+
+      if (error) {
+        /* El mensaje es el mismo diga lo que diga Supabase: si distinguiera
+           «no existe» de «clave incorrecta», cualquiera podría averiguar quién
+           es miembro probando correos. */
+        err.textContent = T.bad!;
+        err.hidden = false;
+        return;
+      }
+      if (destino) location.assign(destino);
+    });
+
+    /* --- Pedir el enlace de la contraseña -------------------------------- */
+    $('[data-form-clave]')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = ($('[data-email-clave]') as HTMLInputElement).value.trim();
+      const err = $('[data-error-clave]')!;
+      const ok = $('[data-ok-clave]')!;
+      const btn = $('[data-enviar-clave]') as HTMLButtonElement;
+
+      err.hidden = true;
+      ok.hidden = true;
+      if (!email) {
+        err.textContent = T.noEmail!;
+        err.hidden = false;
+        return;
+      }
+
+      btn.disabled = true;
+      await supabase.auth.resetPasswordForEmail(email.toLowerCase(), {
+        redirectTo: location.origin + redirectClave,
+      });
+      btn.disabled = false;
+
+      /* Se contesta lo mismo pase lo que pase, y por eso el error ni se mira:
+         la respuesta no puede delatar si ese correo tiene cuenta. */
+      ok.hidden = false;
+    });
+  }
+</script>
+
+<style>
+  .entrar__h {
+    font-size: clamp(1.9rem, 4.4vw, 2.6rem);
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    margin: 0.4rem 0 0.5rem;
+  }
+
+  .entrar__lead {
+    margin: 0 0 clamp(24px, 4vh, 36px);
+  }
+
+  .aviso {
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    padding: 14px 16px;
+    font-size: 0.92rem;
+    margin: 0 0 clamp(24px, 4vh, 36px);
+  }
+
+  .campos {
+    display: grid;
+    gap: 18px;
+    justify-items: stretch;
+  }
+
+  .campo {
+    display: grid;
+    gap: 7px;
+  }
+
+  .campo__t {
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+
+  .campo__ayuda {
+    display: block;
+    font-size: 0.84rem;
+    font-weight: 400;
+    line-height: 1.45;
+    margin-top: 2px;
+  }
+
+  .campo input {
+    font: inherit;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    padding: 12px 14px;
+    width: 100%;
+    transition: border-color var(--fast) var(--ease);
+  }
+
+  .campo input:focus {
+    outline: none;
+    border-color: var(--ink);
+  }
+
+  .casilla {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    align-items: start;
+    font-size: 0.94rem;
+    cursor: pointer;
+  }
+
+  .casilla input {
+    margin-top: 0.28em;
+    accent-color: var(--ink);
+  }
+
+  .error,
+  .ok {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+
+  .error {
+    color: var(--accent-strong);
+  }
+
+  .campos .btn {
+    justify-self: start;
+  }
+
+  .olvido summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.96rem;
+  }
+
+  .olvido__lead {
+    margin: 12px 0 20px;
+    font-size: 0.94rem;
+  }
+
+  .entrar__tienda {
+    margin-top: clamp(28px, 5vh, 40px);
+    font-size: 0.94rem;
+  }
+</style>

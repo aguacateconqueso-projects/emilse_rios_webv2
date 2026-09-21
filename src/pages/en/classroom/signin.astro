@@ -1,0 +1,13 @@
+---
+/** The classroom sign-in screen, in English. */
+import Acceso from '../../../layouts/Acceso.astro';
+import Entrar from '../../../components/acceso/Entrar.astro';
+import { useAula, entrarPath } from '../../../i18n/aula';
+
+const lang = 'en' as const;
+const a = useAula(lang);
+---
+
+<Acceso lang={lang} title={a('signin.title')} pathEs={entrarPath('es')} pathEn={entrarPath('en')}>
+  <Entrar lang={lang} />
+</Acceso>

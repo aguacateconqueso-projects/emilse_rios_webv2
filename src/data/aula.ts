@@ -166,13 +166,18 @@ const NEWSLETTER = 'https://manage.kmail-lists.com/subscriptions/subscribe?a=TPx
 
 /**
  * La puerta del aula: el botón de la página `/aulavirtual/` y el de la cápsula
- * de la cabecera en la tienda. Lleva al inicio de sesión de la academia, que es
- * donde el aula funciona hoy. El día que la sesión viva acá, esto pasa a ser
- * una ruta interna y nada más cambia.
+ * de la cabecera en la tienda.
+ *
+ * **Desde la capa A (20 sep 2026) es una ruta de esta casa**, no un salto a la
+ * academia. La sesión vive acá, contra el mismo Supabase de siempre. Se deja
+ * escrito acá y no se llama a `entrarPath()` desde cada sitio porque este
+ * fichero es el que ya reunía las direcciones de la puerta, y porque la cápsula
+ * de la cabecera —que es del sitio público— no debería tener que importar nada
+ * del aula para pintar un enlace.
  */
 export const entrarHref: Record<Lang, string> = {
-  es: `${ACADEMIA}/entrar/`,
-  en: `${ACADEMIA}/entrar/en/`,
+  es: '/aulavirtual/entrar/',
+  en: '/en/classroom/signin/',
 };
 
 /**
