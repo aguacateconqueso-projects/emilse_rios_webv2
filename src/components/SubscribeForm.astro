@@ -13,10 +13,17 @@ import { type Lang, useTranslations } from '../i18n/ui';
 interface Props {
   lang: Lang;
   id: string;
-  /** Sin el hueco del numeral al margen: la Home ya no los tiene, *Sobre mí* sí. */
+  /** Sin el hueco del numeral al margen. Lo usan la Home y *Sobre mí*, que
+   *  desde el 21 sep 2026 no tienen numerales; la tienda y el aula sí. */
   flush?: boolean;
+  /**
+   * Rótulo encima de la regla, para nombrar el newsletter donde la página no
+   * lo ha nombrado. En la Home sobra —el título ya lo dice— y en *Sobre mí*
+   * hace falta: ahí el campo llega después de mil palabras sobre Emi.
+   */
+  label?: string;
 }
-const { lang, id, flush = false } = Astro.props;
+const { lang, id, flush = false, label } = Astro.props;
 const t = useTranslations(lang);
 
 const endpoint = import.meta.env.PUBLIC_NEWSLETTER_ENDPOINT ?? '';
@@ -27,6 +34,7 @@ const statusId = `${id}-status`;
 <div class:list={['subscribe', 'row', flush && 'row--flush']} id={id}>
   {!flush && <div class="row__num" aria-hidden="true" />}
   <div class="row__body">
+    {label && <p class="mono soft subscribe__name">{label}</p>}
     <form
       class="subscribe__form"
       data-subscribe
@@ -60,6 +68,10 @@ const statusId = `${id}-status`;
 <style>
   .subscribe {
     padding-top: var(--space-4);
+  }
+
+  .subscribe__name {
+    margin-bottom: var(--space-2);
   }
 
   .subscribe__form {

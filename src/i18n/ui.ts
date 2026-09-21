@@ -33,16 +33,14 @@ export const ui = {
     'form.done': 'Listo. Revisa tu bandeja de entrada.',
     'form.error': 'Ese correo no parece válido. ¿Lo revisas?',
     'form.failed':
-      'No pudimos completar la suscripción. Escríbeme a hola@contrabajoenlaciudad.com y te apunto yo.',
+      'No pudimos completar la suscripción. Escríbeme a info@emilserios.com y te apunto yo.',
 
     'cards.open': 'Leer el correo',
     'cards.close': 'Cerrar',
 
-    'media.play': 'Reproducir',
-    'media.playSoon': 'El video llega pronto',
     'media.portrait': 'Retrato de Emi con el contrabajo — blanco y negro',
-    'media.portraitAlt': 'Emilse Ríos con su contrabajo',
-    'media.still': 'Fotograma del video',
+    'media.portraitAlt':
+      'Emilse Ríos sonriendo en una calle, con la voluta de su contrabajo apoyada en el hombro',
     'about.description':
       'Le dijeron que el contrabajo no era para ella. Esta es la historia de por qué se equivocaron: veinte años tocando y formando contrabajistas, de El Sistema a Madrid.',
 
@@ -76,7 +74,7 @@ export const ui = {
     'aula.preview':
       'El aula nueva —la que vivirá acá dentro— ya se puede recorrer. Es una maqueta con contenido de muestra: sirve para verla y opinar, todavía no para estudiar.',
     'aula.previewCta': 'Recorrer la maqueta del aula',
-    'footer.email': 'hola@contrabajoenlaciudad.com',
+    'footer.email': 'info@emilserios.com',
     'footer.instagram': 'Instagram',
     'footer.youtube': 'YouTube',
   },
@@ -105,16 +103,14 @@ export const ui = {
     'form.done': 'Done. Check your inbox.',
     'form.error': "That email doesn't look valid. Mind checking it?",
     'form.failed':
-      "We couldn't complete the subscription. Write to hola@contrabajoenlaciudad.com and I'll add you myself.",
+      "We couldn't complete the subscription. Write to info@emilserios.com and I'll add you myself.",
 
     'cards.open': 'Read the email',
     'cards.close': 'Close',
 
-    'media.play': 'Play',
-    'media.playSoon': 'The video is coming soon',
     'media.portrait': 'Portrait of Emi with the double bass — black and white',
-    'media.portraitAlt': 'Emilse Ríos with her double bass',
-    'media.still': 'Video still',
+    'media.portraitAlt':
+      'Emilse Ríos smiling on a street, the scroll of her double bass resting on her shoulder',
     'about.description':
       'They told her the double bass wasn\'t for her. This is the story of why they were wrong: twenty years playing and training bassists, from El Sistema to Madrid.',
 
@@ -148,7 +144,7 @@ export const ui = {
     'aula.preview':
       "The new classroom — the one that will live in this house — can already be walked through. It's a mock-up with sample content: good for looking and giving notes, not yet for studying.",
     'aula.previewCta': 'Walk through the classroom mock-up',
-    'footer.email': 'hola@contrabajoenlaciudad.com',
+    'footer.email': 'info@emilserios.com',
     'footer.instagram': 'Instagram',
     'footer.youtube': 'YouTube',
   },

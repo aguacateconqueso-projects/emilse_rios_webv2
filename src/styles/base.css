@@ -161,9 +161,10 @@ a:hover {
 /* Una fila sin numeral al margen. El hueco de 48 px existe para colgar de él
    un `01`, un `02`; sin nada dentro lo único que hace es empujar la columna
    40 px a la derecha del centro de la página, y eso solo se sostiene mientras
-   haya numerales que lo expliquen. La Home se quedó sin ellos el 21 sep 2026,
-   así que ahí la columna vuelve al centro y comparte eje con la portada y con
-   las frases-ancla. *Sobre mí* sigue con numerales y sigue con hueco. */
+   haya numerales que lo expliquen. La Home se quedó sin ellos el 21 sep 2026 y
+   *Sobre mí* el mismo día, así que en las dos la columna vuelve al centro y
+   comparte eje con la portada y con las frases-ancla. La tienda y el aula
+   siguen con numerales y siguen con hueco. */
 .row--flush {
   justify-content: center;
 }
@@ -247,6 +248,14 @@ a:hover {
 
 .anchor__num {
   margin-bottom: var(--space-4);
+}
+
+/* Una frase-ancla puede traer varias líneas —las tres lecciones de *Sobre mí*
+   son una lista, no un párrafo—. Cada una es su propio `<p>`, y los 8 px las
+   separan lo justo para que se lean como tres frases y no como una sola
+   partida en renglones. */
+.anchor__text + .anchor__text {
+  margin-top: var(--space-1);
 }
 
 .anchor__text {
