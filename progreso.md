@@ -4,9 +4,11 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 21 de septiembre de 2026 · **la Home lleva el copy
-nuevo de Emi** —más corta, sin archivo de correos, sin el cierre en negro y sin
-numerales de sección, con la entradilla al tamaño de los títulos—;
+**Última actualización:** 21 de septiembre de 2026 · **la Home y *Sobre mí*
+llevan el copy nuevo de Emi**. La Home, más corta, sin archivo de correos y sin
+el cierre en negro; *Sobre mí*, reescrita entera, con su retrato ya puesto y
+sin la ficha de trayectoria ni el hueco del video. Las dos, sin numerales de
+sección. El pie pasa a `info@emilserios.com`;
 la capa A está en pie y mergeada —adaptador de Vercel, sesión contra el
 Supabase de la academia, `/panel/` para Emi— y **Edu ofrece acceso de
 colaborador en Hostinger y la ruta Cloudflare**, pendiente de una llamada de
@@ -1439,21 +1441,21 @@ El sistema es de Emi y se puede cambiar. Lo que no se puede es cambiarlo sin
 dejar constancia, porque si no la tabla de arriba deja de ser fiable. Hasta hoy
 se ha tocado diez veces:
 
-- **21 sep 2026 · La Home se queda sin numerales, y con ellos se va el hueco
-  del margen.** Decisión de Emi: «no suma nada». Salen el `01`, el `02` y el
-  `03`; *Sobre mí*, la tienda y el aula los conservan, así que el patrón sigue
-  en el sistema y lo que cambia es quién lo usa.
+- **21 sep 2026 · Las dos páginas de lectura se quedan sin numerales, y con
+  ellos se va el hueco del margen.** Decisión de Emi: «no suma nada». Salieron
+  primero de la Home —el `01`, el `02` y el `03`— y el mismo día de *Sobre mí*,
+  que llevaba diez. **La tienda y el aula los conservan**, así que el patrón
+  sigue en el sistema y lo que cambia es quién lo usa.
 
   **La consecuencia no es cosmética.** El hueco de 48 px existía para colgar
   de él el numeral, y de paso empujaba la columna de lectura 40 px a la derecha
   del centro de la página — un descuadre a propósito, anotado en **Decisiones
   ya tomadas**, que se justificaba porque ahí vivía algo. Vaciado, no lo
   justifica nada: la portada va centrada en la página y la columna no, y con
-  el párrafo de apertura ya centrado el escalón se ve. Así que en la Home la
+  el párrafo de apertura ya centrado el escalón se ve. Así que en las dos la
   columna vuelve al centro. Es `.row--flush` en `base.css`, y el formulario lo
-  recibe por una prop (`flush`) porque el mismo componente se usa en *Sobre
-  mí*, que sí sigue con hueco. **En *Sobre mí* los 40 px siguen ahí y siguen
-  siendo correctos.**
+  recibe por una prop (`flush`) porque el mismo componente lo usan también la
+  tienda y el aula, **donde los 40 px siguen ahí y siguen siendo correctos**.
 
   Va con un segundo cambio de Emi el mismo día: **el párrafo de apertura deja
   de ser cuerpo y pasa al tamaño de los títulos de sección** (`--text-section`,
@@ -1611,7 +1613,9 @@ src/
   content/correos/       Un .md por correo y por idioma
   content.config.ts      Esquema del archivo del newsletter
   data/home.ts           Textos de la Home (es / en)
-  data/about.ts          Textos de Sobre mí (es / en)
+  data/about.ts          Textos de Sobre mí (es / en). Cinco tipos de bloque:
+                         entrada con foto, prosa, frase-ancla —que admite
+                         varias líneas—, formulario y testimonios
   data/aula.ts           El catálogo: los 7 productos y sus cartas (es / en)
                          — la FACHADA, lo que se vende
   data/cursos.ts         Unidades, clases y videos de Bunny — lo que se COMPRA.
@@ -1721,9 +1725,8 @@ ninguna página.** Si falta la `pagina`, el producto no se genera aunque esté e
 
 ### Poner una imagen donde hay un marco vacío
 
-Las dos llamadas a `MediaSlot` ya existen en `About.astro`. Solo hay que
-importar la imagen y añadirle `src` — el `placeholder` se queda, porque sigue
-siendo el texto de respaldo:
+Se importa la imagen y se le añade `src` — el `placeholder` se queda, porque
+sigue siendo el texto de respaldo si algún día falta el fichero:
 
 ```astro
 import retrato from '../assets/img/retrato.jpg';
@@ -1732,6 +1735,25 @@ import retrato from '../assets/img/retrato.jpg';
 ```
 
 `MediaSlot` la sirve optimizada, en densidad 2x y en blanco y negro.
+
+**Si la proporción de la foto no es la del marco**, el marco recorta con
+`object-fit: cover` y por defecto se queda con el centro. Cuando eso se lleva
+justo lo que importa, se le dice qué salvar con `position`, que es un
+`object-position` de toda la vida:
+
+```astro
+<MediaSlot src={retrato} … position="right center" />
+```
+
+Es lo que hace el retrato de *Sobre mí* (21 sep 2026): la foto es una
+horizontal de 3:2 metida en un marco casi cuadrado, y con el recorte centrado
+la voluta del contrabajo quedaba cortada. A la derecha, lo que se pierde es
+calle vacía.
+
+**En las páginas de lectura ya no queda ninguno.** El de *Sobre mí* tiene su
+foto desde el 21 sep 2026 y el del video se quitó con el copy nuevo. Los que
+siguen vacíos son los de la tienda: cinco fichas de curso esperando su foto,
+que es contenido de Emi — ver **Pendiente → Contenido que falta**.
 
 ### Cambiar la foto de la lámina
 
@@ -1913,6 +1935,34 @@ solo llegaba como dependencia transitiva de Astro, que es como no tenerlo.
 Están discutidas y resueltas. No hace falta volver sobre ellas salvo que Emi
 pida lo contrario. Las que tienen que ver con la plataforma —dominio, aula,
 cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
+
+- **21 sep 2026 · *Sobre mí* se reescribe entera, y la trayectoria deja de ser
+  una tabla.** Copy nuevo de Emi, en los dos idiomas. Lo que sale, por decisión
+  suya: **la ficha de trayectoria** —la tabla de «5 años / Docencia / 10+ años
+  / Argentina / 20+ años»—, porque el texto nuevo cuenta lo mismo en prosa y
+  tenerlo dos veces en la misma página es decirlo dos veces; y **el bloque del
+  video**, con su marco vertical. Entra **el retrato**, que ya llegó, y el
+  rótulo «Qué dicen mis alumnos» encima de los testimonios, que antes no tenían
+  ninguno.
+
+  Dos cosas nuevas en los componentes, las dos porque el copy las pidió:
+  `MediaSlot` acepta `position` para elegir qué salva el recorte, y el
+  formulario acepta un rótulo (`label`) encima de la regla. En *Sobre mí* dice
+  «Contrabajo en la Ciudad», porque ahí el campo llega después de mil palabras
+  sobre Emi y la página todavía no ha nombrado el newsletter. En la Home no
+  hace falta: el título ya lo dice.
+
+  **Las frases-ancla admiten varias líneas** desde este copy: las tres
+  lecciones de El Sistema son una lista, no un párrafo, y se leen como tres
+  frases.
+
+- **21 sep 2026 · Un solo buzón a la vista: `info@emilserios.com`.** Estaba en
+  el pie `hola@contrabajoenlaciudad.com`, y en el mensaje de error de la
+  suscripción la misma dirección. Las dos pasan a `info@emilserios.com`, que es
+  la que ya usaba la carta de la membresía. ⚠️ **Es la dirección que todavía
+  vive en el hosting de Edu** — ver **Pendiente → Bloquea el lanzamiento**. El
+  sitio ya la muestra, así que mudarla dejó de ser una tarea de traspaso y pasó
+  a ser una de correo que se pierde.
 
 - **21 sep 2026 · La Home no lleva numerales, y su primer párrafo es una
   entradilla.** Segunda pasada de Emi sobre la portada, el mismo día. Tres
@@ -2227,8 +2277,8 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
 
   **Ojo con los 40 px al medirlo, que ahora dependen de la página.** La columna
   de lectura se va 40 px a la derecha del centro cuando el numeral vive en el
-  margen izquierdo: pasa en *Sobre mí*, en la tienda y en el aula, y ahí es a
-  propósito, no un descuadre. **En la Home ya no pasa** — sin numerales no hay
+  margen izquierdo: pasa en la tienda y en el aula, y ahí es a propósito, no un
+  descuadre. **En la Home y en *Sobre mí* ya no pasa** — sin numerales no hay
   hueco, y la columna comparte eje con la portada. Ver la enmienda del 21 sep
   2026 en **El sistema de diseño**.
 - **La lámina va dentro de la rejilla de lectura, a lo ancho de la columna.**
@@ -2391,6 +2441,13 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
       membresía tenga que volver a iniciar sesión. Nada se toca hasta que llegue
       un correo de prueba al buzón nuevo.
 
+      ⚠️ **Subió de prioridad el 21 sep 2026.** Desde ese día la dirección está
+      **a la vista en el sitio**: en el pie de todas las páginas y en el mensaje
+      que aparece si falla la suscripción, que le pide a la persona que escriba
+      ahí. Antes era una tarea de traspaso; ahora, si ese buzón no está
+      llegando a manos de Emi, son correos de gente que quiso suscribirse y se
+      pierden. **Comprobar que recibe antes de que el sitio tenga tráfico.**
+
 - [ ] **Decidir qué pasa con `contrabajoenlaciudad.com`.** Quedó abierto el
       31 ago 2026. El dominio principal es `emilserios.com`, ya decidido; falta
       saber si el otro se redirige, si se queda como marca de la newsletter, o
@@ -2490,10 +2547,16 @@ enseñárselo.
 
 ### Contenido que falta (de Emi)
 
-- [ ] **Retrato con el contrabajo**, en blanco y negro, para *Sobre mí*. Es
-      distinto del de la Home: ahí ya está la foto de la calle, y repetirla en
-      las dos páginas las aplana. Su hueco en *Sobre mí* es a 3/4.
-- [ ] **Video «Viaje en el tiempo»** (2:41) y su fotograma.
+- [x] **Retrato con el contrabajo para *Sobre mí*.** Llegó el 21 sep 2026 como
+      `about_me.jpg` y vive en `src/assets/img/about-me.jpg`: **2048 × 1362, a
+      color**, un primer plano de Emi en la calle con la voluta al hombro. El
+      marco lo pone en blanco y negro como el resto. Es una horizontal en un
+      hueco casi cuadrado, así que va recortada a la derecha; ver **Recetas →
+      Poner una imagen donde hay un marco vacío**.
+- [ ] **Video «Viaje en el tiempo»** (2:41) y su fotograma. ⚠️ **Se quedó sin
+      sitio donde ir** el 21 sep 2026: el copy nuevo de *Sobre mí* no lo
+      menciona y el bloque con su marco vertical se quitó. Si el video llega,
+      antes hay que decidir dónde va y escribir el texto que lo presenta.
 - [ ] **Los tres correos reales.** Los N.º 40, 41 y 42 tienen asunto y adelanto
       de verdad, pero el cuerpo es de muestra — marcados `borrador: true`.
       **Sin prisa desde el 21 sep 2026:** el copy nuevo se llevó «Correos

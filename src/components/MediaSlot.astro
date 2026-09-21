@@ -22,14 +22,28 @@ interface Props {
   ratio?: string;
   /** Ancho de presentación en píxeles, para que Astro genere el tamaño justo. */
   width?: number;
+  /**
+   * Qué parte de la foto se salva cuando el marco la recorta (`object-position`).
+   * Por defecto el centro. El retrato de *Sobre mí* va a la derecha: es una
+   * horizontal metida en un marco casi cuadrado, y lo que el recorte se lleva
+   * de un lado es calle vacía y del otro la voluta del contrabajo.
+   */
+  position?: string;
 }
-const { src, alt = '', placeholder, ratio, width = 800 } = Astro.props;
+const { src, alt = '', placeholder, ratio, width = 800, position } = Astro.props;
 ---
 
 <div class="slot" style={ratio ? `aspect-ratio:${ratio}` : undefined}>
   {
     src ? (
-      <Image src={src} alt={alt} width={width} densities={[1, 2]} class="slot__img" />
+      <Image
+        src={src}
+        alt={alt}
+        width={width}
+        densities={[1, 2]}
+        class="slot__img"
+        style={position ? `object-position:${position}` : undefined}
+      />
     ) : (
       <span class="mono slot__label">{placeholder}</span>
     )
