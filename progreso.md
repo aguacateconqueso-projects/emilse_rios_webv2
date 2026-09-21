@@ -4,15 +4,12 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 21 de septiembre de 2026 · **la Home y *Sobre mí*
-llevan el copy nuevo de Emi**. La Home, más corta, sin archivo de correos y sin
-el cierre en negro; *Sobre mí*, reescrita entera, con su retrato ya puesto y
-sin la ficha de trayectoria ni el hueco del video. Las dos, sin numerales de
-sección. El pie pasa a `info@emilserios.com`;
-la capa A está en pie y mergeada —adaptador de Vercel, sesión contra el
-Supabase de la academia, `/panel/` para Emi— y **Edu ofrece acceso de
-colaborador en Hostinger y la ruta Cloudflare**, pendiente de una llamada de
-30 min
+**Última actualización:** 21 de septiembre de 2026 · **EL SITIO ESTÁ EN EL AIRE
+EN SU DOMINIO**: `www.emilserios.com`, con el DNS delegado a Cloudflare y el
+ápice redirigiendo. La Home y *Sobre mí* llevan el copy nuevo de Emi, con su
+retrato. **Dos cosas quedaron a medias y hay que mirarlas:** los CNAME de correo
+siguen proxied —el DKIM de Emi probablemente está roto para enviar— y el dominio
+sigue registrado en la cuenta de Namecheap de Edu
 
 ---
 
@@ -20,13 +17,13 @@ colaborador en Hostinger y la ruta Cloudflare**, pendiente de una llamada de
 
 | | |
 |---|---|
-| **Publicado** | Sí, en Vercel. Despliega solo en cada merge a `main`. |
-| **Dominio** | Pendiente. Todavía se ve en la URL de Vercel. El destino es `emilserios.com`. |
+| **Publicado** | Sí, en Vercel, y desde el 21 sep 2026 **en `www.emilserios.com`**. Despliega solo en cada merge a `main`. |
+| **Dominio** | **Resuelto a medias.** El sitio ya vive en `www.emilserios.com` y el DNS lo sirve Cloudflare. **Falta el push del registro** a una cuenta de Namecheap de Emi: hoy el dominio sigue siendo de Edu. Ver **El dominio, y Edu → Cómo quedó**. |
 | **Páginas** | Home, Sobre mí, Productos, el Aula Virtual —puerta y aula por dentro— y sus pantallas de acceso, en español e inglés. Más `/panel/`, la consola de Emi, solo en español. |
 | **Identidad** | El logo de Emi, vectorizado, en cabecera, pie, entrada y favicon. |
 | **Alcance** | Desde el 31 ago 2026 esto deja de ser solo el sitio: aquí van también el aula, la membresía y los cursos. Ver **La plataforma**. |
 | **Sesión** | Desde el 20 sep 2026 el aula pide sesión de verdad, contra el **mismo Supabase de la academia**. Falta poner las variables en Vercel y las Redirect URLs en Supabase; sin eso queda en modo maqueta y lo dice. |
-| **Lo que falta para lanzar** | Conectar Klaviyo. El formulario **no da de alta a nadie**. |
+| **Lo que falta para lanzar** | Conectar Klaviyo. El formulario **no da de alta a nadie** — y ahora eso se ve en un sitio que ya está publicado y accesible. |
 
 Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/` · `/productos/` ·
 `/en/products/` · `/productos/estudiemos-juntos/` ·
@@ -202,9 +199,11 @@ demás:
 | `ns1.dns-parking.com` · `ns2…` | **Hostinger** | **se lleva el DNS entero** |
 | Otros (Cloudflare, etc.) | Ese tercero | hay que preguntarle a Edu quién es |
 
-⚠️ **Sin comprobar.** Se intentó el 19 sep 2026 desde la sesión de trabajo y la
-red del entorno bloquea las consultas DNS. Es un `dig NS emilserios.com` desde
-cualquier terminal, o whatsmydns.net desde el navegador.
+✅ **Resuelto el 21 sep 2026, y por la vía de arriba:** la zona se migró a
+Cloudflare y los nameservers en Namecheap pasaron a `anna.ns.cloudflare.com` y
+`clay.ns.cloudflare.com`. Sea cual fuera la respuesta original, **ya no importa**:
+el día que Edu borre el hosting, el DNS no depende de él. Ver **Cómo quedó**,
+más abajo.
 
 #### La segunda respuesta, del 21 sep 2026
 
@@ -244,16 +243,20 @@ abre él, no se ha ganado nada: se cambia una dependencia por otra.
 
 #### Los cuatro datos que tiene que dar la llamada
 
-Con estos cuatro, el resto se arma sin volver a preguntarle nada:
+La llamada se hizo el 21 sep 2026 y resolvió tres de los cuatro:
 
-1. **A qué nameservers apunta `emilserios.com`.** Se ve en Namecheap, en la
-   ficha del dominio. Es el dato que decide todo el orden — la tabla de qué
-   significa cada respuesta está justo arriba.
-2. **Dónde vive `info@emilserios.com`**, cuántos buzones hay y quién los paga.
-3. **La zona DNS entera**, con los **MX** y los **TXT** (SPF, DKIM, DMARC). Son
-   los registros que rompen el correo si se pierden.
-4. **El listado de URLs publicadas**, que **se pierde para siempre** el día que
-   borre el sitio, y sin el cual cada enlace viejo cae en un 404.
+1. ✅ **A qué nameservers apunta `emilserios.com`.** Ya no importa: apunta a
+   Cloudflare, `anna` y `clay`.
+2. ✅ **Dónde vive `info@emilserios.com`.** En **Hostinger**, y ahí se queda por
+   ahora. Sigue sin saberse **cuántos buzones hay y quién los paga** — y eso
+   último importa el día que Edu deje de pagar el plan.
+3. ✅ **La zona DNS entera.** Está en Cloudflare, en 11 registros, replicada y
+   funcionando.
+4. ❌ **El listado de URLs publicadas.** **Sigue sin pedirse, y ahora urge
+   más**: el WordPress viejo ya no se ve —el `www` apunta a Vercel— pero los
+   ficheros siguen en el hosting de Edu. Esa lista son las direcciones que la
+   gente tiene guardadas y que Google tiene indexadas, y **se pierde para
+   siempre** el día que él borre el sitio. Hoy cada enlace viejo cae en un 404.
 
 Y dos cuidados al migrar la zona a Cloudflare:
 
@@ -268,18 +271,25 @@ Y dos cuidados al migrar la zona a Cloudflare:
 #### El orden correcto, que es el suyo al revés
 
 ```
-1  Edu dice a QUÉ NAMESERVERS apunta el dominio y DÓNDE vive
-   info@emilserios.com — cuántos buzones hay y quién los paga
-2  Edu exporta la ZONA DNS entera: A, CNAME, MX, TXT (SPF/DKIM/DMARC),
-   subdominios
-3  Se decide dónde vive el correo y SE MUDA. No se toca nada más hasta que
-   llegue un correo de prueba al buzón nuevo.
-4  Edu hace el PUSH del dominio a la cuenta de Namecheap de Emi (instantáneo)
-5  Se delegan los nameservers a Cloudflare —CUENTA DE EMI, no de Edu—, con
-   la zona replicada y REVISADA a mano ANTES de delegar
-6  emilserios.com apunta a Vercel — el cambio de dominio, que es la fase 6
-7  RECIÉN AHORA Edu borra el hosting. Es el último paso, no el primero.
+1  ✅ Edu dice a QUÉ NAMESERVERS apunta el dominio y DÓNDE vive
+      info@emilserios.com — falta cuántos buzones hay y quién los paga
+2  ✅ Edu exporta la ZONA DNS entera
+3  ⏭️  Se decide dónde vive el correo y SE MUDA
+      → NO SE HIZO. El correo se quedó en Hostinger, donde estaba.
+4  ⏭️  Edu hace el PUSH del dominio a la cuenta de Namecheap de Emi
+      → NO SE HIZO. El dominio sigue en la cuenta de Edu.
+5  ✅ Se delegan los nameservers a Cloudflare
+      → hecho, pero ojo: la cuenta de Cloudflare es de Adrián/Edu, NO de Emi
+6  ✅ emilserios.com apunta a Vercel — el sitio está en el aire
+7  ⛔ Edu borra el hosting — SIGUE SIENDO EL ÚLTIMO PASO, y sigue sin hacerse
 ```
+
+**Se saltaron el 3 y el 4, a propósito, para poder publicar el sitio el mismo
+día.** Eso no es un error —el orden existía para proteger el correo, y el correo
+no se tocó— pero **deja dos deudas abiertas** que hay que cerrar antes de dejar
+que Edu apague nada: el dominio sigue siendo suyo (paso 4) y el buzón de Emi
+sigue en su plan de Hostinger (paso 3). **Mientras esas dos sigan abiertas, el
+paso 7 no se puede dar.**
 
 **Lo que sí conviene aceptarle ya**: una copia del sitio (ficheros + base de
 datos) y **el listado de URLs publicadas**. No para levantarlo en ningún lado,
@@ -309,6 +319,88 @@ fecha de corte y estar localizable ese día).
   nameservers a Cloudflare bajo una cuenta de Emi. Dos minutos por su parte, el
   dominio sigue donde está, y a partir de ahí el DNS se controla desde acá para
   siempre.
+
+#### Cómo quedó, el 21 de septiembre de 2026
+
+**El sitio está en el aire en `www.emilserios.com`.** Lo hicieron Adrián y Edu
+juntos, en una sesión.
+
+| | |
+|---|---|
+| **Registro** | Namecheap, **todavía en la cuenta de Edu**. Adrián tiene acceso. El push a una cuenta de Emi **sigue pendiente**. |
+| **Zona DNS** | **Cloudflare.** Nameservers: `anna.ns.cloudflare.com` · `clay.ns.cloudflare.com`. |
+| **Web** | Vercel. `www.emilserios.com` sirve el sitio; el ápice `emilserios.com` hace un **308 hacia www**, así que el canónico es **con `www`**. |
+| **Correo** | **Sigue en Hostinger, intacto.** Lo único que se mudó es el DNS. |
+
+Los dos registros que apuntan a Vercel, los dos **CNAME y en DNS only**:
+
+```
+@     CNAME   1c3acc4056a0b8e9.vercel-dns-017.com    (DNS only)
+www   CNAME   1c3acc4056a0b8e9.vercel-dns-017.com    (DNS only)
+```
+
+Tres cosas que conviene saber de ese bloque, porque no son obvias:
+
+- **Vercel ya no da una sola IP para todos.** Da un host por proyecto, y ese
+  `1c3acc4056...vercel-dns-017.com` es el de este. Los valores viejos
+  —`cname.vercel-dns.com`, `76.76.21.21`— siguen funcionando, pero **el valor
+  bueno se lee siempre del panel de Vercel**, en «View DNS configuration», no
+  de ninguna guía.
+- **Sí, hay un CNAME en el ápice, y sí, convive con los MX.** Normalmente eso
+  es ilegal en DNS. Funciona porque Cloudflare hace *CNAME flattening*: guarda
+  el CNAME y al responder devuelve las IPs ya resueltas, así que los MX y los
+  TXT de `emilserios.com` se sirven con total normalidad. **Es la razón por la
+  que Cloudflare era el lugar correcto para esto.**
+- **Los dos en gris, no negociable.** Con la nube naranja Cloudflare se mete
+  entre el visitante y Vercel, y Vercel no puede validar el dominio ni emitir
+  el certificado. Lo dice su propio panel: `Proxy — Disabled`.
+
+Se borraron los **cinco registros A y AAAA** que quedaban de Hostinger (Edu lo
+hizo con Adrián), y el CNAME de `www` que apuntaba a `www.emilserios.com.cdn.hstgr.net`
+**se editó, no se borró**: pasó a apuntar a Vercel. Con eso el WordPress viejo
+dejó de verse. La zona quedó en 11 registros.
+
+#### ⚠️ Los CNAME de correo quedaron PROXIED, y eso rompe el DKIM
+
+**Es lo primero que hay que mirar en la próxima sesión.**
+
+Cinco registros de correo siguen con la nube naranja:
+
+```
+autoconfig                  CNAME → autoconfig.mail.hostinger.com          🟠
+autodiscover                CNAME → autodiscover.mail.hostinger.com        🟠
+hostingermail-a._domainkey  CNAME → hostingermail-a.dkim.mail.hostinger.com 🟠
+hostingermail-b._domainkey  CNAME → hostingermail-b.dkim.mail.hostinger.com 🟠
+hostingermail-c._domainkey  CNAME → hostingermail-c.dkim.mail.hostinger.com 🟠
+```
+
+**Por qué importa.** El proxy de Cloudflare solo entiende HTTP/HTTPS, y DKIM se
+valida a nivel DNS. Proxiado, Cloudflare devuelve **sus** IPs en vez de la
+cadena hacia Hostinger, así que el servidor del otro lado no encuentra la llave
+pública: **la firma de los correos que Emi envía no se puede verificar**. Los
+`autoconfig`/`autodiscover` rompen además la autoconfiguración en Outlook y
+Thunderbird. **Recibir sigue bien** —los MX están en gris y correctos—; lo que
+está en riesgo es **enviar**.
+
+Mientras Namecheap apuntaba a Hostinger esto era inocuo. Desde que Cloudflare es
+autoritativo, está activo.
+
+**Por qué está así.** Edu dijo que estaba bien y que no se tocara, y Adrián
+decidió seguirlo para no frenar la salida del sitio (21 sep 2026). **Es una
+decisión consciente, no un olvido.** Se deja anotado con su fecha para que el
+día que aparezca el síntoma nadie tenga que investigarlo desde cero.
+
+Conviene no heredar la confusión de fondo: Edu dijo «no toques los TXT», y tiene
+razón — el SPF, el DMARC y el de Klaviyo son TXT y están bien, en gris. **Pero
+los registros de DKIM de Hostinger no son TXT, son CNAME**, y a esos la
+instrucción no los cubría.
+
+| | |
+|---|---|
+| **Síntoma a vigilar** | Los correos que **envía** Emi caen en spam, o los rechazan. Sobre todo a Gmail y Outlook. |
+| **Cómo comprobarlo** | [mxtoolbox.com](https://mxtoolbox.com) → DKIM Lookup con los selectores `hostingermail-a`, `-b`, `-c`. También vale mandar un correo a una cuenta de Gmail y mirar «Mostrar original». |
+| **El arreglo** | Cinco clics en Cloudflare: nube naranja → **gris (DNS only)** en esos cinco. No hay que cambiar ningún contenido. |
+
 
 ### El aula
 
@@ -1936,6 +2028,27 @@ Están discutidas y resueltas. No hace falta volver sobre ellas salvo que Emi
 pida lo contrario. Las que tienen que ver con la plataforma —dominio, aula,
 cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
 
+- **21 sep 2026 · El sitio sale al aire en `www.emilserios.com`, y el canónico
+  lleva `www`.** El DNS pasa a Cloudflare, el ápice hace un 308 hacia `www` y
+  `astro.config.mjs` deja de apuntar a `contrabajoenlaciudad.com`. **El canónico
+  es con `www` y no al revés** porque es lo que sirve el sitio: apuntar los
+  canónicos al ápice, que redirige, es pedirle a Google que adivine. Cómo quedó
+  la zona, registro por registro, en **El dominio, y Edu → Cómo quedó**.
+
+  **Se saltaron dos pasos del orden que este documento tenía escrito**, a
+  propósito, para poder publicar el mismo día: el correo no se mudó y el dominio
+  no se pushó. Ninguno de los dos rompe nada hoy —el correo no se tocó y el
+  registro sigue vivo— pero **los dos bloquean el final del traspaso**, y hasta
+  cerrarlos Edu no puede apagar el hosting.
+
+- **21 sep 2026 · Los CNAME de correo se quedan proxied, por ahora.** Edu dijo
+  que estaba bien y Adrián decidió seguirlo para no frenar la salida del sitio.
+  **Es una decisión consciente y está fechada**, no un descuido: la advertencia
+  se dio, con el mecanismo y el síntoma, y se optó por publicar. Lo que hay en
+  juego —el DKIM de Emi, o sea que sus correos lleguen— y los cinco clics que lo
+  arreglan están en **El dominio, y Edu → Los CNAME de correo quedaron
+  PROXIED**. Si aparece el síntoma, no hay que investigarlo: está escrito.
+
 - **21 sep 2026 · *Sobre mí* se reescribe entera, y la trayectoria deja de ser
   una tabla.** Copy nuevo de Emi, en los dos idiomas. Lo que sale, por decisión
   suya: **la ficha de trayectoria** —la tabla de «5 años / Docencia / 10+ años
@@ -2411,51 +2524,63 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
       `POST` a su API de perfiles. Hay que elegir además **a qué lista entra**
       quien se suscribe. Conviene contarlo antes de estimar.
 
-- [ ] **La llamada de 30 min con Edu**, que él mismo ofreció el 21 sep 2026
-      junto con el acceso de colaborador en Hostinger. Hay que salir de ahí con
-      **cuatro datos**: a qué nameservers apunta el dominio, dónde vive
-      `info@emilserios.com`, la zona DNS entera —con MX y TXT— y el listado de
-      URLs publicadas. Están en **El dominio, y Edu → Los cuatro datos que tiene
-      que dar la llamada**, junto con los dos cuidados al migrar la zona.
-      Y lo que no puede faltar decirle: **que no borre nada del hosting
-      todavía**.
+- [ ] **⚠️ Los cinco CNAME de correo están PROXIED en Cloudflare.** Es lo
+      primero que hay que mirar. El DKIM de Emi no se puede verificar, así que
+      **lo que ella envía puede estar cayendo en spam desde el 21 sep 2026**.
+      El arreglo son cinco clics; el detalle completo, con los nombres de los
+      registros y cómo comprobarlo, está en **El dominio, y Edu → Los CNAME de
+      correo quedaron PROXIED**. Se dejó así por decisión de Adrián y Edu para
+      no frenar la salida del sitio — **no es un olvido, es una deuda con
+      fecha.**
 
-- [ ] **Abrir la cuenta de Cloudflare a nombre de Emi**, antes de la llamada. Si
-      la abre Edu, se cambia una dependencia por otra y no se ha ganado nada.
+- [ ] **Confirmar a nombre de quién quedó la cuenta de Cloudflare.** La zona ya
+      vive ahí, así que esto dejó de ser una pregunta previa y pasó a ser una
+      comprobación: si la cuenta es de Edu, se cambió una dependencia por otra y
+      no se ganó nada. Si es de Adrián, está bien para trabajar pero hay que
+      pasarla a Emi antes de cerrar el traspaso.
+
+- [ ] **El listado de URLs publicadas del WordPress viejo.** Pedírselo a Edu
+      **ya**. Desde el 21 sep 2026 el sitio viejo no se ve —el `www` apunta a
+      Vercel— y cada enlace que la gente tenga guardado cae en un 404. Con la
+      lista se pueden montar los 301; sin ella, no. **Se pierde para siempre el
+      día que él borre el hosting.**
 
 - [ ] **El push del dominio a una cuenta de Namecheap de Emi.** Es lo que cierra
       el tema y **no lo resuelve Cloudflare**: delegar el DNS arregla lo técnico,
       pero el registro sigue en la cuenta de Edu. Mientras esté ahí, Emi está a
       una renovación no pagada de perder su propio nombre.
 
-- [ ] **Comprobar a qué nameservers apunta `emilserios.com`.** Un minuto, y
-      decide si apagar el hosting de Edu se lleva el DNS por delante o no. Se
-      intentó el 19 sep 2026 desde la sesión de trabajo y **la red del entorno
-      bloquea las consultas DNS**: hay que hacerlo desde fuera (`dig NS
-      emilserios.com` o whatsmydns.net). La tabla de qué significa cada respuesta
-      está en **El dominio, y Edu**.
+      ⚠️ **Subió de urgencia el 21 sep 2026.** Hasta ese día era un dominio con
+      un WordPress viejo; desde ese día **es la dirección pública del negocio de
+      Emi**, con su sitio, su newsletter y su aula colgando de ella. Adrián tiene
+      acceso a la cuenta de Namecheap, que sirve para trabajar pero no es lo
+      mismo que ser el titular. Hace falta que Emi tenga cuenta propia de
+      Namecheap y que Edu haga el push — instantáneo, gratis, sin bloqueo ICANN.
+      La mecánica está en **El dominio, y Edu**.
 
-- [ ] **Decidir dónde vive `info@emilserios.com` y mudarlo.** Es el primer paso
-      real del traspaso y bloquea a todos los demás: es el `reply-to` de todos
-      los correos de la academia y el canal de rescate el día que toda la
-      membresía tenga que volver a iniciar sesión. Nada se toca hasta que llegue
-      un correo de prueba al buzón nuevo.
+- [ ] **Mudar `info@emilserios.com` fuera del Hostinger de Edu.** Dónde vive ya
+      se sabe —en Hostinger, en el plan de él— y el 21 sep 2026 se decidió
+      dejarlo ahí para no frenar la salida del sitio. **Sigue siendo el paso que
+      bloquea el final del traspaso:** es el `reply-to` de todos los correos de
+      la academia, el canal de rescate el día que la membresía tenga que volver
+      a iniciar sesión, y desde el 21 sep 2026 **la dirección que el sitio
+      muestra en el pie de todas las páginas** y a la que le pide a la gente que
+      escriba si falla la suscripción.
 
-      ⚠️ **Subió de prioridad el 21 sep 2026.** Desde ese día la dirección está
-      **a la vista en el sitio**: en el pie de todas las páginas y en el mensaje
-      que aparece si falla la suscripción, que le pide a la persona que escriba
-      ahí. Antes era una tarea de traspaso; ahora, si ese buzón no está
-      llegando a manos de Emi, son correos de gente que quiso suscribirse y se
-      pierden. **Comprobar que recibe antes de que el sitio tenga tráfico.**
+      Mientras el buzón esté en el plan de Edu, **él no puede apagar el hosting**
+      y Emi depende de que él lo siga pagando. Nada se toca hasta que llegue un
+      correo de prueba al buzón nuevo. Falta además un dato de la llamada:
+      **cuántos buzones hay y quién los paga.**
+
+      ⚠️ Comprobar de paso que hoy recibe: el sitio ya está publicado, así que
+      un correo perdido ahí es alguien que quiso suscribirse.
 
 - [ ] **Decidir qué pasa con `contrabajoenlaciudad.com`.** Quedó abierto el
-      31 ago 2026. El dominio principal es `emilserios.com`, ya decidido; falta
-      saber si el otro se redirige, si se queda como marca de la newsletter, o
-      si se suelta. **Mientras no se decida, `astro.config.mjs` sigue con
-      `site: 'https://contrabajoenlaciudad.com'` y eso ya no es correcto**: de
-      ahí salen el `<link rel="canonical">`, las URLs absolutas y el futuro
-      sitemap. Cambiarlo es una línea, pero conviene hacerlo cuando se sepa el
-      destino y en su propio PR.
+      31 ago 2026 y sigue abierto: falta saber si se redirige a `emilserios.com`,
+      si se queda como marca de la newsletter, o si se suelta. **El código ya no
+      espera esa decisión**: `astro.config.mjs` pasó a
+      `site: 'https://www.emilserios.com'` el 21 sep 2026, el día que el dominio
+      se puso en el aire.
 
 ### El aula, para que deje de ser maqueta
 
@@ -2546,6 +2671,14 @@ enseñárselo.
       como las otras tres.
 
 ### Contenido que falta (de Emi)
+
+- [ ] **`public/image_hero_2.jpg`, subida el 21 sep 2026, no la usa nadie.**
+      ⚠️ **Pesa 12,9 MB** y está en `public/`, que va tal cual al CDN sin pasar
+      por el optimizador de Astro. Si se va a usar, hay que moverla a
+      `src/assets/img/` e importarla —como se hizo con el retrato de *Sobre mí*,
+      que de 320 kB sale a 48—; si no, borrarla. Tal como está hoy es peso
+      muerto en el repositorio, pero **el día que alguien la referencie desde
+      `public/` son 12,9 MB que se le descargan a cada visita.**
 
 - [x] **Retrato con el contrabajo para *Sobre mí*.** Llegó el 21 sep 2026 como
       `about_me.jpg` y vive en `src/assets/img/about-me.jpg`: **2048 × 1362, a
