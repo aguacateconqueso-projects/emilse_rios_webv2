@@ -22,8 +22,17 @@ const { blocks } = getAboutCopy(lang);
             <div class="ahero__text">
               <div class="ahero__inner">
                 <h1 class="ahero__title">{block.title}</h1>
-                {block.paras.map((para) => (
-                  <p class="ahero__para">{para}</p>
+                {/*
+                  El índice viaja al CSS como `--i` y de ahí sale el retraso de
+                  cada renglón. Escrito así y no con cinco `nth-of-type`, porque
+                  el texto de esta entrada lo edita Emi: si mañana añade un
+                  párrafo, entra en la escalera solo. Con selectores numerados
+                  se quedaría fuera y nadie se daría cuenta.
+                */}
+                {block.paras.map((para, i) => (
+                  <p class="ahero__para" style={`--i:${i}`}>
+                    {para}
+                  </p>
                 ))}
               </div>
             </div>
@@ -41,7 +50,7 @@ const { blocks } = getAboutCopy(lang);
 
       case 'prose':
         return (
-          <div class="row row--flush block">
+          <div class="row row--flush block reveal">
             <div class="row__body prose">
               {block.paras.map((para) => (
                 <p>{para}</p>
@@ -60,11 +69,15 @@ const { blocks } = getAboutCopy(lang);
         );
 
       case 'form':
-        return <SubscribeForm lang={lang} id={block.id} label={block.label} flush />;
+        return (
+          <div class="reveal">
+            <SubscribeForm lang={lang} id={block.id} label={block.label} flush />
+          </div>
+        );
 
       case 'testi':
         return (
-          <section class="row row--wide row--flush block">
+          <section class="row row--wide row--flush block reveal">
             <div class="row__body">
               <h2 class="mono soft testi__label">{block.label}</h2>
               <ul class="testi" role="list">
@@ -137,6 +150,108 @@ const { blocks } = getAboutCopy(lang);
       min-height: 21rem;
       border-left: 0;
       border-bottom: 1px solid var(--rule);
+    }
+  }
+
+  /* --- La entrada de *Sobre mí* -------------------------------------------
+     La Home tiene la firma escribiéndose sobre negro; esta página no, y no
+     debe tenerla: la entrada es de la portada y repetirla en cada sección la
+     gastaría. Lo que le faltaba a *Sobre mí* era lo contrario, que aparece de
+     golpe, con el titular ya puesto antes de que el ojo llegue.
+
+     Así que entra, y entra sin más: no hay panel, ni cortinilla, ni nada que
+     tape la página. Cada renglón sube 16 px y se funde, en la misma curva y a
+     una duración del mismo orden que el revelado del resto del sitio — es el
+     mismo gesto, solo que disparado por la carga y no por el scroll.
+
+     El retrato entra fundiéndose y no subiendo. Sube el texto, que es una
+     columna de renglones y se lee como tal; el retrato es media pantalla
+     pegada a tres bordes, y moverlo despegaría la regla del costado del borde
+     de la ventana durante medio segundo. Se nota, y se nota como un fallo. */
+  @media (prefers-reduced-motion: no-preference) {
+    .ahero__title,
+    .ahero__para {
+      animation: ahero-rise 0.7s var(--ease-reveal) both;
+    }
+
+    .ahero__title {
+      animation-delay: 0.05s;
+    }
+
+    /* La escalera. 60 ms entre renglones: por debajo se leen como uno solo y
+       la escalera no se percibe; por encima, quien llega a leer ya está
+       esperando al párrafo siguiente. El `--i` lo pone el marcado. */
+    .ahero__para {
+      animation-delay: calc(0.13s + var(--i, 0) * 0.06s);
+    }
+
+    .ahero__media {
+      animation: ahero-fade 0.9s var(--ease-reveal) 0.1s both;
+    }
+  }
+
+  @keyframes ahero-rise {
+    from {
+      opacity: 0;
+      transform: translateY(var(--space-2));
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes ahero-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* --- El retrato al pasar por encima -------------------------------------
+     Toma color y se levanta un poco. Es lo mismo que hace la lámina de la
+     Home —el color es algo que ocurre mientras la miras, no un estado— solo
+     que acá lo dispara el cursor y no el scroll, porque acá la foto está
+     quieta en pantalla mientras se lee la columna de al lado.
+
+     Ocho píxeles —un escalón de la rejilla— y ni uno más. Lo que se busca es
+     que la foto se despegue lo justo para que se note que responde; a partir
+     de ahí deja de ser un retrato en una página y empieza a ser una tarjeta,
+     que es otro sistema de diseño. El hueco que abre por abajo es de papel, no
+     de sombra: el sistema dice sombras cero y esta no es la excepción de la
+     cápsula del menú.
+
+     `:global` porque el marco y la imagen son de `MediaSlot`, y sus clases
+     están rotuladas con el ámbito de ESE componente, no con el de este.
+
+     Solo donde hay cursor de verdad. En una pantalla táctil el `:hover` se
+     queda pegado después de tocar, y el retrato se quedaría a color y en el
+     aire hasta que se toque otra cosa. */
+  @media (hover: hover) {
+    .ahero__media :global(.slot) {
+      transition: transform 0.5s var(--ease-reveal);
+    }
+
+    .ahero__media :global(.slot__img) {
+      transition: filter 0.5s var(--ease-reveal);
+    }
+
+    .ahero__media:hover :global(.slot) {
+      transform: translateY(calc(-1 * var(--space-1)));
+    }
+
+    .ahero__media:hover :global(.slot__img) {
+      filter: grayscale(0);
+    }
+
+    /* Quien pide menos movimiento se queda con el color, que no es
+       movimiento, y sin el salto. */
+    @media (prefers-reduced-motion: reduce) {
+      .ahero__media:hover :global(.slot) {
+        transform: none;
+      }
     }
   }
 

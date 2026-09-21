@@ -21,11 +21,6 @@ const es: AboutCopy = {
       paras: [
         '¡Hola! Emilse por acá (aunque casi todos me llaman Emi). La de la foto soy yo.',
         'Acá se supone que te cuente que vengo de una familia de generaciones de músicos, que a los 7 años ya era una niña prodigio y que toco un instrumento prehistórico valorado en 150 billones.',
-      ],
-    },
-    {
-      k: 'prose',
-      paras: [
         'No puedo.',
         'No es mi caso. Y además no te sirve para nada.',
         'Te cuento otra cosa.',
@@ -88,27 +83,27 @@ const es: AboutCopy = {
       ],
     },
     { k: 'form', id: 'suscribete', label: 'Contrabajo en la Ciudad' },
-    {
-      k: 'testi',
-      label: 'Qué dicen mis alumnos',
-      items: [
-        {
-          text: 'Testimonio pendiente — el texto llega después.',
-          meta: 'Nombre · País',
-          pendiente: true,
-        },
-        {
-          text: 'Testimonio pendiente — el texto llega después.',
-          meta: 'Nombre · País',
-          pendiente: true,
-        },
-        {
-          text: 'Testimonio pendiente — el texto llega después.',
-          meta: 'Nombre · País',
-          pendiente: true,
-        },
-      ],
-    },
+    /*
+     * «Qué dicen mis alumnos» va acá, y hoy no está.
+     *
+     * Estuvo publicado con tres huecos en cursiva que decían «testimonio
+     * pendiente». Salió el 21 sep 2026: un hueco anunciado vale mientras se
+     * está trabajando en la página, pero el sitio ya está en el aire y un
+     * visitante no tiene por qué leer nuestras notas internas.
+     *
+     * **No está retirado, está esperando.** Emi manda los testimonios de
+     * verdad y entonces vuelve — y volver es escribir acá el bloque, nada más:
+     * el tipo `testi`, su caso en `About.astro` y su CSS siguen puestos y sin
+     * tocar, justamente para que sea una sola línea de trabajo y no un
+     * rediseño. La forma es:
+     *
+     *   { k: 'testi', label: 'Qué dicen mis alumnos', items: [
+     *       { text: '…', meta: 'Nombre · País' },
+     *   ] }
+     *
+     * `pendiente: true` es lo que pintaba el hueco en cursiva apagada. Un
+     * testimonio real no lo lleva.
+     */
   ],
 };
 
@@ -121,11 +116,6 @@ const en: AboutCopy = {
       paras: [
         "Hi! Emilse here (though most people call me Emi). That's me in the photo.",
         "This is where I'm supposed to tell you I come from generations of musicians, that I was a child prodigy at seven, and that I play a prehistoric instrument worth 150 billion.",
-      ],
-    },
-    {
-      k: 'prose',
-      paras: [
         "Can't do it.",
         "Not my story. And it wouldn't help you anyway.",
         'Let me tell you something else.',
@@ -188,15 +178,7 @@ const en: AboutCopy = {
       ],
     },
     { k: 'form', id: 'suscribete', label: 'Double Bass in the City' },
-    {
-      k: 'testi',
-      label: 'What my students say',
-      items: [
-        { text: 'Testimonial pending — the text comes later.', meta: 'Name · Country', pendiente: true },
-        { text: 'Testimonial pending — the text comes later.', meta: 'Name · Country', pendiente: true },
-        { text: 'Testimonial pending — the text comes later.', meta: 'Name · Country', pendiente: true },
-      ],
-    },
+    /* El gemelo inglés del bloque de testimonios. Ver la nota en `es`. */
   ],
 };
 

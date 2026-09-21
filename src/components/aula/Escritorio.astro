@@ -183,9 +183,19 @@ const membresiaHref = `${ACADEMIA}/aula/`;
   <div class="tienda__txt">
     <h2 class="tienda__h" id="tienda-h">{a('desk.storeTitle')}</h2>
     <p class="card__lead">{a('desk.storeLead')}</p>
-    <p class="tienda__lista soft">
-      {porComprar.map((p) => p.copia[lang].nombre).join(' · ')}
-    </p>
+    {/*
+      La lista de lo que le falta por comprar, y solo si hay algo. Desde que
+      el catálogo anuncia un curso en vez de seis —21 sep 2026— la alumna de
+      muestra ya los tiene todos, y sin esta condición quedaba un párrafo
+      vacío abriendo su hueco debajo del texto. El botón a la tienda se queda
+      igual: aunque no falte nada hoy, es la puerta por donde entra lo que Emi
+      publique mañana.
+    */}
+    {porComprar.length > 0 && (
+      <p class="tienda__lista soft">
+        {porComprar.map((p) => p.copia[lang].nombre).join(' · ')}
+      </p>
+    )}
   </div>
   <Boton href={routePath('products', lang)} etiqueta={a('desk.storeCta')} />
 </section>

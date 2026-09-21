@@ -7,9 +7,14 @@ de cero debería poder seguir trabajando sin preguntar nada.
 **Última actualización:** 21 de septiembre de 2026 · **EL SITIO ESTÁ EN EL AIRE
 EN SU DOMINIO**: `www.emilserios.com`, con el DNS delegado a Cloudflare y el
 ápice redirigiendo. La Home y *Sobre mí* llevan el copy nuevo de Emi, con su
-retrato. **Dos cosas quedaron a medias y hay que mirarlas:** los CNAME de correo
-siguen proxied —el DKIM de Emi probablemente está roto para enviar— y el dominio
-sigue registrado en la cuenta de Namecheap de Edu
+retrato, y desde la segunda tanda de ese mismo día el sitio **enseña menos
+huecos**: la lámina estrena foto vertical, *Sobre mí* entra con movimiento y
+responde al cursor, y se retiraron los marcadores que quedaban a la vista —las
+redes que no llevaban a ninguna parte, los tres testimonios pendientes y cinco
+de los seis cursos por anunciar—. **Dos cosas quedaron a medias y hay que
+mirarlas:** los CNAME de correo siguen proxied —el DKIM de Emi probablemente
+está roto para enviar— y el dominio sigue registrado en la cuenta de Namecheap
+de Edu
 
 ---
 
@@ -47,6 +52,40 @@ Las dos direcciones viejas de la carta de la membresía
 —`/aulavirtual/estudiemos-juntos/` y su gemela inglesa— **siguen funcionando**:
 redirigen a la nueva. Están puestas en `astro.config.mjs` y salen del propio
 catálogo, así que valen para cualquier producto que se publique.
+
+**Lo último que se tocó del sitio público**, el 21 de septiembre de 2026 por la
+tarde, fueron seis cosas que Emi y Adrián pidieron de una vez. Ninguna es
+grande; juntas cambian lo que el sitio dice de sí mismo, que hasta esa tarde
+era «esto todavía se está montando»:
+
+- **La lámina de la Home cambia de foto, y ahora es vertical.** Es Emi en la
+  calle, de cuerpo entero, sosteniendo el contrabajo en horizontal delante de un
+  portal de madera. El fichero es `src/assets/img/emilse-hero.jpg` y sale del
+  original de 3572 × 5368 que estaba subido en `public/` desde el 19 de
+  septiembre — el que este documento venía marcando como peso muerto. La lámina
+  se queda donde estaba, con su pie, su blanco y negro y su revelado al bajar;
+  lo único que cambia es la proporción del marco y un tope de ancho para que una
+  vertical no se coma la pantalla. Ver **Recetas → Cambiar la foto de la
+  lámina**.
+- **El pie se queda sin redes.** Instagram y YouTube enlazaban a la portada de
+  cada plataforma, no a las cuentas de Emi. Vuelven cuando haya direcciones de
+  verdad.
+- **_Sobre mí_ entra con movimiento y responde al cursor.** La página aparecía
+  de golpe, con el titular ya puesto. Ahora los renglones suben y se funden en
+  escalera al cargar, los párrafos se revelan al bajar como los del resto del
+  sitio, y el retrato **toma color y se levanta ocho píxeles al pasarle el
+  cursor por encima**. Trajo una enmienda al sistema, anotada más abajo.
+- **El arranque de *Sobre mí* es un solo bloque.** «No puedo. / No es mi caso. /
+  Te cuento otra cosa» estaba en un bloque de prosa aparte, debajo del de
+  entrada; son el remate de la frase de los 150 billones y ahora se leen pegados
+  a ella, al lado del retrato.
+- **«Qué dicen mis alumnos» sale de la página, y queda pendiente.** Estaban los
+  tres huecos en cursiva diciendo «testimonio pendiente». Emi manda los de
+  verdad y vuelve: el tipo, el componente y el CSS siguen puestos, así que
+  volver es escribir el bloque en `src/data/about.ts` y nada más.
+- **Productos anuncia un curso, no seis.** La membresía y **un** «Curso 1 ·
+  Próximamente». Los otros cinco eran el mismo hueco repetido cinco veces, que
+  no anuncia cinco cursos: anuncia que la tienda está vacía.
 
 **Lo que está en marcha ahora mismo** es la plataforma, y el 19 de septiembre
 de 2026 se movieron tres cosas a la vez:
@@ -479,11 +518,14 @@ de la membresía sale del sitio, y por eso la propia página lo dice en vez de
 dejar que la alumna descubra sola que cambió de dominio a mitad de una compra.
 El séptimo es lo que trae la migración de derechos de acceso.
 
-**El catálogo tiene siete productos**, y **cada uno lleva su foto**. La membresía,
-que es lo único a la venta, y seis cursos que Emi ya tiene grabados pero todavía
-sin estrategia de venta. Los seis salen como «Próximamente» y **sus fichas no son
-enlaces**: no tienen página porque no tienen carta, y una URL indexable
-prometiendo algo que no se puede comprar es peor que un hueco anunciado. Cuando
+**El catálogo tiene dos productos** desde el 21 sep 2026 —eran siete—, y **cada
+uno lleva su foto**. La membresía, que es lo único a la venta, y **un** curso que
+Emi ya tiene grabado pero todavía sin estrategia de venta. Ese sale como
+«Próximamente» y **su ficha no es un enlace**: no tiene página porque no tiene
+carta, y una URL indexable prometiendo algo que no se puede comprar es peor que
+un hueco anunciado. Los otros cinco cursos estuvieron anunciados igual, y eran
+el mismo hueco repetido cinco veces; vuelven de uno en uno, cuando cada uno
+tenga nombre, precio y carta. Cuando
 Emi mande el nombre, el precio, la foto y la carta de cada uno, se escriben en
 `src/data/aula.ts` y la página aparece sola.
 
@@ -1531,7 +1573,37 @@ componentes**: si hace falta uno nuevo, se añade como token.
 
 El sistema es de Emi y se puede cambiar. Lo que no se puede es cambiarlo sin
 dejar constancia, porque si no la tabla de arriba deja de ser fiable. Hasta hoy
-se ha tocado diez veces:
+se ha tocado once veces:
+
+- **21 sep 2026 · *Sobre mí* sube a dos animaciones, y su retrato responde al
+  cursor.** Lo pidió Emi: «entra sin más, ease in, agrega animaciones, que se
+  vea pro, la imagen al hacer hover que tome color y se levante un poquito
+  solamente». La tabla dice «dos animaciones fuera de la Home» y la página
+  tenía **una** —el revelado al bajar, que ahora además se aplica a los
+  párrafos y al formulario, y eso no suma: es la enmienda del 31 de agosto,
+  aplicar un movimiento que ya existe a más elementos—. La segunda es **la
+  entrada**: al cargar, el titular y los renglones suben 16 px y se funden en
+  escalera de 60 ms, y el retrato se funde sin subir. Cuenta como una: son dos
+  `@keyframes` porque el texto y la foto no pueden hacer lo mismo —mover media
+  pantalla pegada a tres bordes despega la regla del costado del borde de la
+  ventana, y se lee como un fallo—, pero es un solo gesto y una sola curva, la
+  del revelado (`--ease-reveal`).
+
+  Queda **en el tope, no por debajo**: una animación más en *Sobre mí* es otra
+  enmienda.
+
+  **El hover del retrato no cuenta**, por la enmienda del 20 de agosto: es
+  respuesta a una acción, de la misma familia que el subrayado de un enlace.
+  Toma color —lo mismo que hace la lámina de la Home, solo que disparado por el
+  cursor y no por el scroll, porque acá la foto está quieta mientras se lee la
+  columna de al lado— y se levanta **un escalón de la rejilla, 8 px**. Ni uno
+  más: a partir de ahí deja de ser un retrato en una página y empieza a ser una
+  tarjeta, que es otro sistema de diseño. El hueco que abre por abajo es de
+  papel, no de sombra — **el sistema sigue diciendo sombras cero y esta no es
+  la excepción de la cápsula del menú**. Va dentro de `@media (hover: hover)`:
+  en una pantalla táctil el `:hover` se queda pegado después de tocar y el
+  retrato se quedaría a color y en el aire. Quien pide menos movimiento se
+  queda con el color, que no es movimiento, y sin el salto.
 
 - **21 sep 2026 · Las dos páginas de lectura se quedan sin numerales, y con
   ellos se va el hueco del margen.** Decisión de Emi: «no suma nada». Salieron
@@ -1673,7 +1745,8 @@ Y antes, las dos del PR #4:
 src/
   assets/fonts/          Las tres familias en woff2 + OFL.txt
   assets/img/            contrabajo.webp, el fondo de la Home
-                         emilse-madrid.jpg, la lámina de la Home
+                         emilse-hero.jpg, la lámina de la Home
+                         about-me.jpg, el retrato de Sobre mí
                          emilse-membresia.jpg, el retrato de la carta
   components/
     Header.astro                   Cabecera: la firma centrada y el menú
@@ -1707,8 +1780,9 @@ src/
   data/home.ts           Textos de la Home (es / en)
   data/about.ts          Textos de Sobre mí (es / en). Cinco tipos de bloque:
                          entrada con foto, prosa, frase-ancla —que admite
-                         varias líneas—, formulario y testimonios
-  data/aula.ts           El catálogo: los 7 productos y sus cartas (es / en)
+                         varias líneas—, formulario y testimonios. El de
+                         testimonios está montado y sin usar: espera los de Emi
+  data/aula.ts           El catálogo: los productos y sus cartas (es / en)
                          — la FACHADA, lo que se vende
   data/cursos.ts         Unidades, clases y videos de Bunny — lo que se COMPRA.
                          Se ata a data/aula.ts por el slug
@@ -1850,35 +1924,53 @@ que es contenido de Emi — ver **Pendiente → Contenido que falta**.
 ### Cambiar la foto de la lámina
 
 La lámina es la foto de la Home, justo después del formulario. El fichero es
-`src/assets/img/emilse-madrid.jpg`: **1536 × 948, a color**.
+`src/assets/img/emilse-hero.jpg`: **1400 × 2104, vertical, a color** (desde el
+21 sep 2026; antes fue `emilse-madrid.jpg`, horizontal).
 
 - **A color, aunque se vea en blanco y negro.** El gris lo pone el CSS, porque
   el revelado necesita el color debajo para poder devolverlo. Si se sube ya
   desaturada, el efecto no tiene de dónde sacarlo.
-- **1536 px de ancho.** La lámina se presenta a 640 px CSS —la medida de
-  lectura—, que en densidad 2 son 1280. Astro genera el 1× y el 2× (48 y
-  165 kB en WebP); el original solo tiene que dar de sobra.
-- **El encuadre no se toca.** Este lo recortó Emi: llega a 2048 × 1264 y solo
-  se reescala. `aspect-ratio` en `Home.astro` vale exactamente lo que el
-  fichero —`1536 / 948`— para que el marco no vuelva a recortar por su cuenta.
-  **Si se cambia la foto por otra de proporción distinta, hay que cambiar ese
-  `aspect-ratio` con ella**, o el marco la recorta en silencio.
+- **1400 px de ancho.** La lámina se presenta a 432 px CSS como máximo —ver el
+  tope de abajo—, que en densidad 2 son 864. Astro genera el 1× y el 2× (43 y
+  176 kB en WebP); el original solo tiene que dar de sobra. Si algún día vuelve
+  a ser horizontal y a ocupar la columna entera, el ancho de presentación sube
+  a 640 y el original tiene que dar 1280.
+- **Es la única imagen del sitio con `quality` escrito.** 70, en `Home.astro`.
+  Por defecto Astro saca el 2× en 269 kB, el triple que el retrato de *Sobre
+  mí*: es una fachada de piedra a contraluz y la textura no comprime. A 70 son
+  176 y el recorte a tamaño real no enseña un solo artefacto. Con otra foto de
+  menos grano, esto sobra y se quita.
+- **El encuadre no se toca.** `aspect-ratio` en `Home.astro` vale exactamente lo
+  que el fichero —`1400 / 2104`— para que el marco no vuelva a recortar por su
+  cuenta. **Si se cambia la foto por otra de proporción distinta, hay que
+  cambiar ese `aspect-ratio` con ella**, o el marco la recorta en silencio.
+- **Y si es vertical, hay que mirar el tope de ancho.** `.plate__fig` lo deja en
+  `min(100%, 27rem)`. Sin él, esta proporción a los 640 px de la columna da
+  961 px de alto: más que la ventana de casi cualquier portátil, y la foto deja
+  de verse entera. Los 432 la dejan en 649, que entra de una vez en una ventana
+  de 768. **Con una foto horizontal ese tope sobra** —una horizontal a 640 px
+  no pasa de 400 de alto— y se quita.
 
-El original está en el commit `d63b52b`, en `public/image_hero_3.png` (4,2 MB).
-Se sacó de `public/` a propósito: ahí se servía en crudo al navegador, sin
-pasar por el optimizador. Las dos fotos anteriores de la lámina siguen en el
-historial: el retrato corto en `378eccb` (`public/image_hero.jpg`) y la de
-cuerpo entero, vertical, en `58dd75c` (`public/image_hero_2.jpg`).
+El original de la de hoy está en el commit `d9d369d`, en `public/image_hero_2.jpg`
+(12,9 MB), y salió de `public/` el 21 sep 2026 al entrar en uso. Es la regla de
+siempre: en `public/` se sirve en crudo al navegador, sin pasar por el
+optimizador. Las fotos anteriores siguen en el historial: la horizontal de
+Madrid en `d63b52b` (`public/image_hero_3.png`, 4,2 MB) y, antes de esa, el
+retrato corto en `378eccb` (`public/image_hero.jpg`).
 
 Para rehacerla desde el original:
 
 ```js
 sharp(original)
-  .resize({ width: 1536 })
-  .jpeg({ quality: 82, mozjpeg: true, chromaSubsampling: '4:4:4' })
+  .rotate()                       // respeta el EXIF; una vertical sin esto sale tumbada
+  .resize({ width: 1400 })
+  .jpeg({ quality: 82, mozjpeg: true, progressive: true })
 ```
 
 El texto del pie y el `alt` viven en `src/data/home.ts`, en el bloque `plate`.
+**El `alt` describe la foto, así que se reescribe con ella** — el de hoy dice
+«sosteniendo su contrabajo en horizontal delante de un portal de madera», que es
+lo que se ve; el anterior decía «con su contrabajo al hombro», que ya no.
 El pie es el mismo en los dos idiomas; el `alt`, no.
 
 ### Subir o bajar el contrabajo del fondo
@@ -2056,7 +2148,9 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
   tenerlo dos veces en la misma página es decirlo dos veces; y **el bloque del
   video**, con su marco vertical. Entra **el retrato**, que ya llegó, y el
   rótulo «Qué dicen mis alumnos» encima de los testimonios, que antes no tenían
-  ninguno.
+  ninguno. (Ese rótulo y sus tres huecos duraron una tarde: **salieron el mismo
+  día**, en la tanda siguiente, y esperan los testimonios de verdad. Ver
+  **Pendiente → Contenido que falta**.)
 
   Dos cosas nuevas en los componentes, las dos porque el copy las pidió:
   `MediaSlot` acepta `position` para elegir qué salva el recorte, y el
@@ -2300,8 +2394,12 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
   diferencia no se ve.
 - **Slug propio por idioma.** `/sobre-mi/` y `/en/about/`, no `/en/sobre-mi/`.
 - **Nada que no funcione se publica enlazado.** El «Reproducir» del video está
-  apagado a propósito, no roto, y los seis cursos por salir son fichas sin
-  enlace. «Aula Virtual» estuvo apagada en el menú hasta el 31 ago 2026, que es
+  apagado a propósito, no roto, y el curso por salir es una ficha sin enlace.
+  **Y desde el 21 sep 2026 su reverso:** un hueco anunciado vale mientras la
+  página se monta, pero en un sitio ya publicado se enseña de uno en uno y no
+  repetido. Salieron por eso cinco fichas de curso idénticas, los tres
+  testimonios en cursiva y las dos redes que llevaban a la portada de su
+  plataforma. «Aula Virtual» estuvo apagada en el menú hasta el 31 ago 2026, que es
   cuando empezó a llevar a algún sitio.
 - **Excepción consciente al tope de animaciones:** el acuse de recibo del
   formulario aparece con un fundido de 0,4 s. Es respuesta a una acción, de la
@@ -2672,13 +2770,14 @@ enseñárselo.
 
 ### Contenido que falta (de Emi)
 
-- [ ] **`public/image_hero_2.jpg`, subida el 21 sep 2026, no la usa nadie.**
-      ⚠️ **Pesa 12,9 MB** y está en `public/`, que va tal cual al CDN sin pasar
-      por el optimizador de Astro. Si se va a usar, hay que moverla a
-      `src/assets/img/` e importarla —como se hizo con el retrato de *Sobre mí*,
-      que de 320 kB sale a 48—; si no, borrarla. Tal como está hoy es peso
-      muerto en el repositorio, pero **el día que alguien la referencie desde
-      `public/` son 12,9 MB que se le descargan a cada visita.**
+- [x] **`public/image_hero_2.jpg` (12,9 MB) — resuelta el 21 sep 2026.** Era la
+      foto vertical de Emi en la calle, subida sin usar y pesando en `public/`,
+      que va tal cual al CDN sin pasar por el optimizador. **Ahora es la lámina
+      de la Home**: se reescaló a `src/assets/img/emilse-hero.jpg` (1400 px,
+      558 kB de origen, 43 y 176 kB en WebP al servirse) y el original salió de
+      `public/`, junto con la copia pequeña que Emi dejó en `public/img/`. Los
+      dos siguen en el historial —commit `d9d369d` y `722b739`— y la receta para
+      rehacerla está en **Recetas → Cambiar la foto de la lámina**.
 
 - [x] **Retrato con el contrabajo para *Sobre mí*.** Llegó el 21 sep 2026 como
       `about_me.jpg` y vive en `src/assets/img/about-me.jpg`: **2048 × 1362, a
@@ -2695,13 +2794,29 @@ enseñárselo.
       **Sin prisa desde el 21 sep 2026:** el copy nuevo se llevó «Correos
       anteriores» de la Home y ahora mismo no hay ninguna página que los
       muestre. Dejan de hacer falta hasta que Emi quiera el archivo de vuelta.
-- [ ] **Los tres testimonios** de *Sobre mí*.
-- [ ] **Enlaces reales de Instagram y YouTube.** Apuntan a las portadas.
+- [ ] **Los tres testimonios** de *Sobre mí*. ⚠️ **El bloque salió de la página
+      el 21 sep 2026** y está esperando: los tres huecos en cursiva que decían
+      «testimonio pendiente» valían mientras la página se montaba, pero el sitio
+      ya está publicado y un visitante no tiene por qué leer nuestras notas
+      internas. **Volver es una sola línea de trabajo**, no un rediseño: el tipo
+      `testi`, su caso en `About.astro` y su CSS siguen puestos y sin tocar, así
+      que basta con escribir el bloque en `src/data/about.ts` —la forma exacta
+      está anotada ahí mismo, donde estaba— en los dos idiomas.
+- [ ] **Enlaces reales de Instagram y YouTube.** ⚠️ **Los dos salieron del pie
+      el 21 sep 2026.** Apuntaban a `instagram.com` y `youtube.com` —la portada
+      de cada plataforma, no las cuentas de Emi—, y un enlace que no lleva a
+      ninguna parte es peor que no tenerlo. Vuelven en cuanto lleguen las
+      direcciones de verdad, y entonces con `rel="me"`, que es lo que ata un
+      perfil a su dueño. Son dos líneas en `Footer.astro` y sus dos rótulos en
+      `src/i18n/ui.ts` —`footer.instagram` y `footer.youtube`, que también
+      salieron—.
 - [ ] **El nombre, el precio, el enlace de pago, la foto y la carta del PRIMER
       curso.** Es lo único que le falta a la página de Productos para dejar de
-      ser un catálogo de marcadores: hoy las seis fichas dicen «Curso 1» a
-      «Curso 6», con el marco de la foto vacío, y salen como «Próximamente»,
-      sin enlace, porque no hay nada a lo que enlazar. Hace falta el nombre, una
+      ser un catálogo de marcadores: **desde el 21 sep 2026 queda una sola ficha
+      de curso** —«Curso 1», con el marco de la foto vacío y «Próximamente», sin
+      enlace, porque no hay nada a lo que enlazar—. Estuvieron las seis, y las
+      seis eran el mismo hueco repetido: seis copias de un hueco no anuncian
+      seis cursos, anuncian que la tienda está vacía. Hace falta el nombre, una
       línea de resumen, el precio, **una foto**, **el enlace de pago** —Stripe o
       PayPal, pago único— y la carta de ventas. En cuanto lleguen se escriben en
       `src/data/aula.ts` y su página de ventas aparece sola, con su botón; no hay
@@ -2716,9 +2831,18 @@ enseñárselo.
       completos** (19 sep 2026) y solo va a poner **uno a la venta ahora**; los
       otros dos se montan y se dejan en `borrador`, listos para que ella los
       publique el día que tenga su proceso de venta. Del primero ya está el
-      esqueleto; de los otros dos falta todo. Ojo con el número: el catálogo
-      tiene **seis** huecos de curso y ahora se habla de **tres**. Hay que
-      ajustar los que sobren.
+      esqueleto; de los otros dos falta todo. El desajuste del número —seis
+      huecos en el catálogo contra tres cursos reales— **se resolvió el 21 sep
+      2026 por el otro lado**: el catálogo anuncia uno. Los que falten vuelven
+      de uno en uno, y volver es añadir su número en la última línea de
+      `src/data/aula.ts` (`[1, 2].map(proximos)`); pero el que entre así sigue
+      siendo un marcador, y lo que de verdad lo publica es escribirle su
+      `copia`.
+
+      ⚠️ `curso-01` no es decorado: es el slug con el que `cursos.ts` ata el
+      curso de muestra del aula, y el que lleva la alumna de prueba en su
+      escritorio. Quitarlo del catálogo deja ese escritorio sin nada que
+      enseñar.
 - [ ] **Los correos de quienes ya compraron un curso** (unas 5 personas), para
       concederles el acceso a mano en la plataforma nueva. Adrián los pasa en
       cuanto los tenga (19 sep 2026).
