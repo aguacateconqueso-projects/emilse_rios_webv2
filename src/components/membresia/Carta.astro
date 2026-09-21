@@ -77,7 +77,7 @@ const ui = useTranslations(lang);
 // catálogo y el conmutador de idioma. Si se cambiara el slug, esto va detrás
 // solo.
 // ---------------------------------------------------------------------------
-const SITE = Astro.site?.origin ?? 'https://contrabajoenlaciudad.com';
+const SITE = Astro.site?.origin ?? 'https://www.emilserios.com';
 const urlES = `${SITE}${productPath(slug, 'es')}`;
 const urlEN = `${SITE}${productPath(slug, 'en')}`;
 const canonical = isEN ? urlEN : urlES;

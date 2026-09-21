@@ -35,7 +35,14 @@ function cut(slug, weight, style) {
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://contrabajoenlaciudad.com',
+  /**
+   * El dominio de verdad desde el 21 sep 2026. De acá salen el
+   * `<link rel="canonical">`, las URLs absolutas y el futuro sitemap, así que
+   * tiene que ser **el canónico**, con `www`: en Vercel el ápice
+   * `emilserios.com` hace un 308 hacia `www.emilserios.com`, y apuntar los
+   * canónicos a una dirección que redirige es pedirle a Google que adivine.
+   */
+  site: 'https://www.emilserios.com',
 
   /**
    * El sitio sigue siendo **estático**: cada página se genera en el build, igual
