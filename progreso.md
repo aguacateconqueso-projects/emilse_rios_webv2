@@ -4,10 +4,10 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 20 de septiembre de 2026 · **la capa A está en pie**:
-el repo lleva adaptador de Vercel, habla con el Supabase de la academia, y el
-aula **ya pide sesión de verdad** — con `/panel/` para Emi y el enlace de ida y
-vuelta que ya conoce
+**Última actualización:** 21 de septiembre de 2026 · **la capa A está en pie y
+mergeada** —adaptador de Vercel, sesión contra el Supabase de la academia,
+`/panel/` para Emi— y **Edu ofrece acceso de colaborador en Hostinger y la ruta
+Cloudflare**, pendiente de una llamada de 30 min
 
 ---
 
@@ -17,20 +17,22 @@ vuelta que ya conoce
 |---|---|
 | **Publicado** | Sí, en Vercel. Despliega solo en cada merge a `main`. |
 | **Dominio** | Pendiente. Todavía se ve en la URL de Vercel. El destino es `emilserios.com`. |
-| **Páginas** | Home, Sobre mí, Productos, la puerta del Aula Virtual y —desde el 11 sep 2026— **el aula por dentro**, en español e inglés. |
+| **Páginas** | Home, Sobre mí, Productos, el Aula Virtual —puerta y aula por dentro— y sus pantallas de acceso, en español e inglés. Más `/panel/`, la consola de Emi, solo en español. |
 | **Identidad** | El logo de Emi, vectorizado, en cabecera, pie, entrada y favicon. |
 | **Alcance** | Desde el 31 ago 2026 esto deja de ser solo el sitio: aquí van también el aula, la membresía y los cursos. Ver **La plataforma**. |
+| **Sesión** | Desde el 20 sep 2026 el aula pide sesión de verdad, contra el **mismo Supabase de la academia**. Falta poner las variables en Vercel y las Redirect URLs en Supabase; sin eso queda en modo maqueta y lo dice. |
 | **Lo que falta para lanzar** | Conectar Klaviyo. El formulario **no da de alta a nadie**. |
 
 Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/` · `/productos/` ·
 `/en/products/` · `/productos/estudiemos-juntos/` ·
 `/en/products/estudiemos-juntos/` · `/aulavirtual/` · `/en/classroom/`
 
-Y el aula por dentro, que es **maqueta navegable** y no pide sesión todavía:
-`/aulavirtual/escritorio/` · `/aulavirtual/curso/<slug>/` ·
-`/en/classroom/desk/` · `/en/classroom/course/<slug>/`. Van con `noindex`, y
-**desde el 20 sep 2026 piden sesión** — salvo si falta la configuración de
-Supabase, y entonces lo dicen. Las direcciones viejas —`…/panel/`— redirigen:
+Y el aula por dentro: `/aulavirtual/escritorio/` · `/aulavirtual/curso/<slug>/` ·
+`/en/classroom/desk/` · `/en/classroom/course/<slug>/`. Van con `noindex` y
+**desde el 20 sep 2026 piden sesión** — salvo si faltan las variables de
+Supabase, y entonces se dejan mirar y lo avisan en pantalla. **El contenido
+sigue siendo de muestra**: la maqueta ya tiene puerta, pero detrás no hay
+todavía ni un video de verdad. Las direcciones viejas —`…/panel/`— redirigen:
 esa palabra quedó reservada para la consola de Emi.
 
 Y las de la puerta, nuevas del mismo día: `/aulavirtual/entrar/` ·
@@ -47,10 +49,12 @@ catálogo, así que valen para cualquier producto que se publique.
 **Lo que está en marcha ahora mismo** es la plataforma, y el 19 de septiembre
 de 2026 se movieron tres cosas a la vez:
 
-- **Edu contestó.** El dominio no está donde creíamos: está en **Namecheap**, y
-  en Hostinger solo está el hosting. Propone mudar el hosting primero y el
-  dominio después — y ese orden, tal cual, **es el que rompe el correo de Emi**.
-  Está contado entero en **El dominio, y Edu**.
+- **Edu está contestando, y ahora sí se mueve.** El dominio no está donde
+  creíamos —es **Namecheap**, y en Hostinger solo el hosting—, y su primera
+  propuesta, mudar el hosting antes que nada, **es la que rompe el correo de
+  Emi**. En su segunda respuesta ofrece **acceso de colaborador en Hostinger** y
+  **delegar el DNS a Cloudflare**, que son las dos cosas buenas. Queda una
+  llamada de 30 min con cuatro datos que sacar. Todo en **El dominio, y Edu**.
 - **Llegó la forma real del primer curso**: tres niveles de 4, 5 y 3 clases,
   **un solo producto**, y los videos **ya están todos en Bunny** — la migración
   desde Vimeo está terminada. No cambia el modelo, pero sí **el vocabulario**:
@@ -197,6 +201,65 @@ demás:
 red del entorno bloquea las consultas DNS. Es un `dig NS emilserios.com` desde
 cualquier terminal, o whatsmydns.net desde el navegador.
 
+#### La segunda respuesta, del 21 sep 2026
+
+Contestó otra vez, y ofrece dos cosas:
+
+> «Si quieres dame como 30 min y lo vemos, creo es más fácil si te agrego como
+> **colaborador dentro de Hostinger**.»
+>
+> «El dominio, ¿tienes los **DNS de Cloud**? Me gusta esa opción porque como ya
+> está en Hostinger entonces no hay un cambio como tal, sino que ya es tema
+> interno de propiedades.»
+
+**Las dos son buenas y las dos se aceptan.** El acceso de colaborador es lo
+mejor que ha ofrecido hasta ahora: deja de hacer falta preguntarle cómo está
+montado, porque se ve. Y Cloudflare es exactamente la ruta que este documento ya
+señalaba como la útil si él solo diera una cosa.
+
+⚠️ **Pero su frase mezcla dos cosas que no son la misma**, y conviene no
+heredarle la confusión:
+
+| | Qué es | Dónde está | Qué lo mueve |
+|---|---|---|---|
+| **El registro** | De quién **es** el dominio | Namecheap, cuenta de Edu | El push a una cuenta de Emi |
+| **La zona DNS** | Quién **responde** las consultas | Por confirmar | Cambiar los nameservers |
+
+Delegar el DNS a Cloudflare arregla lo técnico —y lo arregla del todo: el día
+que Edu borre el hosting, el DNS ya no depende de él—, **pero no cambia de quién
+es el dominio**. Eso sigue en su cuenta de Namecheap hasta que se haga el push.
+«No hay un cambio como tal» vale para el hosting; para el registro, no.
+
+Mientras el dominio esté en la cuenta de otro, Emi está a una renovación no
+pagada de perder su propio nombre. No es urgencia del mismo día, pero es lo que
+cierra el tema.
+
+⚠️ **La cuenta de Cloudflare la abre Emi (o Adrián por ella), nunca Edu.** Si la
+abre él, no se ha ganado nada: se cambia una dependencia por otra.
+
+#### Los cuatro datos que tiene que dar la llamada
+
+Con estos cuatro, el resto se arma sin volver a preguntarle nada:
+
+1. **A qué nameservers apunta `emilserios.com`.** Se ve en Namecheap, en la
+   ficha del dominio. Es el dato que decide todo el orden — la tabla de qué
+   significa cada respuesta está justo arriba.
+2. **Dónde vive `info@emilserios.com`**, cuántos buzones hay y quién los paga.
+3. **La zona DNS entera**, con los **MX** y los **TXT** (SPF, DKIM, DMARC). Son
+   los registros que rompen el correo si se pierden.
+4. **El listado de URLs publicadas**, que **se pierde para siempre** el día que
+   borre el sitio, y sin el cual cada enlace viejo cae en un 404.
+
+Y dos cuidados al migrar la zona a Cloudflare:
+
+- **Revisar los MX y los TXT a mano, registro por registro.** Cloudflare importa
+  lo que encuentra al añadir el dominio, pero no siempre los detecta todos — y
+  justo los de correo son los que más duelen. Se compara contra lo que pase Edu
+  **antes** de cambiar los nameservers, no después.
+- **Cuando se apunte a Vercel, esos registros van en DNS only** (nube gris), no
+  proxied. Cloudflare por delante de Vercel da problemas de certificado y de
+  caché. Los MX no se proxean nunca, de todos modos.
+
 #### El orden correcto, que es el suyo al revés
 
 ```
@@ -207,8 +270,8 @@ cualquier terminal, o whatsmydns.net desde el navegador.
 3  Se decide dónde vive el correo y SE MUDA. No se toca nada más hasta que
    llegue un correo de prueba al buzón nuevo.
 4  Edu hace el PUSH del dominio a la cuenta de Namecheap de Emi (instantáneo)
-5  Se delegan los nameservers a Cloudflare bajo cuenta de Emi, con la zona
-   replicada ANTES de delegar
+5  Se delegan los nameservers a Cloudflare —CUENTA DE EMI, no de Edu—, con
+   la zona replicada y REVISADA a mano ANTES de delegar
 6  emilserios.com apunta a Vercel — el cambio de dominio, que es la fase 6
 7  RECIÉN AHORA Edu borra el hosting. Es el último paso, no el primero.
 ```
@@ -2216,14 +2279,22 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
       `POST` a su API de perfiles. Hay que elegir además **a qué lista entra**
       quien se suscribe. Conviene contarlo antes de estimar.
 
-- [ ] **Contestarle a Edu, y lo primero es «no borres nada».** Contestó el 19 sep
-      2026 y ofrece **mudar el hosting primero**; ese orden apaga el plan de
-      Hostinger, y con él probablemente `info@emilserios.com` y quizá la zona DNS
-      entera. La respuesta es sí pero al revés, y los siete pasos en orden están
-      en **La plataforma → El dominio, y Edu**. Lo que hay que pedirle ahora:
-      **a qué nameservers apunta el dominio**, **dónde vive el correo**, la zona
-      DNS exportada y **el listado de URLs publicadas** —para los 301, y porque
-      esa lista se pierde el día que borre el sitio—.
+- [ ] **La llamada de 30 min con Edu**, que él mismo ofreció el 21 sep 2026
+      junto con el acceso de colaborador en Hostinger. Hay que salir de ahí con
+      **cuatro datos**: a qué nameservers apunta el dominio, dónde vive
+      `info@emilserios.com`, la zona DNS entera —con MX y TXT— y el listado de
+      URLs publicadas. Están en **El dominio, y Edu → Los cuatro datos que tiene
+      que dar la llamada**, junto con los dos cuidados al migrar la zona.
+      Y lo que no puede faltar decirle: **que no borre nada del hosting
+      todavía**.
+
+- [ ] **Abrir la cuenta de Cloudflare a nombre de Emi**, antes de la llamada. Si
+      la abre Edu, se cambia una dependencia por otra y no se ha ganado nada.
+
+- [ ] **El push del dominio a una cuenta de Namecheap de Emi.** Es lo que cierra
+      el tema y **no lo resuelve Cloudflare**: delegar el DNS arregla lo técnico,
+      pero el registro sigue en la cuenta de Edu. Mientras esté ahí, Emi está a
+      una renovación no pagada de perder su propio nombre.
 
 - [ ] **Comprobar a qué nameservers apunta `emilserios.com`.** Un minuto, y
       decide si apagar el hosting de Edu se lleva el DNS por delante o no. Se
