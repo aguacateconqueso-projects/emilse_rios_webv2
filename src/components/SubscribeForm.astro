@@ -13,8 +13,10 @@ import { type Lang, useTranslations } from '../i18n/ui';
 interface Props {
   lang: Lang;
   id: string;
+  /** Sin el hueco del numeral al margen: la Home ya no los tiene, *Sobre mí* sí. */
+  flush?: boolean;
 }
-const { lang, id } = Astro.props;
+const { lang, id, flush = false } = Astro.props;
 const t = useTranslations(lang);
 
 const endpoint = import.meta.env.PUBLIC_NEWSLETTER_ENDPOINT ?? '';
@@ -22,8 +24,8 @@ const inputId = `${id}-email`;
 const statusId = `${id}-status`;
 ---
 
-<div class="subscribe row" id={id}>
-  <div class="row__num" aria-hidden="true"></div>
+<div class:list={['subscribe', 'row', flush && 'row--flush']} id={id}>
+  {!flush && <div class="row__num" aria-hidden="true" />}
   <div class="row__body">
     <form
       class="subscribe__form"

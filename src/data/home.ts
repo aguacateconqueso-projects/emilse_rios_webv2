@@ -4,13 +4,13 @@ import type { Lang } from '../i18n/ui';
 export type Run = { text: string; mono?: boolean };
 
 export type Block =
-  | { k: 'hero'; n: string; eyebrow: string; title: string; lead: string }
+  | { k: 'hero'; eyebrow: string; title: string; lead: string }
   /** La lámina: la foto de Emi a lo ancho, con su pie. Ver `Home.astro`. */
   | { k: 'plate'; caption: string; alt: string }
-  | { k: 'runs'; n: string; runs: Run[] }
-  | { k: 'h2'; n: string; text: string }
-  | { k: 'prose'; n?: string; paras: string[] }
-  | { k: 'anchor'; num?: string; text: string }
+  | { k: 'runs'; runs: Run[] }
+  | { k: 'h2'; text: string }
+  | { k: 'prose'; paras: string[] }
+  | { k: 'anchor'; text: string }
   | { k: 'form'; id: string }
   /** La letra pequeña que cierra la página, debajo del último formulario. */
   | { k: 'fine'; text: string };
@@ -21,14 +21,12 @@ const es: HomeCopy = {
   blocks: [
     {
       k: 'hero',
-      n: '01',
       eyebrow: 'El newsletter',
       title: 'Contrabajo en la Ciudad',
       lead: 'Cada semana envío correos donde explico errores que estancan tu progreso con el contrabajo. Son tan obvios que parecen tontos, pero son tan comunes que tal vez los estés cometiendo a diario — sin saberlo.',
     },
     {
       k: 'runs',
-      n: '02',
       runs: [
         {
           text: 'Al suscribirte recibes un correo de bienvenida con un video. Se trata de un ejercicio donde te explico un concepto que va a cambiar tu forma de producir el sonido. El video dura ',
@@ -45,7 +43,7 @@ const es: HomeCopy = {
       caption: 'Emilse Ríos — Madrid',
       alt: 'Emilse Ríos sonriendo en una calle de Madrid, con su contrabajo al hombro delante de un portal de madera',
     },
-    { k: 'h2', n: '03', text: 'Quiero contarte por qué traje este newsletter al mundo' },
+    { k: 'h2', text: 'Quiero contarte por qué traje este newsletter al mundo' },
     {
       k: 'prose',
       paras: [
@@ -82,14 +80,12 @@ const en: HomeCopy = {
   blocks: [
     {
       k: 'hero',
-      n: '01',
       eyebrow: 'The newsletter',
       title: 'Double Bass in the City',
       lead: "Every week I send out emails where I break down the mistakes that are stalling your progress on the double bass. They're so obvious they sound silly, but they're so common you might be making them every single day — without knowing it.",
     },
     {
       k: 'runs',
-      n: '02',
       runs: [
         {
           text: "When you sign up you get a welcome email with a video. It's an exercise where I explain one concept that's going to change the way you produce sound. The video runs ",
@@ -106,7 +102,7 @@ const en: HomeCopy = {
       caption: 'Emilse Ríos — Madrid',
       alt: 'Emilse Ríos smiling on a street in Madrid, her double bass on her shoulder in front of a wooden doorway',
     },
-    { k: 'h2', n: '03', text: 'Let me tell you why I brought this newsletter into the world' },
+    { k: 'h2', text: 'Let me tell you why I brought this newsletter into the world' },
     {
       k: 'prose',
       paras: [
