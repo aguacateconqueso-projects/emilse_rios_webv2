@@ -181,12 +181,16 @@ export const entrarHref: Record<Lang, string> = {
 };
 
 /**
- * Los seis cursos que están por salir.
+ * Un curso por salir: su hueco anunciado en el catálogo.
  *
  * Emi los tiene grabados; lo que falta es su estrategia de venta —nombre,
- * promesa, precio, foto y carta—. Hasta que llegue, cada uno ocupa su sitio en
- * el catálogo como lo que es: un hueco anunciado, con su marco de foto vacío.
- * **Los nombres de abajo son marcadores**, no títulos.
+ * promesa, precio, foto y carta—. Hasta que llegue, ocupa su sitio en el
+ * catálogo como lo que es: un hueco anunciado, con su marco de foto vacío.
+ * **El nombre de abajo es un marcador**, no un título.
+ *
+ * La fábrica se queda aunque hoy solo se llame una vez — ver el catálogo, al
+ * final del fichero—: los cursos 2 a 6 vuelven en cuanto Emi diga cuáles son,
+ * y volver es añadir un número a esa lista.
  */
 const proximos = (n: number): Product => ({
   slug: `curso-0${n}`,
@@ -650,8 +654,27 @@ const membresia: Product = {
   },
 };
 
-/** El catálogo, en el orden en que se muestra. La membresía va primera. */
-export const catalogo: Product[] = [membresia, ...[1, 2, 3, 4, 5, 6].map(proximos)];
+/**
+ * El catálogo, en el orden en que se muestra. La membresía va primera.
+ *
+ * **Un solo curso anunciado desde el 21 sep 2026.** Estuvieron los seis, y los
+ * seis eran el mismo hueco repetido: «Curso 1» … «Curso 6», la misma línea de
+ * texto y el mismo marco vacío seis veces. Seis copias de un hueco no anuncian
+ * seis cursos, anuncian que la tienda está vacía — y eso en una página que ya
+ * está publicada. Con uno, la promesa se lee igual y la rejilla no se llena de
+ * relleno.
+ *
+ * Los otros cinco no se han cancelado: vuelven cuando cada uno tenga nombre,
+ * precio y carta, y entonces vuelven de uno en uno. Añadir su número acá es
+ * todo lo que hace falta —`[1, 2].map(proximos)`— pero el que se añada así
+ * sigue siendo un marcador; lo que de verdad lo publica es escribirle su
+ * `copia`.
+ *
+ * ⚠️ `curso-01` no es decorado: es el slug que `cursos.ts` usa para el curso
+ * de muestra del aula, y el que lleva la alumna de prueba en su escritorio.
+ * Quitarlo de acá deja ese escritorio sin nada que enseñar.
+ */
+export const catalogo: Product[] = [membresia, ...[1].map(proximos)];
 
 /** Los que tienen página propia: hoy, solo la membresía. */
 export const conPagina = (): Product[] =>

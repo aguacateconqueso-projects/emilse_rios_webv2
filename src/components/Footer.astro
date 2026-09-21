@@ -22,13 +22,14 @@ const t = useTranslations(lang);
       </a>
     </div>
 
+    {/*
+      Sin redes desde el 21 sep 2026. Instagram y YouTube estaban acá como dos
+      enlaces a la portada de cada plataforma —`instagram.com`, `youtube.com`—,
+      no a las cuentas de Emi: un enlace que no lleva a ninguna parte es peor
+      que no tenerlo. Cuando lleguen las direcciones de verdad vuelven, y
+      entonces con `rel="me"`, que es lo que ata un perfil a su dueño.
+    */}
     <nav class="footer__nav mono" aria-label={t('site.name')}>
-      <a class="footer__link" href="https://instagram.com/" rel="me noopener">
-        {t('footer.instagram')}
-      </a>
-      <a class="footer__link" href="https://youtube.com/" rel="me noopener">
-        {t('footer.youtube')}
-      </a>
       <a class="footer__link" href={routePath('about', lang)}>{t('nav.about')}</a>
       <a class="footer__link" href={routePath('products', lang)}>{t('nav.products')}</a>
       <a class="footer__link" href={routePath('aula', lang)}>{t('nav.aula')}</a>

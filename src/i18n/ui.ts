@@ -75,8 +75,6 @@ export const ui = {
       'El aula nueva —la que vivirá acá dentro— ya se puede recorrer. Es una maqueta con contenido de muestra: sirve para verla y opinar, todavía no para estudiar.',
     'aula.previewCta': 'Recorrer la maqueta del aula',
     'footer.email': 'info@emilserios.com',
-    'footer.instagram': 'Instagram',
-    'footer.youtube': 'YouTube',
   },
   en: {
     'site.title': 'Double Bass in the City',
@@ -145,8 +143,6 @@ export const ui = {
       "The new classroom — the one that will live in this house — can already be walked through. It's a mock-up with sample content: good for looking and giving notes, not yet for studying.",
     'aula.previewCta': 'Walk through the classroom mock-up',
     'footer.email': 'info@emilserios.com',
-    'footer.instagram': 'Instagram',
-    'footer.youtube': 'YouTube',
   },
 } as const;
 

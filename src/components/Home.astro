@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 import { type Lang, useTranslations } from '../i18n/ui';
 import { getHomeCopy } from '../data/home';
 import SubscribeForm from './SubscribeForm.astro';
-import emilseMadrid from '../assets/img/emilse-madrid.jpg';
+import emilseHero from '../assets/img/emilse-hero.jpg';
 
 interface Props {
   lang: Lang;
@@ -29,12 +29,26 @@ const { blocks } = getHomeCopy(lang);
         return (
           <section class="row row--flush block plate">
             <div class="row__body">
-              <figure>
+              <figure class="plate__fig">
                 <div class="plate__frame">
+                  {/*
+                    440 y no 640: el marco de abajo no pasa de 432 px, así que
+                    pedir el ancho de la columna entera era bajar el doble de
+                    píxeles para tirar la mitad.
+
+                    Y `quality` escrito, que es la única imagen del sitio que
+                    lo lleva. Por defecto Astro saca el 2× en 269 kB — el
+                    triple que el retrato de *Sobre mí*—: es una fachada de
+                    piedra a contraluz y la textura no comprime. A 70 son 175 y
+                    el recorte a tamaño real no enseña ni un artefacto. Si
+                    alguna vez se cambia la foto por una de menos grano, esto
+                    sobra y se quita.
+                  */}
                   <Image
-                    src={emilseMadrid}
+                    src={emilseHero}
                     alt={block.alt}
-                    width={640}
+                    width={440}
+                    quality={70}
                     densities={[1, 2]}
                     class="plate__img"
                   />
@@ -156,11 +170,25 @@ const { blocks } = getHomeCopy(lang);
      foto lo rompía. Al meterla en la rejilla no puede volver a salirse, venga
      el ancho que venga.
 
-     Horizontal, y esto ya se probó de las dos formas: en vertical, al lado del
-     texto, las dos columnas quedan tan estrechas que ni el párrafo ni la foto
-     tienen sitio — la medida de lectura son 640 px y no caben dos columnas
-     útiles dentro. A lo ancho de la columna, la foto se lee de un vistazo y no
-     compite con nada. */
+     **Desde el 21 sep 2026 es vertical**, y sigue dentro de la misma rejilla.
+     Lo que se descartó en su día era otra cosa: una vertical *al lado* del
+     texto, en dos columnas, que no cabe en una medida de 640 px. Una vertical
+     sola, centrada en la columna, sí cabe — y no hace falta recortarla.
+
+     Lo que sí pide una vertical es un tope de ancho. A los 640 px de la
+     columna, esta proporción da 961 px de alto: más que la ventana de casi
+     cualquier portátil, así que la foto dejaría de verse entera y pasaría a
+     ser una pared por la que se baja. Los 432 px de abajo la dejan en 649 de
+     alto, que entra de una vez en una ventana de 768. Por debajo de ese ancho
+     manda el `100%` y en el teléfono ocupa la columna entera, como siempre.
+
+     Centrada y no pegada al margen izquierdo: en una columna de lectura, una
+     vertical alineada a un lado deja una franja de papel vacío que se lee como
+     un error de maquetación y no como aire. */
+  .plate__fig {
+    max-width: min(100%, 27rem); /* 432 px → 649 px de alto */
+    margin-inline: auto;
+  }
 
   /* `clip` y no `hidden`. Los dos recortan igual lo que el acercamiento saca
      del marco, pero `hidden` convierte el marco en contenedor de scroll —uno
@@ -169,11 +197,11 @@ const { blocks } = getHomeCopy(lang);
      contenedor, así que la imagen queda atada al documento, que es quien de
      verdad se mueve. */
   .plate__frame {
-    /* Es la proporción exacta del fichero (1536 × 948), así que el marco no
+    /* Es la proporción exacta del fichero (1400 × 2104), así que el marco no
        vuelve a recortar nada: el encuadre es el que eligió Emi. Si algún día
        se cambia la foto, hay que cambiar esto con ella o el marco la recorta
        por su cuenta. */
-    aspect-ratio: 1536 / 948;
+    aspect-ratio: 1400 / 2104;
     overflow: clip;
   }
 
@@ -194,7 +222,7 @@ const { blocks } = getHomeCopy(lang);
   /* Sin recorte aparte para móvil, a propósito. Lo hubo mientras la foto era
      una panorámica 2:1 con media calle vacía: a 342 px de ancho quedaba una
      tira de 171 px y había que recortar por los lados. Este encuadre lo eligió
-     Emi y ya viene cerrado —1,62 en vez de 2— así que en estrecho se mantiene
+     Emi y ya viene cerrado —vertical, 0,67— así que en estrecho se mantiene
      entero. Volver a recortarlo por CSS sería deshacer su decisión. */
 
   /* --- El revelado de la lámina -------------------------------------------
