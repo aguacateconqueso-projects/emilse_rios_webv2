@@ -26,7 +26,11 @@
   /* Línea — reglas de 1 px. Decorativa, sin requisito de contraste. */
   --rule: rgba(13, 13, 13, 0.12);
 
-  /* Los mismos papeles sobre fondo de tinta (cierre en negro). */
+  /* Los mismos papeles sobre fondo de tinta. Sin uso desde el 21 sep 2026: su
+     único cliente era el cierre en negro de la Home, que salió con el copy
+     nuevo de Emi. Se quedan en la paleta —son la mitad en tinta del papel y de
+     la regla, no un invento de aquel bloque— y con su medida hecha, para que
+     la próxima sección oscura no tenga que volver a calcularla. */
   --paper-soft: rgba(250, 250, 248, 0.55); /* 6,01:1 sobre --ink ✓ */
   --paper-rule: rgba(250, 250, 248, 0.35);
 

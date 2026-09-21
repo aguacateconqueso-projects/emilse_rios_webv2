@@ -101,7 +101,7 @@ export const ui = {
 
     'form.label': 'Your email address',
     'form.placeholder': 'your@email.com',
-    'form.cta': 'Subscribe here',
+    'form.cta': 'Sign up here',
     'form.done': 'Done. Check your inbox.',
     'form.error': "That email doesn't look valid. Mind checking it?",
     'form.failed':

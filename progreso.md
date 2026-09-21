@@ -4,10 +4,12 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 21 de septiembre de 2026 · **la capa A está en pie y
-mergeada** —adaptador de Vercel, sesión contra el Supabase de la academia,
-`/panel/` para Emi— y **Edu ofrece acceso de colaborador en Hostinger y la ruta
-Cloudflare**, pendiente de una llamada de 30 min
+**Última actualización:** 21 de septiembre de 2026 · **la Home lleva el copy
+nuevo de Emi** —más corta, sin archivo de correos y sin el cierre en negro—;
+la capa A está en pie y mergeada —adaptador de Vercel, sesión contra el
+Supabase de la academia, `/panel/` para Emi— y **Edu ofrece acceso de
+colaborador en Hostinger y la ruta Cloudflare**, pendiente de una llamada de
+30 min
 
 ---
 
@@ -1575,7 +1577,12 @@ src/
     aula/Curso.astro               El reproductor: índice, clase, hilo de dudas
     aula/Boton.astro               El botón de la carta (relleno + flecha + notas)
     Compra.astro                   El bloque de precio y el botón de comprar
-    EmailArchive.astro             Fichas del newsletter + <dialog>
+    EmailArchive.astro             Fichas del newsletter + <dialog>. Desde el
+                                   21 sep 2026 NO SE USA en ninguna página:
+                                   el copy nuevo de la Home se lleva por
+                                   delante «Correos anteriores». Se guarda
+                                   entero, con su colección, para cuando Emi
+                                   lo quiera de vuelta
     SubscribeForm.astro            Campo de suscripción
     MediaSlot.astro                Hueco de imagen
   content/correos/       Un .md por correo y por idioma
@@ -1646,6 +1653,13 @@ El cuerpo, en Markdown.
 
 No hay que tocar código. Se ordenan solos de mayor a menor. Quitar
 `borrador: true` de los tres actuales cuando lleguen los correos de verdad.
+
+⚠️ **Hoy no se ven en ninguna parte.** El copy nuevo de la Home (21 sep 2026)
+se llevó por delante «Correos anteriores», que era la única ficha que los
+sacaba. La colección, el esquema y `EmailArchive.astro` siguen enteros y
+funcionando: devolverlos a la página es añadir un bloque a `data/home.ts` y su
+`case` en `Home.astro`. Hasta que eso pase, dejar correos ahí es escribir para
+un cajón.
 
 ### Poner un curso a la venta
 
@@ -1834,16 +1848,27 @@ a `.skip`. Toda regla del aula que pinte un enlace va prefijada con `.aula`.
 
 `npm run audit:menu` es la misma idea aplicada al panel del menú, que también
 es translúcido y por el que también pasa la página. Abre el menú y mide sus
-cuatro renglones sobre los tres fondos que existen: el bloque negro del cierre
-—el peor caso—, una fotografía y papel liso.
+renglones sobre los fondos que existen: hoy la fotografía de la lámina y papel
+liso.
 
 ```
-peor caso de todos .......................... 4,83:1 ✓   (el cierre en negro)
+peor caso de todos .......................... 6,58:1 ✓   (la lámina)
 ```
+
+Fueron tres hasta el 21 sep 2026, y el tercero —el bloque negro del cierre— era
+el peor con diferencia: 4,83:1, a un pelo de AA. Salió de la Home con el copy
+nuevo de Emi y salió también de acá, porque no queda ninguna sección en tinta
+plena por la que pase el menú. **El velo se eligió contra ese fondo**, así que
+si algún día vuelve una sección oscura hay que devolver el escenario al script
+antes de darlo por bueno: los 6,58:1 de ahora no dicen nada sobre ella.
+
+La lámina se busca por selector (`.plate`) y no por una altura fija. Estaba a
+700 px de scroll, y el copy nuevo la bajó: la medición se hacía sobre el papel
+de encima y salía un número que no era el de la foto.
 
 Sirve además para **elegir el velo**: con `VELO=66% npm run audit:menu` se mide
 sin tocar el token. Así se encontró el suelo, entre 62 % (4,37:1, por debajo de
-AA) y 66 % (4,66:1).
+AA) y 66 % (4,66:1) — medido contra el bloque negro, que era el caso duro.
 
 **Sin el método de las dos capturas no hay medición posible.** El primer
 intento buscaba los píxeles más oscuros del renglón y daba 1,00:1 en sitios
@@ -1865,6 +1890,22 @@ solo llegaba como dependencia transitiva de Astro, que es como no tenerlo.
 Están discutidas y resueltas. No hace falta volver sobre ellas salvo que Emi
 pida lo contrario. Las que tienen que ver con la plataforma —dominio, aula,
 cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
+
+- **21 sep 2026 · La Home es el copy de Emi y nada más.** Emi volvió a
+  reescribir el texto de la portada, y esta vez la página se acorta: la
+  historia del conservatorio pasa de seis párrafos a tres, el párrafo del video
+  deja de citar el minuto `3:36` —solo queda el `4:04` en mono— y el remate ya
+  no es una amenaza sino la letra pequeña, «Suscribirse es gratis, darse de
+  baja también». En inglés el botón pasa de «Subscribe here» a «Sign up here»,
+  que es como lo escribió ella; como la cadena es compartida, cambia también en
+  *Sobre mí*.
+
+  **Salen dos secciones enteras**, por decisión suya ese mismo día: «Correos
+  anteriores» —el archivo del newsletter— y el cierre en negro. La página
+  termina donde termina el copy: en el segundo formulario y esa línea. Lo que
+  arrastra cada una está anotado donde toca — el archivo en **Recetas →
+  Publicar un correo del newsletter**, el bloque negro en **La auditoría del
+  menú**, que lo usaba como peor caso de contraste.
 
 - **19 sep 2026 · Emi maneja su plataforma sola, y la línea está trazada.**
   Contenido —cursos, clases, precios, estados, cartas, personas y accesos— a la
@@ -2126,10 +2167,16 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
   se escribe la firma. Y hace dos trabajos concretos: demuestra el título
   (contrabajo, calle, ciudad) y pone cara al «yo» que escribe, que en un
   newsletter en primera persona no es adorno.
-- **El orden de la apertura es título → subtítulo → formulario → lámina, en
-  columna.** Decisión de Emi, 13 ago 2026, después de probar la alternativa. La
+- **La apertura va en columna, y el formulario siempre justo encima de la
+  lámina.** Decisión de Emi, 13 ago 2026, después de probar la alternativa. La
   portada va centrada arriba; el formulario y la lámina siguen en la rejilla de
-  lectura, uno debajo del otro. Nada en paralelo.
+  lectura, uno debajo del otro. Nada en paralelo. El 21 sep 2026 el copy nuevo
+  metió el párrafo del video entre la portada y el formulario —el orden es
+  título → subtítulo → párrafo del video → formulario → lámina—, porque es ahí
+  donde Emi puso el «[Acá te suscribes]». **Lo que no se movió es el par
+  formulario → lámina**, que es lo que esa decisión protege: la foto no puede
+  quedar por encima del formulario ni pegada al título, o la página pasa a ser
+  sobre ella y no sobre el newsletter.
 - **Se probó la apertura a dos columnas —párrafo a la izquierda, foto a la
   derecha— y no funcionó.** Está en el historial en el PR #12, y conviene saber
   por qué se deshizo antes de volver a proponerla: **la medida de lectura son
@@ -2143,9 +2190,9 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
 - **La portada va centrada y fuera de la rejilla de lectura.** El título, el
   subtítulo y el párrafo de entrada van centrados en la página, con el numeral
   `01` centrado encima en vez de al margen — el mismo patrón que ya usaban las
-  frases-ancla y el cierre en negro para los momentos que no se leen en
-  columna. Ojo con una cosa al medirlo: la columna de lectura **no** está
-  centrada en la página, va 40 px a la derecha porque el numeral vive en el
+  frases-ancla, y el cierre en negro mientras existió, para los momentos que no
+  se leen en columna. Ojo con una cosa al medirlo: la columna de lectura **no**
+  está centrada en la página, va 40 px a la derecha porque el numeral vive en el
   margen izquierdo. La portada sí está centrada en la página. Esos 40 px de
   diferencia son a propósito, no un descuadre: la portada no tiene numeral al
   margen del que colgar.
@@ -2414,6 +2461,9 @@ enseñárselo.
 - [ ] **Video «Viaje en el tiempo»** (2:41) y su fotograma.
 - [ ] **Los tres correos reales.** Los N.º 40, 41 y 42 tienen asunto y adelanto
       de verdad, pero el cuerpo es de muestra — marcados `borrador: true`.
+      **Sin prisa desde el 21 sep 2026:** el copy nuevo se llevó «Correos
+      anteriores» de la Home y ahora mismo no hay ninguna página que los
+      muestre. Dejan de hacer falta hasta que Emi quiera el archivo de vuelta.
 - [ ] **Los tres testimonios** de *Sobre mí*.
 - [ ] **Enlaces reales de Instagram y YouTube.** Apuntan a las portadas.
 - [ ] **El nombre, el precio, el enlace de pago, la foto y la carta del PRIMER

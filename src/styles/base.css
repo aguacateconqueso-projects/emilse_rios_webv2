@@ -75,6 +75,10 @@ a:hover {
   outline-offset: 4px;
 }
 
+/* Sin uso desde el 21 sep 2026: el cierre en negro de la Home era la única
+   sección en tinta plena y salió con el copy nuevo de Emi. Se queda porque es
+   la regla, no el bloque: cualquier sección futura sobre tinta la necesita
+   para que el foco se vea, y es más fácil dejarla que acordarse de ella. */
 .on-ink :focus-visible {
   outline-color: var(--paper);
 }

@@ -5,8 +5,14 @@
  * contraste depende de lo que haya debajo en cada momento. Las dos primeras
  * comprobaciones de `audit.mjs` no lo ven —miran el `background-color` de los
  * ancestros, y acá el fondo es lo ya pintado—, así que esto mide sobre los
- * píxeles de verdad, con el menú abierto, en los tres fondos que existen:
- * el bloque negro del cierre (el peor caso), una fotografía, y papel liso.
+ * píxeles de verdad, con el menú abierto, en los dos fondos que existen hoy:
+ * la fotografía de la lámina (el peor caso) y papel liso.
+ *
+ * Hubo un tercero, el bloque negro del cierre, y era el peor de todos con
+ * diferencia. Salió de la Home el 21 sep 2026 con el copy nuevo de Emi, y con
+ * él salió de acá. **Si vuelve a haber una sección en tinta plena por la que
+ * pase el menú, hay que volver a medirla**: el suelo del velo se eligió contra
+ * ese fondo y contra ninguno de estos dos.
  *
  * Método, el mismo que la tercera comprobación de `audit.mjs`: se fotografía
  * cada renglón dos veces, con el texto y con el texto apagado, y solo se
@@ -81,14 +87,16 @@ async function medir(nombre, prepara) {
   return peorGlobal;
 }
 
-const r1 = await medir('el cierre en negro por detrás', async (p) => {
-  await p.evaluate(() => { document.querySelector('.closing').scrollIntoView(); window.scrollBy(0, 200); });
+// Se busca la lámina en vez de una altura fija: el copy de la Home cambia y la
+// foto se mueve con él. Los 200 px de más dejan la píldora del menú sobre el
+// centro de la foto y no sobre el papel de encima.
+const r1 = await medir('la lámina por detrás', async (p) => {
+  await p.evaluate(() => { document.querySelector('.plate').scrollIntoView(); window.scrollBy(0, 200); });
   await p.waitForTimeout(500);
 });
-const r2 = await medir('la lámina por detrás', async (p) => { await p.evaluate(() => window.scrollTo(0, 700)); await p.waitForTimeout(500); });
-const r3 = await medir('papel liso por detrás', async (p) => { await p.evaluate(() => window.scrollTo(0, 0)); await p.waitForTimeout(400); });
+const r2 = await medir('papel liso por detrás', async (p) => { await p.evaluate(() => window.scrollTo(0, 0)); await p.waitForTimeout(400); });
 await b.close();
 
-const peor = Math.min(r1, r2, r3);
+const peor = Math.min(r1, r2);
 console.log(`\nPEOR CASO DE TODOS: ${peor.toFixed(2)}:1 ${peor >= 4.5 ? '✓' : '✗ por debajo de AA'}`);
 if (peor < 4.5) process.exit(1);
