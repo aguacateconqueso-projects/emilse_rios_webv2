@@ -5,7 +5,8 @@ membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
 **Última actualización:** 21 de septiembre de 2026 · **la Home lleva el copy
-nuevo de Emi** —más corta, sin archivo de correos y sin el cierre en negro—;
+nuevo de Emi** —más corta, sin archivo de correos, sin el cierre en negro y sin
+numerales de sección, con la entradilla al tamaño de los títulos—;
 la capa A está en pie y mergeada —adaptador de Vercel, sesión contra el
 Supabase de la academia, `/panel/` para Emi— y **Edu ofrece acceso de
 colaborador en Hostinger y la ruta Cloudflare**, pendiente de una llamada de
@@ -1425,7 +1426,7 @@ piezas: Sistema de Diseño, las dos páginas, y la animación de entrada.
 | Tipografía | Instrument Serif (titulares), Newsreader (cuerpo), IBM Plex Mono (etiquetas). La firma no es tipografía: es el logo. |
 | Espaciado | Rejilla de 8 px. Sin excepciones. |
 | Formas | Radios: cero. Sombras: cero. Las divisiones son reglas de 1 px. |
-| Medida | 60–68 caracteres. Columna de 640 px, número marginal de 48 px. |
+| Medida | 60–68 caracteres. Columna de 640 px, número marginal de 48 px — en la Home el número ya no está y el hueco tampoco; ver la enmienda del 21 sep 2026. |
 | Movimiento | Máximo cuatro animaciones en la Home, dos en el resto. |
 | Prohibido | Marquesinas, contadores, cursores propios, texto que se escribe letra a letra, tarjetas que se levantan, zoom automático, iconos, emojis, fondos grises de relleno. |
 
@@ -1436,7 +1437,29 @@ componentes**: si hace falta uno nuevo, se añade como token.
 
 El sistema es de Emi y se puede cambiar. Lo que no se puede es cambiarlo sin
 dejar constancia, porque si no la tabla de arriba deja de ser fiable. Hasta hoy
-se ha tocado nueve veces:
+se ha tocado diez veces:
+
+- **21 sep 2026 · La Home se queda sin numerales, y con ellos se va el hueco
+  del margen.** Decisión de Emi: «no suma nada». Salen el `01`, el `02` y el
+  `03`; *Sobre mí*, la tienda y el aula los conservan, así que el patrón sigue
+  en el sistema y lo que cambia es quién lo usa.
+
+  **La consecuencia no es cosmética.** El hueco de 48 px existía para colgar
+  de él el numeral, y de paso empujaba la columna de lectura 40 px a la derecha
+  del centro de la página — un descuadre a propósito, anotado en **Decisiones
+  ya tomadas**, que se justificaba porque ahí vivía algo. Vaciado, no lo
+  justifica nada: la portada va centrada en la página y la columna no, y con
+  el párrafo de apertura ya centrado el escalón se ve. Así que en la Home la
+  columna vuelve al centro. Es `.row--flush` en `base.css`, y el formulario lo
+  recibe por una prop (`flush`) porque el mismo componente se usa en *Sobre
+  mí*, que sí sigue con hueco. **En *Sobre mí* los 40 px siguen ahí y siguen
+  siendo correctos.**
+
+  Va con un segundo cambio de Emi el mismo día: **el párrafo de apertura deja
+  de ser cuerpo y pasa al tamaño de los títulos de sección** (`--text-section`,
+  26 → 32 px). A la medida de 640 px se partía en renglones demasiado cortos,
+  así que a ese tamaño ocupa el ancho de la portada, 900 px. **Ningún token
+  nuevo**: es el mismo tamaño del `h2` y el mismo ancho del hero.
 
 - **11 sep 2026 · El aula se pinta con la ropa de la membresía, menos el
   cursor.** Segunda enmienda grande, y la hermana de la del 9 de septiembre:
@@ -1891,6 +1914,15 @@ Están discutidas y resueltas. No hace falta volver sobre ellas salvo que Emi
 pida lo contrario. Las que tienen que ver con la plataforma —dominio, aula,
 cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
 
+- **21 sep 2026 · La Home no lleva numerales, y su primer párrafo es una
+  entradilla.** Segunda pasada de Emi sobre la portada, el mismo día. Tres
+  cosas: fuera los `01`, `02`, `03` —«no suma nada»—, el párrafo de apertura al
+  tamaño del título de sección, y el párrafo del video centrado, que alineado a
+  la izquierda debajo de una portada centrada «parece desordenado». Lo que
+  arrastra —la columna vuelve al centro de la página, porque el hueco del
+  numeral ya no lo justifica nada— está en **El sistema de diseño → Enmiendas,
+  con fecha**. *Sobre mí* no se toca: conserva numerales, hueco y sus 40 px.
+
 - **21 sep 2026 · La Home es el copy de Emi y nada más.** Emi volvió a
   reescribir el texto de la portada, y esta vez la página se acorta: la
   historia del conservatorio pasa de seis párrafos a tres, el párrafo del video
@@ -2188,14 +2220,17 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
   la vez. **La lección es del ancho, no de la idea:** en esta rejilla, texto y
   foto en paralelo solo saldrían rompiendo la columna de lectura.
 - **La portada va centrada y fuera de la rejilla de lectura.** El título, el
-  subtítulo y el párrafo de entrada van centrados en la página, con el numeral
-  `01` centrado encima en vez de al margen — el mismo patrón que ya usaban las
-  frases-ancla, y el cierre en negro mientras existió, para los momentos que no
-  se leen en columna. Ojo con una cosa al medirlo: la columna de lectura **no**
-  está centrada en la página, va 40 px a la derecha porque el numeral vive en el
-  margen izquierdo. La portada sí está centrada en la página. Esos 40 px de
-  diferencia son a propósito, no un descuadre: la portada no tiene numeral al
-  margen del que colgar.
+  subtítulo y el párrafo de entrada van centrados en la página. Llevó encima un
+  numeral `01` centrado en vez de al margen, el mismo patrón de las frases-ancla
+  —y del cierre en negro mientras existió— para los momentos que no se leen en
+  columna; el numeral salió el 21 sep 2026 con todos los demás de la Home.
+
+  **Ojo con los 40 px al medirlo, que ahora dependen de la página.** La columna
+  de lectura se va 40 px a la derecha del centro cuando el numeral vive en el
+  margen izquierdo: pasa en *Sobre mí*, en la tienda y en el aula, y ahí es a
+  propósito, no un descuadre. **En la Home ya no pasa** — sin numerales no hay
+  hueco, y la columna comparte eje con la portada. Ver la enmienda del 21 sep
+  2026 en **El sistema de diseño**.
 - **La lámina va dentro de la rejilla de lectura, a lo ancho de la columna.**
   Usa el mismo hueco de numeral vacío que el formulario, así que mide los
   640 px de la medida y queda alineada al píxel con los párrafos, con el pie y
