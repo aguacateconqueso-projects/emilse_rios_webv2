@@ -3,7 +3,6 @@ import { Image } from 'astro:assets';
 import { type Lang, useTranslations } from '../i18n/ui';
 import { getHomeCopy } from '../data/home';
 import SubscribeForm from './SubscribeForm.astro';
-import EmailArchive from './EmailArchive.astro';
 import emilseMadrid from '../assets/img/emilse-madrid.jpg';
 
 interface Props {
@@ -103,22 +102,14 @@ const { blocks } = getHomeCopy(lang);
       case 'form':
         return <SubscribeForm lang={lang} id={block.id} />;
 
-      case 'cards':
+      case 'fine':
         return (
-          <div class="block">
-            <EmailArchive lang={lang} n={block.n} label={block.label} />
+          <div class="row fine">
+            <div class="row__num" aria-hidden="true" />
+            <div class="row__body">
+              <p class="mono soft">{block.text}</p>
+            </div>
           </div>
-        );
-
-      case 'closing':
-        return (
-          <section class="closing on-ink">
-            <div class="mono-plain closing__num">{block.num}</div>
-            <p class="closing__text">{block.text}</p>
-            <a class="mono closing__link" href="#suscribete">
-              {block.link}
-            </a>
-          </section>
         );
     }
   })
@@ -128,8 +119,8 @@ const { blocks } = getHomeCopy(lang);
   /* --- Hero ---------------------------------------------------------------
      Portada centrada. Se sale de la rejilla de lectura a propósito: no es un
      bloque de texto más, es la portada del sitio, y el numeral va centrado
-     encima como en las frases-ancla y en el cierre en negro — el sitio ya
-     tenía ese patrón para los momentos que no se leen en columna.
+     encima como en las frases-ancla — el sitio ya tenía ese patrón para los
+     momentos que no se leen en columna.
 
      Más ancho que la medida para que el título respire en dos líneas; el
      párrafo sí vuelve a la medida, porque eso sí se lee. */
@@ -282,41 +273,16 @@ const { blocks } = getHomeCopy(lang);
     }
   }
 
-  /* --- Cierre en negro --------------------------------------------------- */
-  .closing {
-    margin-top: var(--space-16);
-    padding: clamp(var(--space-12), 14vw, 11rem) var(--space-3);
-    background: var(--ink);
-    color: var(--paper);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    min-height: 70vh;
-  }
+  /* --- La letra pequeña ---------------------------------------------------
+     «Suscribirse es gratis, darse de baja también». Cierra la página debajo
+     del último formulario y va en la misma rejilla de lectura que él, con el
+     mismo hueco de numeral vacío: así arranca en la misma vertical que la
+     regla del campo y no queda flotando.
 
-  .closing__num {
-    color: var(--paper-soft);
-  }
-
-  .closing__text {
-    margin-top: var(--space-6);
-    max-width: 56.25rem; /* 900 px */
-    font-family: var(--font-display);
-    font-size: clamp(1.75rem, 4.4vw, 3rem); /* 28 → 48 px */
-    line-height: 1.24;
-    text-wrap: pretty;
-  }
-
-  .closing__link {
-    margin-top: var(--space-8);
-    color: var(--paper);
-    border-bottom: 1px solid var(--paper-rule);
-    padding-bottom: var(--space-1);
-  }
-
-  .closing__link:hover {
-    border-bottom-color: var(--paper);
+     En mono como el acuse de recibo del formulario, que aparece justo encima
+     en ese mismo hueco. Los 8 px son los que el acuse ya usa; el pie de página
+     pone los 128 de separación por su cuenta. */
+  .fine {
+    margin-top: var(--space-1);
   }
 </style>
