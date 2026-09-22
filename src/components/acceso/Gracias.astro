@@ -1,0 +1,398 @@
+---
+/**
+ * Después de pagar — donde Stripe devuelve a quien acaba de comprar.
+ *
+ * Trasplantada de `emilse_rios_membresias` (`src/components/membresia/Gracias.astro`)
+ * el 22 sep 2026, con la mudanza del cobro. Lo que se trajo es **el
+ * comportamiento**, que es lo que estaba probado con compradoras reales; la
+ * ropa es la de esta casa, porque acá esta pantalla es una hermana de «entrar»
+ * y de «poner la contraseña» y comparte marco con ellas.
+ *
+ * Tiene dos caminos, y el orden entre ellos importa:
+ *
+ * - **La contraseña al pagar** (con `session_id`, que es lo normal al venir de
+ *   Stripe): la compradora elige su contraseña acá mismo y entra al aula en el
+ *   mismo clic. Sin correo y sin esperas. La sesión de checkout es la prueba
+ *   del pago —ver `/api/claim-account`—, y el correo sale del propio pago, no
+ *   lo teclea nadie.
+ * - **El acceso por correo** (sin `session_id`, o si lo prefiere): el camino de
+ *   siempre. Escribe su correo y le llega el enlace. Su copy es el definitivo
+ *   de Emi, traído literal.
+ *
+ * ⚠️ **Las dos formas nacen ocultas y el script enseña una.** Al revés —pintar
+ * el camino del correo y esconderlo al descubrir el `session_id`— alguien que
+ * acaba de pagar vería durante un instante que le piden el correo, que es justo
+ * el susto que esta pantalla existe para evitar.
+ *
+ * El camino del correo no necesita ninguna ruta de API propia: es el mismo
+ * `resetPasswordForEmail` que ya usa la pantalla de acceso, apuntando a la
+ * misma pantalla de contraseña nueva. Una pieza menos que mantener.
+ */
+import type { Lang } from '../../i18n/ui';
+import { useAula, clavePath, escritorioPath, entrarPath } from '../../i18n/aula';
+import { isSupabaseConfigured } from '../../lib/supabase';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const a = useAula(lang);
+---
+
+<section
+  class="gracias"
+  data-gracias
+  data-destino={escritorioPath(lang)}
+  data-redirect-clave={clavePath(lang)}
+  data-t-going={a('thanks.going')}
+  data-t-go={a('thanks.go')}
+  data-t-sending={a('thanks.sending')}
+  data-t-send={a('thanks.send')}
+  data-t-short={a('pass.short')}
+  data-t-mismatch={a('pass.mismatch')}
+  data-t-notpaid={a('thanks.notPaid')}
+  data-t-signinfailed={a('thanks.signinFailed')}
+  data-t-failed={a('thanks.failed')}
+  data-t-sendfailed={a('thanks.sendFailed')}
+  data-t-noemail={a('signin.noEmail')}
+>
+  <p class="eyebrow">{a('thanks.eyebrow')}</p>
+  <h1 class="gracias__h">{a('thanks.title')}</h1>
+
+  {
+    !isSupabaseConfigured && (
+      <p class="aviso" role="status">
+        <b>{a('off.badge')}</b> — {a('off.lead')}
+      </p>
+    )
+  }
+
+  {/* --- Camino 1 · la contraseña al pagar ------------------------------- */}
+  <div data-modo-clave hidden>
+    <p class="soft gracias__lead">{a('thanks.lead')}</p>
+
+    <form class="campos" data-form-clave novalidate>
+      <label class="campo">
+        <span class="campo__t">{a('thanks.pass')}</span>
+        <input type="password" name="clave" autocomplete="new-password" required data-clave />
+      </label>
+
+      <label class="campo">
+        <span class="campo__t">{a('thanks.repeat')}</span>
+        <input type="password" name="clave2" autocomplete="new-password" required data-clave2 />
+      </label>
+
+      <p class="error" data-error-clave hidden></p>
+
+      <button class="btn btn--solid" type="submit" data-enviar-clave>
+        <span class="btn__fill" aria-hidden="true"></span>
+        <span class="btn__label">{a('thanks.go')}</span>
+      </button>
+    </form>
+
+    <p class="gracias__alt">
+      {/* Un botón y no un enlace: no navega a ninguna parte, cambia lo que se
+          ve en esta misma pantalla. */}
+      <button type="button" class="enlace" data-ir-correo>{a('thanks.toEmail')}</button>
+    </p>
+  </div>
+
+  {/* --- Camino 2 · el acceso por correo --------------------------------- */}
+  <div data-modo-correo hidden>
+    <h2 class="gracias__h2">{a('thanks.emailTitle')}</h2>
+    <p class="soft gracias__lead">{a('thanks.emailLead')}</p>
+
+    <form class="campos" data-form-correo novalidate>
+      <label class="campo">
+        <span class="campo__t">{a('thanks.email')}</span>
+        <input type="email" name="email" autocomplete="email" required data-email />
+      </label>
+
+      <p class="error" data-error-correo hidden></p>
+      <p class="ok" data-ok-correo hidden>{a('thanks.sent')}</p>
+
+      <button class="btn btn--solid" type="submit" data-enviar-correo>
+        <span class="btn__fill" aria-hidden="true"></span>
+        <span class="btn__label">{a('thanks.send')}</span>
+      </button>
+    </form>
+
+    <p class="soft gracias__spam">{a('thanks.spam')}</p>
+  </div>
+
+  {/* Sin JavaScript no se revela ninguna de las dos, así que la salida es la
+      pantalla de acceso de siempre, que funciona igual. */}
+  <noscript>
+    <p class="gracias__alt"><a href={entrarPath(lang)}>{a('signin.title')}</a></p>
+  </noscript>
+</section>
+
+<script>
+  /**
+   * Va SIN `define:vars`, como el resto de las pantallas de la puerta: ese
+   * modificador vuelve el script inline y un script inline no puede importar
+   * módulos. Lo que necesita saber viaja en los `data-` del contenedor.
+   */
+  import { supabase, isSupabaseConfigured, recordarSesion } from '../../lib/supabase';
+
+  const caja = document.querySelector<HTMLElement>('[data-gracias]');
+
+  if (caja) {
+    const $ = (sel: string) => caja.querySelector(sel) as HTMLElement | null;
+    const destino = caja.dataset.destino!;
+    const redirectClave = caja.dataset.redirectClave!;
+    const T = {
+      going: caja.dataset.tGoing!,
+      go: caja.dataset.tGo!,
+      sending: caja.dataset.tSending!,
+      send: caja.dataset.tSend!,
+      short: caja.dataset.tShort!,
+      mismatch: caja.dataset.tMismatch!,
+      notPaid: caja.dataset.tNotpaid!,
+      signinFailed: caja.dataset.tSigninfailed!,
+      failed: caja.dataset.tFailed!,
+      sendFailed: caja.dataset.tSendfailed!,
+      noEmail: caja.dataset.tNoemail!,
+    };
+
+    const modoClave = $('[data-modo-clave]')!;
+    const modoCorreo = $('[data-modo-correo]')!;
+
+    /* El identificador de la sesión de Stripe es lo único que decide qué
+       camino se enseña. Lo pone Stripe al devolver, en la `success_url`. */
+    let sessionId: string | null = null;
+    try {
+      sessionId = new URLSearchParams(location.search).get('session_id');
+    } catch {
+      /* sin URL utilizable, cae al camino del correo */
+    }
+
+    /* Sin backend no se enseña ninguno de los dos caminos: la compradora ha
+       pagado de verdad, y lo que NO se le puede poner delante es un formulario
+       que no va a funcionar. Se queda el aviso de arriba y la salida del
+       `noscript`, que es la pantalla de acceso de siempre. */
+    const hayBackend = isSupabaseConfigured;
+
+    const verCorreo = (porElUsuario: boolean) => {
+      modoClave.hidden = true;
+      modoCorreo.hidden = !hayBackend;
+      /* El foco solo se mueve cuando lo pidió una persona. Al cargar la
+         página, saltar solo hasta el campo del correo le roba el principio de
+         la pantalla a un lector de pantalla y empuja el scroll en el móvil. */
+      if (porElUsuario && hayBackend) ($('[data-email]') as HTMLInputElement | null)?.focus();
+    };
+
+    if (sessionId && hayBackend) modoClave.hidden = false;
+    else verCorreo(false);
+
+    $('[data-ir-correo]')?.addEventListener('click', () => verCorreo(true));
+
+    /* --- Camino 1 · crear la contraseña y entrar ------------------------- */
+    $('[data-form-clave]')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const c1 = ($('[data-clave]') as HTMLInputElement).value;
+      const c2 = ($('[data-clave2]') as HTMLInputElement).value;
+      const err = $('[data-error-clave]')!;
+      const btn = $('[data-enviar-clave]') as HTMLButtonElement;
+      const rotulo = btn.querySelector('.btn__label')!;
+
+      err.hidden = true;
+      if (c1.length < 8) {
+        err.textContent = T.short;
+        err.hidden = false;
+        return;
+      }
+      if (c1 !== c2) {
+        err.textContent = T.mismatch;
+        err.hidden = false;
+        return;
+      }
+
+      /* Quien acaba de pagar se queda dentro: el token va a `localStorage`.
+         Se escribe ANTES de iniciar sesión para que nazca en el almacén
+         correcto — es lo mismo que hace la casilla de la pantalla de acceso. */
+      recordarSesion(true);
+
+      btn.disabled = true;
+      rotulo.textContent = T.going;
+
+      const fallo = (texto: string) => {
+        err.textContent = texto;
+        err.hidden = false;
+        btn.disabled = false;
+        rotulo.textContent = T.go;
+      };
+
+      try {
+        const res = await fetch('/api/claim-account', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ session_id: sessionId, password: c1 }),
+        });
+        const data = await res.json().catch(() => ({}) as any);
+
+        if (!res.ok || !data?.ok) {
+          if (data?.error === 'not_paid') fallo(T.notPaid);
+          else if (data?.error === 'weak_password') fallo(T.short);
+          else fallo(T.failed + (data?.detail || `HTTP ${res.status}`));
+          return;
+        }
+
+        /* La contraseña ya está puesta. Se inicia sesión con el correo que
+           devolvió el servidor —el del pago—, no con uno tecleado. */
+        const { error } = await supabase.auth.signInWithPassword({
+          email: data.email,
+          password: c1,
+        });
+        if (error) {
+          fallo(T.signinFailed);
+          return;
+        }
+        location.assign(destino);
+      } catch (e: any) {
+        fallo(T.failed + (e?.message || ''));
+      }
+    });
+
+    /* --- Camino 2 · que le llegue por correo ----------------------------- */
+    $('[data-form-correo]')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = ($('[data-email]') as HTMLInputElement).value.trim();
+      const err = $('[data-error-correo]')!;
+      const ok = $('[data-ok-correo]')!;
+      const btn = $('[data-enviar-correo]') as HTMLButtonElement;
+      const rotulo = btn.querySelector('.btn__label')!;
+
+      err.hidden = true;
+      ok.hidden = true;
+      if (!email) {
+        err.textContent = T.noEmail;
+        err.hidden = false;
+        return;
+      }
+
+      btn.disabled = true;
+      rotulo.textContent = T.sending;
+      try {
+        await supabase.auth.resetPasswordForEmail(email.toLowerCase(), {
+          redirectTo: location.origin + redirectClave,
+        });
+      } catch (e: any) {
+        err.textContent = T.sendFailed + (e?.message || '');
+        err.hidden = false;
+        btn.disabled = false;
+        rotulo.textContent = T.send;
+        return;
+      }
+      btn.disabled = false;
+      rotulo.textContent = T.send;
+
+      /* Se contesta lo mismo pase lo que pase, igual que en la pantalla de
+         acceso: la respuesta no puede delatar si ese correo tiene cuenta. */
+      ok.hidden = false;
+    });
+  }
+</script>
+
+<style>
+  .gracias__h {
+    font-size: clamp(1.9rem, 4.4vw, 2.6rem);
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    margin: 0.4rem 0 0.5rem;
+  }
+
+  .gracias__h2 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin: 0 0 0.4rem;
+  }
+
+  .gracias__lead {
+    margin: 0 0 clamp(24px, 4vh, 36px);
+  }
+
+  .gracias__alt {
+    margin: clamp(20px, 3vh, 28px) 0 0;
+    font-size: 0.92rem;
+  }
+
+  .gracias__spam {
+    margin: clamp(20px, 3vh, 28px) 0 0;
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+
+  /* Un `<button>` que se lee como enlace: cambia esta pantalla, no navega, así
+     que tiene que ser un botón para el teclado y el lector de pantalla — pero
+     para el ojo es lo mismo que el resto de los enlaces del marco. */
+  .enlace {
+    appearance: none;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+
+  .aviso {
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    padding: 14px 16px;
+    font-size: 0.92rem;
+    margin: 0 0 clamp(24px, 4vh, 36px);
+  }
+
+  .campos {
+    display: grid;
+    gap: 18px;
+    justify-items: stretch;
+  }
+
+  .campo {
+    display: grid;
+    gap: 7px;
+  }
+
+  .campo__t {
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+
+  /* Los mismos campos que la pantalla de acceso. Se repiten y no se sacan a
+     `aula.css` porque el estilo de Astro va por componente: mientras solo sean
+     dos pantallas, duplicar seis reglas cuesta menos que abrir una clase
+     global que cualquiera pueda tocar sin saber quién la usa. */
+  .campo input {
+    font: inherit;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    padding: 12px 14px;
+    width: 100%;
+    transition: border-color var(--fast) var(--ease);
+  }
+
+  .campo input:focus {
+    outline: none;
+    border-color: var(--ink);
+  }
+
+  .error,
+  .ok {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+
+  .error {
+    color: var(--accent-strong);
+  }
+
+  .campos .btn {
+    justify-self: start;
+  }
+</style>

@@ -4,17 +4,17 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 21 de septiembre de 2026 · **EL SITIO ESTÁ EN EL AIRE
-EN SU DOMINIO**: `www.emilserios.com`, con el DNS delegado a Cloudflare y el
-ápice redirigiendo. La Home y *Sobre mí* llevan el copy nuevo de Emi, con su
-retrato, y desde la segunda tanda de ese mismo día el sitio **enseña menos
-huecos**: la lámina estrena foto vertical, *Sobre mí* entra con movimiento y
-responde al cursor, y se retiraron los marcadores que quedaban a la vista —las
-redes que no llevaban a ninguna parte, los tres testimonios pendientes y cinco
-de los seis cursos por anunciar—. **Dos cosas quedaron a medias y hay que
-mirarlas:** los CNAME de correo siguen proxied —el DKIM de Emi probablemente
-está roto para enviar— y el dominio sigue registrado en la cuenta de Namecheap
-de Edu
+**Última actualización:** 22 de septiembre de 2026 · **EMPEZÓ LA UNIÓN DE LAS
+DOS CASAS.** El cobro de la membresía ya vive en `www.emilserios.com`: el botón
+de comprar dejó de salir del sitio, la compra termina acá y quien paga pone su
+contraseña y entra al aula en el mismo clic, sin esperar ningún correo. Y está
+puesto el puente que le trae la sesión a quien ya estaba dentro de la academia.
+**Falta configuración de paneles, que solo pueden hacer Emi o Adrián** —está en
+`docs/UNIR-LAS-DOS-CASAS.md`— y **el webhook de Stripe sigue viviendo en la
+academia a propósito**. Antes de eso, el 21 de septiembre el sitio salió al aire
+en su dominio y dejó de enseñar huecos. **Dos cosas siguen a medias:** los CNAME
+de correo siguen proxied —el DKIM de Emi probablemente está roto para enviar— y
+el dominio sigue registrado en la cuenta de Namecheap de Edu
 
 ---
 
@@ -28,7 +28,8 @@ de Edu
 | **Identidad** | El logo de Emi, vectorizado, en cabecera, pie, entrada y favicon. |
 | **Alcance** | Desde el 31 ago 2026 esto deja de ser solo el sitio: aquí van también el aula, la membresía y los cursos. Ver **La plataforma**. |
 | **Sesión** | Desde el 20 sep 2026 el aula pide sesión de verdad, contra el **mismo Supabase de la academia**. Falta poner las variables en Vercel y las Redirect URLs en Supabase; sin eso queda en modo maqueta y lo dice. |
-| **Lo que falta para lanzar** | Conectar Klaviyo. El formulario **no da de alta a nadie** — y ahora eso se ve en un sitio que ya está publicado y accesible. |
+| **Cobro** | **Desde el 22 sep 2026 vive acá.** `/api/checkout` crea la sesión de Stripe, `/gracias/` recoge a quien pagó y `/api/claim-account` le crea la cuenta. El **webhook sigue en la academia**, y es correcto que siga: ver **La unión de las dos casas**. |
+| **Lo que falta para lanzar** | Conectar Klaviyo. El formulario **no da de alta a nadie** — y ahora eso se ve en un sitio que ya está publicado y accesible. Y las variables de Stripe en Vercel, o el botón de comprar da un 500. |
 
 Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/` · `/productos/` ·
 `/en/products/` · `/productos/estudiemos-juntos/` ·
@@ -53,8 +54,33 @@ Las dos direcciones viejas de la carta de la membresía
 redirigen a la nueva. Están puestas en `astro.config.mjs` y salen del propio
 catálogo, así que valen para cualquier producto que se publique.
 
-**Lo último que se tocó del sitio público**, el 21 de septiembre de 2026 por la
-tarde, fueron seis cosas que Emi y Adrián pidieron de una vez. Ninguna es
+**Lo último, el 22 de septiembre de 2026: empezó la unión de las dos casas.**
+Ya hay dominio, así que la pregunta dejó de ser «cuándo» y pasó a ser «en qué
+orden». Lo pidió Adrián con el orden ya puesto —«primero el link activo de los
+productos y después conectar supabase para que la membresía siga funcionando
+como si nada»— y así se hizo. Tiene su sección entera más abajo: **La unión de
+las dos casas**. En corto:
+
+- **El cobro se mudó.** `/api/checkout`, `/gracias/` y `/api/claim-account` son
+  rutas de esta casa. El botón de la carta ya no saca a la lectora del sitio a
+  mitad de una compra, y quien paga **pone su contraseña y entra en el mismo
+  clic**, sin esperar ningún correo.
+- **El webhook NO se mudó, y es la decisión que sostiene todo lo demás.** Un
+  webhook no tiene dominio: Stripe llama a la dirección que tenga apuntada, y la
+  de la academia escribe en el MISMO Supabase con un `UPSERT`. Dejarlo ahí
+  significa **cero cambios en el panel de Stripe** y el correo de bienvenida
+  intacto, que sale por Resend con el dominio de la academia verificado —
+  `emilserios.com` todavía no puede mandar correo, su DKIM sigue roto.
+- **El puente de traspaso está puesto.** `/aulavirtual/pasar/` recibe la sesión
+  que la alumna trae desde la academia y la planta acá. Es el paso 1 de las tres
+  capas que este documento dejó decididas el 11 de septiembre, y lo que hace que
+  volver a entrar cueste un clic y no una contraseña olvidada.
+- **Lo que falta no es código.** Copiar cuatro variables de Stripe a Vercel,
+  añadir dos Redirect URLs en Supabase y pegar una página en el repo de la
+  academia. Paso a paso en `docs/UNIR-LAS-DOS-CASAS.md`.
+
+**Antes de eso, el 21 de septiembre de 2026 por la
+tarde,** se hicieron seis cosas que Emi y Adrián pidieron de una vez. Ninguna es
 grande; juntas cambian lo que el sitio dice de sí mismo, que hasta esa tarde
 era «esto todavía se está montando»:
 
@@ -131,7 +157,9 @@ está detrás del inicio de sesión, igual que la membresía: `/aulavirtual/` ya
 enseña el catálogo, es una puerta con el botón de ingresar y un enlace a la
 tienda para quien todavía no ha comprado nada. La sesión de verdad sigue siendo
 la de la academia — acá no hay sesión todavía —, así que el botón sale del sitio
-y la página lo dice.
+y la página lo dice. (Eso se quedó atrás dos veces: la sesión vive acá desde el
+20 sep 2026 y **el cobro desde el 22**. Lo que sigue en la academia es el aula
+de la membresía, los videos semanales.)
 
 Del sitio en sí, lo último que se tocó fue **el menú**. La cabecera dejó de ser
 una barra: ahora es una cápsula de cristal que flota sobre la página, con la
@@ -506,17 +534,23 @@ mirada hasta estar dentro estudiando, son siete pasos:
 1  Catálogo            /productos/              ✅ hecho
 2  Página de venta     /productos/<slug>/       ✅ hecho (la de la membresía)
 3  Botón de comprar    dentro de esa página     ✅ hecho
-4  Enlace de pago      Stripe · PayPal          ◻︎ Stripe sí, pero en la academia
-5  Confirmación                                 ◻︎ existe en la academia
-6  Correo + crear la cuenta                     ◻︎ existe en la academia
+4  Enlace de pago      /api/checkout            ✅ hecho, y ACÁ (22 sep 2026)
+5  Confirmación        /gracias/                ✅ hecho, y ACÁ (22 sep 2026)
+6  Crear la cuenta     /api/claim-account       ✅ hecho, y ACÁ — sin correo
 7  Entra, con lo que compró desbloqueado        ◻︎ pide derechos de acceso
 ```
 
-Los tres primeros pasos son este repo y ya están. Del cuarto al sexto **existen
-y funcionan hoy**, pero en `emilseriosacademy.com`: por eso el botón «Comprar»
-de la membresía sale del sitio, y por eso la propia página lo dice en vez de
-dejar que la alumna descubra sola que cambió de dominio a mitad de una compra.
-El séptimo es lo que trae la migración de derechos de acceso.
+**Del uno al seis son este repo desde el 22 sep 2026.** Hasta ese día los pasos
+4 a 6 vivían en `emilseriosacademy.com` —funcionaban, pero el botón «Comprar»
+sacaba a la lectora del sitio a mitad de una compra, y la página tenía que
+avisarlo—. Hoy la compra entera ocurre sin cambiar de dominio, y el paso 6 ni
+siquiera pasa por el correo: quien paga pone su contraseña en `/gracias/` y
+entra. Ver **La unión de las dos casas**.
+
+El séptimo es lo que trae la migración de derechos de acceso. Y el **webhook**
+de Stripe sigue en la academia a propósito, que es otra cosa: no es un paso del
+recorrido de la compradora, es lo que espeja su suscripción en la base de datos
+después.
 
 **El catálogo tiene dos productos** desde el 21 sep 2026 —eran siete—, y **cada
 uno lleva su foto**. La membresía, que es lo único a la venta, y **un** curso que
@@ -659,8 +693,8 @@ Los siete cables que había que soltar, y cómo quedaron:
 
 | Cable | Qué se hizo |
 |---|---|
-| `payHref: '/api/checkout?lang=…'` | apunta al checkout de la academia (`ACADEMIA`, de `data/aula.ts`), que es donde se cobra hoy |
-| El aviso de que el cobro sale del sitio | añadido **una vez**, en la ficha de precio, con el mismo texto que el resto de la tienda (`products.leaving`) |
+| `payHref: '/api/checkout?lang=…'` | apuntó al checkout de la academia hasta el 22 sep 2026; hoy **la misma dirección es una ruta de esta casa**, así que el cable se soltó solo al mudar el cobro |
+| El aviso de que el cobro sale del sitio | se añadió **una vez**, en la ficha de precio; **salió el 22 sep 2026** con el checkout, porque ya no era verdad. La frase sigue en `products.leaving` y `Compra.astro` la enseña sola si un producto vuelve a cobrarse fuera |
 | `/entrar/` de la píldora | va a `entrarHref`, la misma puerta del aula que usa la cápsula de la tienda |
 | El conmutador ES/EN | va a las dos direcciones de esta página, no a la raíz de la academia |
 | Privacidad y Términos del pie (dos `#`) | cambiados por «Volver a Productos» e «Inicio», que sí existen |
@@ -1115,6 +1149,106 @@ Y dos cosas que hay que arreglar al mudar, encontradas leyendo:
 La capa visual de la academia que se guarda sin enchufar son dos ficheros:
 `public/membresia-ui.css` y `public/membresia-ui.js`.
 
+### La unión de las dos casas
+
+Hecha —la primera mitad— el **22 de septiembre de 2026**. Es lo que este
+documento venía llamando «el cambio de dominio»: `emilseriosacademy.com` deja de
+ser un sitio aparte y pasa a ser, por ahora, un servicio de fondo.
+
+Adrián lo pidió con el orden puesto: **primero el enlace activo de los
+productos, después Supabase, y que la membresía siga funcionando como si nada.**
+Ese orden es el correcto y conviene entender por qué: el enlace de compra es lo
+único que un visitante nuevo ve roto —sale del dominio a mitad de una compra— y
+no toca a nadie que ya esté pagando. La sesión, en cambio, sí toca a los
+miembros de verdad, así que va después y va con red.
+
+#### Lo que se mudó
+
+| | Antes | Ahora |
+|---|---|---|
+| El botón de comprar | `emilseriosacademy.com/api/checkout` | **`/api/checkout`**, acá |
+| Después de pagar | `emilseriosacademy.com/gracias/` | **`/gracias/`** y `/en/thank-you/`, acá |
+| Crear la cuenta | `…/api/claim-account` de la academia | **`/api/claim-account`**, acá |
+| El webhook de Stripe | la academia | **la academia** — no se movió |
+| El correo de bienvenida | Resend, desde la academia | **igual** — lo manda su webhook |
+| El aula de la membresía | la academia | **igual** — los videos siguen allá |
+
+Ficheros nuevos: `src/lib/stripe.ts`, `src/lib/stripe-sync.ts`,
+`src/lib/membership-server.ts`, `src/pages/api/checkout.ts`,
+`src/pages/api/claim-account.ts`, `src/components/acceso/Gracias.astro` y
+`src/components/acceso/Pasar.astro`, más sus cuatro páginas. Todos trasplantados
+de `emilse_rios_membresias` salvo `Pasar.astro`, que es nuevo.
+
+#### Por qué el webhook se queda en la academia
+
+Es la decisión que sostiene el resto, así que va escrita sin rodeos: **no
+mudarlo no es dejarlo a medias, es la parte barata de hacerlo bien.**
+
+1. **Un webhook no tiene dominio.** Stripe llama a la dirección que tenga
+   apuntada en su panel. Esa dirección escribe en el **mismo proyecto de
+   Supabase** que esta casa — no hay dos bases de datos, nunca las hubo.
+2. **Los dos caminos son idempotentes.** `writeSubscriptionRow()` hace `UPSERT`
+   por `stripe_subscription_id`. Que `/api/claim-account` escriba la fila desde
+   acá y el webhook la reescriba desde allá deja exactamente el mismo
+   resultado, llegue quien llegue primero. ⚠️ **Si esto deja de ser
+   idempotente, la mudanza a medias deja de ser segura.**
+3. **Mudarlo cuesta tres cosas que hoy no se pueden hacer bien**: endpoint nuevo
+   en el panel de Stripe, `STRIPE_WEBHOOK_SECRET` nuevo, y `emilserios.com`
+   verificado en Resend. Lo tercero **depende del DKIM, que está roto** (ver
+   **El dominio, y Edu**). Un webhook caído significa que alguien paga y no
+   recibe acceso.
+
+Así que el orden es: primero el DKIM, después Resend, después el webhook. Está
+en **Pendiente**.
+
+#### El desdoble que esto deja abierto
+
+⚠️ **Las fechas de las puertas están escritas en dos casas y hay que cambiarlas
+en las dos.** `MEMBERSHIP_CLOSES_AT` y `MEMBERSHIP_REOPENS_AT` viven en los dos
+proyectos de Vercel: acá mandan sobre la carta y sobre `/api/checkout`, allá
+sobre su webhook y su copy. Si acá dicen «abierto» y allá «cerrado», la carta
+invita a entrar por una puerta que el otro lado tiene cerrada. Este desdoble
+existe mientras el webhook siga allá, y desaparece con él.
+
+#### Lo que la compradora ve ahora
+
+```
+/productos/estudiemos-juntos/   la carta, con su botón
+        ↓
+/api/checkout?lang=es           ¿puertas abiertas? → sesión de Stripe
+        ↓                       ¿cerradas? → 403 con la fecha de reapertura
+   [ Stripe ]
+        ↓
+/gracias/?session_id=…          pone su contraseña
+        ↓
+/api/claim-account              comprueba el pago CONTRA STRIPE, crea la
+        ↓                       cuenta, fija la clave y espeja la suscripción
+/aulavirtual/escritorio/        dentro, sin haber abierto el correo
+```
+
+**Dónde está la autorización, que es lo que hay que entender antes de tocar
+`/api/claim-account`:** en tener un `session_id` de Stripe pagado. Nadie más lo
+tiene. Y **el correo no lo escribe el navegador** — sale del propio checkout de
+Stripe—, que es lo que impide quedarse con la cuenta de otra persona tecleando
+su dirección. Una versión que preguntara «¿este correo pagó?» sería un secuestro
+de cuentas con pasos extra.
+
+La pantalla de `/gracias/` tiene **dos caminos**, y el del correo es el de
+respaldo: si no hay `session_id` —o si la compradora lo prefiere— pide el correo
+y manda el enlace de siempre. Ese camino **no necesitó ninguna ruta de API
+propia**: es el mismo `resetPasswordForEmail` que ya usa la pantalla de acceso,
+apuntando a la misma pantalla de contraseña nueva. Una pieza menos que mantener.
+
+#### Lo que sigue en la academia, y no es un olvido
+
+- **El webhook de Stripe**, por lo de arriba.
+- **El aula de la membresía** — los videos semanales. El botón «Membresía» del
+  escritorio todavía sale del sitio, y lo dice.
+- **Las URLs de retorno del portal de cliente de Stripe.** Se cambian en su
+  panel cuando la membresía entera viva acá, no antes.
+- **La academia tiene que seguir viva**, y esto no es optativo: sin ella no hay
+  puente de traspaso. Pasa a ser un 301 semanas después, no ahora.
+
 ### La mudanza de la sesión
 
 Decidido el **11 de septiembre de 2026**, al preguntarse si había que copiar las
@@ -1146,10 +1280,13 @@ clave `sb-<ref>-auth-token`, y `localStorage` es **por origen**.
 es hacer que volver a entrar cueste un clic y no una contraseña olvidada, con
 tres capas:
 
-1. **El puente de traspaso**, mientras el dominio viejo siga vivo. Una página en
-   `emilseriosacademy.com/pasar/` lee la sesión con `getSession()` y redirige a
-   `https://emilserios.com/entrar/#access_token=…&refresh_token=…`; el sitio
-   nuevo hace `setSession(...)` y ya está dentro. **No es un invento: la
+1. **El puente de traspaso**, mientras el dominio viejo siga vivo. ✅ **La mitad
+   de acá está construida desde el 22 sep 2026**: `/aulavirtual/pasar/` y su
+   gemela `/en/classroom/handoff/` reciben los tokens en el `#hash`, los plantan
+   con `setSession()` y borran el hash. Falta la mitad de allá — la página
+   `emilseriosacademy.com/pasar/` que lee la sesión con `getSession()` y
+   redirige—, y está escrita entera, lista para pegar, en
+   `docs/UNIR-LAS-DOS-CASAS.md`. **No es un invento: la
    academia ya usa `flowType: 'implicit'`**, que es exactamente esto — los
    tokens viajan en el hash. Dos cosas obligatorias: que la redirección la
    inicie la alumna (un `<iframe>` lo rompe el particionado de almacenamiento de
@@ -1167,15 +1304,19 @@ Con las tres, el peor caso de cualquier miembro es *volver a entrar*, nunca
 **El orden, que acá sí importa:**
 
 ```
-1  No tocar la base de datos. Mismo proyecto, misma URL, misma clave anon.
-2  AÑADIR emilserios.com a Site URL y Redirect URLs de Supabase Auth.
+1  No tocar la base de datos. Mismo proyecto, misma URL, misma clave anon.   ✅
+2  AÑADIR emilserios.com a Site URL y Redirect URLs de Supabase Auth.        ◻︎ panel
    Es aditivo: el dominio viejo sigue funcionando.
-3  Desplegar el aula nueva en emilserios.com contra ese mismo Supabase.
-4  MANTENER emilseriosacademy.com viva, con la app vieja + el puente.
+3  Desplegar el aula nueva en emilserios.com contra ese mismo Supabase.      ✅
+4  MANTENER emilseriosacademy.com viva, con la app vieja + el puente.        ◻︎ pegar
    Si se apaga antes, el puente no existe.
-5  El correo de aviso.
-6  Semanas después, la academia pasa a ser un 301 al sitio nuevo.
+5  El correo de aviso.                                                       ◻︎ Emi
+6  Semanas después, la academia pasa a ser un 301 al sitio nuevo.            ◻︎
 ```
+
+Lo que queda de esa lista **no es código**: son dos campos en el panel de
+Supabase, una página que pegar en el repo de la academia y un correo que manda
+Emi. Los tres están detallados en `docs/UNIR-LAS-DOS-CASAS.md`.
 
 Tres trampas, y las tres muerden si no se ven venir:
 
@@ -1788,7 +1929,14 @@ src/
                          Se ata a data/aula.ts por el slug
   lib/membership.ts      Las fechas de las puertas y el alta al newsletter,
                          traídas de la academia con sus mismos nombres de
-                         variable de entorno
+                         variable de entorno. Lo puede importar cualquiera
+  lib/membership-server.ts  El pase de invitación. APARTE porque guarda un
+                         SECRETO: solo lo importan rutas con prerender = false
+  lib/stripe.ts          El cliente de Stripe, los dos Prices y el origen
+                         público. Solo servidor
+  lib/stripe-sync.ts     Espejar una suscripción en `subscriptions`. UPSERT,
+                         y esa idempotencia es lo que deja que el webhook siga
+                         viviendo en la academia
   i18n/ui.ts             Cadenas de interfaz + mapa de rutas
   i18n/aula.ts           Las cadenas y las rutas del aula, aparte: afuera se
                          habla de comprar y adentro de estudiar
@@ -1804,6 +1952,9 @@ src/
                          aulavirtual/index · en/classroom/index
                          aulavirtual/escritorio · aulavirtual/curso/[curso]
                          en/classroom/desk · en/classroom/course/[curso]
+                         gracias · en/thank-you (después de pagar)
+                         aulavirtual/pasar · en/classroom/handoff (el puente)
+                         api/checkout · api/claim-account (el cobro, servidor)
   styles/tokens.css      Los tokens del sistema
   styles/base.css        Reset y primitivas compartidas
   styles/aula.css        El sistema del aula: la crema de la membresía. Todo
@@ -1817,6 +1968,9 @@ public/img/              foto.jpg, logo_emi_alpha.png y los dos cursores de
 public/emi-city.jpg      El respaldo del onerror de la foto
 docs/PORTAR-CARTA-DE-VENTAS.md  El kit del trasplante. Estaba en public/, que
                          lo habría publicado en la raíz del sitio
+docs/UNIR-LAS-DOS-CASAS.md  Lo que hay que hacer FUERA del código para la
+                         unión: variables de Vercel, Redirect URLs de Supabase
+                         y la página que hay que pegar en el repo de la academia
 scripts/audit.mjs        Auditoría de contraste y rejilla
 scripts/audit-menu.mjs   Contraste del menú de cristal, con el panel abierto
 ```
@@ -2298,10 +2452,12 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
 
 - **El botón de comprar aparece cuatro veces, y lo decide el texto.** En la
   carta original hay cuatro llamadas y acá también, porque quitarlas cambiaría
-  la carta. Dónde van lo dice `data/aula.ts`, no el componente. El aviso de que
-  el cobro todavía vive fuera se da **una sola vez**, en la primera: repetirlo
+  la carta. Dónde van lo dice `data/aula.ts`, no el componente. Mientras el
+  cobro vivió fuera, el aviso se dio **una sola vez**, en la primera —repetirlo
   cuatro veces es ruido, callarlo es dejar que la lectora descubra sola el
-  cambio de dominio a mitad de una compra.
+  cambio de dominio a mitad de una compra—. Desde el 22 sep 2026 el cobro es de
+  esta casa y el aviso salió; **la regla de decirlo una vez se queda escrita**
+  para el día que un curso cobre desde fuera.
 
 - **El botón de comprar es el único botón macizo del sitio.** Tinta llena, papel
   encima, sin radio y sin sombra. Se lo gana porque es el final del recorrido y
@@ -2596,6 +2752,30 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
 
 ### Bloquea el lanzamiento
 
+- [ ] **⚠️ Las variables de Stripe en Vercel, o el botón de comprar da un 500.**
+      Desde el 22 sep 2026 `/api/checkout` vive acá, y **sin
+      `STRIPE_SECRET_KEY` y `STRIPE_PRICE_STANDARD` no crea ninguna sesión de
+      pago**: contesta 500 con el motivo escrito en pantalla. Los valores son
+      **los mismos que ya están en el proyecto de Vercel de la academia** — se
+      copian, no se crean. Van también `PUBLIC_SITE_URL`
+      (`https://www.emilserios.com`, **con `www`**) y
+      `SUPABASE_SERVICE_ROLE_KEY`. La lista entera, con el porqué de cada una,
+      está en `docs/UNIR-LAS-DOS-CASAS.md`.
+
+      Hoy esto no se ve porque **las puertas están cerradas hasta el 1 de
+      octubre** y el checkout corta antes de mirar a Stripe — sale la pantalla
+      de «puertas cerradas», que es lo correcto. **El 1 de octubre deja de
+      taparlo.**
+
+- [ ] **Las dos Redirect URLs nuevas en Supabase.** `/aulavirtual/pasar/` y
+      `/en/classroom/handoff/`, con el dominio delante. Sin ellas el puente de
+      traspaso no lleva a ninguna parte. Es **aditivo**: la academia sigue
+      funcionando igual.
+
+- [ ] **Pegar el puente en el repo de la academia.** La página
+      `emilseriosacademy.com/pasar/` está escrita entera, lista para pegar, en
+      `docs/UNIR-LAS-DOS-CASAS.md`. Sin ella, la mitad de acá no recibe nada.
+
 - [ ] **Decidir las fechas de las puertas de la membresía en ESTE proyecto.** La
       carta trasplantada trae `src/lib/membership.ts` con las mismas dos fechas
       que la academia y los mismos nombres de variable —`MEMBERSHIP_CLOSES_AT` y
@@ -2604,8 +2784,13 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
       septiembre de 2026. Hoy eso deja la carta con las puertas cerradas hasta el
       1 de octubre, que es lo correcto — pero el mes que Emi cambie el ciclo y
       solo lo cambie en una casa, la carta invitará a entrar por una puerta que
-      el checkout tiene cerrada. Lo sano el día de la mudanza del cobro: una sola
-      fuente para las dos.
+      el checkout tiene cerrada.
+
+      ⚠️ **Desde el 22 sep 2026 esto pesa más, no menos.** Ahora las dos fechas
+      mandan **acá** sobre la carta Y sobre `/api/checkout` —el cobro de verdad,
+      el que cobra o no cobra—, y **allá** sobre el webhook y su copy. El
+      desdoble desaparece el día que el webhook se mude; hasta entonces, **se
+      cambian en los dos proyectos de Vercel o no se cambian en ninguno**.
 
 - [ ] **Conectar Klaviyo.** El formulario valida y maqueta bien, pero **no da
       de alta a nadie**. Está resuelto para que no mienta — en producción y sin
@@ -2848,6 +3033,23 @@ enseñárselo.
       cuanto los tenga (19 sep 2026).
 
 ### Próximos PRs
+
+- [ ] **Mudar el webhook de Stripe, y con él el correo de bienvenida.** Es la
+      segunda mitad de **La unión de las dos casas**, y **tiene un orden que no
+      se puede saltar**:
+
+      1. arreglar el DKIM —los cinco CNAME proxied, arriba—;
+      2. verificar `emilserios.com` en Resend;
+      3. traer `/api/stripe-webhook`, `welcome-email.ts` y `email.ts` de
+         `emilse_rios_membresias`;
+      4. endpoint nuevo en el panel de Stripe y `STRIPE_WEBHOOK_SECRET` nuevo
+         en Vercel.
+
+      Hacer el 3 y el 4 sin el 1 y el 2 significa que **alguien paga y no
+      recibe su correo de bienvenida**. Mientras tanto no hay prisa y no hay
+      nada roto: el webhook de la academia escribe en el mismo Supabase y su
+      `UPSERT` es idempotente. Con esto desaparece además el desdoble de las
+      fechas de las puertas.
 
 - [ ] **Cierre para producción.** `sitemap.xml`, `robots.txt`, imagen de Open
       Graph, datos estructurados y página 404. Es el candidato natural al

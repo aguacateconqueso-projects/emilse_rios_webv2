@@ -42,13 +42,14 @@
 //   · canónica, hreflang y og:url apuntan a `/productos/estudiemos-juntos/` y
 //     su gemela inglesa, que es donde vive la carta ahora.
 //   · el favicon es el de este sitio.
-//   · los botones de pago van al checkout de la academia, con su aviso.
+//   · los botones de pago van a /api/checkout, que desde el 22 sep 2026 es una
+//     ruta de ESTA casa (antes era el de la academia, y llevaba su aviso).
 //   · fuera el precio de fundador: su ventana cerró el 23 jul 2026 y acá entra
 //     solo el estándar (decisión ya tomada, ver `progreso.md`).
 //   · la píldora de idioma y el pie enlazan a este sitio, no a la academia.
 // ---------------------------------------------------------------------------
-import { useTranslations, productPath, routePath } from '../../i18n/ui';
-import { ACADEMIA, entrarHref } from '../../data/aula';
+import { productPath, routePath } from '../../i18n/ui';
+import { entrarHref } from '../../data/aula';
 import { CLOSES_AT, REOPENS_AT, NEWSLETTER_URL, INVITE_PARAM, doorsClosed } from '../../lib/membership';
 
 interface Props {
@@ -59,15 +60,12 @@ interface Props {
 const { lang = 'es', slug = 'estudiemos-juntos' } = Astro.props;
 const isEN = lang === 'en';
 const newsHref = NEWSLETTER_URL;
-/**
- * Las cadenas del SITIO, no las de la carta.
- *
- * Se llama `ui` y no `t` porque en este fichero `t` ya es el bloque de copy de
- * la carta, que viene entero del original y ahí se queda. Lo único que se pide
- * prestado de `src/i18n/ui.ts` es el aviso de que el cobro vive fuera, que es
- * la misma frase que dice el resto de la tienda: una verdad, un texto.
+/*
+ * Acá se pedían prestadas las cadenas del SITIO —`useTranslations`— para una
+ * sola frase: el aviso de que el cobro vivía fuera. Con el checkout ya en esta
+ * casa (22 sep 2026) esa frase salió de la carta, y con ella el préstamo. La
+ * carta vuelve a ser lo que dice su cabecera: su copy y nada más.
  */
-const ui = useTranslations(lang);
 
 // ---------------------------------------------------------------------------
 // SEO — lo que Google necesita para indexar esta carta.
@@ -253,7 +251,7 @@ const t = isEN ? {
   priceReassure: 'Cancel anytime, no questions asked.',
   priceBelow: 'You pay each month on the date you joined. For example, if you join on the 20th, your month runs from the 20th to the 20th. You never lose days. You can cancel whenever you want, no explanations needed. One thing though: if you leave and later want to come back, you join at whatever price is in force at that moment.',
   pay: 'Join here',
-  payHref: `${ACADEMIA}/api/checkout?lang=en`,
+  payHref: '/api/checkout?lang=en',
   // Cuenta atrás bajo cada botón + estado «puertas cerradas» (ver
   // src/lib/membership.ts). Los marcadores los rellenan el build y el script con
   // la hora de MADRID: {time} = 23:59, {tz} = CEST/CET, {date} = September 2.
@@ -408,7 +406,7 @@ const t = isEN ? {
   priceReassure: 'Cancela cuando quieras, sin explicar nada.',
   priceBelow: 'Pagas cada mes en la fecha que entraste. Por ejemplo, si entras un 20, tu mes va del 20 al 20. Nunca pierdes días. Te puedes dar de baja cuando quieras, sin explicaciones. Eso sí: si te vas y luego quieres volver, entras con el precio que esté vigente en ese momento.',
   pay: 'Acá te unes',
-  payHref: `${ACADEMIA}/api/checkout?lang=es`,
+  payHref: '/api/checkout?lang=es',
   // Cuenta atrás bajo cada botón + estado «puertas cerradas» (ver
   // src/lib/membership.ts). Los marcadores los rellenan el build y el script con
   // la hora de MADRID: {time} = 23:59, {tz} = CEST/CET, {date} = 2 de septiembre.
@@ -806,9 +804,6 @@ const jsonLd = {
   .pricecard__action { display: flex; flex-direction: column; gap: 12px; }
   .pricecard__fine { font-size: 0.82em; color: var(--soft); text-align: center; margin: 0; transition: color 0.45s ease; }
   .pricecard:hover .pricecard__fine { color: rgba(250, 247, 241, 0.6); }
-  /* El aviso de que el cobro vive fuera: la misma letra pequeña, con aire
-     encima para que no se lea como una coletilla de «cancela cuando quieras». */
-  .pricecard__away { margin-top: 4px; }
   /* Fila inferior a todo el ancho: info de facturación destacada (negrita, centrada).
      max-width: none anula el límite global de <p> (var(--measure)) para que ocupe
      todo el ancho de la tarjeta y el texto quede centrado de verdad. */
@@ -1137,12 +1132,18 @@ const jsonLd = {
             </p>
             <p class="pricecard__fine">{t.priceReassure}</p>
             {/*
-              Añadido de esta casa, y se dice UNA sola vez, en la ficha de
-              precio: el botón sale del sitio porque el cobro todavía vive en la
-              academia. Decirlo acá es mejor que dejar que la lectora descubra
-              sola que cambió de dominio a mitad de una compra.
+              Acá vivía el aviso de que el botón salía del sitio, porque el
+              cobro estaba en la academia. **Salió el 22 sep 2026**, con el
+              checkout: `/api/checkout` es ahora una ruta de esta casa y la
+              compra entera —pagar, poner la contraseña, entrar— ocurre sin
+              cambiar de dominio, así que el aviso decía algo que ya no pasa.
+
+              La frase sigue escrita en `src/i18n/ui.ts` como
+              `products.leaving`, y `Compra.astro` la enseña sola en cuanto un
+              producto vuelva a tener un `comprarHref` absoluto. El día que un
+              curso cobre por PayPal desde fuera, el aviso reaparece sin que
+              nadie lo vuelva a escribir.
             */}
-            <p class="pricecard__fine pricecard__away">{ui('products.leaving')}</p>
           </div>
         </div>
         <p class="pricecard__foot">{t.priceBelow}</p>

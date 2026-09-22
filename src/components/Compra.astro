@@ -12,11 +12,16 @@
  *   hace falta la puerta: tras el gancho, tras el mensaje final y tras las
  *   preguntas.
  *
- * **Hoy el paso 4 sale del sitio.** La membresía sigue cobrando en
- * `emilseriosacademy.com` y ahí se queda hasta el cambio de dominio, así que el
- * botón lleva a su checkout de Stripe, que funciona. Se dice una vez, en la
- * primera ficha, en lugar de que la lectora descubra sola que cambió de dominio
- * a mitad de una compra.
+ * **Desde el 22 sep 2026 el paso 4 NO sale del sitio.** `comprarHref` de la
+ * membresía es `/api/checkout`, una ruta de esta casa, y la compra entera
+ * ocurre sin cambiar de dominio.
+ *
+ * El aviso de que el cobro vive fuera sigue acá y **no sobra**: se enseña solo
+ * cuando el `comprarHref` del producto es absoluto —`fuera`, abajo—, que es
+ * justo lo que pasará el día que un curso cobre por PayPal desde otra casa. Es
+ * la regla, no el caso: la frase se escribió una vez y aparece sola cuando
+ * vuelve a ser verdad, en lugar de que alguien tenga que acordarse de
+ * reescribirla.
  */
 import { type Lang, useTranslations } from '../i18n/ui';
 import type { Product } from '../data/aula';

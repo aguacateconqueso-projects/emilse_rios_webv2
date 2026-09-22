@@ -1,0 +1,18 @@
+---
+/** The session handoff bridge, in English. */
+import Acceso from '../../../../layouts/Acceso.astro';
+import Pasar from '../../../../components/acceso/Pasar.astro';
+import { useAula, pasarPath } from '../../../../i18n/aula';
+
+const lang = 'en' as const;
+const a = useAula(lang);
+---
+
+<Acceso
+  lang={lang}
+  title={a('pass.bridgeTitle')}
+  pathEs={pasarPath('es')}
+  pathEn={pasarPath('en')}
+>
+  <Pasar lang={lang} />
+</Acceso>

@@ -128,10 +128,12 @@ export type Product = {
   /** La foto del producto. Sin ella, la ficha dibuja un marco con su etiqueta. */
   foto?: ImageMetadata;
   /**
-   * A dónde lleva el botón de compra. Hoy sale del sitio: la membresía sigue
-   * cobrando en `emilseriosacademy.com` y ahí se queda hasta el cambio de
-   * dominio. Cuando el pago viva acá, esto pasa a ser una ruta interna y nada
-   * más cambia.
+   * A dónde lleva el botón de compra.
+   *
+   * **Desde el 22 sep 2026 la membresía apunta adentro**, a `/api/checkout`.
+   * Sigue pudiendo ser absoluto —y `Compra.astro` enseña su aviso solo cuando
+   * lo es—: el día que un curso cobre por PayPal desde otra casa, se escribe la
+   * dirección entera acá y el aviso vuelve sin tocar nada más.
    */
   comprarHref?: Record<Lang, string>;
   /**
@@ -240,9 +242,21 @@ const membresia: Product = {
   num: '01',
   cartaPropia: true,
   foto: membresiaFoto,
+  /*
+   * **Desde el 22 sep 2026 es una ruta de esta casa.** Hasta ese día era
+   * `${ACADEMIA}/api/checkout`, y el botón de comprar sacaba a la lectora del
+   * sitio a mitad de una compra; hoy `/api/checkout` vive acá —misma sesión de
+   * Stripe, mismos metadatos, mismo webhook leyéndolos del otro lado—.
+   *
+   * Relativo y no absoluto a propósito: así vale igual en producción, en las
+   * previsualizaciones de Vercel y en `astro dev`, sin una variable más. Y
+   * `Compra.astro` mira justamente si empieza por `http` para decidir si
+   * enseña el aviso de «el cobro vive fuera»; al ser relativo, el aviso
+   * desaparece solo, que es lo correcto porque ya no es verdad.
+   */
   comprarHref: {
-    es: `${ACADEMIA}/api/checkout?lang=es`,
-    en: `${ACADEMIA}/api/checkout?lang=en`,
+    es: '/api/checkout?lang=es',
+    en: '/api/checkout?lang=en',
   },
   copia: {
     es: {

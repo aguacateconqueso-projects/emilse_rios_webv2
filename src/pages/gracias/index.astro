@@ -1,0 +1,24 @@
+---
+/**
+ * Después de pagar, en español. Es la `success_url` de `/api/checkout`.
+ *
+ * No cuelga de `/aulavirtual/` a propósito: quien llega acá todavía no tiene
+ * cuenta ni sesión, y viene de la carta de ventas, que vive en la tienda. Ver
+ * `graciasPath()` en `src/i18n/aula.ts`.
+ */
+import Acceso from '../../layouts/Acceso.astro';
+import Gracias from '../../components/acceso/Gracias.astro';
+import { useAula, graciasPath } from '../../i18n/aula';
+
+const lang = 'es' as const;
+const a = useAula(lang);
+---
+
+<Acceso
+  lang={lang}
+  title={a('thanks.title')}
+  pathEs={graciasPath('es')}
+  pathEn={graciasPath('en')}
+>
+  <Gracias lang={lang} />
+</Acceso>
