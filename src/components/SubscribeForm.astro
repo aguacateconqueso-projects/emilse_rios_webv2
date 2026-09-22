@@ -1,14 +1,24 @@
 ---
 import { type Lang, useTranslations } from '../i18n/ui';
+import { hayProveedor } from '../lib/klaviyo';
 
 /**
  * Campo de suscripción — una regla, nunca una caja.
  *
- * PENDIENTE (bloquea el lanzamiento): todavía no hay proveedor de correo
- * conectado. El formulario envía a `PUBLIC_NEWSLETTER_ENDPOINT` cuando esa
- * variable existe. Si no existe:
+ * **Desde el 22 sep 2026 da de alta de verdad.** Manda el correo a
+ * `/api/suscribir`, que habla con Klaviyo desde el servidor con la clave
+ * privada — ver `src/lib/klaviyo.ts`. Hasta ese día no daba de alta a nadie.
+ *
+ * Lo que decide si funciona es **`KLAVIYO_API_KEY` en Vercel**, y de ahí sale
+ * `hayProveedor`. Sin ella, el comportamiento de siempre, que no se toca
+ * porque es el correcto:
+ *
  *   · en desarrollo, simula el envío para poder revisar el diseño;
  *   · en producción, muestra el error en vez de mentirle a quien se suscribe.
+ *
+ * `PUBLIC_NEWSLETTER_ENDPOINT` sigue existiendo y sigue mandando sobre todo lo
+ * demás: es la salida para apuntar a otro sitio —otro proveedor, un formulario
+ * alojado— sin tocar código. Vacía, que es lo normal, manda la ruta de casa.
  */
 interface Props {
   lang: Lang;
@@ -26,7 +36,18 @@ interface Props {
 const { lang, id, flush = false, label } = Astro.props;
 const t = useTranslations(lang);
 
-const endpoint = import.meta.env.PUBLIC_NEWSLETTER_ENDPOINT ?? '';
+/*
+ * La ruta de casa por defecto. Se escribe relativa a propósito: así vale igual
+ * en producción, en las previsualizaciones de Vercel y en `astro dev`, sin una
+ * variable más — la misma razón por la que `comprarHref` de la membresía es
+ * relativo desde que el cobro se mudó acá.
+ *
+ * ⚠️ `hayProveedor` viaja al navegador como un booleano y **solo como un
+ * booleano**. `klaviyo.ts` es de servidor y la clave no sale de ahí; lo único
+ * que cruza es un sí o un no.
+ */
+const endpoint = import.meta.env.PUBLIC_NEWSLETTER_ENDPOINT || '/api/suscribir';
+const conectado = hayProveedor || Boolean(import.meta.env.PUBLIC_NEWSLETTER_ENDPOINT);
 const inputId = `${id}-email`;
 const statusId = `${id}-status`;
 ---
@@ -38,12 +59,12 @@ const statusId = `${id}-status`;
     <form
       class="subscribe__form"
       data-subscribe
-      data-endpoint={endpoint}
+      data-endpoint={conectado ? endpoint : ''}
       data-dev={import.meta.env.DEV ? 'true' : 'false'}
       data-done={t('form.done')}
       data-invalid={t('form.error')}
       data-failed={t('form.failed')}
-      action={endpoint || undefined}
+      action={conectado ? endpoint : undefined}
       method="post"
       novalidate
     >
@@ -203,12 +224,14 @@ const statusId = `${id}-status`;
         return;
       }
 
-      // Sin proveedor conectado: en desarrollo se simula para poder revisar
-      // el diseño; en producción no se finge un alta que no ha ocurrido.
+      // Sin proveedor conectado —`KLAVIYO_API_KEY` vacía y sin endpoint
+      // propio— el `data-endpoint` nace vacío. En desarrollo se simula para
+      // poder revisar el diseño; en producción no se finge un alta que no ha
+      // ocurrido: se dice que no y se da una dirección a la que escribir.
       if (!endpoint) {
         if (isDev) {
           console.warn(
-            '[suscripción] PUBLIC_NEWSLETTER_ENDPOINT no está definido: envío simulado.',
+            '[suscripción] sin proveedor (falta KLAVIYO_API_KEY): envío simulado.',
           );
           succeed();
         } else {

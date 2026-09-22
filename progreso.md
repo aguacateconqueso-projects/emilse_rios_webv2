@@ -4,7 +4,11 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 22 de septiembre de 2026 · **EMPEZÓ LA UNIÓN DE LAS
+**Última actualización:** 22 de septiembre de 2026 · **EL NEWSLETTER YA DA DE
+ALTA**, que era lo último que bloqueaba el lanzamiento: «Acá te suscribes» manda
+a `/api/suscribir`, que habla con Klaviyo desde el servidor. Falta **una sola
+variable en Vercel** —`KLAVIYO_API_KEY`— y está contado en
+`docs/CONECTAR-KLAVIYO.md`. Ese mismo día, antes, **EMPEZÓ LA UNIÓN DE LAS
 DOS CASAS.** El cobro de la membresía ya vive en `www.emilserios.com`: el botón
 de comprar dejó de salir del sitio, la compra termina acá y quien paga pone su
 contraseña y entra al aula en el mismo clic, sin esperar ningún correo. Y está
@@ -29,7 +33,8 @@ el dominio sigue registrado en la cuenta de Namecheap de Edu
 | **Alcance** | Desde el 31 ago 2026 esto deja de ser solo el sitio: aquí van también el aula, la membresía y los cursos. Ver **La plataforma**. |
 | **Sesión** | Desde el 20 sep 2026 el aula pide sesión de verdad, contra el **mismo Supabase de la academia**. Falta poner las variables en Vercel y las Redirect URLs en Supabase; sin eso queda en modo maqueta y lo dice. |
 | **Cobro** | **Desde el 22 sep 2026 vive acá.** `/api/checkout` crea la sesión de Stripe, `/gracias/` recoge a quien pagó y `/api/claim-account` le crea la cuenta. El **webhook sigue en la academia**, y es correcto que siga: ver **La unión de las dos casas**. |
-| **Lo que falta para lanzar** | Conectar Klaviyo. El formulario **no da de alta a nadie** — y ahora eso se ve en un sitio que ya está publicado y accesible. Y las variables de Stripe en Vercel, o el botón de comprar da un 500. |
+| **Newsletter** | **Conectado desde el 22 sep 2026.** `/api/suscribir` da de alta en la lista real de Klaviyo (`SaE8Px`). Falta poner `KLAVIYO_API_KEY` en Vercel; sin ella el formulario avisa en vez de fingir. |
+| **Lo que falta para lanzar** | **Dos variables en Vercel, y ninguna es código:** `KLAVIYO_API_KEY` o el newsletter no da de alta, y las de Stripe o el botón de comprar da un 500. |
 
 Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/` · `/productos/` ·
 `/en/products/` · `/productos/estudiemos-juntos/` ·
@@ -1149,6 +1154,97 @@ Y dos cosas que hay que arreglar al mudar, encontradas leyendo:
 La capa visual de la academia que se guarda sin enchufar son dos ficheros:
 `public/membresia-ui.css` y `public/membresia-ui.js`.
 
+### El newsletter, conectado
+
+Hecho el **22 de septiembre de 2026**. Era el último pendiente que bloqueaba el
+lanzamiento, y llevaba en esa lista desde el principio: **el formulario no daba
+de alta a nadie.**
+
+Lo que había hasta ese día: el campo validaba, maquetaba bien y, en producción,
+enseñaba un error honesto con `info@emilserios.com`. No mentía —eso estaba
+resuelto a propósito— pero tampoco servía. Adrián lo comprobó en el código
+fuente del sitio publicado: `data-endpoint` viajaba vacío en los dos
+formularios de la Home y en el de *Sobre mí*.
+
+#### Cómo quedó
+
+```
+«Acá te suscribes»
+        ↓  POST {email}
+/api/suscribir          valida, normaliza y llama a Klaviyo
+        ↓                desde el SERVIDOR, con la clave privada
+[ Klaviyo ]             trabajo de suscripción → lista SaE8Px
+        ↓
+«Listo. Revisa tu bandeja de entrada.»
+```
+
+- **`src/lib/klaviyo.ts`** — solo servidor. La clave, la lista, la versión de
+  la API y la llamada.
+- **`src/pages/api/suscribir.ts`** — la ruta. Valida el correo y traduce el
+  resultado a un sí o un no genérico.
+- **`SubscribeForm.astro`** — apunta a `/api/suscribir` por defecto.
+
+#### Tres decisiones, y por qué
+
+**1 · La llamada va por el servidor, no desde el navegador.** Klaviyo tiene un
+endpoint de cliente que habría evitado escribir la ruta — pero entonces
+cualquiera puede dar de alta a cualquiera con un bucle de dos líneas, y la
+clave viaja en el HTML. Es lo que este documento ya había decidido cuando el
+pendiente se escribió, y sigue siendo lo correcto. **Y hoy cuesta menos que
+antes:** el repo ya tiene rutas de servidor desde la capa A, así que la
+infraestructura estaba puesta.
+
+**2 · El ID de la lista va por defecto en el código, no en Vercel.** Es
+`SaE8Px`, la lista real del newsletter — la misma a la que lleva la página
+alojada de Klaviyo que usan la carta de ventas y el pie de la membresía (ver
+`NEWSLETTER` en `src/data/aula.ts`). No es un secreto: viaja en esa URL que Emi
+comparte. Ponerla por defecto evita el fallo más caro de todos: **dar de alta a
+gente en una lista equivocada durante semanas sin que nadie lo note.** Se puede
+cambiar con `KLAVIYO_LIST_ID`, pero el valor por defecto es el bueno.
+
+**3 · La respuesta es la misma esté o no ese correo ya suscrito.** Si
+contestara distinto, cualquiera podría averiguar quién lee el newsletter de Emi
+probando direcciones. Es la misma regla que ya sigue la pantalla de acceso del
+aula al pedir el enlace de la contraseña. Lo que sí se distingue es **el fallo
+nuestro** —sin proveedor, Klaviyo caído, Klaviyo rechazando— porque ahí no hay
+nada que filtrar y quien se suscribe merece saber que no quedó apuntado.
+
+#### Lo que no cambió, y es importante
+
+**El comportamiento sin proveedor se queda igual.** Si falta
+`KLAVIYO_API_KEY`, el formulario hace lo de siempre: en desarrollo simula un
+«Listo» para poder revisar el diseño, y en producción dice que no se pudo y da
+una dirección a la que escribir.
+
+⚠️ **De ahí una trampa que conviene saber: probarlo en local no prueba nada.**
+En `astro dev` sin clave el formulario dice «Listo» y no ha dado de alta a
+nadie. La comprobación de verdad es mirar el correo en Klaviyo.
+
+#### Lo que hay que saber si un día deja de funcionar
+
+⚠️ **La API de Klaviyo va versionada por fecha**, en la cabecera `revision`, y
+es obligatoria. Si el alta empieza a fallar de golpe sin haber tocado nada, eso
+es lo primero que hay que mirar: se sube la fecha en `KLAVIYO_REVISION`.
+
+El motivo de verdad siempre está en **Vercel → Logs**, buscando `[klaviyo]`: se
+registra el estado HTTP, la `revision`, la lista y **el cuerpo del error de
+Klaviyo entero**. A la pantalla no va nada de eso a propósito — nombra la lista
+y la cuenta.
+
+⚠️ **La forma del cuerpo de la petición no se pudo verificar contra la
+documentación de Klaviyo** al escribirla: el entorno donde se programó no tiene
+salida hacia sus servidores. Por eso `docs/CONECTAR-KLAVIYO.md` lleva un `curl`
+que la confirma en diez segundos desde cualquier terminal, y hay que correrlo
+**antes** de dar esto por bueno.
+
+#### Lo que sigue siendo de Klaviyo, y no de este sitio
+
+**El correo de bienvenida con el video** que promete la Home lo manda Klaviyo,
+con su flujo de bienvenida atado a la lista. Este sitio solo da el alta. Y si
+la lista tiene **doble confirmación** activada, Klaviyo manda su correo y la
+persona no queda suscrita hasta pulsarlo — el copy de la pantalla, «Listo.
+Revisa tu bandeja de entrada», ya sirve para los dos casos.
+
 ### La unión de las dos casas
 
 Hecha —la primera mitad— el **22 de septiembre de 2026**. Es lo que este
@@ -1927,6 +2023,8 @@ src/
                          — la FACHADA, lo que se vende
   data/cursos.ts         Unidades, clases y videos de Bunny — lo que se COMPRA.
                          Se ata a data/aula.ts por el slug
+  lib/klaviyo.ts         El alta al newsletter. Solo servidor: la clave
+                         privada de Klaviyo no sale de acá
   lib/membership.ts      Las fechas de las puertas y el alta al newsletter,
                          traídas de la academia con sus mismos nombres de
                          variable de entorno. Lo puede importar cualquiera
@@ -1955,6 +2053,7 @@ src/
                          gracias · en/thank-you (después de pagar)
                          aulavirtual/pasar · en/classroom/handoff (el puente)
                          api/checkout · api/claim-account (el cobro, servidor)
+                         api/suscribir (el alta al newsletter, servidor)
   styles/tokens.css      Los tokens del sistema
   styles/base.css        Reset y primitivas compartidas
   styles/aula.css        El sistema del aula: la crema de la membresía. Todo
@@ -1971,6 +2070,9 @@ docs/PORTAR-CARTA-DE-VENTAS.md  El kit del trasplante. Estaba en public/, que
 docs/UNIR-LAS-DOS-CASAS.md  Lo que hay que hacer FUERA del código para la
                          unión: variables de Vercel, Redirect URLs de Supabase
                          y la página que hay que pegar en el repo de la academia
+docs/CONECTAR-KLAVIYO.md  Lo que hay que hacer FUERA del código para que el
+                         newsletter dé de alta: la clave, la lista, la variable
+                         de Vercel y el curl que confirma la API
 scripts/audit.mjs        Auditoría de contraste y rejilla
 scripts/audit-menu.mjs   Contraste del menú de cristal, con el panel abierto
 ```
@@ -2792,20 +2894,28 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
       desdoble desaparece el día que el webhook se mude; hasta entonces, **se
       cambian en los dos proyectos de Vercel o no se cambian en ninguno**.
 
-- [ ] **Conectar Klaviyo.** El formulario valida y maqueta bien, pero **no da
-      de alta a nadie**. Está resuelto para que no mienta — en producción y sin
-      proveedor muestra un error honesto con una dirección a la que escribir,
-      en vez de un «Listo» falso.
+- [ ] **⚠️ `KLAVIYO_API_KEY` en Vercel, o el newsletter no da de alta.** El
+      código está hecho desde el 22 sep 2026 —ver **El newsletter,
+      conectado**— y **esto es lo único que falta**: una variable. Sin ella el
+      formulario no miente, pero tampoco suscribe a nadie.
 
-      **El proveedor ya se sabe: Emi usa Klaviyo** y la cuenta es suya
-      (31 ago 2026). Falta enchufarlo. **Aviso para quien lo implemente:** no
-      basta con poner `PUBLIC_NEWSLETTER_ENDPOINT`. El formulario hace un
-      `POST` de `{ email }` en JSON desde el navegador, y la mayoría de
-      proveedores no aceptan eso por CORS ni admiten exponer la clave en el
-      cliente. Hace falta una función serverless en Vercel que reciba el correo
-      y hable con la API de Klaviyo con la clave del lado del servidor — un
-      `POST` a su API de perfiles. Hay que elegir además **a qué lista entra**
-      quien se suscribe. Conviene contarlo antes de estimar.
+      La clave se saca de klaviyo.com → Settings → API keys → Create Private
+      API Key, con permiso de escritura sobre Lists y Profiles (nunca «Full
+      Access»). **Sin prefijo `PUBLIC_`**, o viajaría en el HTML. Y hay que
+      **redesplegar**: Vercel no aplica una variable nueva al despliegue que ya
+      está en el aire.
+
+      El ID de la lista NO hace falta ponerlo: por defecto es `SaE8Px`, la
+      lista real del newsletter.
+
+      ⚠️ **Antes de darlo por bueno, correr el `curl` de
+      `docs/CONECTAR-KLAVIYO.md`.** La forma del cuerpo de la petición no se
+      pudo verificar contra la documentación de Klaviyo al programarla, y ese
+      `curl` lo confirma en diez segundos.
+
+      ⚠️ **Probarlo en local no prueba nada:** en `astro dev` sin clave el
+      formulario dice «Listo» a propósito, para poder revisar el diseño. La
+      comprobación de verdad es ver el correo dentro de la lista en Klaviyo.
 
 - [ ] **⚠️ Los cinco CNAME de correo están PROXIED en Cloudflare.** Es lo
       primero que hay que mirar. El DKIM de Emi no se puede verificar, así que
