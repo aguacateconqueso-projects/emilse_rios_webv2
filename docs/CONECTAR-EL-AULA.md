@@ -118,17 +118,64 @@ paz. Pero ni siquiera eso hace falta antes del correo de aviso.
 
 ## 3 · Los admins
 
-**En este orden, que importa:**
+⚠️ **Antes que nada: en este sitio NADIE puede crearse una cuenta.** Y es a
+propósito — no hay registro abierto, porque el aula se compra. Las cuentas nacen
+de un solo sitio: `/api/claim-account`, después de un pago de Stripe.
 
-1. **Emi entra una vez** en `https://www.emilserios.com/aulavirtual/entrar/` con
-   su correo. Si nunca ha puesto contraseña en este sitio, usa «¿Primera vez, o
-   se te olvidó la clave?» y le llega el enlace.
-2. **Adrián, lo mismo.**
-3. Recién entonces, en **Supabase → SQL Editor**, pegar y ejecutar
-   **`supabase/set_admin.sql`** de este repositorio.
+Eso incluye a Emi y a Adrián, que nunca han pagado nada. **Sus cuentas hay que
+crearlas a mano.**
 
-⚠️ **El orden no es una recomendación.** El perfil de cada persona se crea la
-primera vez que entra, no antes. Si el script se ejecuta con alguien sin perfil,
+Y ojo con la trampa, que es de las que hacen perder una tarde: **«¿Primera vez,
+o se te olvidó la clave?» tampoco las crea.** Por debajo es
+`resetPasswordForEmail`, y esa función solo manda el correo si la cuenta ya
+existe — si no existe, **contesta que todo fue bien y no manda nada**, para no
+delatar quién está registrado. Así que parece que funcionó, y no llega ningún
+correo nunca.
+
+### 3.1 · Crear las dos cuentas
+
+En **Supabase → Authentication → Users → Add user → Create new user**:
+
+| Campo | Qué poner |
+|---|---|
+| Email | `emilserios.bass@gmail.com` · luego `adrianmendozam@gmail.com` |
+| Password | una contraseña **distinta para cada uno** |
+| Auto Confirm User | **marcado** ✅ |
+
+⚠️ **«Auto Confirm User» marcado, o no se puede entrar.** Sin confirmar, Supabase
+rechaza el inicio de sesión con «Email not confirmed» — que en pantalla se ve
+como el mismo «ese correo o esa contraseña no son correctos» de siempre.
+
+⚠️ **Una contraseña distinta para cada persona, y que no haya viajado por un
+chat.** Dos cuentas de admin con la misma clave es una sola cuenta con dos
+nombres: si se filtra una, se filtraron las dos, y los registros no dicen quién
+hizo qué.
+
+Al crear el usuario, el trigger `on_auth_user_created` le crea el perfil solo.
+No hay que hacer nada más.
+
+### 3.2 · Comprobar que entran
+
+Cada uno en `https://www.emilserios.com/aulavirtual/entrar/`, con su correo y su
+contraseña. Tienen que entrar al escritorio.
+
+Si dice «Ese correo o esa contraseña no son correctos», **abrir la consola del
+navegador** (F12 → Console) y buscar `[acceso]`. Ahí está el motivo de verdad:
+
+| En la consola | Qué pasa |
+|---|---|
+| `Invalid login credentials` | la cuenta no existe, o la contraseña no es ésa |
+| `Email not confirmed` | falta marcar *Auto Confirm* — se arregla en el usuario |
+| `Invalid API key` | `PUBLIC_SUPABASE_ANON_KEY` de Vercel está mal |
+| un error de red | Supabase no contestó |
+
+### 3.3 · Y recién entonces, el script
+
+En **Supabase → SQL Editor**, pegar y ejecutar **`supabase/set_admin.sql`** de
+este repositorio.
+
+⚠️ **El orden no es una recomendación.** El perfil de cada persona existe desde
+que se crea el usuario, no antes. Si el script se ejecuta con alguien sin perfil,
 **aborta sin tocar nada** y dice quién falta — está hecho así a propósito, para
 que nadie pierda el admin por un typo.
 

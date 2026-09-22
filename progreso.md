@@ -1289,6 +1289,43 @@ de aviso → webhook → **y semanas después** el 301. Lo que sí se puede hace
 si molesta que alguien llegue al sitio viejo, es redirigir **rutas sueltas** —la
 portada, `/aula/`— dejando `/api/*` en paz.
 
+#### En este sitio nadie puede crearse una cuenta, y eso incluye a Emi
+
+Descubierto **el mismo día, probándolo**: Emi y Adrián no podían entrar, y el
+mensaje decía «ese correo o esa contraseña no son correctos» sin más.
+
+La causa no era la contraseña: **sus cuentas no existían**. Y no podían existir,
+porque en este sitio **no hay registro abierto** —a propósito: el aula se
+compra—. Las cuentas nacen de un solo sitio, `/api/claim-account`, después de un
+pago de Stripe. Emi y Adrián nunca han pagado nada.
+
+⚠️ **Y la trampa, que es de las que hacen perder una tarde: «¿Primera vez, o se
+te olvidó la clave?» tampoco crea la cuenta.** Por debajo es
+`resetPasswordForEmail`, que **solo manda el correo si la cuenta ya existe**; si
+no existe, contesta que todo fue bien y no manda nada, para no delatar quién
+está registrado. Parece que funcionó y no llega ningún correo nunca.
+
+El paso 3 de `docs/CONECTAR-EL-AULA.md` decía «que entren una vez y el perfil se
+crea solo». **Era falso** y está corregido: las dos cuentas se crean a mano en
+Supabase → Authentication → Users, con **Auto Confirm User marcado** —sin eso,
+Supabase rechaza el inicio de sesión con «Email not confirmed», que en pantalla
+se ve exactamente igual que una contraseña mala—. El trigger
+`on_auth_user_created` hace el resto.
+
+#### El mensaje de error escondía cinco cosas distintas
+
+La pantalla de acceso decía «ese correo o esa contraseña no son correctos» pase
+lo que pase, **y no registraba nada en ninguna parte**. Eso está bien para el
+mensaje —distinguir «no existe» de «clave incorrecta» deja averiguar quién es
+miembro probando correos— y estaba mal para todo lo demás: la cuenta que no
+existe, el correo sin confirmar, la clave `anon` mal copiada en Vercel y un
+error de red se veían **idénticos**, y no había manera de saber cuál era.
+
+Desde el 22 sep 2026 el error entero va a **la consola del navegador**. No es una
+contradicción con lo anterior: la consola solo la ve quien está sentado delante,
+que es quien acaba de teclear ese correo y esa contraseña, así que no se le
+cuenta nada que no sepa. El mensaje de pantalla no cambia.
+
 #### `set_admin.sql`, que estaba citado y no existía
 
 Este documento venía diciendo desde la capa A que había que ejecutar
@@ -3026,9 +3063,15 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
 - [ ] **⚠️ Conectar el aula: los admins.** ✅ Hechas ya (22 sep 2026) las tres
       variables de Vercel, las cuatro Redirect URLs y el cambio del Site URL a
       `https://www.emilserios.com`. **Falta el tercer paso**, que es el que
-      tiene orden: Emi y Adrián entran una vez cada uno por
-      `/aulavirtual/entrar/`, y **recién entonces** se ejecuta
-      `supabase/set_admin.sql`. El perfil se crea al entrar, no antes.
+      tiene orden: **crear las dos cuentas a mano** en Supabase →
+      Authentication → Users, con **Auto Confirm User marcado**; comprobar que
+      cada uno entra por `/aulavirtual/entrar/`; y **recién entonces** ejecutar
+      `supabase/set_admin.sql`.
+
+      ⚠️ **Las cuentas no se pueden crear desde el sitio**, ni siquiera con
+      «¿Primera vez, o se te olvidó la clave?» — eso solo manda el correo si la
+      cuenta ya existe. Ver **El aula, conectada → En este sitio nadie puede
+      crearse una cuenta**.
 
       ⚠️ **Y lo que NO hay que hacer: redirigir `emilseriosacademy.com`.** Mata
       el webhook de Stripe, el aula de la membresía y el puente de traspaso.

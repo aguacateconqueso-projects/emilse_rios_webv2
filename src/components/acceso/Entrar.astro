@@ -148,9 +148,25 @@ const a = useAula(lang);
       btn.disabled = false;
 
       if (error) {
-        /* El mensaje es el mismo diga lo que diga Supabase: si distinguiera
-           «no existe» de «clave incorrecta», cualquiera podría averiguar quién
-           es miembro probando correos. */
+        /* EN PANTALLA, el mensaje es el mismo diga lo que diga Supabase: si
+           distinguiera «no existe» de «clave incorrecta», cualquiera podría
+           averiguar quién es miembro probando correos.
+
+           EN LA CONSOLA, el error entero. No es una contradicción: la consola
+           solo la ve quien está sentado delante, que es quien acaba de teclear
+           ese correo y esa contraseña — no se le cuenta nada que no sepa. Y sin
+           esto, «no son correctos» puede significar cinco cosas distintas y no
+           hay forma de saber cuál:
+
+             · «Invalid login credentials» → la cuenta no existe, o la clave no
+               es. Supabase no las distingue a propósito, así que acá tampoco.
+             · «Email not confirmed»       → existe, pero sin confirmar.
+             · «Invalid API key»           → la clave anon de Vercel está mal.
+             · un error de red             → Supabase no contestó.
+
+           Pasó de verdad el 22 sep 2026, al conectar el aula: nadie podía
+           entrar y el mensaje no decía por qué. */
+        console.error('[acceso] Supabase rechazó el inicio de sesión:', error.message, error);
         err.textContent = T.bad!;
         err.hidden = false;
         return;
