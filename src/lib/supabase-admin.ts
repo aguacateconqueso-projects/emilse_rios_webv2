@@ -10,9 +10,26 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
  * escribir el espejo de Stripe. Todo lo demás pasa por la clave `anon` con la
  * RLS decidiendo, que es como funciona el resto del proyecto.
  */
-const url = process.env.PUBLIC_SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL;
-const anonKey = process.env.PUBLIC_SUPABASE_ANON_KEY || import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+/**
+ * La misma limpieza que hace `supabase.ts` del lado del navegador, y por la
+ * misma razón: una `PUBLIC_SUPABASE_URL` con `/rest/v1` pegado al final produce
+ * rutas como `…/rest/v1/auth/v1/token`, que devuelven 404. Pasó el 22 sep 2026
+ * y el fallo es mudo — el 404 muere en la pasarela y no deja rastro en los
+ * registros de autenticación.
+ *
+ * Son cuatro líneas duplicadas a propósito: sacarlas a un módulo compartido
+ * obligaría a que este fichero —de servidor, con la `service_role`— y el del
+ * navegador importaran del mismo sitio, y esa frontera es justo la que este
+ * proyecto mantiene separada a mano.
+ */
+const limpiarUrl = (bruta: string | undefined): string | undefined =>
+  bruta?.trim().replace(/\/+$/, '').replace(/\/(rest|auth|storage|realtime)\/v1$/, '');
+
+const url = limpiarUrl(process.env.PUBLIC_SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL);
+const anonKey = (
+  process.env.PUBLIC_SUPABASE_ANON_KEY || import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+)?.trim();
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
 
 /** El cliente con `service_role`, o `null` si falta la clave. */
 export function supabaseAdmin(): SupabaseClient | null {

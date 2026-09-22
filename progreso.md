@@ -1312,6 +1312,47 @@ Supabase rechaza el inicio de sesión con «Email not confirmed», que en pantal
 se ve exactamente igual que una contraseña mala—. El trigger
 `on_auth_user_created` hace el resto.
 
+#### La causa de verdad: `/rest/v1` pegado a la URL de Supabase
+
+Lo que tenía a Adrián fuera del aula, encontrado el 22 sep 2026 en **Logs → API**:
+
+```
+404  POST  https://<ref>.supabase.co/rest/v1/auth/v1/token?grant_type=password
+                                     ^^^^^^^^^
+```
+
+`PUBLIC_SUPABASE_URL` en Vercel llevaba **`/rest/v1` pegado al final**. El
+cliente le añade `/auth/v1` a la base que le den, así que pedía
+`…/rest/v1/auth/v1/token`, que no existe.
+
+**Es un error fácil de cometer:** el panel de Supabase enseña la URL del
+proyecto en un sitio y los endpoints REST —con `/rest/v1`— en otro.
+
+**Y es un fallo mudo, que es lo que lo hizo caro.** El 404 muere en la pasarela
+y **nunca llega al servicio de autenticación**: no aparece en Users, no aparece
+en Authentication → Logs, no deja rastro donde uno mira. Solo sale en Logs →
+API, entre el ruido de los checkpoints de Postgres. Mientras tanto la pantalla
+decía que la contraseña no era correcta, así que se buscaron contraseñas.
+
+⚠️ **Los `200` de Authentication → Logs que despistaron eran de otros
+intentos**, de antes de que la variable estuviera mal o desde la academia —esos
+registros son del USUARIO en el proyecto, no de este sitio—. Lección: un 200 ahí
+prueba que *alguna vez* entró, no que *este* intento llegara.
+
+**Arreglado en dos sitios, y los dos hacen falta:**
+
+- **En Vercel**, la variable: `https://<ref>.supabase.co`, sin sufijo y sin
+  barra final.
+- **En el código**, `limpiarUrl()` en `supabase.ts` y su gemela en
+  `supabase-admin.ts`: quitan la barra final y el sufijo `/rest/v1`,
+  `/auth/v1`, `/storage/v1` o `/realtime/v1` si alguien lo pega. **Y avisan por
+  consola.** Arreglarlo en silencio escondería una variable mal puesta que
+  alguien volvería a copiar igual.
+
+Comprobado con la URL rota exacta: la petición sale corregida a
+`/auth/v1/token`, el acceso entra al escritorio, y la consola nombra la
+variable y el valor que se usó.
+
 #### «No son correctos» mentía, y eso costó una tarde
 
 El 22 sep 2026, con el aula ya conectada, Adrián no podía entrar. La pantalla
