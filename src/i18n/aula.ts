@@ -142,6 +142,11 @@ export const aulaUi = {
     'signin.sent':
       'Si ese correo tiene cuenta, el enlace ya va en camino. Revisa también la carpeta de no deseados.',
     'signin.bad': 'Ese correo o esa contraseña no son correctos.',
+    /* Para cuando el fallo NO es de credenciales. Decir «no son correctos» ahí
+       es mandar a alguien a cambiar una contraseña que estaba bien — pasó el
+       22 sep 2026 y costó una tarde. */
+    'signin.broke':
+      'No pudimos completar el acceso, y no es tu contraseña: es algo de nuestro lado. Vuelve a intentarlo en un momento, y si sigue igual escríbeme a info@emilserios.com.',
     'signin.noEmail': 'Escribe tu correo.',
     'signin.store': 'Todavía no he comprado nada',
     'signin.leaving': 'Cerrando tu sesión…',
@@ -330,6 +335,8 @@ export const aulaUi = {
     'signin.sent':
       "If that address has an account, the link is on its way. Check your spam folder too.",
     'signin.bad': "That email or password isn't right.",
+    'signin.broke':
+      "We couldn't complete your sign-in, and it isn't your password — something on our side went wrong. Try again in a moment, and if it keeps happening write to info@emilserios.com.",
     'signin.noEmail': 'Type your email.',
     'signin.store': "I haven't bought anything yet",
     'signin.leaving': 'Signing you out…',

@@ -159,15 +159,29 @@ No hay que hacer nada más.
 Cada uno en `https://www.emilserios.com/aulavirtual/entrar/`, con su correo y su
 contraseña. Tienen que entrar al escritorio.
 
-Si dice «Ese correo o esa contraseña no son correctos», **abrir la consola del
-navegador** (F12 → Console) y buscar `[acceso]`. Ahí está el motivo de verdad:
+**La pantalla ya distingue dos cosas, y la diferencia importa:**
+
+- **«Ese correo o esa contraseña no son correctos»** → es de credenciales. La
+  cuenta no existe, la clave no es ésa, o el correo está sin confirmar. (Los
+  tres se cuentan igual a propósito: distinguirlos deja averiguar quién es
+  miembro probando correos.)
+- **«No pudimos completar el acceso, y no es tu contraseña»** → **no toques la
+  contraseña**. Es de nuestro lado, y el motivo está en la consola.
+
+En los dos casos, **abrir la consola** (F12 → Console) y buscar `[acceso]`:
 
 | En la consola | Qué pasa |
 |---|---|
 | `Invalid login credentials` | la cuenta no existe, o la contraseña no es ésa |
 | `Email not confirmed` | falta marcar *Auto Confirm* — se arregla en el usuario |
-| `Invalid API key` | `PUBLIC_SUPABASE_ANON_KEY` de Vercel está mal |
+| `Invalid API key` | `PUBLIC_SUPABASE_ANON_KEY` de Vercel está mal o incompleta |
+| `Auth session or user missing` | Supabase contestó `200` pero sin sesión utilizable. **Las credenciales eran buenas.** Mirar Authentication → Logs para ver el `/token` |
+| `Request rate limit reached` | demasiados intentos seguidos; esperar |
 | un error de red | Supabase no contestó |
+
+💡 **Authentication → Logs en Supabase es la otra mitad del diagnóstico**, y
+llega antes que la consola: si `/token` sale en **200**, las credenciales
+estaban bien y el problema es de este lado. Si sale en 400, no.
 
 ### 3.3 · Y recién entonces, el script
 
