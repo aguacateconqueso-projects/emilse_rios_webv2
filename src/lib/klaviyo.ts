@@ -27,7 +27,13 @@
  * la fecha en `KLAVIYO_REVISION` y ya.
  */
 
-/** La clave privada. Vacía = no hay proveedor, y el sitio lo dice en vez de fingir. */
+/**
+ * La clave privada. Vacía = no hay proveedor, y el sitio lo dice en vez de fingir.
+ *
+ * ⚠️ **Necesita tres permisos de escritura, no dos:** `lists`, `profiles` y
+ * `subscriptions`. Sin el tercero Klaviyo contesta `403` y nadie queda
+ * apuntado. Hasta el 22 sep 2026 la guía pedía solo los dos primeros.
+ */
 const API_KEY = process.env.KLAVIYO_API_KEY || '';
 
 /**
@@ -42,8 +48,17 @@ const API_KEY = process.env.KLAVIYO_API_KEY || '';
  */
 const LIST_ID = process.env.KLAVIYO_LIST_ID || 'SaE8Px';
 
-/** La versión fechada de la API. Ver el aviso de arriba. */
-const REVISION = process.env.KLAVIYO_REVISION || '2024-10-15';
+/**
+ * La versión fechada de la API. Ver el aviso de arriba.
+ *
+ * Klaviyo sostiene cada fecha **dos años** y después la retira. Hasta el
+ * 22 sep 2026 esto decía `2024-10-15`, que se retira el **15 oct 2026**:
+ * el alta habría seguido contestando, pero con el comportamiento de otra
+ * versión que nadie eligió. `2026-07-15` es la estable de ese día, y la forma
+ * del cuerpo de abajo está comprobada contra ella — contra el SDK oficial de
+ * Klaviyo, `klaviyo-api` 23.0.0. **Dura hasta julio de 2028.**
+ */
+const REVISION = process.env.KLAVIYO_REVISION || '2026-07-15';
 
 const ENDPOINT = 'https://a.klaviyo.com/api/profile-subscription-bulk-create-jobs/';
 
@@ -64,6 +79,14 @@ export type Resultado =
  * lista tiene doble confirmación activada en el panel de Klaviyo, es también lo
  * que dispara ese correo de confirmación.
  *
+ * ⚠️ **También le quita la baja a quien se había dado de baja.** Lo dice la
+ * documentación de Klaviyo: este trabajo levanta las supresiones
+ * `UNSUBSCRIBE`, `SPAM_REPORT` y `USER_SUPPRESSED`. Con confirmación simple,
+ * cualquiera puede volver a apuntar a otra persona tecleando su correo, y esa
+ * persona recibe campañas desde ese momento; con doble, lo que recibe es un
+ * correo de confirmación y no queda suscrita hasta pulsarlo. Es la razón para
+ * que la lista lleve doble confirmación.
+ *
  * Responde `202 Accepted` sin cuerpo cuando lo acepta: el alta se procesa
  * detrás. Por eso no se puede saber desde acá si el correo existía ya, y por
  * eso tampoco hace falta — la respuesta al navegador es la misma en los dos
@@ -76,6 +99,10 @@ export async function suscribir(email: string): Promise<Resultado> {
     data: {
       type: 'profile-subscription-bulk-create-job',
       attributes: {
+        /* Queda escrito en el registro de consentimiento de cada perfil. Es
+           lo que deja a Emi distinguir en Klaviyo a quien se apuntó desde el
+           sitio de quien lo hizo por la página alojada de la lista. */
+        custom_source: 'emilserios.com',
         profiles: {
           data: [
             {
