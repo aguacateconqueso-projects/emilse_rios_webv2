@@ -4,27 +4,40 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 22 de septiembre de 2026 · **EL AULA YA TIENE
-CANDADO DE PAGO.** El portero hacía una sola pregunta —¿hay sesión?— y eso
-dejaba entrar a quien canceló hace seis meses; ahora pregunta también por
-`has_active_sub()`, que ya existía en la base de datos. **No hay nada que crear
-ni migrar**: el esquema es el de la academia, el mismo proyecto. Falta
-configuración de paneles, en `docs/CONECTAR-EL-AULA.md`. Ese mismo día, antes,
-**EL NEWSLETTER EMPEZÓ A DAR DE ALTA**, que era lo último que bloqueaba el
-lanzamiento: «Acá te suscribes» manda
-a `/api/suscribir`, que habla con Klaviyo desde el servidor. Falta **una sola
-variable en Vercel** —`KLAVIYO_API_KEY`— y está contado en
-`docs/CONECTAR-KLAVIYO.md`. Ese mismo día, antes, **EMPEZÓ LA UNIÓN DE LAS
-DOS CASAS.** El cobro de la membresía ya vive en `www.emilserios.com`: el botón
-de comprar dejó de salir del sitio, la compra termina acá y quien paga pone su
-contraseña y entra al aula en el mismo clic, sin esperar ningún correo. Y está
-puesto el puente que le trae la sesión a quien ya estaba dentro de la academia.
-**Falta configuración de paneles, que solo pueden hacer Emi o Adrián** —está en
-`docs/UNIR-LAS-DOS-CASAS.md`— y **el webhook de Stripe sigue viviendo en la
-academia a propósito**. Antes de eso, el 21 de septiembre el sitio salió al aire
-en su dominio y dejó de enseñar huecos. **Dos cosas siguen a medias:** los CNAME
-de correo siguen proxied —el DKIM de Emi probablemente está roto para enviar— y
-el dominio sigue registrado en la cuenta de Namecheap de Edu
+**Última actualización:** 22 de septiembre de 2026.
+
+**EL AULA ESTÁ CONECTADA Y SE ENTRA.** Adrián entró con su cuenta contra el
+Supabase de siempre: variables, Redirect URLs, sesión y candado de pago
+funcionan de punta a punta. **No hubo que crear ni migrar nada** — el esquema es
+el de la academia, el mismo proyecto.
+
+Fue un día largo, y estas cinco cosas se movieron, de la última a la primera:
+
+| | |
+|---|---|
+| **El aula** | Conectada y probada. El portero pide sesión **y suscripción al día** — antes bastaba con la sesión, y eso dejaba entrar a quien canceló hace seis meses. |
+| **El newsletter** | «Acá te suscribes» ya da de alta de verdad, contra Klaviyo desde el servidor. Hasta hoy **no apuntaba a nadie**. |
+| **El cobro** | Vive en `www.emilserios.com`. El botón de comprar dejó de salir del sitio, y quien paga pone su contraseña y entra en el mismo clic. |
+| **La sesión** | Puesto el puente que la trae desde la academia, para que nadie tenga que recordar su contraseña al mudarse. |
+| **El sitio** | (21 sep) Salió al aire en su dominio y dejó de enseñar huecos. |
+
+**Lo que falta, y nada de ello es código:**
+
+1. **`supabase/set_admin.sql`**, para que Emi y Adrián sean admin. Antes,
+   comprobar cuál es el correo real de Emi.
+2. **`KLAVIYO_API_KEY`** en Vercel, o el newsletter no da de alta.
+3. **Pegar el puente** en el repo de la academia, y el correo de aviso.
+
+Está todo en `docs/CONECTAR-EL-AULA.md`, `docs/CONECTAR-KLAVIYO.md` y
+`docs/UNIR-LAS-DOS-CASAS.md`.
+
+⚠️ **Y dos cosas siguen a medias desde antes:** los CNAME de correo siguen
+proxied —el DKIM de Emi probablemente está roto para enviar— y el dominio sigue
+registrado en la cuenta de Namecheap de Edu.
+
+⚠️ **El webhook de Stripe sigue viviendo en la academia a propósito**, así que
+`emilseriosacademy.com` **no se redirige todavía**: un 301 ahí deja a alguien
+pagando sin recibir acceso.
 
 ---
 
@@ -37,7 +50,7 @@ el dominio sigue registrado en la cuenta de Namecheap de Edu
 | **Páginas** | Home, Sobre mí, Productos, el Aula Virtual —puerta y aula por dentro— y sus pantallas de acceso, en español e inglés. Más `/panel/`, la consola de Emi, solo en español. |
 | **Identidad** | El logo de Emi, vectorizado, en cabecera, pie, entrada y favicon. |
 | **Alcance** | Desde el 31 ago 2026 esto deja de ser solo el sitio: aquí van también el aula, la membresía y los cursos. Ver **La plataforma**. |
-| **Sesión** | Desde el 20 sep 2026 el aula pide sesión de verdad, contra el **mismo Supabase de la academia**, y desde el 22 sep **también suscripción al día**. Falta poner las variables en Vercel y las Redirect URLs en Supabase; sin eso queda en modo maqueta y lo dice. Ver `docs/CONECTAR-EL-AULA.md`. |
+| **Sesión** | **Conectada y probada el 22 sep 2026**: se entra de verdad, contra el **mismo Supabase de la academia**, y el candado pide **suscripción al día**. Las variables y las Redirect URLs ya están puestas. Falta `set_admin.sql`. Ver `docs/CONECTAR-EL-AULA.md`. |
 | **Cobro** | **Desde el 22 sep 2026 vive acá.** `/api/checkout` crea la sesión de Stripe, `/gracias/` recoge a quien pagó y `/api/claim-account` le crea la cuenta. El **webhook sigue en la academia**, y es correcto que siga: ver **La unión de las dos casas**. |
 | **Newsletter** | **Conectado desde el 22 sep 2026.** `/api/suscribir` da de alta en la lista real de Klaviyo (`SaE8Px`). Falta poner `KLAVIYO_API_KEY` en Vercel; sin ella el formulario avisa en vez de fingir. |
 | **Lo que falta para lanzar** | **Dos variables en Vercel, y ninguna es código:** `KLAVIYO_API_KEY` o el newsletter no da de alta, y las de Stripe o el botón de comprar da un 500. |
@@ -1402,6 +1415,36 @@ Desde el 22 sep 2026 el error entero va a **la consola del navegador**. No es un
 contradicción con lo anterior: la consola solo la ve quien está sentado delante,
 que es quien acaba de teclear ese correo y esa contraseña, así que no se le
 cuenta nada que no sepa. El mensaje de pantalla no cambia.
+
+#### Cómo acabó, y las tres lecciones que valen para la próxima
+
+**Se entra.** Adrián entró con su cuenta el 22 sep 2026, contra el Supabase de
+siempre. La cadena completa —variables de Vercel, Redirect URLs, Site URL,
+sesión, candado de pago— funciona de punta a punta.
+
+Costó media tarde, y **el tiempo se fue en diagnosticar, no en arreglar**: los
+dos arreglos de verdad fueron un campo de Vercel y cuatro líneas de código. Lo
+que falló fue saber dónde mirar. Las tres lecciones, por orden de lo que habría
+ahorrado más tiempo:
+
+1. **Un mensaje de error que lo dice todo igual no protege a nadie: esconde.**
+   «Ese correo o esa contraseña no son correctos» tapaba una URL mal copiada, y
+   mandó a buscar contraseñas que estaban bien. El mensaje genérico sigue siendo
+   correcto **solo para el 400**; todo lo demás se dice, porque no es un vector
+   de enumeración.
+2. **Un fallo puede no dejar rastro donde uno mira.** El 404 moría en la
+   pasarela y no aparecía ni en Users ni en Authentication → Logs. **Cuando ahí
+   no hay nada, el intento no llegó**, y hay que ir a Logs → API.
+3. **Un registro puede ser de otra cosa.** Los `200` de Authentication → Logs
+   que parecían decir «las credenciales son buenas» eran de otros intentos del
+   mismo usuario en el proyecto, no de este sitio. Un 200 ahí prueba que
+   *alguna vez* entró, no que *este* intento llegara.
+
+**Lo que queda del paso 3:** ejecutar `supabase/set_admin.sql`. Y antes,
+comprobar en Supabase → Users **cuál es el correo real de Emi**: el script tiene
+escrito `emilserios.bass@gmail.com` y en la lista se veía un
+`emilse.art@gmail.com`. Si no coincide, se edita el array del script — si no,
+aborta y no toca nada, que es lo que tiene que hacer.
 
 #### `set_admin.sql`, que estaba citado y no existía
 
@@ -3137,31 +3180,27 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
       de «puertas cerradas», que es lo correcto. **El 1 de octubre deja de
       taparlo.**
 
-- [ ] **⚠️ Conectar el aula: los admins.** ✅ Hechas ya (22 sep 2026) las tres
-      variables de Vercel, las cuatro Redirect URLs y el cambio del Site URL a
-      `https://www.emilserios.com`. **Falta el tercer paso**, que es el que
-      tiene orden: **crear las dos cuentas a mano** en Supabase →
-      Authentication → Users, con **Auto Confirm User marcado**; comprobar que
-      cada uno entra por `/aulavirtual/entrar/`; y **recién entonces** ejecutar
-      `supabase/set_admin.sql`.
+- [ ] **Ejecutar `supabase/set_admin.sql`.** Es lo único que queda del paso 3:
+      el aula **ya está conectada y se entra** (probado el 22 sep 2026), pero
+      sin esto nadie es admin y `/panel/` no se abre para Emi.
 
-      ⚠️ **Las cuentas no se pueden crear desde el sitio**, ni siquiera con
-      «¿Primera vez, o se te olvidó la clave?» — eso solo manda el correo si la
-      cuenta ya existe. Ver **El aula, conectada → En este sitio nadie puede
-      crearse una cuenta**.
+      ⚠️ **Antes de ejecutarlo, comprobar en Supabase → Users cuál es el correo
+      real de Emi.** El script tiene escrito `emilserios.bass@gmail.com` y en la
+      lista se veía un `emilse.art@gmail.com`. Si no coincide, se edita el array
+      del inicio del fichero; si no, el script aborta sin tocar nada — que es lo
+      que tiene que hacer.
 
-      ⚠️ **Y lo que NO hay que hacer: redirigir `emilseriosacademy.com`.** Mata
-      el webhook de Stripe, el aula de la membresía y el puente de traspaso.
-      Ver **El aula, conectada → El Site URL, y una trampa**.
+      ⚠️ **Y que Emi haya entrado una vez**, o su perfil no existe todavía y el
+      script también aborta.
 
-      Paso a paso, con cómo comprobar los cuatro casos del candado, en
-      `docs/CONECTAR-EL-AULA.md`. Ahí está también lo que ya quedó hecho, por si
-      hay que rehacerlo: las tres variables de Vercel
-      —`PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY` y
-      `SUPABASE_SERVICE_ROLE_KEY`— y las cuatro Redirect URLs.
+      Lo que ya quedó hecho, por si hay que rehacerlo: las tres variables de
+      Vercel —`PUBLIC_SUPABASE_URL` (¡la RAÍZ, sin `/rest/v1`!),
+      `PUBLIC_SUPABASE_ANON_KEY` y `SUPABASE_SERVICE_ROLE_KEY`—, las cuatro
+      Redirect URLs y el Site URL. Todo en `docs/CONECTAR-EL-AULA.md`, con los
+      cuatro casos del candado y la tabla de diagnóstico.
 
-      ⚠️ **No hay que crear ni migrar nada**: el esquema ya existe en el
-      Supabase de la academia, que es el mismo proyecto.
+      ⚠️ **Lo que NO hay que hacer: redirigir `emilseriosacademy.com`.** Mata el
+      webhook de Stripe, el aula de la membresía y el puente de traspaso.
 
 - [ ] **Pegar el puente en el repo de la academia.** La página
       `emilseriosacademy.com/pasar/` está escrita entera, lista para pegar, en
