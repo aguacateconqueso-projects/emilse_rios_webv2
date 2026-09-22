@@ -1,0 +1,18 @@
+---
+/** After paying, in English. The `success_url` of `/api/checkout?lang=en`. */
+import Acceso from '../../../layouts/Acceso.astro';
+import Gracias from '../../../components/acceso/Gracias.astro';
+import { useAula, graciasPath } from '../../../i18n/aula';
+
+const lang = 'en' as const;
+const a = useAula(lang);
+---
+
+<Acceso
+  lang={lang}
+  title={a('thanks.title')}
+  pathEs={graciasPath('es')}
+  pathEn={graciasPath('en')}
+>
+  <Gracias lang={lang} />
+</Acceso>

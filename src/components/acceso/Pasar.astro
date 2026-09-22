@@ -1,0 +1,194 @@
+---
+/**
+ * El puente de traspaso — donde aterriza la sesión traída desde la academia.
+ *
+ * Construido el 22 sep 2026, al unir las dos casas. Ejecuta el paso 1 de las
+ * tres capas que `progreso.md` dejó decididas el 11 de septiembre, en **La
+ * mudanza de la sesión**.
+ *
+ * ---
+ *
+ * **Por qué existe.** El token de la sesión vive en `localStorage`, y
+ * `localStorage` es **por origen**: `emilserios.com` no puede leer el de
+ * `emilseriosacademy.com`. Así que al unir las dos casas, todo el mundo queda
+ * deslogueado una vez. No hay manera de evitarlo y no es culpa de Supabase.
+ *
+ * Lo que sí se puede es que volver a entrar cueste **un clic y no una
+ * contraseña olvidada**, y eso es esta pantalla: la academia manda a la alumna
+ * acá con sus tokens en el `#hash`, y acá se plantan con `setSession`.
+ *
+ * **No es un invento.** Las dos casas usan `flowType: 'implicit'`, que es
+ * exactamente esto: los tokens viajan en el hash. Por eso `supabase.ts` dice
+ * que cambiarlo a `pkce` rompe la mudanza — este fichero es lo que rompería.
+ *
+ * ---
+ *
+ * **Las tres cosas que no son opcionales**, y las tres están abajo:
+ *
+ * 1. **La redirección la inicia la alumna**, con un clic en la academia. En un
+ *    `<iframe>` no funciona: el particionado de almacenamiento de los
+ *    navegadores impide leer el `localStorage` del otro dominio.
+ * 2. **El hash se borra en cuanto se consume**, con `history.replaceState`. Un
+ *    `refresh_token` en el historial del navegador es un `refresh_token` en el
+ *    historial del navegador.
+ * 3. **Fallar no puede ser un callejón.** Si el hash no trae tokens, o si
+ *    caducaron, se dice y se manda a la pantalla de acceso — donde entrar con
+ *    correo y contraseña funciona igual que siempre.
+ *
+ * ⚠️ **Esta dirección tiene que estar en las Redirect URLs de Supabase Auth.**
+ *
+ * ---
+ *
+ * **Dos cosas que un revisor va a preguntar, contestadas acá:**
+ *
+ * **1 · ¿No consume el hash el propio cliente antes que este script?** Puede,
+ * y no importa. `supabase.ts` lleva `detectSessionInUrl: true`, así que al
+ * crearse el cliente intenta leer el hash él solo y, si lo consigue, lo borra.
+ * Las dos carreras terminan bien porque abajo se cubren las dos: si el hash
+ * todavía está, se planta la sesión a mano; si ya no está, se pregunta por
+ * `getSession()` y, si hay sesión, adentro. Por eso el «no hay tokens» no es un
+ * fallo por sí mismo — solo lo es si además no hay sesión.
+ *
+ * **2 · Cualquiera puede fabricar un enlace con tokens suyos y mandárselo a
+ * otra persona**, que acabaría dentro de la cuenta del remitente sin saberlo.
+ * Es cierto, y **no lo añade esta pantalla**: `detectSessionInUrl: true` hace
+ * exactamente eso en CUALQUIER página del sitio, y es lo que pide
+ * `flowType: 'implicit'`, que es lo que hace posible la mudanza. Acá el daño
+ * es ver el escritorio de otra persona, no tomarle la cuenta. **Si algún día se
+ * pasa a `pkce`, esta pantalla es lo primero que hay que rehacer** — y
+ * `supabase.ts` ya avisa de que cambiar el flujo rompe la mudanza.
+ */
+import type { Lang } from '../../i18n/ui';
+import { useAula, entrarPath, escritorioPath } from '../../i18n/aula';
+import { isSupabaseConfigured } from '../../lib/supabase';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const a = useAula(lang);
+---
+
+<section
+  class="pasar"
+  data-pasar
+  data-destino={escritorioPath(lang)}
+  data-entrar={entrarPath(lang)}
+  data-t-failtitle={a('pass.bridgeFailTitle')}
+>
+  <p class="eyebrow">{a('app.title')}</p>
+  <h1 class="pasar__h" data-titulo>{a('pass.bridgeTitle')}</h1>
+  <p class="soft pasar__lead" data-lead>{a('pass.bridgeLead')}</p>
+
+  {
+    !isSupabaseConfigured && (
+      <p class="aviso" role="status">
+        <b>{a('off.badge')}</b> — {a('off.lead')}
+      </p>
+    )
+  }
+
+  {/* Nace oculto: mientras el traspaso va bien, nadie tiene que leer un aviso
+      de fallo. Solo aparece si de verdad falla. */}
+  <p class="error" data-error hidden>{a('pass.bridgeFail')}</p>
+
+  {/* Nace visible y no depende del script: si algo va mal en el camino —sin
+      JavaScript, un error inesperado— esta pantalla sigue teniendo salida. */}
+  <p class="pasar__salida">
+    <a href={entrarPath(lang)}>{a('signin.title')}</a>
+  </p>
+</section>
+
+<script>
+  import { supabase, isSupabaseConfigured, recordarSesion } from '../../lib/supabase';
+
+  const caja = document.querySelector<HTMLElement>('[data-pasar]');
+
+  if (caja && isSupabaseConfigured) {
+    const destino = caja.dataset.destino!;
+    const lead = caja.querySelector('[data-lead]') as HTMLElement | null;
+    const err = caja.querySelector('[data-error]') as HTMLElement | null;
+    const titulo = caja.querySelector('[data-titulo]') as HTMLElement | null;
+
+    /* El titular cambia con el aviso. Dejarlo en «Trayendo tu sesión» encima de
+       un error que dice que no se pudo traer es la pantalla contándose dos
+       cosas distintas a la vez. */
+    const fallar = () => {
+      if (titulo) titulo.textContent = caja.dataset.tFailtitle!;
+      if (lead) lead.hidden = true;
+      if (err) err.hidden = false;
+    };
+
+    /* Los tokens llegan en el `#hash`, no en la query: es lo que hace
+       `flowType: 'implicit'`, y es lo que permite pasarlos de un dominio al
+       otro sin que toquen ningún servidor ni queden en un log. */
+    const hash = new URLSearchParams(location.hash.replace(/^#/, ''));
+    const access_token = hash.get('access_token');
+    const refresh_token = hash.get('refresh_token');
+
+    /* Se borra el hash ANTES de usarlo y pase lo que pase después. Si se
+       borrara solo al terminar bien, un fallo dejaría el `refresh_token` en la
+       barra de direcciones y en el historial. */
+    try {
+      history.replaceState(null, '', location.pathname + location.search);
+    } catch {
+      /* sin History API el hash se queda; no es razón para no seguir */
+    }
+
+    if (!access_token || !refresh_token) {
+      /* Puede ser que ya hubiera sesión en esta casa —alguien que vuelve a
+         pulsar el enlace del correo, o que llega de vuelta atrás— y entonces
+         esto no es un fallo: es que no hacía falta el puente. */
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session) location.replace(destino);
+        else fallar();
+      });
+    } else {
+      /* Quien venía dentro se queda dentro: el token va a `localStorage`. Se
+         escribe antes de plantar la sesión, para que nazca en el almacén
+         correcto — lo mismo que hace la casilla de la pantalla de acceso. */
+      recordarSesion(true);
+
+      supabase.auth
+        .setSession({ access_token, refresh_token })
+        .then(({ error }) => {
+          if (error) fallar();
+          else location.replace(destino);
+        })
+        .catch(fallar);
+    }
+  }
+</script>
+
+<style>
+  .pasar__h {
+    font-size: clamp(1.9rem, 4.4vw, 2.6rem);
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    margin: 0.4rem 0 0.5rem;
+  }
+
+  .pasar__lead {
+    margin: 0 0 clamp(24px, 4vh, 36px);
+  }
+
+  .pasar__salida {
+    margin-top: clamp(24px, 4vh, 36px);
+    font-size: 0.94rem;
+  }
+
+  .aviso {
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    padding: 14px 16px;
+    font-size: 0.92rem;
+    margin: 0 0 clamp(24px, 4vh, 36px);
+  }
+
+  .error {
+    margin: 0 0 clamp(24px, 4vh, 36px);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--accent-strong);
+  }
+</style>

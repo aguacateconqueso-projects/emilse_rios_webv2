@@ -54,7 +54,7 @@ export const ui = {
     'products.buy': 'Comprar',
     'products.back': 'Volver a Productos',
     'products.leaving':
-      'El cobro todavía vive en emilseriosacademy.com. Se muda a esta casa con el cambio de dominio, y quien ya esté dentro no tiene que hacer nada.',
+      'Este producto se cobra fuera de este sitio. Es el mismo pago de siempre, y quien ya esté dentro no tiene que hacer nada.',
     'products.enrolled': '¿Ya compraste? El aula es por acá',
 
     /* --- El aula, que está adentro y pide haber pagado ------------------- */
@@ -122,7 +122,7 @@ export const ui = {
     'products.buy': 'Buy',
     'products.back': 'Back to Products',
     'products.leaving':
-      'Payment still lives at emilseriosacademy.com. It moves into this house with the domain change, and anyone already inside has nothing to do.',
+      'This product is paid for outside this site. It is the same checkout as always, and anyone already inside has nothing to do.',
     'products.enrolled': 'Already bought? The classroom is this way',
 
     /* --- El aula, que está adentro y pide haber pagado ------------------- */

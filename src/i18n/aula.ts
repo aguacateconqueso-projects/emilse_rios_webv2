@@ -157,6 +157,43 @@ export const aulaUi = {
     'panel.who': 'Vista de Emi · Admin',
     'panel.soon': 'Lo que viene acá',
 
+    /* --- Gracias, la pantalla de después de pagar -------------------------- */
+    /* El copy del camino por correo es el definitivo de Emi, traído tal cual de
+       la academia. El del camino de la contraseña se reescribió: allí pedía «no
+       cierres esta pestaña» en rojo parpadeante porque el acceso dependía de un
+       correo que podía tardar; acá la compradora entra en el mismo clic, así que
+       esa alarma ya no dice la verdad. */
+    'thanks.eyebrow': 'Bienvenida',
+    'thanks.title': 'Gracias por unirte',
+    'thanks.lead': 'Elige tu contraseña y entra directo al aula. Sin correo, sin esperas.',
+    'thanks.pass': 'Tu contraseña',
+    'thanks.repeat': 'Otra vez, para estar seguros',
+    'thanks.go': 'Crear mi contraseña y entrar',
+    'thanks.going': 'Entrando…',
+    'thanks.toEmail': '¿Prefieres recibir el acceso por correo?',
+    'thanks.emailTitle': 'Te mando el acceso por correo',
+    'thanks.emailLead':
+      'Escribe el correo con el que realizaste tu pago y te llegará el enlace de acceso a la plataforma. Esta pestaña se va, pero a tu correo puedes volver siempre — ahí quedará guardado.',
+    'thanks.email': 'Tu correo',
+    'thanks.send': 'Enviarme mi acceso',
+    'thanks.sending': 'Enviando…',
+    'thanks.sent': '¡Listo! Revisa tu bandeja, llega en un momento.',
+    'thanks.spam':
+      'Revisa bien tu bandeja, también spam y correos no deseados. Si no te llega, escríbeme y lo solucionamos.',
+    'thanks.notPaid':
+      'No pudimos confirmar tu pago desde este enlace. Pide el acceso por correo acá abajo y llega igual.',
+    'thanks.signinFailed':
+      'Tu contraseña quedó creada, pero no pudimos iniciar tu sesión sola. Entra con tu correo y esa contraseña.',
+    'thanks.failed': 'No se pudo crear tu contraseña: ',
+    'thanks.sendFailed': 'No se pudo enviar: ',
+
+    /* --- El puente de traspaso --------------------------------------------- */
+    'pass.bridgeTitle': 'Trayendo tu sesión',
+    'pass.bridgeFailTitle': 'Hay que entrar a mano',
+    'pass.bridgeLead': 'Un momento: te estamos pasando a la casa nueva.',
+    'pass.bridgeFail':
+      'No pudimos traer tu sesión. No se ha perdido nada — entra con tu correo y tu contraseña de siempre.',
+
     /* --- Sin backend ------------------------------------------------------- */
     'off.badge': 'Sin conectar',
     'off.lead':
@@ -302,6 +339,38 @@ export const aulaUi = {
     'panel.who': "Emi's view · Admin",
     'panel.soon': 'What goes here',
 
+    /* --- Gracias, la pantalla de después de pagar -------------------------- */
+    'thanks.eyebrow': 'Welcome',
+    'thanks.title': 'Thank you for joining',
+    'thanks.lead': 'Choose your password and go straight into the classroom. No email, no waiting.',
+    'thanks.pass': 'Your password',
+    'thanks.repeat': 'Once more, to be sure',
+    'thanks.go': 'Create my password and go in',
+    'thanks.going': 'Signing in…',
+    'thanks.toEmail': 'Prefer to get your access by email instead?',
+    'thanks.emailTitle': "I'll email you your access",
+    'thanks.emailLead':
+      'Type the email you used for your payment and the link to the platform will arrive there. This tab will go away, but you can always come back to your email — it will stay saved there.',
+    'thanks.email': 'Your email',
+    'thanks.send': 'Send me my access',
+    'thanks.sending': 'Sending…',
+    'thanks.sent': 'Done! Check your inbox — it should arrive in a moment.',
+    'thanks.spam':
+      "Check your inbox carefully — also spam and junk mail. If it doesn't arrive, write to me and we'll fix it.",
+    'thanks.notPaid':
+      "We couldn't confirm your payment from this link. Ask for your access by email below and it will get to you all the same.",
+    'thanks.signinFailed':
+      "Your password was set, but we couldn't sign you in automatically. Sign in with your email and that password.",
+    'thanks.failed': "Couldn't create your password: ",
+    'thanks.sendFailed': "Couldn't send it: ",
+
+    /* --- El puente de traspaso --------------------------------------------- */
+    'pass.bridgeTitle': 'Bringing your session over',
+    'pass.bridgeFailTitle': "You'll have to sign in by hand",
+    'pass.bridgeLead': "One moment — we're moving you into the new house.",
+    'pass.bridgeFail':
+      "We couldn't bring your session over. Nothing is lost — sign in with your usual email and password.",
+
     /* --- Sin backend ------------------------------------------------------- */
     'off.badge': 'Not connected',
     'off.lead':
@@ -332,6 +401,37 @@ const segmentoEscritorio: Record<Lang, string> = { es: 'escritorio', en: 'desk' 
 const segmentoEntrar: Record<Lang, string> = { es: 'entrar', en: 'signin' };
 const segmentoClave: Record<Lang, string> = { es: 'nueva-clave', en: 'new-password' };
 const segmentoSalir: Record<Lang, string> = { es: 'salir', en: 'signout' };
+const segmentoPasar: Record<Lang, string> = { es: 'pasar', en: 'handoff' };
+
+/**
+ * La página de agradecimiento, donde aterriza quien acaba de pagar.
+ *
+ * **No cuelga del aula**, al revés que todo lo de acá abajo, y es a propósito:
+ * quien la ve todavía no es alumna —no tiene cuenta ni sesión— y venía de la
+ * carta de ventas, que vive en la tienda. Colgarla de `/aulavirtual/` sería
+ * meterla detrás de una puerta por la que aún no ha pasado.
+ *
+ * ⚠️ **Su dirección es la `success_url` de Stripe**, y la escribe
+ * `/api/checkout` con el dominio delante. Cambiarla acá sin cambiar nada más
+ * está bien —el checkout la lee de esta función— pero **las compras ya en
+ * curso apuntan a la vieja**: Stripe guarda la URL en la sesión al crearla.
+ */
+export const graciasPath = (lang: Lang): string => (lang === 'en' ? '/en/thank-you/' : '/gracias/');
+
+/**
+ * El puente de traspaso: donde aterriza la sesión traída desde la academia.
+ *
+ * Existe por una razón concreta y conocida desde el 11 sep 2026: el token de
+ * la sesión vive en `localStorage`, y `localStorage` es **por origen**.
+ * `emilserios.com` no puede leer el de `emilseriosacademy.com`, así que al unir
+ * las dos casas todo el mundo queda deslogueado una vez. No hay forma de
+ * evitarlo. Lo que sí se puede es que volver a entrar cueste un clic y no una
+ * contraseña olvidada, y eso es esta página.
+ *
+ * ⚠️ **Tiene que estar en las Redirect URLs de Supabase Auth**, con el dominio
+ * delante, igual que la pantalla de la contraseña nueva.
+ */
+export const pasarPath = (lang: Lang): string => `${raiz[lang]}/${segmentoPasar[lang]}/`;
 
 /** La puerta: la única página del aula que se ve sin haber pagado. */
 export const puertaPath = (lang: Lang): string => `${raiz[lang]}/`;

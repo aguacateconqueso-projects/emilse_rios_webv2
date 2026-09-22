@@ -15,7 +15,8 @@
   "dependencies": {
     "@astrojs/vercel": "^11.0.10",
     "@supabase/supabase-js": "^2.116.0",
-    "astro": "^7.2.0"
+    "astro": "^7.2.0",
+    "stripe": "^22.6.2"
   },
   "devDependencies": {
     "playwright": "^1.62.1",

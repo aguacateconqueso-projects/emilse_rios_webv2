@@ -56,3 +56,54 @@ export async function adminDeLaPeticion(request: Request) {
   const { data } = await admin.from('profiles').select('role').eq('id', u.id).maybeSingle();
   return data?.role === 'admin' ? u : null;
 }
+
+/**
+ * Busca el perfil por correo; si no existe, crea el usuario.
+ *
+ * Trasplantado de `emilse_rios_membresias` el 22 sep 2026, con la mudanza del
+ * cobro. **Tiene que dar de alta con exactamente el mismo criterio que el
+ * webhook de la academia**, porque los dos escriben en el mismo Supabase y los
+ * dos pueden llegar primero: el webhook cuando Stripe avisa del pago, y
+ * `/api/claim-account` cuando la compradora pone su contraseña en `/gracias/`.
+ * Si uno normalizara el correo distinto del otro, un mismo pago crearía dos
+ * cuentas y solo una tendría la suscripción.
+ *
+ * De ahí el `eq` con el correo en minúsculas y sin espacios: GoTrue los guarda
+ * así y el trigger de la base de datos los copia tal cual al perfil, con lo que
+ * la igualdad exacta es correcta y además evita los comodines de un `like`.
+ *
+ * El usuario nace **sin contraseña** —el trigger le crea el perfil— y quien la
+ * pone es quien acaba de pagar. `creado` dice si es alta nueva, que es lo que
+ * el webhook de la academia usa para decidir si manda el correo de bienvenida.
+ */
+export async function buscarOCrearUsuario(
+  admin: SupabaseClient,
+  email: string | null,
+): Promise<{ userId: string | null; creado: boolean }> {
+  if (!email) return { userId: null, creado: false };
+  const minus = email.trim().toLowerCase();
+
+  const { data: perfil } = await admin
+    .from('profiles')
+    .select('id')
+    .eq('email', minus)
+    .maybeSingle();
+  if (perfil?.id) return { userId: perfil.id, creado: false };
+
+  const { data: alta, error } = await admin.auth.admin.createUser({
+    email: minus,
+    email_confirm: true,
+  });
+  if (alta?.user?.id) return { userId: alta.user.id, creado: true };
+
+  /* Ya existía en `auth` pero sin perfil —una cuenta vieja de antes del
+     trigger, o una carrera con el webhook—. Se le busca por correo: no es un
+     alta nueva y no debe contarse como tal. */
+  if (error) {
+    const { data: lista } = await admin.auth.admin.listUsers();
+    const u = lista?.users?.find((x) => (x.email || '').toLowerCase() === minus);
+    if (u) return { userId: u.id, creado: false };
+    console.error('[supabase-admin] no se pudo crear ni encontrar el usuario de', minus, error.message);
+  }
+  return { userId: null, creado: false };
+}
