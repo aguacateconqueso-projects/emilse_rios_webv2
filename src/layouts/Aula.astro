@@ -26,7 +26,7 @@
  *   · los tres gestos compartidos: el fundido al entrar en pantalla, el
  *     relleno de los botones y las notas musicales
  */
-import { type Lang, routePath } from '../i18n/ui';
+import { type Lang, routePath, productPath } from '../i18n/ui';
 import { useAula, escritorioPath, entrarPath, salirPath, panelPath } from '../i18n/aula';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { ACADEMIA } from '../data/aula';
@@ -282,21 +282,32 @@ const salirHref = salirPath(lang);
     data-entrar={entrarPath(lang)}
     data-gate-needed={a('gate.needed')}
     data-gate-needed-lead={a('gate.neededLead')}
+    data-gate-nosub={a('gate.noSub')}
+    data-gate-nosub-lead={a('gate.noSubLead')}
+    data-membresia={productPath('estudiemos-juntos', lang)}
+    data-salir={salirHref}
   >
     <a class="skip" href="#aula">{a('app.skip')}</a>
 
     {/*
       El portero del aula.
 
+      Desde el 22 sep 2026 hace **dos** preguntas, no una: ¿hay sesión?, y
+      ¿tiene la suscripción al día? Antes bastaba con la primera, y eso dejaba
+      entrar a quien canceló hace seis meses. El candado es `has_active_sub()`,
+      que ya existía en la base de datos desde la primera migración de la
+      academia — acá solo se le pregunta.
+
       ⚠️ **No es la seguridad, es la puerta de la casa.** Lo que esconde es la
       pantalla, no los datos: hoy el contenido de las clases va escrito en el
       HTML porque es de muestra, así que alguien con la consola abierta lo ve
-      igual. No importa mientras sea de muestra — y **deja de no importar el día
-      que entre el curso de verdad**. Ese día las clases tienen que llegar por
-      consulta a Supabase, con la RLS decidiendo, y no venir horneadas en la
-      página. Está anotado en `progreso.md` como lo que cierra la capa B.
+      igual, tenga suscripción o no. No importa mientras sea de muestra — y
+      **deja de no importar el día que entre el curso de verdad**. Ese día las
+      clases tienen que llegar por consulta a Supabase, con la RLS decidiendo, y
+      no venir horneadas en la página. Está anotado en `progreso.md` como lo que
+      cierra la capa B.
 
-      Nace visible en el HTML y se quita al confirmar la sesión, no al revés:
+      Nace visible en el HTML y se quita al confirmar el acceso, no al revés:
       así nadie ve el aula un instante antes de que le digan que no puede.
     */}
     <div class="porton" data-porton hidden={!isSupabaseConfigured}>
@@ -305,6 +316,7 @@ const salirHref = salirPath(lang);
         <p class="eyebrow">{a('app.title')}</p>
         <h1 class="porton__h" data-porton-h>{a('gate.checking')}</h1>
         <p class="soft" data-porton-p>{a('gate.wait')}</p>
+        {/* Para quien no ha iniciado sesión. */}
         <div class="porton__actos" data-porton-actos hidden>
           <a class="btn btn--solid" href={entrarPath(lang)}>
             <span class="btn__fill" aria-hidden="true"></span>
@@ -313,6 +325,25 @@ const salirHref = salirPath(lang);
           <a class="btn" href={routePath('products', lang)}>
             <span class="btn__fill" aria-hidden="true"></span>
             <span class="btn__label">{a('app.store')}</span>
+          </a>
+        </div>
+
+        {/*
+          Para quien SÍ tiene sesión pero no suscripción al día. Son botones
+          distintos porque el problema es otro: acá «iniciar sesión» no
+          arregla nada —ya está dentro de su cuenta— y lo que necesita es o
+          bien ponerse al día, o bien darse cuenta de que entró con la cuenta
+          equivocada, que pasa más de lo que parece cuando alguien tiene dos
+          correos.
+        */}
+        <div class="porton__actos" data-porton-actos-sub hidden>
+          <a class="btn btn--solid" data-ir-membresia href={routePath('products', lang)}>
+            <span class="btn__fill" aria-hidden="true"></span>
+            <span class="btn__label">{a('gate.seeMembership')}</span>
+          </a>
+          <a class="btn" data-ir-salir href={salirHref}>
+            <span class="btn__fill" aria-hidden="true"></span>
+            <span class="btn__label">{a('gate.otherAccount')}</span>
           </a>
         </div>
       </div>
@@ -882,31 +913,79 @@ const salirHref = salirPath(lang);
       if (cuerpo && isSupabaseConfigured) {
         const porton = cuerpo.querySelector('[data-porton]') as HTMLElement;
 
+        /** Deja el portón puesto con un mensaje y su juego de botones. */
+        const cerrar = (titulo: string, texto: string, actos: string) => {
+          (porton.querySelector('[data-porton-h]') as HTMLElement).textContent = titulo;
+          (porton.querySelector('[data-porton-p]') as HTMLElement).textContent = texto;
+          (porton.querySelector(actos) as HTMLElement).hidden = false;
+        };
+
         (async () => {
           const {
             data: { session },
           } = await supabase.auth.getSession();
 
           if (!session) {
-            (porton.querySelector('[data-porton-h]') as HTMLElement).textContent =
-              cuerpo.dataset.gateNeeded!;
-            (porton.querySelector('[data-porton-p]') as HTMLElement).textContent =
-              cuerpo.dataset.gateNeededLead!;
-            (porton.querySelector('[data-porton-actos]') as HTMLElement).hidden = false;
+            cerrar(
+              cuerpo.dataset.gateNeeded!,
+              cuerpo.dataset.gateNeededLead!,
+              '[data-porton-actos]',
+            );
             return;
+          }
+
+          /* Las dos preguntas a la vez: quién es y si tiene acceso. En serie
+             son dos viajes de ida y vuelta con el portón puesto delante, y eso
+             se nota en una conexión lenta. */
+          const [perfilRes, subRes] = await Promise.all([
+            supabase.from('profiles').select('role').eq('id', session.user.id).maybeSingle(),
+            supabase.rpc('has_active_sub'),
+          ]);
+
+          const esAdmin = perfilRes.data?.role === 'admin';
+
+          /* Emi entra siempre. No tiene suscripción —no se paga a sí misma— y
+             sin esta línea el candado la dejaría fuera de su propia aula. */
+          if (!esAdmin) {
+            if (subRes.error) {
+              /* La comprobación no se pudo hacer: la función no está expuesta,
+                 la red falló, Supabase tuvo un mal minuto.
+
+                 **Se deja pasar, y es una decisión, no un descuido.** Este
+                 portón decide QUÉ SE DIBUJA, no qué se puede leer — la barrera
+                 de verdad es la RLS, y hoy además el contenido de las clases es
+                 de muestra y va escrito en el HTML, así que cerrar acá no
+                 protege nada que no esté ya a la vista. Entre dejar entrar a
+                 alguien de más un minuto y dejar fuera a TODA la membresía por
+                 un fallo de configuración, lo segundo es mucho peor.
+
+                 ⚠️ **Esto se invierte el día que entre el curso de verdad.** Ese
+                 día las clases llegan por consulta con la RLS decidiendo —es lo
+                 que cierra la capa B, ver `progreso.md`— y entonces un fallo acá
+                 tiene que cerrar, no abrir. */
+              console.error('[aula] no se pudo comprobar la suscripción', subRes.error);
+            } else if (subRes.data !== true) {
+              cerrar(
+                cuerpo.dataset.gateNosub!,
+                cuerpo.dataset.gateNosubLead!,
+                '[data-porton-actos-sub]',
+              );
+              /* Los dos botones se apuntan acá y no en el marcado: la carta de
+                 la membresía tiene ruta propia por idioma, y salir tiene que
+                 volver a la puerta y no a donde estaba. */
+              const irM = porton.querySelector('[data-ir-membresia]') as HTMLAnchorElement | null;
+              const irS = porton.querySelector('[data-ir-salir]') as HTMLAnchorElement | null;
+              if (irM && cuerpo.dataset.membresia) irM.href = cuerpo.dataset.membresia;
+              if (irS && cuerpo.dataset.salir) irS.href = cuerpo.dataset.salir;
+              return;
+            }
           }
 
           porton.hidden = true;
 
           /* El enlace de vuelta al panel: solo para Emi, y después de
              preguntarle a la base de datos, nunca antes. */
-          const { data: perfil } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', session.user.id)
-            .maybeSingle();
-
-          if (perfil?.role === 'admin') {
+          if (esAdmin) {
             cuerpo
               .querySelectorAll('[data-admin]')
               .forEach((el) => ((el as HTMLElement).hidden = false));
