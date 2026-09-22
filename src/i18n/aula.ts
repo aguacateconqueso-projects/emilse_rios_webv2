@@ -114,6 +114,14 @@ export const aulaUi = {
     'gate.neededLead':
       'Inicia sesión con el correo con el que compraste. Si todavía no tienes nada, la tienda está acá al lado.',
     'gate.signin': 'Iniciar sesión',
+    /* El candado de pago, desde el 22 sep 2026. El texto no acusa a nadie de
+       no haber pagado: quien llega acá suele ser alguien que SÍ pagó y cuyo
+       cobro se retrasó, o que acaba de pagar y el webhook no ha llegado. */
+    'gate.noSub': 'Tu suscripción no está al día',
+    'gate.noSubLead':
+      'Entramos con tu cuenta, pero no encontramos una suscripción activa. Si acabas de pagar, dale un minuto y recarga — a veces tarda un poco en llegar. Y si crees que hay un error, escríbeme a info@emilserios.com y lo miramos.',
+    'gate.seeMembership': 'Ver la membresía',
+    'gate.otherAccount': 'Entrar con otra cuenta',
     'gate.adminOnly': 'Esta parte es solo de Emi',
     'gate.adminOnlyLead':
       'Has entrado, pero esta pantalla es el panel de control y no está a tu nombre. Tu sitio es el escritorio.',
@@ -297,6 +305,11 @@ export const aulaUi = {
     'gate.neededLead':
       'Sign in with the email you bought with. If you have nothing yet, the store is right next door.',
     'gate.signin': 'Sign in',
+    'gate.noSub': "Your subscription isn't current",
+    'gate.noSubLead':
+      "We're in with your account, but we couldn't find an active subscription. If you've just paid, give it a minute and reload — it sometimes takes a moment to come through. And if you think this is a mistake, write to info@emilserios.com and we'll look into it.",
+    'gate.seeMembership': 'See the membership',
+    'gate.otherAccount': 'Sign in with another account',
     'gate.adminOnly': "This part is Emi's only",
     'gate.adminOnlyLead':
       "You're signed in, but this screen is the control panel and it isn't in your name. Your place is the desk.",

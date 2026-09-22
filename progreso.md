@@ -4,8 +4,14 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 22 de septiembre de 2026 · **EL NEWSLETTER YA DA DE
-ALTA**, que era lo último que bloqueaba el lanzamiento: «Acá te suscribes» manda
+**Última actualización:** 22 de septiembre de 2026 · **EL AULA YA TIENE
+CANDADO DE PAGO.** El portero hacía una sola pregunta —¿hay sesión?— y eso
+dejaba entrar a quien canceló hace seis meses; ahora pregunta también por
+`has_active_sub()`, que ya existía en la base de datos. **No hay nada que crear
+ni migrar**: el esquema es el de la academia, el mismo proyecto. Falta
+configuración de paneles, en `docs/CONECTAR-EL-AULA.md`. Ese mismo día, antes,
+**EL NEWSLETTER EMPEZÓ A DAR DE ALTA**, que era lo último que bloqueaba el
+lanzamiento: «Acá te suscribes» manda
 a `/api/suscribir`, que habla con Klaviyo desde el servidor. Falta **una sola
 variable en Vercel** —`KLAVIYO_API_KEY`— y está contado en
 `docs/CONECTAR-KLAVIYO.md`. Ese mismo día, antes, **EMPEZÓ LA UNIÓN DE LAS
@@ -31,7 +37,7 @@ el dominio sigue registrado en la cuenta de Namecheap de Edu
 | **Páginas** | Home, Sobre mí, Productos, el Aula Virtual —puerta y aula por dentro— y sus pantallas de acceso, en español e inglés. Más `/panel/`, la consola de Emi, solo en español. |
 | **Identidad** | El logo de Emi, vectorizado, en cabecera, pie, entrada y favicon. |
 | **Alcance** | Desde el 31 ago 2026 esto deja de ser solo el sitio: aquí van también el aula, la membresía y los cursos. Ver **La plataforma**. |
-| **Sesión** | Desde el 20 sep 2026 el aula pide sesión de verdad, contra el **mismo Supabase de la academia**. Falta poner las variables en Vercel y las Redirect URLs en Supabase; sin eso queda en modo maqueta y lo dice. |
+| **Sesión** | Desde el 20 sep 2026 el aula pide sesión de verdad, contra el **mismo Supabase de la academia**, y desde el 22 sep **también suscripción al día**. Falta poner las variables en Vercel y las Redirect URLs en Supabase; sin eso queda en modo maqueta y lo dice. Ver `docs/CONECTAR-EL-AULA.md`. |
 | **Cobro** | **Desde el 22 sep 2026 vive acá.** `/api/checkout` crea la sesión de Stripe, `/gracias/` recoge a quien pagó y `/api/claim-account` le crea la cuenta. El **webhook sigue en la academia**, y es correcto que siga: ver **La unión de las dos casas**. |
 | **Newsletter** | **Conectado desde el 22 sep 2026.** `/api/suscribir` da de alta en la lista real de Klaviyo (`SaE8Px`). Falta poner `KLAVIYO_API_KEY` en Vercel; sin ella el formulario avisa en vez de fingir. |
 | **Lo que falta para lanzar** | **Dos variables en Vercel, y ninguna es código:** `KLAVIYO_API_KEY` o el newsletter no da de alta, y las de Stripe o el botón de comprar da un 500. |
@@ -861,6 +867,10 @@ abierto** — y, más importante, las clases tienen que llegar por consulta a
 Supabase con la RLS decidiendo, en vez de venir horneadas en la página. Está en
 el pendiente que cierra la capa B.
 
+(La misma lógica, y el mismo día de caducidad, valen para el candado de pago que
+entró el 22 sep 2026: si la comprobación falla, el aula abre. Ver **El aula,
+conectada**.)
+
 #### Lo que estos porteros son y lo que no
 
 El portero del aula y el del panel deciden **qué se dibuja**. No protegen nada:
@@ -895,6 +905,11 @@ Nada de esto funciona hasta que:
    ellas todo sigue en modo maqueta.
 3. **Los dos admins**: que Emi y Adrián entren una vez cada uno —el perfil se
    crea en ese momento— y después ejecutar `supabase/set_admin.sql`.
+
+⚠️ **Esa lista se quedó corta el 22 sep 2026**, cuando el aula estrenó candado
+de pago y `set_admin.sql` por fin entró en este repo. La versión buena y
+completa, con las cuatro Redirect URLs y el orden que importa, está en
+`docs/CONECTAR-EL-AULA.md`.
 
 #### Lo que NO entró, y por qué
 
@@ -1153,6 +1168,103 @@ Y dos cosas que hay que arreglar al mudar, encontradas leyendo:
 
 La capa visual de la academia que se guarda sin enchufar son dos ficheros:
 `public/membresia-ui.css` y `public/membresia-ui.js`.
+
+### El aula, conectada
+
+Hecho el **22 de septiembre de 2026**. Adrián preguntó qué hacía falta para
+conectar la base de datos y entrar al aula, y la respuesta corta fue: **casi
+nada de código, y ninguna credencial**. Lo que sí hacía falta era una decisión,
+y la tomó: ponerle el candado de pago.
+
+#### Lo que ya existía, y es la mitad buena de esta historia
+
+**No hubo que crear ni migrar nada.** El proyecto de Supabase es el mismo que
+lleva un año sirviendo la academia, y ya tenía todo:
+
+| | |
+|---|---|
+| `profiles` | con `role` y el correo |
+| `subscriptions` | con `status`, `tier`, `current_period_end` |
+| `on_auth_user_created` | el trigger que crea el perfil solo |
+| `is_admin()` | quién ve el panel |
+| `has_active_sub()` | **quién entra al aula** |
+
+Está en las migraciones `0001` a `0008` de `emilse_rios_membresias`, ya
+aplicadas. Este sitio **solo lee**. Es la otra cara de lo que se decidió el 11
+de septiembre —«la lógica de acceso está toda en la base de datos, no en el
+frontend»— y por eso conectar el aula cuesta tres pasos de panel.
+
+#### El candado
+
+Hasta este día el portero hacía **una** pregunta: ¿hay sesión? Con eso,
+**alguien que canceló hace seis meses seguía entrando**. No era un descuido —la
+capa A lo dejó fuera a propósito, con el contenido de muestra detrás— pero ya no
+hay razón para dejarlo así.
+
+Ahora hace dos, en paralelo:
+
+```
+¿hay sesión?          no → «Esto es para quien ya entró»
+                           + Iniciar sesión · Tienda
+        ↓ sí
+¿es admin?            sí → adentro     (Emi no se paga a sí misma)
+        ↓ no
+¿has_active_sub()?    no → «Tu suscripción no está al día»
+                           + Ver la membresía · Entrar con otra cuenta
+        ↓ sí
+                     adentro
+```
+
+Tres detalles que se cuidaron porque se notan:
+
+- **Emi entra siempre.** No tiene suscripción, y sin esa línea el candado la
+  dejaría fuera de su propia aula.
+- **Los botones del «sin suscripción» son otros.** Ahí «iniciar sesión» no
+  arregla nada —ya está dentro de su cuenta— y lo que necesita es ponerse al día
+  o darse cuenta de que entró con el correo equivocado, que pasa más de lo que
+  parece cuando alguien tiene dos.
+- **El texto no acusa a nadie de no haber pagado.** Quien llega a esa pantalla
+  suele ser alguien que SÍ pagó y cuyo cobro se retrasó, o que acaba de pagar y
+  el webhook no ha llegado todavía. Por eso dice «si acabas de pagar, dale un
+  minuto y recarga», y da una dirección.
+
+#### Si la comprobación falla, se deja pasar
+
+Y es una decisión, no un descuido. Si `has_active_sub()` no contesta —no está
+expuesta, la red falló, Supabase tuvo un mal minuto— el aula **abre** y el error
+va a la consola.
+
+El razonamiento: este portón decide **qué se dibuja**, no qué se puede leer. La
+barrera de verdad es la RLS. Y hoy, además, el contenido de las clases es de
+muestra y va escrito en el HTML, así que cerrar acá no protegería nada que no
+esté ya a la vista. Entre dejar entrar a alguien de más un minuto y **dejar
+fuera a toda la membresía** por un fallo de configuración, lo segundo es mucho
+peor.
+
+⚠️ **Esto se invierte el día que entre el curso de verdad.** Ese día las clases
+llegan por consulta con la RLS decidiendo —lo que cierra la capa B— y entonces
+un fallo acá tiene que cerrar, no abrir. Está escrito en el propio fichero, al
+lado de la línea que lo hace.
+
+#### Lo que este candado NO cubre
+
+⚠️ **Quien compró un CURSO suelto no entra.** El único derecho de acceso que hay
+en la base de datos es la suscripción a la membresía; los cursos piden la tabla
+`entitlements`, que sigue pendiente. Hoy no molesta —no hay ningún curso a la
+venta— y molestará el día que lo haya. Cuando llegue, la pregunta del portero
+deja de ser `has_active_sub()` a secas.
+
+#### `set_admin.sql`, que estaba citado y no existía
+
+Este documento venía diciendo desde la capa A que había que ejecutar
+`supabase/set_admin.sql`. **El fichero vivía solo en el repo de la academia**,
+así que el paso estaba escrito y no se podía dar. Ahora está acá, en
+`supabase/set_admin.sql`, con un cambio: el alumno de prueba **nace vacío**.
+
+En el original venía con un correo puesto, y ese bloque **regala una membresía
+de 30 días**. Es justo lo que hace falta para probar el candado sin pasar por
+Stripe, y justo lo que no se quiere dejar puesto por descuido: es una
+suscripción de verdad en la tabla de verdad. Se rellena, se prueba, se vacía.
 
 ### El newsletter, conectado
 
@@ -2073,6 +2185,12 @@ docs/UNIR-LAS-DOS-CASAS.md  Lo que hay que hacer FUERA del código para la
 docs/CONECTAR-KLAVIYO.md  Lo que hay que hacer FUERA del código para que el
                          newsletter dé de alta: la clave, la lista, la variable
                          de Vercel y el curl que confirma la API
+docs/CONECTAR-EL-AULA.md  Lo que hay que hacer FUERA del código para que el
+                         aula pida sesión y suscripción: las tres variables,
+                         las Redirect URLs y el orden de los admins
+supabase/set_admin.sql   Quién es admin. NO crea nada: el esquema ya existe en
+                         el Supabase de la academia. Se ejecuta DESPUÉS de que
+                         cada admin haya entrado una vez
 scripts/audit.mjs        Auditoría de contraste y rejilla
 scripts/audit-menu.mjs   Contraste del menú de cristal, con el panel abierto
 ```
@@ -2869,10 +2987,24 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
       de «puertas cerradas», que es lo correcto. **El 1 de octubre deja de
       taparlo.**
 
-- [ ] **Las dos Redirect URLs nuevas en Supabase.** `/aulavirtual/pasar/` y
-      `/en/classroom/handoff/`, con el dominio delante. Sin ellas el puente de
-      traspaso no lleva a ninguna parte. Es **aditivo**: la academia sigue
-      funcionando igual.
+- [ ] **⚠️ Conectar el aula: tres variables, cuatro Redirect URLs y los
+      admins.** El código está desde la capa A y el candado de pago desde el 22
+      sep 2026; **falta todo lo de los paneles**, y sin ello el aula sigue en
+      modo maqueta y lo dice en pantalla.
+
+      En Vercel: `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY` y
+      `SUPABASE_SERVICE_ROLE_KEY` (esta última ya hacía falta para el cobro).
+      En Supabase: las **cuatro** Redirect URLs —las dos de la contraseña nueva
+      y las dos del puente—. Y después, **en este orden**: Emi y Adrián entran
+      una vez cada uno, y recién entonces se ejecuta `supabase/set_admin.sql`.
+      El perfil se crea al entrar, no antes; el script aborta sin tocar nada si
+      falta alguno.
+
+      Paso a paso, con cómo comprobar los cuatro casos del candado, en
+      `docs/CONECTAR-EL-AULA.md`.
+
+      ⚠️ **No hay que crear ni migrar nada**: el esquema ya existe en el
+      Supabase de la academia, que es el mismo proyecto.
 
 - [ ] **Pegar el puente en el repo de la academia.** La página
       `emilseriosacademy.com/pasar/` está escrita entera, lista para pegar, en
