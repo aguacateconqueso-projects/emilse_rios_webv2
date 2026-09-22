@@ -16,8 +16,40 @@ import { createClient } from '@supabase/supabase-js';
  * datos. Por eso el frontend se puede reescribir entero sin tocar una sola
  * regla de acceso — y por eso esta mudanza es barata.
  */
-const url = import.meta.env.PUBLIC_SUPABASE_URL;
-const anonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+/**
+ * La URL del proyecto, **limpiada**.
+ *
+ * `createClient` quiere la raíz —`https://<ref>.supabase.co`— y le pega
+ * `/auth/v1`, `/rest/v1` o lo que toque según a quién le hable. Pegarle una
+ * base que ya lleve `/rest/v1` produce `…/rest/v1/auth/v1/token`, que no existe
+ * y devuelve **404**.
+ *
+ * ⚠️ **No es un caso hipotético: pasó el 22 sep 2026 y costó media tarde.** El
+ * panel de Supabase enseña la URL del proyecto en un sitio y los endpoints REST
+ * —con `/rest/v1` al final— en otro, y copiar el segundo es facilísimo. Lo peor
+ * es cómo se ve el fallo desde fuera: **el 404 muere en la pasarela y nunca
+ * llega al servicio de autenticación**, así que en Supabase → Users no aparece
+ * ningún intento, en Authentication → Logs tampoco, y la pantalla dice que la
+ * contraseña no es correcta. Se buscan contraseñas durante una hora.
+ *
+ * Así que se limpia acá, que es donde se puede: fuera la barra final y fuera el
+ * sufijo del endpoint si alguien lo pegó. Y se avisa por consola, porque
+ * arreglarlo en silencio esconde una variable mal puesta en Vercel que alguien
+ * va a volver a copiar igual.
+ */
+function limpiarUrl(bruta: string | undefined): string | undefined {
+  if (!bruta) return bruta;
+  const limpia = bruta.trim().replace(/\/+$/, '').replace(/\/(rest|auth|storage|realtime)\/v1$/, '');
+  if (limpia !== bruta.trim()) {
+    console.warn(
+      `[supabase] PUBLIC_SUPABASE_URL tiene que ser la raíz del proyecto. Se recibió «${bruta}» y se usará «${limpia}». Arréglalo en Vercel.`,
+    );
+  }
+  return limpia;
+}
+
+const url = limpiarUrl(import.meta.env.PUBLIC_SUPABASE_URL);
+const anonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY?.trim();
 
 /**
  * Si es `false`, no hay backend: el aula se comporta como la maqueta que era y

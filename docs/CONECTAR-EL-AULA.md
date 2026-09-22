@@ -46,6 +46,28 @@ que si ya está puesta, no se toca.
 de publicar. **Y redesplegar**: Vercel no aplica una variable nueva al
 despliegue que ya está en el aire.
 
+⚠️ **`PUBLIC_SUPABASE_URL` es la RAÍZ del proyecto, y nada más:**
+
+```
+✅  https://<ref>.supabase.co
+❌  https://<ref>.supabase.co/rest/v1     ← el error que costó media tarde
+❌  https://<ref>.supabase.co/            ← la barra final también sobra
+```
+
+El panel enseña la URL del proyecto en un sitio y los endpoints REST —con
+`/rest/v1` al final— en otro, y copiar el segundo es facilísimo. El cliente le
+pega `/auth/v1` a lo que le des, así que con `/rest/v1` delante pide
+`…/rest/v1/auth/v1/token` y recibe un **404**.
+
+**Y el fallo es mudo**, que es lo peor: el 404 muere en la pasarela y **nunca
+llega al servicio de autenticación**, así que no aparece nada en Users ni en
+Authentication → Logs. Solo se ve en **Logs → API/Postgres**, entre el ruido.
+
+Desde el 22 sep 2026 el código limpia la URL solo y avisa por consola
+(`[supabase] PUBLIC_SUPABASE_URL tiene que ser la raíz…`), así que el sitio
+funciona igual — pero **la variable hay que arreglarla**, o el aviso se queda
+ahí para siempre.
+
 ⚠️ **`PUBLIC_SUPABASE_ANON_KEY` lleva el prefijo `PUBLIC_` a propósito y no es
 un descuido.** Esa clave es pública por diseño: viaja en el HTML y la ve
 cualquiera con el inspector abierto. Lo que decide qué puede leer cada quien no
@@ -177,11 +199,16 @@ En los dos casos, **abrir la consola** (F12 → Console) y buscar `[acceso]`:
 | `Invalid API key` | `PUBLIC_SUPABASE_ANON_KEY` de Vercel está mal o incompleta |
 | `Auth session or user missing` | Supabase contestó `200` pero sin sesión utilizable. **Las credenciales eran buenas.** Mirar Authentication → Logs para ver el `/token` |
 | `Request rate limit reached` | demasiados intentos seguidos; esperar |
+| `[supabase] PUBLIC_SUPABASE_URL tiene que ser la raíz…` | la variable de Vercel lleva `/rest/v1` o una barra de más. El sitio se apaña, pero arréglala |
 | un error de red | Supabase no contestó |
 
 💡 **Authentication → Logs en Supabase es la otra mitad del diagnóstico**, y
 llega antes que la consola: si `/token` sale en **200**, las credenciales
 estaban bien y el problema es de este lado. Si sale en 400, no.
+
+⚠️ **Y si ahí no aparece NADA**, el intento no llegó al servicio de
+autenticación. Entonces el sitio de mirar es **Logs → API**, buscando un `404`
+sobre `/token`: es la URL mal formada de arriba.
 
 ### 3.3 · Y recién entonces, el script
 
