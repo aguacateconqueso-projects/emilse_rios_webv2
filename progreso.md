@@ -1312,6 +1312,42 @@ Supabase rechaza el inicio de sesión con «Email not confirmed», que en pantal
 se ve exactamente igual que una contraseña mala—. El trigger
 `on_auth_user_created` hace el resto.
 
+#### «No son correctos» mentía, y eso costó una tarde
+
+El 22 sep 2026, con el aula ya conectada, Adrián no podía entrar. La pantalla
+decía «ese correo o esa contraseña no son correctos». Se probaron contraseñas,
+se miró si la cuenta existía, se dudó de la conexión.
+
+**Nada de eso era.** Los logs de Supabase —Authentication → Logs— enseñaban el
+`/token` de sus dos intentos devolviendo **`200`**: las credenciales eran
+buenas y Supabase las había aceptado. El error salía **después**, del lado del
+navegador, y la pantalla lo contaba como si fuera la contraseña.
+
+Leyendo `signInWithPassword` de `auth-js` 2.116, después de un `200` solo quedan
+dos caminos que devuelvan error: que la respuesta no traiga sesión o usuario
+utilizables —`AuthInvalidTokenResponseError: Auth session or user missing`— o
+que algo falle al guardar la sesión. **Ninguno tiene que ver con la
+contraseña.**
+
+Así que la pantalla ahora dice **dos cosas y no una**:
+
+- **`error.status === 400`** → es de credenciales, y ahí el mensaje sigue siendo
+  el mismo diga lo que diga Supabase. «No existe», «clave incorrecta» y «email
+  not confirmed» se cuentan igual: distinguirlos deja averiguar quién es miembro
+  probando correos, y confirmar que una cuenta existe ya es delatarla.
+- **Cualquier otra cosa** → «no pudimos completar el acceso, y **no es tu
+  contraseña**». Acá caen la clave `anon` mal copiada, un 429, un 500, la red y
+  el caso de arriba. **Nada de eso es un vector de enumeración**, así que decirlo
+  no cuesta nada — y ahorra la tarde.
+
+Comprobado con un Supabase de mentira, los seis casos: 400 de credenciales y 400
+de correo sin confirmar dan el mensaje genérico; 401, 429 y el `200` sin sesión
+dan el nuevo; y el éxito entra al escritorio.
+
+💡 **Regla que queda:** cuando el acceso falle, **Authentication → Logs de
+Supabase llega antes que la consola**. Si el `/token` sale en 200, el problema
+no está en las credenciales y no hay que tocarlas.
+
 #### El mensaje de error escondía cinco cosas distintas
 
 La pantalla de acceso decía «ese correo o esa contraseña no son correctos» pase
