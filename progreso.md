@@ -1254,6 +1254,41 @@ en la base de datos es la suscripción a la membresía; los cursos piden la tabl
 venta— y molestará el día que lo haya. Cuando llegue, la pregunta del portero
 deja de ser `has_active_sub()` a secas.
 
+#### El Site URL, y una trampa que conviene dejar escrita
+
+Al hacer los pasos, Adrián encontró en Supabase el campo **Site URL** todavía
+apuntando a `https://www.emilseriosacademy.com`, y preguntó dos cosas. La
+primera tenía razón y faltaba en el documento; la segunda habría roto tres
+cosas. Van las dos, porque cualquiera las va a volver a pensar.
+
+**Sí: el Site URL se cambia** a `https://www.emilserios.com`. Es **el
+respaldo** —a dónde manda Supabase cuando nadie le dice a dónde ir, o cuando lo
+que le dicen no está permitido— y por eso cambiarlo es seguro: **ningún camino
+de las dos casas depende de él**. La pantalla de acceso, la de `/gracias/` y los
+tres generadores de enlace del webhook de la academia pasan todos su
+`redirectTo` a mano, y esas direcciones ya están en la lista. ⚠️ Lo único que
+hay que mirar antes son las plantillas de correo: si alguna usa
+`{{ .SiteURL }}`, sus enlaces cambian de dominio.
+
+**No: la academia NO se redirige todavía.** La idea es razonable —el sitio viejo
+ya no debería recibir a nadie— y es exactamente el movimiento que rompe tres
+cosas a la vez:
+
+1. **Se cae el webhook de Stripe**, que vive en
+   `emilseriosacademy.com/api/stripe-webhook`. Un 301 deja el aviso de Stripe
+   llegando a una página de ventas, que no procesa nada. **Alguien paga y no
+   recibe acceso**, y no se entera nadie hasta que esa persona escriba. Es la
+   otra cara de la decisión de no mudar el webhook: **si se queda, el dominio
+   que lo aloja tiene que seguir respondiendo.**
+2. **Se cae el aula de la membresía.** Los videos semanales se sirven allá.
+3. **Se cae el puente de traspaso antes de existir**, y entonces todo el mundo
+   tiene que restablecer su contraseña en vez de entrar con un clic.
+
+El orden bueno ya estaba escrito en **La mudanza de la sesión**: puente → correo
+de aviso → webhook → **y semanas después** el 301. Lo que sí se puede hacer ya,
+si molesta que alguien llegue al sitio viejo, es redirigir **rutas sueltas** —la
+portada, `/aula/`— dejando `/api/*` en paz.
+
 #### `set_admin.sql`, que estaba citado y no existía
 
 Este documento venía diciendo desde la capa A que había que ejecutar
@@ -1513,8 +1548,9 @@ Con las tres, el peor caso de cualquier miembro es *volver a entrar*, nunca
 
 ```
 1  No tocar la base de datos. Mismo proyecto, misma URL, misma clave anon.   ✅
-2  AÑADIR emilserios.com a Site URL y Redirect URLs de Supabase Auth.        ◻︎ panel
-   Es aditivo: el dominio viejo sigue funcionando.
+2  AÑADIR emilserios.com a Redirect URLs, y CAMBIAR el Site URL.            ✅ 22 sep
+   Las Redirect URLs son aditivas: el dominio viejo sigue funcionando.
+   El Site URL es solo el respaldo — nadie depende de él.
 3  Desplegar el aula nueva en emilserios.com contra ese mismo Supabase.      ✅
 4  MANTENER emilseriosacademy.com viva, con la app vieja + el puente.        ◻︎ pegar
    Si se apaga antes, el puente no existe.
@@ -2987,21 +3023,22 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
       de «puertas cerradas», que es lo correcto. **El 1 de octubre deja de
       taparlo.**
 
-- [ ] **⚠️ Conectar el aula: tres variables, cuatro Redirect URLs y los
-      admins.** El código está desde la capa A y el candado de pago desde el 22
-      sep 2026; **falta todo lo de los paneles**, y sin ello el aula sigue en
-      modo maqueta y lo dice en pantalla.
+- [ ] **⚠️ Conectar el aula: los admins.** ✅ Hechas ya (22 sep 2026) las tres
+      variables de Vercel, las cuatro Redirect URLs y el cambio del Site URL a
+      `https://www.emilserios.com`. **Falta el tercer paso**, que es el que
+      tiene orden: Emi y Adrián entran una vez cada uno por
+      `/aulavirtual/entrar/`, y **recién entonces** se ejecuta
+      `supabase/set_admin.sql`. El perfil se crea al entrar, no antes.
 
-      En Vercel: `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY` y
-      `SUPABASE_SERVICE_ROLE_KEY` (esta última ya hacía falta para el cobro).
-      En Supabase: las **cuatro** Redirect URLs —las dos de la contraseña nueva
-      y las dos del puente—. Y después, **en este orden**: Emi y Adrián entran
-      una vez cada uno, y recién entonces se ejecuta `supabase/set_admin.sql`.
-      El perfil se crea al entrar, no antes; el script aborta sin tocar nada si
-      falta alguno.
+      ⚠️ **Y lo que NO hay que hacer: redirigir `emilseriosacademy.com`.** Mata
+      el webhook de Stripe, el aula de la membresía y el puente de traspaso.
+      Ver **El aula, conectada → El Site URL, y una trampa**.
 
       Paso a paso, con cómo comprobar los cuatro casos del candado, en
-      `docs/CONECTAR-EL-AULA.md`.
+      `docs/CONECTAR-EL-AULA.md`. Ahí está también lo que ya quedó hecho, por si
+      hay que rehacerlo: las tres variables de Vercel
+      —`PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY` y
+      `SUPABASE_SERVICE_ROLE_KEY`— y las cuatro Redirect URLs.
 
       ⚠️ **No hay que crear ni migrar nada**: el esquema ya existe en el
       Supabase de la academia, que es el mismo proyecto.

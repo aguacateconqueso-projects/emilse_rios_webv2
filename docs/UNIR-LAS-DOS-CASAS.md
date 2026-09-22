@@ -81,6 +81,28 @@ academia no lleva a ninguna parte.
 Conviene añadir también las de la URL de Vercel (`*.vercel.app`) para poder
 probar antes de publicar.
 
+**Y en esa misma pantalla, el Site URL**: cambiarlo de
+`https://www.emilseriosacademy.com` a `https://www.emilserios.com`. Es el
+respaldo —a dónde manda Supabase cuando nadie se lo dice— y ninguno de los
+caminos de las dos casas depende de él: todos pasan su `redirectTo` a mano. Ver
+`docs/CONECTAR-EL-AULA.md`.
+
+---
+
+## ⚠️ Lo que NO hay que hacer todavía: redirigir la academia
+
+Está dicho más abajo, pero va acá arriba porque es el error que más caro sale y
+la idea se le ocurre a cualquiera: **un 301 de `emilseriosacademy.com` mata el
+webhook de Stripe**, que vive en `/api/stripe-webhook` y es lo que escribe la
+suscripción en la base de datos. El aviso de Stripe acabaría llegando a una
+página de ventas, que no procesa nada — **alguien paga y no recibe acceso**.
+
+Además se lleva por delante el aula de la membresía (los videos semanales siguen
+allá) y el puente de traspaso, que necesita la academia viva para existir.
+
+El orden bueno es el del final de este documento: puente → correo de aviso →
+webhook → **y semanas después** el 301.
+
 ---
 
 ## 3 · El puente, en el repositorio de la academia

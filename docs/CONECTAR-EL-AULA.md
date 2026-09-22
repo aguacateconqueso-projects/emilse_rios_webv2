@@ -71,6 +71,49 @@ traspaso desde la academia.
 
 Conviene añadir también las de la URL de Vercel (`*.vercel.app`).
 
+### Y el Site URL, en esa misma pantalla
+
+Justo encima está **Site URL**, y desde la capa A dice
+`https://www.emilseriosacademy.com`. **Cambiarlo a `https://www.emilserios.com`.**
+
+Es seguro, y conviene entender por qué antes de tocarlo: el Site URL es **el
+respaldo**, el sitio al que Supabase manda cuando nadie le dice a dónde ir, o
+cuando lo que le dicen no está en la lista de arriba. **Ninguno de los caminos
+de las dos casas depende de él**: la pantalla de acceso, la de `/gracias/` y el
+webhook de la academia pasan todos su `redirectTo` a mano, y esas direcciones ya
+están permitidas. Lo único que cambia es a dónde cae lo que se salga del guion.
+
+⚠️ **Si Emi tiene plantillas de correo personalizadas** que usen `{{ .SiteURL }}`
+—Authentication → Email Templates— sus enlaces cambiarán de dominio con esto.
+Mirarlas antes.
+
+---
+
+## ⚠️ Lo que NO hay que hacer todavía: redirigir la academia
+
+La tentación es razonable —el sitio viejo ya no debería recibir a nadie— y es
+**exactamente el movimiento que rompe tres cosas a la vez**. Con un 301 de
+`emilseriosacademy.com` a cualquier sitio:
+
+1. **Se cae el webhook de Stripe.** Vive en
+   `emilseriosacademy.com/api/stripe-webhook` y es lo que escribe la suscripción
+   en la base de datos. Una redirección deja el aviso de Stripe llegando a una
+   página de ventas, que no procesa nada. **Resultado: alguien paga y no recibe
+   acceso** — y no se entera nadie hasta que esa persona escriba.
+2. **Se cae el aula de la membresía.** Los videos semanales se siguen sirviendo
+   allá. Las miembros de hoy se quedan sin sus clases.
+3. **Se cae el puente de traspaso antes de existir.** Sin la academia viva no hay
+   de dónde traer la sesión, y entonces **todo el mundo tiene que restablecer su
+   contraseña** en vez de entrar con un clic.
+
+El orden bueno ya está escrito en `docs/UNIR-LAS-DOS-CASAS.md`: primero el
+puente, después el correo de aviso, después mudar el webhook, y **semanas
+después** la academia pasa a ser un 301. Ahora no.
+
+**Lo que sí se puede hacer ya**, si la molestia es que alguien llegue al sitio
+viejo: redirigir **rutas sueltas** —la portada, `/aula/`— y dejar `/api/*` en
+paz. Pero ni siquiera eso hace falta antes del correo de aviso.
+
 ---
 
 ## 3 · Los admins
