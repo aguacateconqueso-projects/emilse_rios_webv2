@@ -380,9 +380,17 @@ cortina porque ahí `VERCEL_ENV` vale `preview`:
 **Cómo se abre, paso a paso** (Adrián preguntó el 23 sep 2026 y no estaba
 escrito):
 
-- **Desde GitHub, lo más corto:** abrir el PR → bajar hasta el comentario del
-  bot de Vercel → **Visit Preview**. Un PR ya mergeado conserva el comentario y
-  el enlace sigue funcionando.
+- **Desde GitHub, lo más corto:** abrir el PR → pestaña **Conversation** →
+  bajar hasta el comentario de **vercel[bot]**, que es una tabla con los dos
+  proyectos → en la fila de `emilse-rios-webv2`, columna *Actions*, el enlace
+  **Preview**. (No dice «Visit Preview», como se escribió aquí al principio.)
+  Un PR ya mergeado conserva el comentario y el enlace sigue funcionando.
+- **Ojo con abrir la de otra rama.** Cada rama tiene su dirección, y la de una
+  rama vieja enseña esa rama, no la última. El 23 sep 2026 Adrián miraba la de
+  `claude/busy-heisenberg-2ig8dt` (`…-git-claude-b-bc8959-…`) buscando los
+  cambios del PR #47, que estaban en la de `claude/youthful-meitner-21x8ys`
+  (`…-git-claude-y-2c57cd-…`). Lo más seguro es entrar siempre desde el
+  comentario del PR.
 - **Desde Vercel:** el proyecto → **Deployments** → buscar la rama en la
   columna de la rama (o filtrar por ella) → pulsar el despliegue → **Visit**.
   El de arriba del todo es el último push.
