@@ -4,12 +4,43 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 22 de septiembre de 2026.
+**Última actualización:** 23 de septiembre de 2026.
+
+> **Para quien retome en una sesión nueva.** Lo último —las correcciones de
+> Klaviyo— está en la rama **`claude/compassionate-gates-is7e15`** y **todavía
+> no está en `main`**: falta abrir el PR y mergearlo. Hasta ese merge, lo que
+> está en el aire sigue usando la versión `2024-10-15` de la API de Klaviyo, que
+> se retira el **15 oct 2026**. Después del merge, lo que queda del newsletter es
+> todo de paneles, en este orden:
+>
+> 1. **Klaviyo → Custom Key** con escritura sobre **Lists, Profiles y
+>    Subscriptions**. Si ya había una clave hecha con la guía vieja, se edita
+>    para añadir *Subscriptions*.
+> 2. **Vercel → `KLAVIYO_API_KEY`** en Production, y **redesplegar**.
+> 3. **Comprobar:** `data-endpoint="/api/suscribir"` en el código fuente de la
+>    Home, un alta de prueba, y el correo dentro de la lista `SaE8Px`.
+> 4. **Klaviyo → apagar WooCommerce**, mirando antes los flujos. Y decidir con
+>    Emi la doble confirmación (recomendada).
+>
+> **No se sabe todavía si la clave ya está puesta en Vercel:** el entorno de la
+> sesión del 22 sep no tenía salida ni hacia `emilserios.com` ni hacia Klaviyo,
+> así que no se pudo mirar. Es lo primero que hay que comprobar, con el paso 3.
+>
+> **El correo de Emi funciona**, en las dos direcciones y a la bandeja de
+> entrada (Adrián, 22 sep). Queda solo mirar la línea `DKIM:` en «Mostrar
+> original» para cerrar lo de los CNAME proxied.
 
 **EL AULA ESTÁ CONECTADA Y SE ENTRA.** Adrián entró con su cuenta contra el
 Supabase de siempre: variables, Redirect URLs, sesión y candado de pago
 funcionan de punta a punta. **No hubo que crear ni migrar nada** — el esquema es
 el de la academia, el mismo proyecto.
+
+**Y al final del día, Klaviyo.** A Emi le llegó un aviso —«Klaviyo ya no puede
+conectarse a WooCommerce»— y al revisarlo salieron **dos fallos en el alta al
+newsletter que habrían dejado a la gente sin apuntar**: la clave pedía dos
+permisos donde hacen falta tres, y la versión de la API se retira el 15 de
+octubre. Los dos están corregidos; el aviso se apaga, no se arregla. Ver **El
+newsletter, conectado → La corrección del mismo día**.
 
 Fue un día largo, y estas cinco cosas se movieron, de la última a la primera:
 
@@ -25,15 +56,19 @@ Fue un día largo, y estas cinco cosas se movieron, de la última a la primera:
 
 1. **`supabase/set_admin.sql`**, para que Emi y Adrián sean admin. Antes,
    comprobar cuál es el correo real de Emi.
-2. **`KLAVIYO_API_KEY`** en Vercel, o el newsletter no da de alta.
+2. **`KLAVIYO_API_KEY`** en Vercel, o el newsletter no da de alta. **Con tres
+   permisos de escritura: Lists, Profiles y Subscriptions** — sin el tercero,
+   Klaviyo contesta 403. Y apagar la integración de WooCommerce en Klaviyo.
 3. **Pegar el puente** en el repo de la academia, y el correo de aviso.
 
 Está todo en `docs/CONECTAR-EL-AULA.md`, `docs/CONECTAR-KLAVIYO.md` y
 `docs/UNIR-LAS-DOS-CASAS.md`.
 
 ⚠️ **Y dos cosas siguen a medias desde antes:** los CNAME de correo siguen
-proxied —el DKIM de Emi probablemente está roto para enviar— y el dominio sigue
-registrado en la cuenta de Namecheap de Edu.
+proxied y el dominio sigue registrado en la cuenta de Namecheap de Edu. **Lo del
+correo pesa menos de lo que parecía:** el 22 sep 2026 Adrián y Emi se
+escribieron y todo llegó a la bandeja de entrada, en las dos direcciones. Ver
+**Los CNAME de correo quedaron PROXIED → La prueba del 22 de septiembre**.
 
 ⚠️ **El webhook de Stripe sigue viviendo en la academia a propósito**, así que
 `emilseriosacademy.com` **no se redirige todavía**: un 301 ahí deja a alguien
@@ -52,7 +87,7 @@ pagando sin recibir acceso.
 | **Alcance** | Desde el 31 ago 2026 esto deja de ser solo el sitio: aquí van también el aula, la membresía y los cursos. Ver **La plataforma**. |
 | **Sesión** | **Conectada y probada el 22 sep 2026**: se entra de verdad, contra el **mismo Supabase de la academia**, y el candado pide **suscripción al día**. Las variables y las Redirect URLs ya están puestas. Falta `set_admin.sql`. Ver `docs/CONECTAR-EL-AULA.md`. |
 | **Cobro** | **Desde el 22 sep 2026 vive acá.** `/api/checkout` crea la sesión de Stripe, `/gracias/` recoge a quien pagó y `/api/claim-account` le crea la cuenta. El **webhook sigue en la academia**, y es correcto que siga: ver **La unión de las dos casas**. |
-| **Newsletter** | **Conectado desde el 22 sep 2026.** `/api/suscribir` da de alta en la lista real de Klaviyo (`SaE8Px`). Falta poner `KLAVIYO_API_KEY` en Vercel; sin ella el formulario avisa en vez de fingir. |
+| **Newsletter** | **Conectado desde el 22 sep 2026.** `/api/suscribir` da de alta en la lista real de Klaviyo (`SaE8Px`), con la API en su versión `2026-07-15`. Falta poner `KLAVIYO_API_KEY` en Vercel —**con los permisos Lists, Profiles y Subscriptions**—; sin ella el formulario avisa en vez de fingir. La integración de WooCommerce de Klaviyo está muerta desde el 21 sep y **se apaga**: los cobros son de Stripe. |
 | **Lo que falta para lanzar** | **Dos variables en Vercel, y ninguna es código:** `KLAVIYO_API_KEY` o el newsletter no da de alta, y las de Stripe o el botón de comprar da un 500. |
 
 Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/` · `/productos/` ·
@@ -491,6 +526,23 @@ instrucción no los cubría.
 | **Síntoma a vigilar** | Los correos que **envía** Emi caen en spam, o los rechazan. Sobre todo a Gmail y Outlook. |
 | **Cómo comprobarlo** | [mxtoolbox.com](https://mxtoolbox.com) → DKIM Lookup con los selectores `hostingermail-a`, `-b`, `-c`. También vale mandar un correo a una cuenta de Gmail y mirar «Mostrar original». |
 | **El arreglo** | Cinco clics en Cloudflare: nube naranja → **gris (DNS only)** en esos cinco. No hay que cambiar ningún contenido. |
+
+##### La prueba del 22 de septiembre
+
+**El correo de Emi funciona.** Adrián le escribió y ella le contestó, y todo
+llegó **a la bandeja de entrada**, no a spam. Recibir, que nunca estuvo en
+duda, y **enviar**, que era lo que este apartado ponía en riesgo.
+
+Conviene leerla bien, porque prueba lo que importa y no más: **el síntoma no
+está.** No prueba que el DKIM pase — un correo puede llegar a la bandeja con el
+DKIM roto si el SPF pasa y el DMARC se alinea por ahí, que es lo más probable
+con el SPF de Hostinger en gris y correcto. La forma de saberlo del todo cuesta
+treinta segundos: en Gmail, el correo de Emi → los tres puntos → **Mostrar
+original**, y leer la línea `DKIM:`.
+
+- `DKIM: 'PASS'` → está bien, y los cinco CNAME se pueden quedar como están.
+- `DKIM: 'FAIL'` o sin línea → funciona **apoyado solo en el SPF**. Los cinco
+  clics siguen valiendo la pena, pero dejan de ser urgentes.
 
 
 ### El aula
@@ -1527,19 +1579,70 @@ nadie. La comprobación de verdad es mirar el correo en Klaviyo.
 #### Lo que hay que saber si un día deja de funcionar
 
 ⚠️ **La API de Klaviyo va versionada por fecha**, en la cabecera `revision`, y
-es obligatoria. Si el alta empieza a fallar de golpe sin haber tocado nada, eso
-es lo primero que hay que mirar: se sube la fecha en `KLAVIYO_REVISION`.
+es obligatoria. Klaviyo sostiene cada fecha **dos años** y después la retira.
+La que usa el código es `2026-07-15`, que **dura hasta julio de 2028**. Si el
+alta empieza a fallar de golpe sin haber tocado nada, eso es lo primero que hay
+que mirar: se sube la fecha en `KLAVIYO_REVISION`.
 
 El motivo de verdad siempre está en **Vercel → Logs**, buscando `[klaviyo]`: se
 registra el estado HTTP, la `revision`, la lista y **el cuerpo del error de
 Klaviyo entero**. A la pantalla no va nada de eso a propósito — nombra la lista
 y la cuenta.
 
-⚠️ **La forma del cuerpo de la petición no se pudo verificar contra la
-documentación de Klaviyo** al escribirla: el entorno donde se programó no tiene
-salida hacia sus servidores. Por eso `docs/CONECTAR-KLAVIYO.md` lleva un `curl`
-que la confirma en diez segundos desde cualquier terminal, y hay que correrlo
-**antes** de dar esto por bueno.
+**La forma del cuerpo de la petición está comprobada** desde el mismo 22 sep
+2026, contra el SDK oficial de Klaviyo (`klaviyo-api` 23.0.0, versión
+`2026-07-15`), campo por campo. El `curl` de `docs/CONECTAR-KLAVIYO.md` sigue
+haciendo falta, pero para otra cosa: **comprobar la clave**, que no se puede
+comprobar desde el código.
+
+#### La corrección del mismo día
+
+Esa misma noche, al revisar el aviso de WooCommerce que le llegó a Emi, se
+comprobó el alta contra el SDK oficial de Klaviyo —el entorno sigue sin salida
+hacia sus servidores, pero sí hacia npm— y salieron **dos fallos que habrían
+dejado a la gente sin apuntar**:
+
+1. **La clave pedía dos permisos donde hacen falta tres.** La guía decía
+   *Lists* y *Profiles*; el trabajo de suscripción pide además
+   **`subscriptions:write`**. Una clave hecha al pie de la letra habría dado
+   **403 en cada alta**, con el formulario diciendo «no pudimos» y nadie
+   sabiendo por qué hasta mirar los logs. Corregido en la guía, en
+   `.env.example` y en el comentario de la clave.
+2. **La versión de la API caducaba en tres semanas.** `2024-10-15` se retira
+   el **15 de octubre de 2026**. Klaviyo no rompe la llamada al retirarla: la
+   atiende con el comportamiento de la versión más antigua que siga viva, que
+   es peor, porque cambia sin avisar. Subida a **`2026-07-15`**, la estable de ese día.
+
+Y dos cosas que se añadieron de paso:
+
+- **El alta lleva origen: `custom_source: 'emilserios.com'`.** Queda escrito en
+  el registro de consentimiento de cada perfil, y es lo que deja a Emi
+  distinguir en Klaviyo a quien se apuntó desde el sitio de quien lo hizo por
+  la página alojada.
+- **La recomendación de doble confirmación, con su motivo.** La documentación
+  de Klaviyo dice que este trabajo **le quita la baja a quien se había dado de
+  baja**. Con confirmación simple, cualquiera puede volver a apuntar a otra
+  persona tecleando su correo; con doble, a esa persona le llega un correo para
+  confirmar y nada más. Sigue siendo decisión de Emi.
+
+#### WooCommerce, que ya no está
+
+**El aviso «Klaviyo ya no puede conectarse a WooCommerce» es lo esperado.**
+WooCommerce vivía en el WordPress de Edu, y el 21 sep 2026 `www.emilserios.com`
+pasó a apuntar a Vercel: Klaviyo llama a una tienda que ya no existe. **No se
+reconecta** —los cursos y la membresía se cobran por Stripe y viven en Bunny y
+en esta casa— **y no afecta al newsletter**, que va por la API.
+
+Se apaga así, en este orden: primero mirar en **Flows** que ningún flujo activo
+arranque con un evento de WooCommerce (*Placed Order*, *Started Checkout*…) y
+pasarlos a borrador; después **Integrations → WooCommerce → Disable**. Klaviyo
+no borra los datos de pedidos ya sincronizados. Está en
+`docs/CONECTAR-KLAVIYO.md`.
+
+**El sustituto natural dentro de Klaviyo es su integración oficial con
+Stripe**: trae los pagos, las facturas y los cobros fallidos para disparar
+flujos —la bienvenida a quien compra, el aviso de tarjeta rechazada—. Queda
+como idea, no como pendiente: nadie la ha pedido todavía.
 
 #### Lo que sigue siendo de Klaviyo, y no de este sitio
 
@@ -3228,27 +3331,40 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
       formulario no miente, pero tampoco suscribe a nadie.
 
       La clave se saca de klaviyo.com → Settings → API keys → Create Private
-      API Key, con permiso de escritura sobre Lists y Profiles (nunca «Full
-      Access»). **Sin prefijo `PUBLIC_`**, o viajaría en el HTML. Y hay que
-      **redesplegar**: Vercel no aplica una variable nueva al despliegue que ya
-      está en el aire.
+      API Key → **Custom Key**, con permiso de escritura sobre **Lists,
+      Profiles y Subscriptions** (nunca «Full Access»). ⚠️ **Sin
+      Subscriptions contesta 403**: la guía pedía solo dos hasta la noche del
+      22 sep 2026, así que si la clave ya se creó, hay que editarla. **Sin
+      prefijo `PUBLIC_`**, o viajaría en el HTML. Y hay que **redesplegar**:
+      Vercel no aplica una variable nueva al despliegue que ya está en el
+      aire.
 
       El ID de la lista NO hace falta ponerlo: por defecto es `SaE8Px`, la
       lista real del newsletter.
 
-      ⚠️ **Antes de darlo por bueno, correr el `curl` de
-      `docs/CONECTAR-KLAVIYO.md`.** La forma del cuerpo de la petición no se
-      pudo verificar contra la documentación de Klaviyo al programarla, y ese
-      `curl` lo confirma en diez segundos.
+      **Antes de darlo por bueno, correr el `curl` de
+      `docs/CONECTAR-KLAVIYO.md`.** La forma del cuerpo ya está comprobada
+      contra el SDK oficial; el `curl` comprueba la clave y sus permisos en
+      diez segundos.
 
       ⚠️ **Probarlo en local no prueba nada:** en `astro dev` sin clave el
       formulario dice «Listo» a propósito, para poder revisar el diseño. La
       comprobación de verdad es ver el correo dentro de la lista en Klaviyo.
 
-- [ ] **⚠️ Los cinco CNAME de correo están PROXIED en Cloudflare.** Es lo
-      primero que hay que mirar. El DKIM de Emi no se puede verificar, así que
-      **lo que ella envía puede estar cayendo en spam desde el 21 sep 2026**.
-      El arreglo son cinco clics; el detalle completo, con los nombres de los
+- [ ] **Apagar la integración de WooCommerce en Klaviyo.** Es la que le manda a
+      Emi el aviso «Klaviyo ya no puede conectarse a WooCommerce». No se
+      reconecta: la tienda ya no existe y los cobros son de Stripe. Antes,
+      mirar que ningún flujo activo arranque con un evento de WooCommerce, y
+      que el de bienvenida arranque con **«Added to list» → `SaE8Px`**. Paso a
+      paso en `docs/CONECTAR-KLAVIYO.md`.
+
+- [ ] **Los cinco CNAME de correo están PROXIED en Cloudflare.** **Bajó de
+      urgencia el 22 sep 2026:** Adrián y Emi se escribieron y todo llegó a la
+      bandeja de entrada, en las dos direcciones, así que el síntoma —lo que
+      ella envía cayendo en spam— **no está**. Lo que queda es saber si el
+      DKIM pasa o si el correo se sostiene solo en el SPF: treinta segundos
+      con «Mostrar original» en Gmail, explicado en **La prueba del 22 de
+      septiembre**. El arreglo, si hace falta, son cinco clics; el detalle completo, con los nombres de los
       registros y cómo comprobarlo, está en **El dominio, y Edu → Los CNAME de
       correo quedaron PROXIED**. Se dejó así por decisión de Adrián y Edu para
       no frenar la salida del sitio — **no es un olvido, es una deuda con
@@ -3293,8 +3409,10 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
       correo de prueba al buzón nuevo. Falta además un dato de la llamada:
       **cuántos buzones hay y quién los paga.**
 
-      ⚠️ Comprobar de paso que hoy recibe: el sitio ya está publicado, así que
-      un correo perdido ahí es alguien que quiso suscribirse.
+      ✅ **Recibe y envía:** comprobado el 22 sep 2026, cuando Adrián le
+      escribió a Emi y la respuesta llegó a su bandeja de entrada. Si la
+      prueba fue a otra dirección del dominio y no a `info@`, conviene mandar
+      uno a `info@`: es la que el sitio enseña cuando falla la suscripción.
 
 - [ ] **Decidir qué pasa con `contrabajoenlaciudad.com`.** Quedó abierto el
       31 ago 2026 y sigue abierto: falta saber si se redirige a `emilserios.com`,
