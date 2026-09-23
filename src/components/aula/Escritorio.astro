@@ -2,437 +2,509 @@
 /**
  * El escritorio — la primera pantalla después de iniciar sesión.
  *
- * Responde una sola pregunta, y la responde arriba del todo: **¿qué estaba
- * haciendo yo?** Todo lo demás —la membresía, el resto de mis cursos, la
- * tienda— va después, en ese orden, porque ese es el orden en que importan.
+ * **«Mi escritorio», arriba y en grande** (23 sep 2026, pedido de Adrián: «al
+ * comienzo, más protagonismo»). Sin saludo: el «Hola, Ana» de la maqueta se
+ * quitó porque el nombre no se puede sacar del correo y uno inventado dice
+ * cualquier cosa, y la frase de debajo tampoco sumaba.
  *
- * La membresía y los cursos **viven juntos acá y se ven distintos a propósito**.
- * Son dos maneras distintas de estudiar con Emi: la membresía es un flujo que
- * no termina —un ejercicio nuevo cada jueves, y el de la semana pasada
- * desaparece— y un curso es un camino con final. Pintarlos iguales, con la
- * misma barra de progreso, mentiría sobre lo que son: una membresía no se
- * «completa».
+ * Después, en el orden en que importan:
+ *   1. **Sigue por donde ibas** — la única acción grande, porque es la que
+ *      hace el 90 % de las visitas: se entra a seguir, no a explorar.
+ *   2. **Mis cursos**, con su avance.
+ *   3. **La membresía**, si la tiene. Sin barra de avance: es un flujo que no
+ *      termina —un ejercicio nuevo cada jueves—, y una barra mentiría.
+ *   4. Formaciones, para quien quiere seguir aprendiendo.
  *
- * ⚠️ Lo que se pinta en el servidor es el estado **de partida**: cero avance y
- * la primera clase del primer curso. El avance real vive en el navegador de
- * cada alumna, así que el script de abajo lo reescribe al cargar. Está hecho
- * así, y no al revés, para que quien llegue sin JS vea un escritorio que
- * funciona en vez de un hueco.
+ * **Todo lo de los cursos llega por consulta**, no va escrito en el HTML: sale
+ * de Supabase con la RLS decidiendo (`src/lib/aula-datos.ts`). Lo que pinta el
+ * servidor es solo el esqueleto y las fotos de Formaciones, que son públicas.
  */
+import { getImage } from 'astro:assets';
 import type { Lang } from '../../i18n/ui';
-import { routePath } from '../../i18n/ui';
-import { useAula, cursoPath } from '../../i18n/aula';
-import { ACADEMIA } from '../../data/aula';
-import {
-  ALUMNA_DEMO,
-  buscarCurso,
-  cursosPorComprar,
-  clasesDe,
-  misCursos,
-  reloj,
-} from '../../data/cursos';
-import Boton from './Boton.astro';
+import { routePath, useTranslations } from '../../i18n/ui';
+import { useAula } from '../../i18n/aula';
+import { ACADEMIA, catalogo } from '../../data/aula';
+import Boton from '../Boton.astro';
 
 interface Props {
   lang: Lang;
 }
 const { lang } = Astro.props;
 const a = useAula(lang);
-
-const mios = misCursos();
-const porComprar = cursosPorComprar();
+const t = useTranslations(lang);
 
 /**
- * Cada curso comprado, con su contenido al lado.
- *
- * `clases` es la lista de ids en orden, y es lo que el script necesita para
- * calcular el avance sin volver a preguntarle nada al servidor: cuenta cuántas
- * de esas ids están marcadas y divide. Va por `data-` en el HTML, que es la
- * manera de pasarle datos a un script sin duplicar el catálogo en JSON.
+ * Lo que el script necesita del catálogo: el nombre y la foto de cada curso
+ * que tiene ficha en Formaciones, y cuáles tienen página propia en el aula.
+ * Las fotos salen ya optimizadas, en el tamaño de la ficha.
  */
-const mesa = mios.map((p) => {
-  const curso = buscarCurso(p.slug);
-  const clases = curso ? clasesDe(curso) : [];
-  return {
-    slug: p.slug,
-    nombre: p.copia[lang].nombre,
-    /* La línea de adentro, no la de la tienda. Ver `Curso.copia` en
-       `src/data/cursos.ts`: quien ya compró no necesita que le vendan. */
-    resumen: curso?.copia?.[lang].resumen ?? p.copia[lang].resumen,
-    clases,
-    ids: clases.map((x) => x.id).join(','),
-    /** Cuánto dura el curso entero, para la ficha. */
-    duracion: clases.reduce((t, x) => t + (x.duracion ?? 0), 0),
-  };
-});
+const deCatalogo = await Promise.all(
+  catalogo
+    .filter((p) => p.tipo === 'curso')
+    .map(async (p) => ({
+      slug: p.slug,
+      nombre: p.copia[lang].nombre,
+      alt: p.copia[lang].fotoAlt ?? '',
+      foto: p.foto ? (await getImage({ src: p.foto, width: 720 })).src : null,
+    })),
+);
 
-/** El punto de partida sin JS: la primera clase del primer curso que tenga. */
-const arranque = mesa.find((c) => c.clases.length > 0);
-const primera = arranque?.clases[0];
+const paraJs = {
+  lang,
+  catalogo: deCatalogo,
+  raiz: lang === 'es' ? '/aulavirtual/curso/' : '/en/classroom/course/',
+  t: {
+    clases: a('course.lessons'),
+    continuar: a('desk.resumeCta'),
+    empezar: a('desk.startCta'),
+    hecho: a('course.done'),
+    sinEmpezar: a('course.notStarted'),
+    vacio: a('desk.mineEmpty'),
+    error: a('desk.error'),
+    borrador: a('desk.draft'),
+  },
+};
 
 const membresiaHref = `${ACADEMIA}/aula/`;
 ---
 
-<section class="wrap saludo reveal">
-  <p class="eyebrow">{a('app.desk')}</p>
-  <h1 class="saludo__h">{a('desk.hello')}, {ALUMNA_DEMO.nombre}.</h1>
-  <p class="saludo__lead">{a('desk.lead')}</p>
-</section>
+<script type="application/json" id="escritorio-datos" set:html={JSON.stringify(paraJs)} />
 
-{/*
-  Retomar. Es la única acción de la pantalla que se escribe grande, porque es
-  la que hace el 90 % de las visitas: se entra al aula a seguir, no a explorar.
-*/}
-<section class="wrap reveal" aria-labelledby="retomar-h">
-  <div class="retomar card card--live" data-retomar>
+<header class="app-wrap desk-head">
+  <h1 class="app-h1 desk-head__h">{a('app.desk')}</h1>
+</header>
+
+{/* --- Sigue por donde ibas --------------------------------------------- */}
+<section class="app-wrap desk-sec" aria-labelledby="retomar-h" data-retomar hidden>
+  <div class="retomar">
     <div class="retomar__txt">
       <p class="eyebrow" id="retomar-h">{a('desk.resume')}</p>
-      {
-        arranque && primera ? (
-          <>
-            <p class="retomar__curso" data-retomar-curso>
-              {arranque.nombre}
-            </p>
-            <p class="retomar__clase" data-retomar-clase>
-              {primera.copia[lang].titulo}
-            </p>
-            <p class="retomar__meta soft tnum" data-retomar-meta>
-              {reloj(primera.duracion)}
-            </p>
-          </>
-        ) : (
-          <p class="retomar__clase">{a('desk.resumeNone')}</p>
-        )
-      }
+      <p class="retomar__curso mono" data-r-curso></p>
+      <p class="retomar__clase" data-r-clase></p>
+      <p class="retomar__meta soft tnum" data-r-meta></p>
     </div>
-    {
-      arranque && primera && (
-        <Boton
-          href={`${cursoPath(arranque.slug, lang)}#${primera.id}`}
-          etiqueta={a('desk.resumeCta')}
-          variante="solid"
-          data-retomar-cta
-        />
-      )
-    }
+    <Boton class="boton--solid" href="#" data-r-cta>{a('desk.resumeCta')}</Boton>
   </div>
 </section>
 
-<div class="wrap"><hr class="hr" /></div>
+{/* --- Mis cursos -------------------------------------------------------- */}
+<section class="app-wrap desk-sec" aria-labelledby="mios-h">
+  <h2 class="eyebrow desk-sec__h" id="mios-h">{a('desk.mine')}</h2>
+  <p class="soft desk-estado" data-cursos-estado role="status">{a('desk.loading')}</p>
+  <ul class="fichas" role="list" data-cursos></ul>
 
-{/*
-  La membresía. Va en una ficha ancha y sin barra de avance, que es lo que la
-  separa de un curso: no hay un final que perseguir.
-*/}
-<section class="wrap reveal" aria-labelledby="memb-h">
-  <div class="memb card card--live">
+  <template data-ficha>
+    <li class="ficha">
+      <a class="ficha__link" data-f-link>
+        <span class="ficha__media" data-f-media>
+          <img class="ficha__img" alt="" loading="lazy" data-f-img />
+          <span class="mono ficha__hueco" data-f-hueco></span>
+        </span>
+        <span class="ficha__meta mono">
+          <span class="tnum" data-f-pct>0 %</span>
+          <span class="soft tnum" data-f-cifras></span>
+        </span>
+        <span class="meter ficha__meter"><span class="meter__fill" data-f-fill></span></span>
+        <span class="ficha__nombre" data-f-nombre></span>
+        <span class="ficha__resumen soft" data-f-resumen></span>
+        <span class="estado ficha__estado" data-f-borrador hidden></span>
+      </a>
+    </li>
+  </template>
+</section>
+
+{/* --- La membresía ------------------------------------------------------ */}
+<section class="app-wrap desk-sec" aria-labelledby="memb-h" data-membresia hidden>
+  <div class="memb">
     <div class="memb__txt">
       <p class="eyebrow">{a('app.membership')}</p>
-      <h2 class="card__title memb__h" id="memb-h">{a('desk.membershipTitle')}</h2>
-      <p class="card__lead">{a('desk.membershipLead')}</p>
-      {/*
-        El salto de dominio se avisa, no se descubre. Es la misma regla que ya
-        sigue la tienda con el botón de comprar: nadie debería enterarse a mitad
-        de camino de que cambió de casa.
-      */}
-      <p class="memb__away soft">{a('desk.membershipAway')}</p>
+      <h2 class="app-h2 memb__h" id="memb-h">{a('desk.membershipTitle')}</h2>
+      <p class="memb__lead">{a('desk.membershipLead')}</p>
+      {/* El salto de dominio se avisa, no se descubre. */}
+      <p class="memb__fuera soft">{a('desk.membershipAway')}</p>
     </div>
-    <Boton href={membresiaHref} etiqueta={a('desk.membershipCta')} externo />
+    <Boton href={membresiaHref} rel="noopener">{a('desk.membershipCta')}</Boton>
   </div>
 </section>
 
-<div class="wrap"><hr class="hr" /></div>
-
-{/* Mis cursos. */}
-<section class="wrap reveal" aria-labelledby="mios-h">
-  <p class="eyebrow" id="mios-h">{a('desk.mine')}</p>
-  <ul class="rejilla" role="list">
-    {
-      mesa.map((c) => (
-        <li>
-          <a class="curso card" href={cursoPath(c.slug, lang)} data-curso={c.ids}>
-            <h3 class="card__title">{c.nombre}</h3>
-            <p class="card__lead">{c.resumen}</p>
-            <div class="curso__pie">
-              <div class="meter" data-meter>
-                <span class="meter__fill" />
-              </div>
-              <p class="curso__cifras soft tnum">
-                <span data-curso-pct>0 %</span>
-                <span aria-hidden="true"> · </span>
-                <span>
-                  {c.clases.length} {a('course.lessons')}
-                </span>
-                {c.duracion > 0 && (
-                  <>
-                    <span aria-hidden="true"> · </span>
-                    <span>{reloj(c.duracion)}</span>
-                  </>
-                )}
-              </p>
-            </div>
-          </a>
-        </li>
-      ))
-    }
-  </ul>
-</section>
-
-{/* La tienda, para quien ya está dentro. Mismo catálogo, leído desde acá. */}
-<section class="wrap tienda reveal" aria-labelledby="tienda-h">
-  <div class="tienda__txt">
-    <h2 class="tienda__h" id="tienda-h">{a('desk.storeTitle')}</h2>
-    <p class="card__lead">{a('desk.storeLead')}</p>
-    {/*
-      La lista de lo que le falta por comprar, y solo si hay algo. Desde que
-      el catálogo anuncia un curso en vez de seis —21 sep 2026— la alumna de
-      muestra ya los tiene todos, y sin esta condición quedaba un párrafo
-      vacío abriendo su hueco debajo del texto. El botón a la tienda se queda
-      igual: aunque no falte nada hoy, es la puerta por donde entra lo que Emi
-      publique mañana.
-    */}
-    {porComprar.length > 0 && (
-      <p class="tienda__lista soft">
-        {porComprar.map((p) => p.copia[lang].nombre).join(' · ')}
-      </p>
-    )}
+{/* --- Formaciones -------------------------------------------------------- */}
+<section class="app-wrap desk-sec desk-tienda" aria-labelledby="tienda-h">
+  <div class="desk-tienda__txt">
+    <h2 class="app-h2" id="tienda-h">{a('desk.storeTitle')}</h2>
+    <p class="soft">{a('desk.storeLead')}</p>
   </div>
-  <Boton href={routePath('products', lang)} etiqueta={a('desk.storeCta')} />
+  <Boton href={routePath('products', lang)}>{t('nav.products')}</Boton>
 </section>
 
-{/*
-  El avance real. Llega del navegador, no del servidor, así que se pinta encima
-  de lo que ya está en pantalla en vez de dejar huecos esperándolo.
-*/}
-<script is:inline define:vars={{ lang, mesa: mesa.map((c) => ({ slug: c.slug, nombre: c.nombre, clases: c.clases.map((l) => ({ id: l.id, titulo: l.copia[lang].titulo, duracion: l.duracion ?? 0 })) })), etiquetaContinuar: a('desk.resumeCta'), etiquetaEmpezar: a('desk.startCta'), etiquetaHecho: a('course.done'), etiquetaSinEmpezar: a('course.notStarted') }}>
-  (function () {
-    var A = window.Aula;
-    if (!A) return;
+<script>
+  import { datos, clasesDe, reloj, type Curso, type Avance } from '../../lib/aula-datos';
+  import { acceso } from '../../lib/aula-acceso';
 
-    var reloj = A.reloj;
+  type Ficha = { slug: string; nombre: string; alt: string; foto: string | null };
+  const D = JSON.parse(document.getElementById('escritorio-datos')!.textContent!) as {
+    lang: 'es' | 'en';
+    catalogo: Ficha[];
+    raiz: string;
+    t: Record<string, string>;
+  };
+  const { lang, t } = D;
+  const conPagina = D.catalogo.map((c) => c.slug);
+  const $ = <T extends HTMLElement = HTMLElement>(s: string, en: ParentNode = document) =>
+    en.querySelector<T>(s);
 
-    /* --- La barra de cada curso ---------------------------------------- */
-    function pintarCursos() {
-      document.querySelectorAll('[data-curso]').forEach(function (tarjeta) {
-        var ids = (tarjeta.getAttribute('data-curso') || '').split(',').filter(Boolean);
-        if (!ids.length) return;
-        var hechas = ids.filter(function (id) { return A.de(id).hecho; }).length;
-        var pct = Math.round((hechas / ids.length) * 100);
-        var barra = tarjeta.querySelector('[data-meter]');
-        if (barra) {
-          barra.querySelector('.meter__fill').style.setProperty('--pct', pct + '%');
-          barra.classList.toggle('meter--done', pct === 100);
-        }
-        var cifra = tarjeta.querySelector('[data-curso-pct]');
-        if (cifra) cifra.textContent = pct + ' %';
-      });
+  const nombreDe = (c: Curso) =>
+    (lang === 'en' ? c.title_en || c.title_es : c.title_es || c.title_en) ||
+    D.catalogo.find((f) => f.slug === c.slug)?.nombre ||
+    c.slug;
+
+  const resumenDe = (c: Curso) => (lang === 'en' ? c.summary_en || c.summary_es : c.summary_es) || '';
+
+  const tituloClase = (l: { title_es: string; title_en: string }) =>
+    (lang === 'en' ? l.title_en || l.title_es : l.title_es || l.title_en) || '—';
+
+  const hrefCurso = (slug: string, clase?: string) =>
+    (conPagina.includes(slug) ? `${D.raiz}${slug}/` : `${D.raiz}?c=${encodeURIComponent(slug)}`) +
+    (clase ? `#${clase}` : '');
+
+  /* --- Mis cursos ---------------------------------------------------------- */
+  function pintarCursos(cursos: Curso[], avance: Record<string, Avance>, admin: boolean) {
+    const lista = $('[data-cursos]')!;
+    const molde = $<HTMLTemplateElement>('[data-ficha]')!;
+    lista.textContent = '';
+
+    cursos.forEach((c) => {
+      const clases = clasesDe(c);
+      const hechas = clases.filter((l) => avance[l.id]?.hecho).length;
+      const pct = clases.length ? Math.round((hechas / clases.length) * 100) : 0;
+      const duracion = clases.reduce((s, l) => s + (l.duration_s ?? 0), 0);
+      const ficha = D.catalogo.find((f) => f.slug === c.slug);
+
+      const li = molde.content.firstElementChild!.cloneNode(true) as HTMLElement;
+      $<HTMLAnchorElement>('[data-f-link]', li)!.href = hrefCurso(c.slug);
+      const img = $<HTMLImageElement>('[data-f-img]', li)!;
+      const hueco = $('[data-f-hueco]', li)!;
+      if (ficha?.foto) {
+        img.src = ficha.foto;
+        img.alt = ficha.alt;
+        hueco.remove();
+      } else {
+        img.remove();
+        hueco.textContent = nombreDe(c);
+      }
+      $('[data-f-pct]', li)!.textContent = `${pct} %`;
+      const cifras = [`${clases.length} ${t.clases}`];
+      if (duracion > 0) cifras.push(reloj(duracion));
+      $('[data-f-cifras]', li)!.textContent = cifras.join(' · ');
+      $('[data-f-fill]', li)!.style.setProperty('--pct', `${pct}%`);
+      $('[data-f-nombre]', li)!.textContent = nombreDe(c);
+      const resumen = resumenDe(c);
+      const r = $('[data-f-resumen]', li)!;
+      if (resumen) r.textContent = resumen;
+      else r.remove();
+      if (admin && !c.published) {
+        const b = $('[data-f-borrador]', li)!;
+        b.textContent = t.borrador;
+        b.hidden = false;
+      }
+      lista.appendChild(li);
+    });
+  }
+
+  /* --- Por dónde iba -------------------------------------------------------
+     La clase tocada más recientemente, de cualquier curso. Si ya está vista,
+     la SIGUIENTE sin ver: volver a ponerle la que acaba de terminar no ayuda.
+     Sin nada tocado, la primera clase del primer curso, y el botón dice
+     «empezar» en vez de «continuar». */
+  function pintarRetomar(cursos: Curso[], avance: Record<string, Avance>) {
+    const caja = $('[data-retomar]')!;
+    let mejor: { c: Curso; id: string; ts: number } | null = null;
+    cursos.forEach((c) =>
+      clasesDe(c).forEach((l) => {
+        const p = avance[l.id];
+        if (p?.ts && (!mejor || p.ts > mejor.ts)) mejor = { c, id: l.id, ts: p.ts };
+      }),
+    );
+
+    let curso: Curso | undefined;
+    let clase: ReturnType<typeof clasesDe>[number] | undefined;
+    let empezar = false;
+
+    if (mejor) {
+      const m = mejor as { c: Curso; id: string };
+      curso = m.c;
+      const lista = clasesDe(curso);
+      const i = lista.findIndex((l) => l.id === m.id);
+      clase = lista[i];
+      if (avance[m.id]?.hecho) clase = lista.slice(i + 1).find((l) => !avance[l.id]?.hecho) ?? clase;
+    } else {
+      curso = cursos.find((c) => clasesDe(c).length > 0);
+      clase = curso ? clasesDe(curso)[0] : undefined;
+      empezar = true;
     }
+    if (!curso || !clase) return;
 
-    /* --- Por dónde iba -------------------------------------------------- */
-    function pintarRetomar() {
-      var caja = document.querySelector('[data-retomar]');
-      if (!caja) return;
+    $('[data-r-curso]', caja)!.textContent = nombreDe(curso);
+    $('[data-r-clase]', caja)!.textContent = tituloClase(clase);
 
-      /* El curso que se tocó más recientemente gana. Con varios cursos a la
-         vez, «seguir» tiene que llevar al último que se estaba viendo, no
-         siempre al primero de la lista. */
-      var mejor = null;
-      mesa.forEach(function (curso) {
-        curso.clases.forEach(function (lec) {
-          var p = A.de(lec.id);
-          if (p.ts && (!mejor || p.ts > mejor.ts)) {
-            mejor = { ts: p.ts, curso: curso, lec: lec, p: p };
-          }
-        });
-      });
+    const p = avance[clase.id];
+    const total = clase.duration_s || p?.d || 0;
+    let meta = total ? reloj(total) : t.sinEmpezar;
+    if (p?.hecho) meta = t.hecho + (total ? ` · ${reloj(total)}` : '');
+    else if (p && p.s > 5) meta = reloj(p.s) + (total ? ` / ${reloj(total)}` : '');
+    $('[data-r-meta]', caja)!.textContent = meta;
 
-      /* Sin nada tocado, se queda lo que pintó el servidor: la primera clase
-         del primer curso, con el botón diciendo «empezar» en vez de «seguir». */
-      var cta = caja.querySelector('[data-retomar-cta]');
-      if (!mejor) {
-        if (cta) {
-          var et = cta.querySelector('.btn__label');
-          if (et) et.textContent = etiquetaEmpezar;
-        }
-        return;
-      }
+    const cta = $<HTMLAnchorElement>('[data-r-cta]', caja)!;
+    cta.href = hrefCurso(curso.slug, clase.id);
+    cta.querySelector('.boton__label')!.textContent = empezar ? t.empezar : t.continuar;
+    caja.hidden = false;
+  }
 
-      /* Si la clase donde se quedó ya está vista, lo útil es la SIGUIENTE, no
-         volver a ponerle la que acaba de terminar. */
-      var destino = mejor.lec;
-      var cursoDestino = mejor.curso;
-      if (mejor.p.hecho) {
-        var lista = cursoDestino.clases;
-        var i = lista.findIndex(function (l) { return l.id === mejor.lec.id; });
-        var siguiente = lista.slice(i + 1).find(function (l) { return !A.de(l.id).hecho; });
-        if (siguiente) destino = siguiente;
-      }
+  (async () => {
+    const estado = $('[data-cursos-estado]')!;
+    try {
+      const quien = await acceso();
+      if (datos.modo === 'supabase' && !quien.sesion) return;
 
-      var elCurso = caja.querySelector('[data-retomar-curso]');
-      var elClase = caja.querySelector('[data-retomar-clase]');
-      var elMeta = caja.querySelector('[data-retomar-meta]');
-      if (elCurso) elCurso.textContent = cursoDestino.nombre;
-      if (elClase) elClase.textContent = destino.titulo;
+      $('[data-membresia]')!.hidden = !(quien.membresia || quien.admin || datos.modo === 'maqueta');
 
-      if (elMeta) {
-        var avance = A.de(destino.id);
-        var total = destino.duracion || avance.d;
-        if (avance.hecho) {
-          elMeta.textContent = etiquetaHecho + (total ? ' · ' + reloj(total) : '');
-        } else if (avance.s > 5) {
-          elMeta.textContent = reloj(avance.s) + (total ? ' / ' + reloj(total) : '');
-        } else {
-          elMeta.textContent = total ? reloj(total) : etiquetaSinEmpezar;
-        }
-      }
-
-      if (cta) {
-        var raiz = lang === 'es' ? '/aulavirtual/curso/' : '/en/classroom/course/';
-        cta.setAttribute('href', raiz + cursoDestino.slug + '/#' + destino.id);
-        var etq = cta.querySelector('.btn__label');
-        if (etq) etq.textContent = etiquetaContinuar;
-      }
+      const [cursos, avance] = await Promise.all([datos.misCursos(), datos.avance()]);
+      pintarCursos(cursos, avance, quien.admin);
+      pintarRetomar(cursos, avance);
+      estado.textContent = cursos.length ? '' : t.vacio;
+      estado.hidden = cursos.length > 0;
+      document.dispatchEvent(new CustomEvent('botones:nuevos'));
+    } catch (e) {
+      console.error('[escritorio]', e);
+      estado.textContent = t.error;
     }
-
-    function pintar() {
-      pintarCursos();
-      pintarRetomar();
-    }
-
-    pintar();
-    /* Volver con el botón de atrás no recarga la página en algunos navegadores,
-       y el avance puede haber cambiado en la pestaña del curso. */
-    window.addEventListener('pageshow', pintar);
-    document.addEventListener('aula:cambio', pintar);
   })();
 </script>
 
 <style>
-  /* --- El saludo --------------------------------------------------------- */
-  .saludo {
-    margin-bottom: clamp(28px, 4.5vw, 44px);
+  /* --- El titular ---------------------------------------------------------
+     La pantalla se llama como lo que es, en el tamaño de la portada de
+     Formaciones. Nada encima: ni saludo ni frase. */
+  .desk-head {
+    padding-top: var(--space-6);
   }
 
-  .saludo__h {
-    margin-top: 8px;
-    font-size: clamp(1.9rem, 5.2vw, 2.7rem);
-    font-weight: 700;
-    line-height: 1.08;
-    letter-spacing: -0.025em;
+  .desk-head__h {
+    max-width: 14ch;
   }
 
-  .saludo__lead {
-    margin-top: 8px;
-    max-width: 36rem;
-    color: var(--soft);
-    text-wrap: pretty;
+  .desk-sec {
+    margin-top: var(--space-8);
   }
 
-  /* --- Retomar ----------------------------------------------------------- */
-  .retomar,
-  .memb {
+  .desk-sec__h {
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .desk-estado {
+    margin-top: var(--space-3);
+  }
+
+  /* --- Sigue por donde ibas ------------------------------------------------
+     Un recuadro de tinta, como la ficha de precio de las cartas: es lo único
+     de la pantalla que hay que ver de un vistazo. */
+  .retomar {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
-    gap: 24px clamp(24px, 4vw, 48px);
+    gap: var(--space-3) var(--space-6);
+    padding: var(--space-4);
+    border: 1px solid var(--ink);
   }
 
-  .retomar__txt,
-  .memb__txt {
-    flex: 1 1 22rem;
-    min-width: 0;
-  }
-
-  .retomar__curso {
-    margin-top: 12px;
-    font-size: 0.86rem;
-    color: var(--soft);
-  }
-
-  .retomar__clase {
-    margin-top: 4px;
-    font-size: clamp(1.25rem, 3.4vw, 1.6rem);
-    font-weight: 600;
-    line-height: 1.2;
-    letter-spacing: -0.015em;
-    text-wrap: pretty;
-  }
-
-  .retomar__meta {
-    margin-top: 8px;
-    font-size: 0.85rem;
-  }
-
-  /* --- La membresía ------------------------------------------------------ */
-  .memb__h {
-    margin-top: 8px;
-    font-size: clamp(1.3rem, 3.4vw, 1.6rem);
-  }
-
-  .memb__away {
-    margin-top: 16px;
-    max-width: 34rem;
-    font-size: 0.8rem;
-    line-height: 1.55;
-    padding-top: 16px;
-    border-top: 1px solid var(--rule-soft);
-    text-wrap: pretty;
-  }
-
-  /* --- Mis cursos -------------------------------------------------------- */
-  .rejilla {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
-    gap: 16px;
-    margin: 16px 0 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .curso {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
-
-  .curso__pie {
-    margin-top: auto;
-    padding-top: 24px;
-  }
-
-  .curso__cifras {
-    margin-top: 8px;
-    font-size: 0.78rem;
-  }
-
-  /* --- La tienda --------------------------------------------------------- */
-  .tienda {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px 40px;
-    margin-top: clamp(48px, 8vw, 84px);
-    padding-top: clamp(32px, 5vw, 48px);
-    border-top: 1px solid var(--rule);
-  }
-
-  .tienda__txt {
+  .retomar__txt {
     flex: 1 1 24rem;
     min-width: 0;
   }
 
-  .tienda__h {
-    font-size: clamp(1.3rem, 3.6vw, 1.7rem);
-    font-weight: 600;
-    letter-spacing: -0.015em;
+  .retomar__curso {
+    margin-top: var(--space-3);
   }
 
-  .tienda__lista {
-    margin-top: 12px;
-    font-size: 0.8rem;
-    line-height: 1.7;
+  .retomar__clase {
+    margin-top: var(--space-1);
+    font-family: var(--font-display);
+    font-size: var(--text-anchor);
+    line-height: var(--leading-anchor);
+    letter-spacing: var(--tracking-section);
+    text-wrap: balance;
+  }
+
+  .retomar__meta {
+    margin-top: var(--space-1);
+    font-size: var(--text-small);
+  }
+
+  @media (max-width: 36rem) {
+    .retomar {
+      padding: var(--space-3);
+    }
+  }
+
+  /* --- Mis cursos ----------------------------------------------------------
+     Las fichas de Formaciones: foto enmarcada en blanco y negro que toma color
+     al pasar, la línea de datos y el nombre. Más la barra de avance. */
+  .fichas {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-6);
+    margin: var(--space-4) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (max-width: 62rem) {
+    .fichas {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 38rem) {
+    .fichas {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  :global(.ficha__link) {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-bottom: 0;
+    color: inherit;
+  }
+
+  :global(.ficha__media) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 3 / 2;
+    overflow: clip;
+    border: 1px solid var(--rule);
+  }
+
+  :global(.ficha__img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(1);
+    transition:
+      filter 0.5s var(--ease-reveal),
+      transform 0.5s var(--ease-reveal);
+  }
+
+  @media (hover: hover) {
+    :global(.ficha__link:hover .ficha__img) {
+      filter: grayscale(0);
+      transform: scale(1.04);
+    }
+  }
+
+  :global(.ficha__hueco) {
+    padding: var(--space-3);
+    color: var(--ink-soft);
+    text-align: center;
+  }
+
+  :global(.ficha__meta) {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+  }
+
+  :global(.ficha__meter) {
+    margin-top: var(--space-1);
+  }
+
+  :global(.ficha__nombre) {
+    display: block;
+    margin-top: var(--space-3);
+    font-family: var(--font-display);
+    font-size: var(--text-section);
+    line-height: var(--leading-section);
+    letter-spacing: var(--tracking-section);
+  }
+
+  :global(.ficha__resumen) {
+    display: block;
+    margin-top: var(--space-1);
+    font-size: var(--text-small);
+    line-height: 1.5;
     text-wrap: pretty;
+  }
+
+  :global(.ficha__estado) {
+    align-self: flex-start;
+    margin-top: var(--space-2);
+  }
+
+  /* --- La membresía -------------------------------------------------------- */
+  .memb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-3) var(--space-6);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--rule);
+  }
+
+  .memb__txt {
+    flex: 1 1 28rem;
+    min-width: 0;
+  }
+
+  .memb__h {
+    margin-top: var(--space-2);
+  }
+
+  .memb__lead {
+    margin-top: var(--space-1);
+    max-width: var(--measure);
+  }
+
+  .memb__fuera {
+    margin-top: var(--space-2);
+    max-width: var(--measure);
+    font-size: var(--text-small);
+    line-height: 1.5;
+  }
+
+  /* --- Formaciones -------------------------------------------------------- */
+  /* La regla va en un pseudoelemento y no en el borde: la caja lleva el
+     margen lateral de `.app-wrap`, y un borde saldría 24 px más ancho que la
+     columna por cada lado. */
+  .desk-tienda {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-3) var(--space-6);
+    padding-top: var(--space-6);
+  }
+
+  .desk-tienda::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: var(--space-3);
+    right: var(--space-3);
+    height: 1px;
+    background: var(--rule);
+  }
+
+  .desk-tienda__txt {
+    flex: 1 1 24rem;
+  }
+
+  .desk-tienda__txt p {
+    margin-top: var(--space-1);
   }
 </style>

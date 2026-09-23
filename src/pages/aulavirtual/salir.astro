@@ -16,8 +16,8 @@ const a = useAula(lang);
 <Acceso lang={lang} title={a('app.leave')} pathEs={salirPath('es')} pathEn={salirPath('en')}>
   <section class="salida" data-salir data-destino={puertaPath(lang)}>
     <p class="eyebrow">{a('app.leave')}</p>
-    <h1 class="salida__h">{a('signin.leaving')}</h1>
-    <p class="soft">{a('gate.wait')}</p>
+    <h1 class="puerta__h">{a('signin.leaving')}</h1>
+    <p class="puerta__lead">{a('gate.wait')}</p>
     <noscript>
       <p><a href={puertaPath(lang)}>{a('app.title')}</a></p>
     </noscript>
@@ -42,11 +42,3 @@ const a = useAula(lang);
     location.replace(destino);
   })();
 </script>
-
-<style>
-  .salida__h {
-    font-size: clamp(1.6rem, 3.6vw, 2.1rem);
-    letter-spacing: -0.02em;
-    margin: 0.4rem 0 0.5rem;
-  }
-</style>

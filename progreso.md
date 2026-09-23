@@ -4,7 +4,8 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 23 de septiembre de 2026, al cierre del día.
+**Última actualización:** 23 de septiembre de 2026, por la noche: el aula y el
+panel de Emi (ver **El aula y el panel de Emi, con la ropa del sitio**).
 
 > **🚧 LA CORTINA ESTÁ BAJADA desde el 23 sep 2026.** Quien entra a
 > `www.emilserios.com` —a cualquier dirección— ve solo la firma de Emi sobre
@@ -18,10 +19,13 @@ de cero debería poder seguir trabajando sin preguntar nada.
 > sube un cambio, se le deja el enlace directo para verlo** —a la página
 > exacta que cambió, en la vista previa de la rama, no «mira el PR»—. Adrián
 > no encontraba las vistas previas, y una vez estuvo mirando la de una rama
-> vieja buscando cambios que estaban en otra. Mientras se trabaje en la rama
-> `claude/youthful-meitner-21x8ys`, la raíz es siempre esta:
+> vieja buscando cambios que estaban en otra. **Desde la noche del 23 sep 2026
+> se trabaja en la rama `claude/epic-bardeen-k6zfn7`** (PR #51), y su raíz es:
 >
-> **https://emilse-rios-webv2-git-claude-y-2c57cd-adrians-projects-594b3131.vercel.app**
+> **https://emilse-rios-webv2-git-claude-e-21eb3e-adrians-projects-594b3131.vercel.app**
+>
+> La de antes, `claude/youthful-meitner-21x8ys`, era
+> `…-git-claude-y-2c57cd-…`: enseña `main` hasta el #50, sin el aula nueva.
 >
 > y se le añade la ruta: `/sobre-mi/`, `/en/products/`… Con otra rama, la
 > raíz cambia: sale en el comentario de **vercel[bot]** del PR, fila
@@ -30,6 +34,27 @@ de cero debería poder seguir trabajando sin preguntar nada.
 > par de minutos en construir después de cada push. Ver **La cortina → Cómo
 > se sigue viendo la web**.
 
+> **Para quien retome en una sesión nueva (noche del 23 sep 2026).** Esta
+> sesión abrió lo que la de la tarde dejó para después: **el aula con la ropa
+> del sitio, los cursos en la base de datos y el panel de Emi con Hoy,
+> Membresía y Cursos**. Rama `claude/epic-bardeen-k6zfn7`, **PR #51**. Todo en
+> **El aula y el panel de Emi, con la ropa del sitio**.
+>
+> **Lo que viene, en orden:**
+>
+> 1. **⚠️ Aplicar `supabase/migrations/0009_cursos.sql` en Supabase** (solo
+>    aditiva e idempotente), poner las variables de Supabase también en
+>    **Preview** en Vercel y `BUNNY_STREAM_API_KEY`. Sin la migración, la
+>    pestaña Cursos lo dice y no deja crear nada. Los cinco pasos, en esa
+>    sección → **Lo que hay que hacer fuera del código**.
+> 2. **Emi carga su primer curso desde el panel** y se mira con un video de
+>    verdad: el puente `player.js` que guarda el minuto sigue sin probarse
+>    contra uno.
+> 3. **Las pestañas que faltan**: Personas, Mensajes, Tienda y Cartas.
+> 4. Lo que seguía del relevo de la tarde (abajo): copies de Emi, la
+>    bienvenida de siete correos, Stripe y subir la cortina. **La membresía se
+>    muda la última**, con el dominio (Adrián, 23 sep 2026).
+>
 > **Para quien retome en una sesión nueva (cierre del 23 sep 2026).** Con la
 > cortina bajada se está terminando la web detrás. **Todo lo del día está en
 > `main`, probado y mergeado: del #42 al #49.** La rama
@@ -168,10 +193,11 @@ pagando sin recibir acceso.
 |---|---|
 | **Publicado** | Sí, en Vercel, y desde el 21 sep 2026 **en `www.emilserios.com`**. Despliega solo en cada merge a `main`. **Desde el 23 sep, tapado por la cortina** — ver **La cortina**. |
 | **Dominio** | **Resuelto a medias.** El sitio ya vive en `www.emilserios.com` y el DNS lo sirve Cloudflare. **Falta el push del registro** a una cuenta de Namecheap de Emi: hoy el dominio sigue siendo de Edu. Ver **El dominio, y Edu → Cómo quedó**. |
-| **Páginas** | Home, Sobre mí, Formaciones —hasta el 23 sep 2026 se llamó Productos—, **las cuatro cartas de venta** (membresía y tres cursos) y el Aula Virtual —acceso directo y aula por dentro—, en español e inglés. Más `/panel/`, la consola de Emi, solo en español. **Todo en el sistema del sitio salvo el aula por dentro**, que cambia de ropa más adelante. |
+| **Páginas** | Home, Sobre mí, Formaciones —hasta el 23 sep 2026 se llamó Productos—, **las cuatro cartas de venta** (membresía y tres cursos) y el Aula Virtual —acceso directo y aula por dentro—, en español e inglés. Más `/panel/`, la consola de Emi, solo en español. **Todo en el sistema del sitio**: el aula por dentro y el panel se vistieron el 23 sep 2026 por la noche. |
 | **Identidad** | El logo de Emi, vectorizado, en cabecera, pie, entrada y favicon. |
 | **Alcance** | Desde el 31 ago 2026 esto deja de ser solo el sitio: aquí van también el aula, la membresía y los cursos. Ver **La plataforma**. |
 | **Sesión** | **Conectada y probada el 22 sep 2026**: se entra de verdad, contra el **mismo Supabase de la academia**, y el candado pide **suscripción al día**. Las variables y las Redirect URLs ya están puestas. Falta `set_admin.sql`. Ver `docs/CONECTAR-EL-AULA.md`. |
+| **Cursos** | **En la base de datos desde el 23 sep 2026** (`supabase/migrations/0009_cursos.sql`, **pendiente de aplicar** en Supabase). Emi los arma sola desde `/panel/#cursos`; el aula los lee por consulta, con la RLS decidiendo. Ver **El aula y el panel de Emi**. |
 | **Cobro** | **Desde el 22 sep 2026 vive acá.** `/api/checkout` crea la sesión de Stripe, `/gracias/` recoge a quien pagó y `/api/claim-account` le crea la cuenta. El **webhook sigue en la academia**, y es correcto que siga: ver **La unión de las dos casas**. |
 | **Newsletter** | **Conectado desde el 22 sep 2026.** `/api/suscribir` da de alta en la lista real de Klaviyo (`SaE8Px`), con la API en su versión `2026-07-15`. `KLAVIYO_API_KEY` **puesta en Vercel el 23 sep 2026**, con los permisos Lists, Profiles y Subscriptions; **la prueba se hace al subir la cortina**, junto con la bienvenida de siete correos —ver **El newsletter, conectado → La primera prueba**—. La integración de WooCommerce de Klaviyo está muerta desde el 21 sep y **se apaga**: los cobros son de Stripe. |
 | **Lo que falta para lanzar** | **Las variables de Stripe en Vercel**, o el botón de comprar da un 500 (`KLAVIYO_API_KEY` ya está, 23 sep). Y **subir la cortina**, con la prueba del newsletter y la bienvenida de siete correos de Emi en el mismo momento. |
@@ -189,9 +215,10 @@ páginas** desde el 23 sep 2026: redirigen a la pantalla de acceso.
 Y el aula por dentro: `/aulavirtual/escritorio/` · `/aulavirtual/curso/<slug>/` ·
 `/en/classroom/desk/` · `/en/classroom/course/<slug>/`. Van con `noindex` y
 **desde el 20 sep 2026 piden sesión** — salvo si faltan las variables de
-Supabase, y entonces se dejan mirar y lo avisan en pantalla. **El contenido
-sigue siendo de muestra**: la maqueta ya tiene puerta, pero detrás no hay
-todavía ni un video de verdad. Las direcciones viejas —`…/panel/`— redirigen:
+Supabase, y entonces se dejan mirar y lo avisan en pantalla. **Desde el 23
+sep 2026 por la noche el contenido no va en la página**: llega de Supabase por
+consulta, y sin variables el aula enseña un curso de muestra que no es real.
+Los cursos que no están en el catálogo se abren en `/aulavirtual/curso/?c=<slug>`. Las direcciones viejas —`…/panel/`— redirigen:
 esa palabra quedó reservada para la consola de Emi.
 
 Y las de la puerta, nuevas del mismo día: `/aulavirtual/entrar/` ·
@@ -440,6 +467,223 @@ no tenía salida a `vercel.app`:
   vistas previas. No se sabe cuál tiene el dominio; el segundo parece un
   duplicado y conviene revisarlo —y borrarlo, si sobra— para no pagar dos
   builds ni confundir variables.
+
+---
+
+## El aula y el panel de Emi, con la ropa del sitio
+
+**23 de septiembre de 2026, por la noche.** Adrián abrió lo que se había dejado
+para después, en este orden:
+
+1. «Pásalo al estilo nuevo de la web, todo» — el aula entera.
+2. En el escritorio, «Mi escritorio» al comienzo y con más protagonismo;
+   fuera el «Hola, Ana» —«no tenemos cómo saber el nombre de la gente a
+   partir del mail»— y fuera «Esto es lo que tienes abierto ahora mismo».
+3. Armar el panel de Emi pestaña a pestaña: **Hoy** (el resumen), **Membresía**
+   («la que ya tenemos, tal cual, con el nuevo look & feel») y **Cursos**:
+   «Emi tiene que poder meter ahí sus cursos completos y armar como ella
+   quiera todo; es un Tutor LMS hecho por nosotros, mejorado al 1000 %».
+
+Dos aclaraciones suyas que ordenan el resto:
+
+- **La membresía se muda la última**, junto con la subida de la cortina y el
+  cambio a `emilserios.com`. Mientras tanto sigue viviendo en la academia; lo
+  que sí se hace ya es su pestaña del panel, porque escribe en la misma tabla.
+- **`emilse.art@gmail.com` se ignora**: fue una cuenta de prueba del panel de
+  la academia. El correo de Emi es `emilserios.bass@gmail.com`, el que ya
+  tiene `supabase/set_admin.sql`.
+
+### Lo que se ve
+
+**El aula entera va con el sistema del sitio**: el acceso, la contraseña
+nueva, salir, el puente, `/gracias/`, el escritorio y los cursos. Menú de
+cápsula, pie, Instrument Serif, Newsreader, IBM Plex Mono, reglas de 1 px y el
+botón de las notas (`Boton.astro`). Salen la crema, Hanken Grotesk,
+`aula.css`, `aula/Boton.astro` y `CabeceraSuelta.astro` (la copia suelta del
+menú que necesitaban las pantallas de acceso cuando no iban en `Base.astro`).
+`public/colors_and_type.css` —la hoja de la academia— queda en el repo **sin
+que nada la cargue**, como ya se hizo con la capa cálida.
+
+- **El escritorio** arranca con «Mi escritorio» en el tamaño de la portada de
+  Formaciones y nada encima. Debajo: **Sigue por donde ibas** (un recuadro de
+  tinta con la clase, el minuto y «Continuar»), **Mis cursos** (las fichas de
+  Formaciones —foto en blanco y negro que toma color al pasar— con su barra
+  de avance), **la membresía** solo si la tiene, y Formaciones.
+- **El curso**: la misma pantalla de la maqueta —una página por curso, la
+  clase en el `#`, el índice pegado a la izquierda, el hilo de dudas— con la
+  ropa nueva.
+- **Una barra del aula** debajo de la cápsula: dónde estás y Mi escritorio,
+  Membresía ↗, Formaciones, ← Volver al panel (solo Emi) y Salir. No flota: la
+  cápsula ya flota, y dos cosas fijas se pisan.
+- **El panel** no usa `Base.astro` —es una herramienta, con barra de pestañas
+  y sin cápsula—, pero lleva los mismos tokens, letras y botón
+  (`layouts/Panel.astro`).
+
+El botón del sitio ganó tres variantes para esto, en `base.css`:
+`.boton--solid` (la acción principal de una pantalla), `.boton--sm` y el
+apagado (`[disabled]`, sin relleno ni notas). Y su script salió de
+`Base.astro` a `src/scripts/botones.ts`, que arma los botones que nacen
+después de cargar la página cuando alguien lanza `botones:nuevos`.
+
+Pasó la auditoría del sitio (`scripts/audit.mjs`), con sesión, en el
+escritorio, el curso y las tres pestañas, a 1440 y a 390 px: nada fuera de la
+rejilla de 8 y ningún contraste por debajo de AA (salvo las notas musicales,
+que son la excepción ya aceptada).
+
+### Lo que cambió por dentro: los cursos viven en la base de datos
+
+**Es el cambio grande, y es el que cierra la capa B.** Hasta hoy el curso de
+muestra iba escrito en el HTML de la página (`src/data/cursos.ts`): cualquiera
+con la consola abierta lo leía entero, y por eso `progreso.md` decía que «el
+día que entre el curso de verdad, sin backend tiene que significar cerrado».
+Ahora:
+
+- **El contenido vive en Supabase** —el mismo proyecto de la academia— en seis
+  tablas nuevas: `courses`, `course_units`, `course_lessons`, `course_access`,
+  `course_progress` y `course_questions`, más un bucket **privado**,
+  `cursos`, para los materiales. Todo en
+  `supabase/migrations/0009_cursos.sql`.
+- **Llega a la pantalla por consulta, con la RLS decidiendo.** Una alumna
+  recibe solo lo publicado de los cursos que tiene; quien no lo tiene recibe
+  una lista vacía. Emi (admin) lo ve todo, borradores incluidos, con su
+  aviso. El portero del aula pasó a ser solo la puerta de la casa: forzarlo
+  enseña un escritorio vacío.
+- **El avance y las dudas se guardan en la base de datos**, atados a la
+  persona, y ya no en el navegador: siguen ahí al cambiar de equipo. Es lo
+  que `window.Aula` prometía desde el 11 sep; `window.Aula` desapareció y en su
+  sitio está `src/lib/aula-datos.ts`, con la misma idea —las pantallas no
+  saben qué hay detrás— y dos modos:
+  - **supabase**, el de verdad;
+  - **maqueta**, cuando faltan las variables (en local, o en una vista previa
+    sin ellas): enseña el curso de muestra de `cursos.ts` y guarda en el
+    navegador. **No enseña nada real**: lo real solo existe en la base de datos.
+- **Quién entra al aula**: Emi siempre; el resto, con la membresía al día
+  **o con algún curso** (antes, solo con la membresía). Si la comprobación
+  falla, se deja pasar —lo de dentro llega por consulta, así que pasar de más
+  enseña un escritorio vacío, no un curso—.
+- **Los materiales son privados.** El aula no enlaza el fichero: pide un
+  enlace firmado que caduca en una hora, y Supabase solo lo da si la persona
+  tiene el curso. La ruta es `<curso>/<clase>/<fichero>` y la política lee la
+  primera carpeta.
+- **Los videos**: el normalizador de la academia, traído tal cual
+  (`src/lib/video.ts`), el mismo que Emi usa cada jueves. Acepta la URL, el
+  «Embed», el GUID o el `<iframe>`, y sabe la biblioteca de siempre
+  (`741634`) aunque no esté `PUBLIC_BUNNY_LIBRARY`. Si una clase no tiene
+  video en inglés, el aula en inglés pone el español y lo dice.
+
+**Una página por curso del catálogo, y una genérica.** El sitio es estático:
+las páginas `/aulavirtual/curso/<slug>/` salen del catálogo de Formaciones en
+el build. Un curso que Emi cree con un slug que el catálogo no tiene se abre en
+`/aulavirtual/curso/?c=<slug>` hasta que tenga ficha (`cursoLibrePath()` en
+`src/i18n/aula.ts`). Se descartó una página de servidor para esto porque la
+cortina solo tapa páginas del build: una de servidor se habría quedado
+destapada en producción.
+
+### El panel
+
+`/panel/` es una página con una pestaña por componente
+(`src/components/panel/`), que se hablan solo por `src/lib/panel.ts`. Cada una
+arranca la primera vez que se abre. La dirección dice dónde se está:
+`#hoy`, `#membresia`, `#cursos`, `#cursos/<curso>/<clase>`.
+
+| Pestaña | Qué hace |
+|---|---|
+| **Hoy** | La portada. Cuatro cifras —miembros activas (por Stripe y a mano), cuentas nuevas del mes, preguntas sin responder (foro + cursos) y cursos publicados—, la membresía esta semana (en vivo, lo próximo, el concepto base) con **un aviso si el jueves llega sin nada programado**, los cursos con sus clases sin video y sus alumnas, y las últimas cuentas. Se relee cada vez que se vuelve a ella. **No enseña dinero**: la verdad del dinero es Stripe, y hay un enlace. |
+| **Membresía** | La pestaña Ejercicios de la academia **tal cual**: los tres destinos (semana, concepto base, bonus), ES y EN lado a lado, el mismo normalizador de video, el PDF al bucket `pdfs`, las fechas por defecto de jueves a jueves y «Publicar ahora». **Escribe en la misma tabla que lee el aula de la academia**, así que lo que Emi publique desde acá lo ven las miembros allá en el acto. Se puede usar ya. Añade una sola cosa: al editar, dice si ya hay PDF y deja verlo. |
+| **Cursos** | El constructor. Ver abajo. |
+| **Tienda · Cartas · Personas · Mensajes** | Anunciadas, con un punto en la barra: cada una dice qué va a hacer y dónde se hace eso mientras tanto (Personas y Mensajes, en el panel de la academia). |
+
+**La pestaña Cursos**, que es lo que Adrián llamó «un Tutor LMS mejorado»:
+
+- **Crear un curso** eligiendo su ficha de Formaciones (rellena el nombre y el
+  slug) u «Otro». Nace **en borrador** y con un bloque puesto.
+- **Bloques y clases** con el nombre que Emi quiera («Nivel 1», «Antes de
+  tocar una nota»…): añadir, renombrar (ES y EN), borrar, y **ordenar
+  arrastrando** o con las flechas. Una clase se mueve de un bloque a otro
+  arrastrándola o con las flechas en el borde del bloque. El orden se guarda
+  de una vez con `course_reorder()`, en una transacción.
+- **Cada clase**: título y texto en ES y EN lado a lado, **un video por
+  idioma** con «Probar el video» sin salir, duración, **materiales** (archivos
+  al bucket privado o enlaces, para ES, EN o los dos) y su propio **borrador**:
+  una clase en borrador no la ve nadie aunque el curso esté publicado.
+  Guardar es un botón —y Cmd/Ctrl + S—, con aviso si se sale con cambios sin
+  guardar: Emi escribe los dos idiomas a la vez y un guardado a medias
+  publicaría media clase. **Duplicar** y **borrar** también.
+- **Elegir de Bunny**: en vez de pegar el «Embed», Emi elige el video de una
+  lista de su biblioteca —con título, duración y colección— y la duración se
+  pone sola. Y **«+ Desde Bunny»** debajo de un bloque crea de golpe una clase
+  por cada video que marque. Necesita `BUNNY_STREAM_API_KEY` en Vercel (ver
+  abajo); sin ella, lo dice y se pega a mano como siempre. La lista la da
+  `/api/panel/bunny`, una ruta de servidor que empieza por
+  `adminDeLaPeticion()`: la clave de Bunny borra videos y no puede ir al
+  navegador.
+- **Publicar el curso** avisa si hay clases publicadas sin video.
+- **Ver en el aula ↗** abre el curso como lo ve una alumna (Emi ve también los
+  borradores, marcados).
+- **Datos del curso**: nombre, la línea «de qué va» del escritorio y el slug,
+  con aviso si se cambia (cambia la dirección). Y borrar el curso, escribiendo
+  su slug para confirmar.
+- **Alumnas**: quién tiene el curso, desde cuándo y por dónde va (clases
+  vistas, última vez), y **dar o quitar acceso a mano** por correo. La persona
+  tiene que tener cuenta; crearla desde el panel llega con Personas.
+
+**Las clases nuevas nacen con el inglés vacío**, no con «New class»: en el
+aula en inglés un título vacío se lee en español, que es mejor que un
+marcador. Y nacen publicadas si el curso está en borrador (se verán al
+publicarlo) y en borrador si el curso ya está publicado, para que a las
+alumnas no les aparezca una clase a medio escribir.
+
+### Lo que hay que hacer fuera del código
+
+En este orden. **Sin el paso 1, la pestaña Cursos lo dice y no deja crear
+nada**; el aula sigue funcionando para la membresía.
+
+1. **Pegar `supabase/migrations/0009_cursos.sql` en Supabase → SQL Editor**,
+   una vez. **Es solo aditiva**: tablas nuevas, sus reglas y el bucket
+   `cursos`; no toca ni una fila ni una regla de la membresía que está
+   cobrando. Es idempotente: pegarla dos veces no rompe nada.
+2. **`supabase/set_admin.sql`**, si Emi o Adrián todavía no son admin. Antes,
+   que cada uno haya entrado una vez por `/aulavirtual/entrar/`.
+3. **Las variables de Supabase también en «Preview»** en Vercel, si se quiere
+   usar el panel en la vista previa (con la cortina bajada es el único sitio
+   donde se ve). Sin ellas, la vista previa enseña el aula en modo maqueta y
+   el panel dice «Sin conectar».
+4. **`BUNNY_STREAM_API_KEY`** en Vercel —Production y Preview—: Bunny →
+   Stream → la biblioteca → API → *API Key*. Solo para «Elegir de Bunny» y
+   «+ Desde Bunny». Opcional: **`BUNNY_CDN_HOST`** (`vz-xxxx.b-cdn.net`, en la
+   misma pantalla) para que la lista enseñe miniaturas.
+5. **En Bunny, añadir el dominio de la vista previa y `emilserios.com` a los
+   *allowed referrers*** de la biblioteca, si están restringidos, o los videos
+   no se ven aunque el enlace esté bien.
+
+### Cómo se probó
+
+Sin tocar la base de datos de verdad. En la sesión se levantó **un Supabase de
+juguete**: Postgres 16 con las ocho migraciones reales de la academia más la
+0009, PostgREST encima y una pasarela mínima que imita `/auth/v1` (entrar con
+contraseña) y `/storage/v1`. Sobre eso:
+
+- **La migración**, aplicada dos veces seguidas: idempotente.
+- **Las reglas**, con tres personas: Ana (con dos cursos, uno en borrador) ve
+  solo lo publicado de lo suyo y solo su avance; no puede contestarse, darse
+  acceso, editar un curso ni reordenar. Luis (sin nada) y un anónimo no ven
+  nada. Emi lo ve y lo toca todo.
+- **El recorrido entero en Chromium**: Emi entra, publica un ejercicio desde
+  Membresía, crea «Todo el diapasón», añade clases con video, texto, un PDF y
+  un enlace, renombra un bloque, mueve clases con las flechas y arrastrando,
+  duplica y borra, publica el curso y le da acceso a Ana. Ana entra, ve el
+  curso en su escritorio, abre el PDF con su enlace firmado (200), marca una
+  clase, pregunta, y el escritorio le propone la siguiente. En inglés, los
+  títulos vacíos salen en español. Luis se queda en el portón y no entra al
+  panel. «Hoy» cuenta la pregunta nueva y el curso publicado. En teléfono, sin
+  desbordes. **Cero errores en la consola.**
+- **Tipos**: `astro check` sin errores ni avisos en todo lo nuevo. (Hay uno
+  anterior en `productos/[producto].astro`, una comparación `'es' === 'en'`;
+  no se tocó.)
+
+⚠️ **Lo que no se pudo probar desde la sesión**: la API de Bunny (sin clave),
+un video de verdad —así que **el puente `player.js` que guarda el minuto sigue
+sin probar contra un video real**— y el Supabase de producción.
 
 ---
 
@@ -2539,6 +2783,10 @@ correos en el cliente es una cortina, no una puerta.
 El perfil se crea solo la primera vez que cada uno entra por la pantalla de
 acceso. O sea: **primero entran los dos una vez, después se ejecuta el script.**
 
+**`emilse.art@gmail.com` no es de Emi** (Adrián, 23 sep 2026): fue una cuenta
+de prueba cuando probaban el panel de la academia. Se ignora; el correo bueno
+es el que ya tiene el script.
+
 #### Las pestañas
 
 ```
@@ -3157,8 +3405,6 @@ src/
                          curso-vibrato .jpg, las fotos de los cursos
   components/
     Header.astro                   Cabecera: la firma centrada y el menú
-    CabeceraSuelta.astro           La misma cabecera, para las páginas que
-                                   no van en Base.astro: el acceso al aula
     CartaVenta.astro               Las cartas de venta: la membresía y los
                                    cursos, con el sistema del sitio
     Boton.astro                    El botón del sitio: relleno, imán, notas
@@ -3169,9 +3415,16 @@ src/
     Backdrop.astro                 El contrabajo tras el cristal (solo Home)
     Home.astro · About.astro       Los bloques de cada página
     Catalogo.astro                 La rejilla de productos de la tienda
-    aula/Escritorio.astro          El escritorio: retomar, membresía, mis cursos
-    aula/Curso.astro               El reproductor: índice, clase, hilo de dudas
-    aula/Boton.astro               El botón de la carta (relleno + flecha + notas)
+    aula/Escritorio.astro          El escritorio: retomar, mis cursos, membresía
+    aula/Curso.astro               El reproductor: índice, clase, hilo de dudas.
+                                   Lee el curso de Supabase; nada va en el HTML
+    acceso/                        Entrar, contraseña nueva, puente, gracias
+    panel/Consola.astro            El panel: portero, barra de pestañas
+    panel/Hoy.astro                La portada del panel: cifras y avisos
+    panel/Membresia.astro          Los ejercicios de la membresía (la de la
+                                   academia, tal cual, con la ropa nueva)
+    panel/Cursos.astro             El constructor de cursos (el marcado)
+    panel/Proximamente.astro       Tienda, Cartas, Personas, Mensajes
     EmailArchive.astro             Fichas del newsletter + <dialog>. Desde el
                                    21 sep 2026 NO SE USA en ninguna página:
                                    el copy nuevo de la Home se lleva por
@@ -3190,8 +3443,8 @@ src/
   data/aula.ts           El catálogo: los productos y sus cartas (es / en)
   data/cartas.ts         Las cartas de venta: membresía y cursos (es / en)
                          — la FACHADA, lo que se vende
-  data/cursos.ts         Unidades, clases y videos de Bunny — lo que se COMPRA.
-                         Se ata a data/aula.ts por el slug
+  data/cursos.ts         SOLO el curso de muestra de la maqueta. Los de verdad
+                         viven en Supabase desde el 23 sep 2026
   data/cortina.ts        Los textos de la cortina (es / en)
   lib/cortina.ts         La llave de la cortina: CORTINA_BAJADA, y cuándo baja
   middleware.ts          Pone la cortina: reescribe cada página en el build y
@@ -3211,9 +3464,20 @@ src/
   i18n/ui.ts             Cadenas de interfaz + mapa de rutas
   i18n/aula.ts           Las cadenas y las rutas del aula, aparte: afuera se
                          habla de comprar y adentro de estudiar
-  layouts/Base.astro     <head>, cabecera, pie, revelado de frases-ancla
-  layouts/Aula.astro     El marco del aula: barra, pie, y `window.Aula` —el
-                         almacén del progreso, maqueta de la base de datos
+  layouts/Base.astro     <head>, cabecera, pie, revelado de frases-ancla.
+                         `noindex` para el aula
+  layouts/Aula.astro     El aula dentro de Base.astro: la barra del aula y el
+                         portón (¿sesión?, ¿membresía o algún curso?)
+  layouts/Acceso.astro   Las pantallas de la puerta, dentro de Base.astro
+  layouts/Panel.astro    El documento del panel: tokens y letras del sitio,
+                         sin cápsula ni pie
+  lib/aula-datos.ts      Los datos del aula (cursos, avance, dudas): Supabase
+                         o la maqueta, con la misma forma
+  lib/aula-acceso.ts     Quién entra, preguntado una vez por página
+  lib/panel.ts           Lo que comparten las pestañas del panel
+  lib/video.ts           El normalizador de Bunny, traído de la academia
+  scripts/botones.ts     El movimiento del botón (relleno, imán, notas)
+  scripts/panel-cursos.ts  La lógica del constructor de cursos
   pages/                 index · sobre-mi · en/index · en/about
                          cortina (lo que tapa todo mientras está bajada)
                          productos/index · productos/[producto]
@@ -3223,19 +3487,23 @@ src/
                          en/products/estudiemos-juntos
                          aulavirtual/index · en/classroom/index
                          aulavirtual/escritorio · aulavirtual/curso/[curso]
+                         aulavirtual/curso/index (?c=, cursos sin ficha)
                          en/classroom/desk · en/classroom/course/[curso]
+                         panel/index (la consola de Emi)
+                         api/panel/bunny (la biblioteca de Bunny, solo admin)
                          gracias · en/thank-you (después de pagar)
                          aulavirtual/pasar · en/classroom/handoff (el puente)
                          api/checkout · api/claim-account (el cobro, servidor)
                          api/suscribir (el alta al newsletter, servidor)
   styles/tokens.css      Los tokens del sistema
   styles/base.css        Reset y primitivas compartidas
-  styles/aula.css        El sistema del aula: la crema de la membresía. Todo
-                         cuelga de `html.aula` — ver la enmienda del 11 sep
+  styles/app.css         Las piezas de aplicación del aula y el panel
+                         (formularios, avisos, estados, barras), con los
+                         tokens del sitio. Reemplazó a aula.css el 23 sep
 public/logo.svg          La firma vectorizada. La usa Logo.astro de máscara
 public/favicon.svg       La E del logo. Se adapta al tema del navegador
-public/colors_and_type.css  Tipografías y tokens de la academia. Los piden la
-                         carta trasplantada y el aula; el resto del sitio no
+public/colors_and_type.css  Tipografías y tokens de la academia. Desde el
+                         23 sep 2026 no lo carga nada: se guarda sin enchufar
 public/img/              foto.jpg, logo_emi_alpha.png y los dos cursores de
                          clave de fa: los recursos de esa carta
 public/emi-city.jpg      El respaldo del onerror de la foto
@@ -3250,6 +3518,9 @@ docs/CONECTAR-KLAVIYO.md  Lo que hay que hacer FUERA del código para que el
 docs/CONECTAR-EL-AULA.md  Lo que hay que hacer FUERA del código para que el
                          aula pida sesión y suscripción: las tres variables,
                          las Redirect URLs y el orden de los admins
+supabase/migrations/0009_cursos.sql  Los cursos: seis tablas, sus reglas y
+                         el bucket privado «cursos». Sigue la numeración de la
+                         academia (0001–0008). Solo aditiva e idempotente
 supabase/set_admin.sql   Quién es admin. NO crea nada: el esquema ya existe en
                          el Supabase de la academia. Se ejecuta DESPUÉS de que
                          cada admin haya entrado una vez
@@ -4203,13 +4474,20 @@ enseñárselo.
 - [x] **Pasar los videos de Vimeo a Bunny Stream.** Hecho por Emi; confirmado el
       19 sep 2026. La migración está terminada.
 
-- [ ] **El identificador de la biblioteca de Bunny.** Va a Vercel como
-      `PUBLIC_BUNNY_LIBRARY`, y cada clase estrena su `bunny` —el GUID del
-      video— en `src/data/cursos.ts`. Sin él, todas las clases se ven como marco
-      vacío, que es lo que hay hoy aunque los videos ya existan. **Y hay que
-      añadir `emilserios.com` a los *allowed referrers* de la biblioteca**, o los
-      embeds se bloquean aunque el código esté bien: es la misma trampa que ya
-      tiene anotada Vimeo.
+- [ ] **⚠️ Aplicar `supabase/migrations/0009_cursos.sql`** en Supabase → SQL
+      Editor. Sin ella la pestaña Cursos del panel lo dice y no deja crear
+      nada. Solo aditiva e idempotente. Ver **El aula y el panel de Emi → Lo
+      que hay que hacer fuera del código**, que tiene los cinco pasos.
+
+- [ ] **`BUNNY_STREAM_API_KEY` en Vercel**, para «Elegir de Bunny» y «+ Desde
+      Bunny» en el panel. Sin ella se pega el «Embed» a mano, como en la
+      academia.
+
+- [x] **El identificador de la biblioteca de Bunny.** Resuelto el 23 sep 2026:
+      el normalizador de la academia (`src/lib/video.ts`) sabe la biblioteca de
+      siempre, `741634`, y cada clase guarda la URL entera del reproductor.
+      Sigue en pie lo de **añadir `emilserios.com` (y la vista previa) a los
+      *allowed referrers* de la biblioteca**, si están restringidos.
 
 - [ ] **Opcional: el script que genera la estructura del curso desde la API de
       Bunny.** Lista los videos de la biblioteca con GUID, título, duración y
@@ -4251,14 +4529,14 @@ enseñárselo.
       `venta` y `proximamente`; hacen falta cuatro. La tabla está en **El panel
       de Emi**.
 
-- [ ] **Sacar el progreso del navegador.** Hoy vive en `localStorage`, que es de
-      un equipo y se va con los datos del sitio. El día que haya sesión, el
-      avance y las preguntas se mudan al servidor. Está preparado: todo pasa por
-      `window.Aula` en `src/layouts/Aula.astro`, y las formas guardadas ya son
-      las filas de las tablas futuras. **Ese día se cambia ese bloque y nada
-      más.**
+- [x] **Sacar el progreso del navegador.** Hecho el 23 sep 2026: el avance
+      y las dudas viven en `course_progress` y `course_questions`, atados a la
+      persona. `window.Aula` se fue; su sitio es `src/lib/aula-datos.ts`.
 
-- [ ] **El otro lado del hilo: el panel de Emi y los correos.** Una pregunta sin
+- [ ] **El otro lado del hilo: el panel de Emi y los correos.** Desde el 23
+      sep 2026 las dudas ya se guardan en `course_questions` y «Hoy» las
+      cuenta; **falta la pestaña Mensajes**, donde Emi las lee y responde, y los
+      correos. Una pregunta sin
       respuesta no es una función, es un buzón roto. Hacen falta las dos
       direcciones —aviso a Emi cuando entra una duda, aviso a la alumna cuando
       Emi contesta— y la pantalla donde Emi las lee y responde. Sigue en pie lo
@@ -4275,13 +4553,12 @@ enseñárselo.
       convierte el deslogueo forzoso en un clic. Vive en el repo de la
       membresía, no en este, y solo sirve mientras el dominio viejo esté vivo.
 
-- [ ] **Las tipografías del aula vienen de Google Fonts.** `colors_and_type.css`
-      las trae con un `@import` remoto, igual que en la carta trasplantada,
-      mientras el resto del sitio las sirve desde `src/assets/fonts/`. Funciona,
-      pero es una petición bloqueante a un tercero en la pantalla donde la
-      alumna pasa más tiempo — y un fallo de red la deja con la tipografía del
-      sistema. Cuando toque, Hanken Grotesk se descarga y se sirve desde acá
-      como las otras tres.
+- [x] **Las tipografías del aula venían de Google Fonts.** Resuelto el 23 sep
+      2026 de rebote: el aula ya no carga `colors_and_type.css` y usa las tres
+      familias del sitio, servidas desde casa.
+
+- [ ] **Probar el puente `player.js` contra un video de verdad** (sigue abajo,
+      más detallado): es lo que guarda el minuto solo.
 
 ### Contenido que falta (de Emi)
 
@@ -4295,9 +4572,9 @@ enseñárselo.
       PR #43:
       - **El video de un minuto** salió porque no está en el copy nuevo. Si lo
         quiere, hay que decir dónde va.
-      - **Dentro del aula, el enlace a la tienda sigue diciendo «Tienda»**
-        (`app.store` y `desk.storeCta` en `src/i18n/aula.ts`). ¿Pasa a
-        «Formaciones»?
+      - ~~**Dentro del aula, el enlace a la tienda sigue diciendo «Tienda»**~~
+        Resuelto de rebote el 23 sep 2026: al vestir el aula con el sistema
+        del sitio, sus enlaces a la tienda dicen «Formaciones», como el menú.
       - **El testimonio de Sergio dice «Esta buenisimo»**, sin tildes: está
         tal cual lo pegó Emi. Corregirlo es una línea.
       - **Al de Laura en inglés se le quitó el «Yes,»** del principio para que
@@ -4381,12 +4658,20 @@ enseñárselo.
 
 ### Próximos PRs
 
-- [ ] **Vestir el aula con el sistema del sitio.** Lo mismo que se hizo con
-      las cartas el 23 sep 2026: letra, papel, rejilla de 8, el menú y el pie
-      del sitio y `Boton.astro`, en el escritorio, las páginas de curso y el
-      reproductor. Adrián lo confirmó y **lo dejó para después**: primero
-      todas las páginas públicas, y el aula viene con sesiones pesadas. No se
-      empieza sin que él lo abra.
+- [x] **Vestir el aula con el sistema del sitio.** Hecho el 23 sep 2026 por la
+      noche, con el panel y los cursos en la base de datos. Ver **El aula y el
+      panel de Emi, con la ropa del sitio**.
+
+- [ ] **Las cuatro pestañas que faltan del panel**: **Personas** (miembros y
+      quién tiene qué curso, altas manuales —la de la academia hace esto con
+      `/api/admin/add-member`, que habrá que traer—), **Mensajes** (el foro de
+      la membresía y los hilos de los cursos, con respuesta en video y audio, y
+      los correos), **Tienda** (los cuatro estados, el precio y la foto de cada
+      ficha, en base de datos) y **Cartas** (el editor por bloques).
+
+- [ ] **Vender los cursos de verdad**: un `/api/checkout` que sepa de cursos y
+      que el pago escriba en `course_access` (`source = 'stripe'`). La tabla y
+      las reglas ya están.
 
 - [ ] **Mudar el webhook de Stripe, y con él el correo de bienvenida.** Es la
       segunda mitad de **La unión de las dos casas**, y **tiene un orden que no
@@ -4443,8 +4728,10 @@ enseñárselo.
       aditivo: la academia sigue igual. **Sin esto, el aula queda en modo
       maqueta** y lo dice en pantalla.
 
-- [ ] **Cerrar la puerta del modo maqueta antes de que entre el curso de
-      verdad.** Hoy, si faltan las variables de Supabase, el aula se deja mirar
+- [x] **Cerrar la puerta del modo maqueta antes de que entre el curso de
+      verdad.** Hecho el 23 sep 2026: el contenido ya no va en la página, llega
+      por consulta con la RLS decidiendo. Sin variables, el aula enseña solo el
+      curso de muestra, que no es real. Lo de abajo queda como constancia. Hoy, si faltan las variables de Supabase, el aula se deja mirar
       sin sesión — y está bien, porque el contenido es de muestra y va escrito
       en el HTML, así que el portero no esconde nada que no se vea igual con la
       consola abierta. **El día que entre el curso real eso se invierte:** «sin
@@ -4460,7 +4747,8 @@ enseñárselo.
       pruebas, y no se despierta sin decidirlo.
 
 - [ ] **Traer las tres pestañas del panel de la academia** —Membresía, Miembros
-      y Foro— cada una en su componente. El armazón de `/panel/` ya está y las
+      y Foro— cada una en su componente. **Membresía, hecha el 23 sep 2026**;
+      Miembros y Foro van en Personas y Mensajes. El armazón de `/panel/` ya está y las
       anuncia apagadas.
 
 - [x] **Aula Virtual, la fachada.** Hecho el 31 ago 2026: el catálogo con los

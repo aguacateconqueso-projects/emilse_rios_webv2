@@ -19,6 +19,7 @@ import type { Lang } from '../../i18n/ui';
 import { routePath } from '../../i18n/ui';
 import { useAula, clavePath, escritorioPath } from '../../i18n/aula';
 import { isSupabaseConfigured } from '../../lib/supabase';
+import Boton from '../Boton.astro';
 
 interface Props {
   lang: Lang;
@@ -37,8 +38,8 @@ const a = useAula(lang);
   data-t-noemail={a('signin.noEmail')}
 >
   <p class="eyebrow">{a('signin.eyebrow')}</p>
-  <h1 class="entrar__h">{a('signin.title')}</h1>
-  <p class="soft entrar__lead">{a('signin.lead')}</p>
+  <h1 class="puerta__h">{a('signin.title')}</h1>
+  <p class="puerta__lead">{a('signin.lead')}</p>
 
   {
     !isSupabaseConfigured && (
@@ -69,10 +70,7 @@ const a = useAula(lang);
 
     <p class="error" data-error hidden></p>
 
-    <button class="btn btn--solid" type="submit" data-enviar>
-      <span class="btn__fill" aria-hidden="true"></span>
-      <span class="btn__label">{a('signin.go')}</span>
-    </button>
+    <Boton class="boton--solid" type="submit" data-enviar>{a('signin.go')}</Boton>
   </form>
 
   <hr class="hr" />
@@ -87,10 +85,7 @@ const a = useAula(lang);
       </label>
       <p class="error" data-error-clave hidden></p>
       <p class="ok" data-ok-clave hidden>{a('signin.sent')}</p>
-      <button class="btn" type="submit" data-enviar-clave>
-        <span class="btn__fill" aria-hidden="true"></span>
-        <span class="btn__label">{a('signin.send')}</span>
-      </button>
+      <Boton type="submit" data-enviar-clave>{a('signin.send')}</Boton>
     </form>
   </details>
 
@@ -211,106 +206,24 @@ const a = useAula(lang);
 </script>
 
 <style>
-  .entrar__h {
-    font-size: clamp(1.9rem, 4.4vw, 2.6rem);
-    letter-spacing: -0.025em;
-    line-height: 1.05;
-    margin: 0.4rem 0 0.5rem;
-  }
-
-  .entrar__lead {
-    margin: 0 0 clamp(24px, 4vh, 36px);
-  }
-
-  .aviso {
-    border: 1px solid var(--rule);
-    background: var(--surface);
-    padding: 14px 16px;
-    font-size: 0.92rem;
-    margin: 0 0 clamp(24px, 4vh, 36px);
-  }
-
-  .campos {
-    display: grid;
-    gap: 18px;
-    justify-items: stretch;
-  }
-
-  .campo {
-    display: grid;
-    gap: 7px;
-  }
-
-  .campo__t {
-    font-size: 0.92rem;
-    font-weight: 600;
-  }
-
-  .campo__ayuda {
-    display: block;
-    font-size: 0.84rem;
-    font-weight: 400;
-    line-height: 1.45;
-    margin-top: 2px;
-  }
-
-  .campo input {
-    font: inherit;
-    color: var(--ink);
-    background: var(--paper);
-    border: 1px solid var(--rule);
-    padding: 12px 14px;
-    width: 100%;
-    transition: border-color var(--fast) var(--ease);
-  }
-
-  .campo input:focus {
-    outline: none;
-    border-color: var(--ink);
-  }
-
-  .casilla {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 10px;
-    align-items: start;
-    font-size: 0.94rem;
-    cursor: pointer;
-  }
-
-  .casilla input {
-    margin-top: 0.28em;
-    accent-color: var(--ink);
-  }
-
-  .error,
-  .ok {
-    margin: 0;
-    font-size: 0.92rem;
-    font-weight: 600;
-  }
-
-  .error {
-    color: var(--accent-strong);
-  }
-
-  .campos .btn {
-    justify-self: start;
-  }
-
+  /* Los campos, el aviso y los errores son del marco (`styles/app.css`); acá
+     solo lo que es de esta pantalla. */
   .olvido summary {
     cursor: pointer;
-    font-weight: 600;
-    font-size: 0.96rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-mono);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
   }
 
   .olvido__lead {
-    margin: 12px 0 20px;
-    font-size: 0.94rem;
+    margin: var(--space-2) 0 var(--space-3);
+    font-size: var(--text-small);
+    line-height: 1.5;
   }
 
   .entrar__tienda {
-    margin-top: clamp(28px, 5vh, 40px);
-    font-size: 0.94rem;
+    margin-top: var(--space-6);
+    font-size: var(--text-small);
   }
 </style>

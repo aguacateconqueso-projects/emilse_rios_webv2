@@ -1,0 +1,552 @@
+---
+/**
+ * Pestaña Hoy — la portada del panel.
+ *
+ * Lo que Emi tiene que saber al entrar, en una pantalla y sin tocar nada:
+ *
+ *   · cuatro cifras: miembros activas, altas del mes, preguntas sin responder
+ *     y cursos publicados
+ *   · la membresía esta semana: qué está en vivo, cuándo cierra y qué viene —
+ *     y un aviso si el jueves llega sin nada programado
+ *   · sus cursos: publicados o en borrador, cuántas clases, cuántas sin video
+ *     y cuántas alumnas tiene cada uno
+ *   · las últimas cuentas que se crearon
+ *
+ * **Solo lee.** Cada bloque lleva a la pestaña donde se hace el trabajo.
+ *
+ * Lo que **no** enseña, a propósito: dinero. La verdad del dinero es Stripe,
+ * y un panel que calcula ventas por su cuenta es un panel que hay que
+ * reconciliar a mano cada mes. Hay un enlace a Stripe y nada más.
+ */
+---
+
+<div class="app-wrap hoy" data-hoy>
+  <header class="hoy__cab">
+    <p class="eyebrow" data-hoy-fecha></p>
+    <h1 class="app-h1 hoy__h">Hoy</h1>
+  </header>
+
+  {/* --- Las cuatro cifras ---------------------------------------------- */}
+  <dl class="cifras" data-cifras>
+    <div class="cifra">
+      <dt class="eyebrow">Miembros activas</dt>
+      <dd class="cifra__v" data-c="activas">—</dd>
+      <dd class="cifra__s soft" data-c="activas-s"></dd>
+    </div>
+    <div class="cifra">
+      <dt class="eyebrow">Cuentas nuevas este mes</dt>
+      <dd class="cifra__v" data-c="altas">—</dd>
+      <dd class="cifra__s soft" data-c="altas-s"></dd>
+    </div>
+    <div class="cifra">
+      <dt class="eyebrow">Preguntas sin responder</dt>
+      <dd class="cifra__v" data-c="preguntas">—</dd>
+      <dd class="cifra__s soft" data-c="preguntas-s"></dd>
+    </div>
+    <div class="cifra">
+      <dt class="eyebrow">Cursos publicados</dt>
+      <dd class="cifra__v" data-c="cursos">—</dd>
+      <dd class="cifra__s soft" data-c="cursos-s"></dd>
+    </div>
+  </dl>
+
+  {/* --- La membresía esta semana ---------------------------------------- */}
+  <section class="bloque" aria-labelledby="hoy-memb">
+    <div class="bloque__cab">
+      <h2 class="app-h2" id="hoy-memb">La membresía esta semana</h2>
+      <div class="bloque__actos" data-hoy-memb-actos></div>
+    </div>
+    <p class="aviso bloque__alerta" data-hoy-alerta hidden></p>
+    <div class="semanas" data-hoy-memb></div>
+  </section>
+
+  {/* --- Los cursos -------------------------------------------------------- */}
+  <section class="bloque" aria-labelledby="hoy-cursos">
+    <div class="bloque__cab">
+      <h2 class="app-h2" id="hoy-cursos">Tus cursos</h2>
+      <div class="bloque__actos" data-hoy-cursos-actos></div>
+    </div>
+    <ul class="lista" role="list" data-hoy-cursos>
+      <li class="soft lista__vacio">Cargando…</li>
+    </ul>
+  </section>
+
+  {/* --- Las últimas altas ------------------------------------------------- */}
+  <section class="bloque" aria-labelledby="hoy-altas">
+    <div class="bloque__cab">
+      <h2 class="app-h2" id="hoy-altas">Las últimas cuentas</h2>
+    </div>
+    <ul class="lista" role="list" data-hoy-altas>
+      <li class="soft lista__vacio">Cargando…</li>
+    </ul>
+    <p class="hoy__stripe">
+      <a class="mono" href="https://dashboard.stripe.com/payments" rel="noopener">Las ventas, en Stripe ↗</a>
+    </p>
+  </section>
+</div>
+
+<script>
+  import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+  import { alAbrir, armarBotones, boton, el, fecha, fechaHora, hace, ir } from '../../lib/panel';
+
+  const raiz = document.querySelector<HTMLElement>('[data-hoy]')!;
+  const $ = <T extends HTMLElement = HTMLElement>(s: string) => raiz.querySelector<T>(s)!;
+  const cifra = (k: string, v: string) => ($(`[data-c="${k}"]`).textContent = v);
+  const n = (x: number) => x.toLocaleString('es-ES');
+
+  $('[data-hoy-fecha]').textContent = new Date().toLocaleDateString('es-ES', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  });
+
+  /* Los atajos, hechos una vez. */
+  const nuevoEj = boton('Nuevo ejercicio', { chico: true });
+  nuevoEj.addEventListener('click', () => ir('membresia', 'nuevo'));
+  const aMemb = el('a', { class: 'mono', href: '#membresia', text: 'Ir a Membresía' });
+  $('[data-hoy-memb-actos]').append(nuevoEj, aMemb);
+
+  const nuevoCurso = boton('Nuevo curso', { chico: true });
+  nuevoCurso.addEventListener('click', () => ir('cursos', 'nuevo'));
+  const aCursos = el('a', { class: 'mono', href: '#cursos', text: 'Ir a Cursos' });
+  $('[data-hoy-cursos-actos]').append(nuevoCurso, aCursos);
+  armarBotones();
+
+  const activa = (s: { status: string; current_period_end: string | null }) =>
+    s.status === 'active' && (!s.current_period_end || Date.parse(s.current_period_end) > Date.now());
+
+  /* --- Membresía: miembros y altas ---------------------------------------- */
+  async function personas() {
+    const inicioMes = new Date();
+    inicioMes.setDate(1);
+    inicioMes.setHours(0, 0, 0, 0);
+
+    const [subs, altas, ultimas] = await Promise.all([
+      supabase.from('subscriptions').select('user_id, status, current_period_end, stripe_subscription_id'),
+      supabase
+        .from('profiles')
+        .select('id', { count: 'exact', head: true })
+        .gte('created_at', inicioMes.toISOString()),
+      supabase
+        .from('profiles')
+        .select('email, full_name, role, created_at')
+        .order('created_at', { ascending: false })
+        .limit(6),
+    ]);
+
+    if (subs.error) {
+      cifra('activas-s', 'No se pudo leer.');
+    } else {
+      const vivas = (subs.data ?? []).filter(activa);
+      const personasActivas = new Set(vivas.map((s) => s.user_id));
+      const aMano = new Set(
+        vivas.filter((s) => String(s.stripe_subscription_id ?? '').startsWith('manual_')).map((s) => s.user_id),
+      );
+      cifra('activas', n(personasActivas.size));
+      cifra('activas-s', `${n(personasActivas.size - aMano.size)} por Stripe · ${n(aMano.size)} a mano`);
+    }
+
+    cifra('altas', altas.error ? '—' : n(altas.count ?? 0));
+    cifra('altas-s', `Desde el ${fecha(inicioMes.toISOString())}`);
+
+    const ul = $('[data-hoy-altas]');
+    ul.textContent = '';
+    if (ultimas.error) {
+      ul.append(el('li', { class: 'lista__vacio', text: `No se pudo leer: ${ultimas.error.message}` }));
+      return;
+    }
+    (ultimas.data ?? []).forEach((p) =>
+      ul.append(
+        el(
+          'li',
+          { class: 'lista__i' },
+          el(
+            'div',
+            { class: 'lista__txt' },
+            el('p', { class: 'lista__t', text: p.full_name || p.email || '(sin nombre)' }),
+            p.full_name ? el('p', { class: 'mono-plain soft', text: p.email ?? '' }) : null,
+          ),
+          p.role === 'admin' ? el('span', { class: 'estado estado--tinta', text: 'Admin' }) : el('span'),
+          el('span', { class: 'mono soft', text: hace(p.created_at) }),
+        ),
+      ),
+    );
+    if (!ul.children.length) ul.append(el('li', { class: 'lista__vacio soft', text: 'Todavía no hay cuentas.' }));
+  }
+
+  /* --- La membresía esta semana ----------------------------------------- */
+  async function semana() {
+    const { data, error } = await supabase
+      .from('exercises')
+      .select('id, kind, title_es, week_label, publish_at, unpublish_at')
+      .order('publish_at', { ascending: true });
+    const caja = $('[data-hoy-memb]');
+    caja.textContent = '';
+    if (error) {
+      caja.append(el('p', { text: `No se pudo leer: ${error.message}` }));
+      return null;
+    }
+    const ahora = Date.now();
+    const vivo = (e: any) =>
+      Date.parse(e.publish_at) <= ahora && (e.kind === 'bonus' || Date.parse(e.unpublish_at) > ahora);
+    const todos = data ?? [];
+    const semanaViva = todos.filter((e) => (e.kind ?? 'semana') === 'semana' && vivo(e)).pop();
+    const baseViva = todos.filter((e) => e.kind === 'base' && vivo(e)).pop();
+    const proxima = todos.find((e) => (e.kind ?? 'semana') === 'semana' && Date.parse(e.publish_at) > ahora);
+
+    const caja1 = (etiqueta: string, titulo: string, meta: string, viva: boolean) =>
+      el(
+        'div',
+        { class: viva ? 'semanas__c semanas__c--vivo' : 'semanas__c' },
+        el('p', { class: 'mono', text: etiqueta }),
+        el('p', { class: 'semanas__t', text: titulo }),
+        el('p', { class: 'semanas__m', text: meta }),
+      );
+
+    caja.append(
+      semanaViva
+        ? caja1('Ejercicio en vivo', semanaViva.title_es, `Se cierra el ${fechaHora(semanaViva.unpublish_at)}`, true)
+        : caja1('Ejercicio en vivo', 'Ninguno', 'Esta semana no hay ejercicio publicado.', false),
+      proxima
+        ? caja1('Próximo', proxima.title_es, `Se publica el ${fechaHora(proxima.publish_at)}`, false)
+        : caja1('Próximo', 'Nada programado', 'Todavía no hay ejercicio para la semana que viene.', false),
+      baseViva
+        ? caja1('Concepto base', baseViva.title_es, `Hasta el ${fecha(baseViva.unpublish_at)}`, false)
+        : caja1('Concepto base', 'Ninguno', 'No hay concepto base en vivo.', false),
+    );
+
+    /* El aviso que de verdad sirve: el jueves llega y no hay nada preparado.
+       Salta a tres días del cierre del ejercicio en vivo. */
+    const alerta = $('[data-hoy-alerta]');
+    const cierra = semanaViva ? Date.parse(semanaViva.unpublish_at) : null;
+    if (!proxima && (!semanaViva || (cierra && cierra - ahora < 3 * 86400000))) {
+      alerta.textContent = semanaViva
+        ? `El ejercicio de esta semana se cierra el ${fechaHora(semanaViva.unpublish_at)} y no hay otro programado.`
+        : 'Las miembros no tienen ejercicio esta semana y no hay ninguno programado.';
+      alerta.hidden = false;
+    } else alerta.hidden = true;
+  }
+
+  /* --- Preguntas sin responder ------------------------------------------- */
+  async function preguntas() {
+    const [foro, cursos] = await Promise.all([
+      supabase
+        .from('questions')
+        .select('id, answers(id), exercises(publish_at, unpublish_at, kind)'),
+      supabase.from('course_questions').select('id', { count: 'exact', head: true }).is('answered_at', null),
+    ]);
+    const ahora = Date.now();
+    const delForo = (foro.data ?? []).filter((q: any) => {
+      const e = q.exercises;
+      const vivo = e && Date.parse(e.publish_at) <= ahora && (e.kind === 'bonus' || Date.parse(e.unpublish_at) > ahora);
+      return vivo && (!q.answers || q.answers.length === 0);
+    }).length;
+    const deCursos = cursos.error ? 0 : cursos.count ?? 0;
+    cifra('preguntas', foro.error ? '—' : n(delForo + deCursos));
+    cifra(
+      'preguntas-s',
+      cursos.error
+        ? `${n(delForo)} del foro · cursos sin conectar`
+        : `${n(delForo)} del foro · ${n(deCursos)} de cursos`,
+    );
+  }
+
+  /* --- Los cursos ---------------------------------------------------------- */
+  async function cursos() {
+    const [c, acc] = await Promise.all([
+      supabase
+        .from('courses')
+        .select('id, slug, title_es, published, position, course_lessons(id, video_es, video_en, published)')
+        .order('position'),
+      supabase.from('course_access').select('course_id'),
+    ]);
+    const ul = $('[data-hoy-cursos]');
+    ul.textContent = '';
+    if (c.error) {
+      /* Lo más probable: la migración de los cursos todavía no se aplicó. */
+      const falta = /does not exist|schema cache|Could not find/i.test(c.error.message);
+      ul.append(
+        el('li', {
+          class: 'lista__vacio',
+          text: falta
+            ? 'La base de datos todavía no tiene las tablas de los cursos: falta aplicar supabase/migrations/0009_cursos.sql.'
+            : `No se pudo leer: ${c.error.message}`,
+        }),
+      );
+      cifra('cursos', '—');
+      return;
+    }
+    const lista = c.data ?? [];
+    const alumnas = new Map<string, number>();
+    (acc.data ?? []).forEach((a) => alumnas.set(a.course_id, (alumnas.get(a.course_id) ?? 0) + 1));
+    const publicados = lista.filter((x) => x.published).length;
+    const totalClases = lista.reduce((s, x) => s + (x.course_lessons?.length ?? 0), 0);
+    cifra('cursos', lista.length ? `${n(publicados)} de ${n(lista.length)}` : '0');
+    cifra('cursos-s', `${n(totalClases)} clases en total`);
+
+    if (!lista.length) {
+      ul.append(el('li', { class: 'lista__vacio soft', text: 'Todavía no hay cursos. Crea el primero con «Nuevo curso».' }));
+      return;
+    }
+    lista.forEach((x) => {
+      const clases = x.course_lessons ?? [];
+      const sinVideo = clases.filter((l) => !l.video_es && !l.video_en).length;
+      const borrador = clases.filter((l) => !l.published).length;
+      const meta = [`${n(clases.length)} clases`];
+      if (sinVideo) meta.push(`${n(sinVideo)} sin video`);
+      if (borrador) meta.push(`${n(borrador)} en borrador`);
+      meta.push(`${n(alumnas.get(x.id) ?? 0)} alumnas`);
+      ul.append(
+        el(
+          'li',
+          { class: 'lista__i' },
+          el(
+            'div',
+            { class: 'lista__txt' },
+            el('a', { class: 'lista__t lista__enlace', href: `#cursos/${x.id}`, text: x.title_es || x.slug }),
+            el('p', { class: 'mono soft', text: meta.join(' · ') }),
+          ),
+          el('span', {
+            class: x.published ? 'estado estado--vivo' : 'estado',
+            text: x.published ? 'Publicado' : 'Borrador',
+          }),
+          el('a', { class: 'mono', href: `#cursos/${x.id}`, text: 'Editar' }),
+        ),
+      );
+    });
+  }
+
+  async function cargar() {
+    await Promise.all([
+      personas().catch((e) => console.error('[hoy] personas', e)),
+      semana().catch((e) => console.error('[hoy] semana', e)),
+      preguntas().catch((e) => console.error('[hoy] preguntas', e)),
+      cursos().catch((e) => console.error('[hoy] cursos', e)),
+    ]);
+  }
+
+  let abierta = false;
+  alAbrir('hoy', async () => {
+    if (!isSupabaseConfigured) {
+      ['activas', 'altas', 'preguntas', 'cursos'].forEach((k) => cifra(`${k}-s`, 'Sin conectar'));
+      $('[data-hoy-cursos]').textContent = '';
+      $('[data-hoy-altas]').textContent = '';
+      return;
+    }
+    abierta = true;
+    await cargar();
+  });
+
+  /* Cada vez que se vuelve a «Hoy» se relee: es la portada, y tiene que decir
+     lo de ahora —la pregunta que acaba de entrar, el curso que se acaba de
+     publicar—, no lo de cuando se abrió el panel. Son cinco consultas pequeñas. */
+  document.addEventListener('panel:pestana', (e) => {
+    if ((e as CustomEvent).detail === 'hoy' && abierta) void cargar();
+  });
+</script>
+
+<style>
+  .hoy {
+    padding-top: var(--space-6);
+  }
+
+  .hoy__h {
+    margin-top: var(--space-2);
+  }
+
+  /* --- Las cifras -----------------------------------------------------------
+     Cuatro números sueltos, no un gráfico: cada uno es una sola cantidad y el
+     número ES la gráfica. Separados por reglas de 1 px, sin cajas. La cifra en
+     la letra de los titulares del sitio, con sus números de siempre (no
+     tabulares: a este tamaño bailarían sueltos). */
+  .cifras {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin: var(--space-6) 0 0;
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .cifra {
+    padding: var(--space-3) var(--space-3) var(--space-3) 0;
+  }
+
+  .cifra + .cifra {
+    padding-left: var(--space-3);
+    border-left: 1px solid var(--rule);
+  }
+
+  .cifra dd {
+    margin: 0;
+  }
+
+  .cifra__v {
+    margin-top: var(--space-1);
+    font-family: var(--font-display);
+    font-size: var(--text-anchor);
+    line-height: 1;
+  }
+
+  .cifra__s {
+    margin-top: var(--space-1);
+    font-size: 0.9375rem;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 56rem) {
+    .cifras {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .cifra:nth-child(3) {
+      padding-left: 0;
+      border-left: 0;
+      border-top: 1px solid var(--rule);
+    }
+
+    .cifra:nth-child(4) {
+      border-top: 1px solid var(--rule);
+    }
+  }
+
+  /* --- Los bloques ----------------------------------------------------------- */
+  .bloque {
+    margin-top: var(--space-8);
+  }
+
+  .bloque__cab {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .bloque__actos {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .bloque__actos :global(a) {
+    border-bottom: 0;
+    color: var(--ink-soft);
+  }
+
+  .bloque__actos :global(a:hover) {
+    color: var(--ink);
+  }
+
+  .bloque__alerta {
+    margin-top: var(--space-3);
+    border-color: var(--ink);
+    border-left-width: 2px;
+  }
+
+  .semanas {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
+
+  @media (max-width: 56rem) {
+    .semanas {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .semanas :global(.semanas__c) {
+    padding: var(--space-3);
+    border: 1px solid var(--rule);
+  }
+
+  .semanas :global(.semanas__c--vivo) {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+
+  .semanas :global(.semanas__t) {
+    margin-top: var(--space-1);
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    line-height: 1.2;
+  }
+
+  .semanas :global(.semanas__m) {
+    margin-top: var(--space-1);
+    font-size: 0.9375rem;
+    line-height: 1.4;
+    color: var(--ink-soft);
+  }
+
+  .semanas :global(.semanas__c--vivo .semanas__m) {
+    color: var(--paper-soft);
+  }
+
+  /* --- Las listas --------------------------------------------------------- */
+  .lista {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .lista :global(.lista__i) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: var(--space-1) var(--space-3);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .lista :global(.lista__t) {
+    font-family: var(--font-display);
+    font-size: 1.375rem;
+    line-height: 1.25;
+  }
+
+  .lista :global(.lista__enlace) {
+    border-bottom: 0;
+  }
+
+  .lista :global(.lista__enlace:hover) {
+    border-bottom: 1px solid currentColor;
+  }
+
+  .lista :global(.lista__txt .mono),
+  .lista :global(.lista__txt .mono-plain) {
+    margin-top: var(--space-1);
+  }
+
+  .lista :global(.lista__i > a.mono) {
+    border-bottom: 0;
+    color: var(--ink-soft);
+  }
+
+  .lista :global(.lista__vacio) {
+    padding: var(--space-3) 0;
+  }
+
+  .hoy__stripe {
+    margin-top: var(--space-3);
+  }
+
+  .hoy__stripe a {
+    border-bottom: 0;
+    color: var(--ink-soft);
+  }
+
+  @media (max-width: 40rem) {
+    .lista :global(.lista__i) {
+      grid-template-columns: 1fr auto;
+    }
+
+    .lista :global(.lista__i > :last-child) {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

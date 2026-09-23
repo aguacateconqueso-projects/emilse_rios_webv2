@@ -1,0 +1,456 @@
+/* ==========================================================================
+   El aula y el panel — las piezas de aplicación, con la ropa del sitio.
+
+   Desde el 23 sep 2026 el aula (acceso, escritorio, cursos), `/gracias/` y el
+   panel de Emi se visten igual que la Home, *Sobre mí*, Formaciones y las
+   cartas: papel y tinta, Instrument Serif, Newsreader, IBM Plex Mono, reglas
+   de 1 px, sin radios y sin sombras. Lo pidió Adrián —«pásalo al estilo nuevo
+   de la web, todo»— después de que las cartas dejaran la ropa de la academia.
+   Hasta ese día esto era `aula.css`, con la crema, la tinta cálida y Hanken
+   Grotesk traídas de la academia.
+
+   Los tokens y las primitivas vienen de `tokens.css` y `base.css`; acá está lo
+   que solo tiene una aplicación: formularios, avisos, barras de avance, filas
+   de una lista, estados. **Nada de colores nuevos**: todo sale de la tinta y
+   del papel. La única excepción del sitio siguen siendo las notas musicales de
+   los botones.
+   ========================================================================== */
+
+/* `hidden` tiene que ganarle a cualquier `display` que se le ponga a una caja.
+   El atributo lo aplica la hoja del navegador con un selector de elemento, así
+   que una sola clase con `display: flex` lo pisa y deja a la vista algo que el
+   script dio por escondido. Pasó en el aula de antes con los pasos de
+   anterior/siguiente. */
+[hidden] {
+  display: none !important;
+}
+
+/* --- Anchos ---------------------------------------------------------------- */
+.app-wrap {
+  max-width: var(--width-full);
+  margin-inline: auto;
+  padding-inline: var(--space-3);
+}
+
+.app-wrap--text {
+  max-width: calc(var(--measure) + 2 * var(--space-3));
+}
+
+/* --- Tipografía ------------------------------------------------------------ */
+
+/* La etiqueta de sección: la mono del sitio, en tinta secundaria. */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono);
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+/* El titular de una pantalla: el de la portada de Formaciones. */
+.app-h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--text-hero);
+  line-height: var(--leading-hero);
+  letter-spacing: var(--tracking-hero);
+  text-wrap: balance;
+}
+
+/* El de una pantalla de paso (entrar, poner la contraseña): más corto. */
+.app-h1--sm {
+  font-size: var(--text-anchor);
+  line-height: var(--leading-anchor);
+}
+
+.app-h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--text-section);
+  line-height: var(--leading-section);
+  letter-spacing: var(--tracking-section);
+  text-wrap: pretty;
+}
+
+.app-lead {
+  max-width: var(--measure);
+  color: var(--ink-soft);
+  text-wrap: pretty;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Reglas ---------------------------------------------------------------- */
+.hr {
+  height: 1px;
+  border: 0;
+  margin: var(--space-8) 0;
+  background: var(--rule);
+}
+
+/* --- Avisos ---------------------------------------------------------------- */
+.aviso {
+  border: 1px solid var(--rule);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-small);
+  line-height: 1.5;
+}
+
+.aviso b {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono);
+  font-weight: 400;
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+}
+
+.error,
+.ok {
+  margin: 0;
+  font-size: var(--text-small);
+  line-height: 1.5;
+}
+
+/* Sin rojo: el sistema no tiene color de acento. El error se distingue por la
+   regla de tinta a la izquierda y por decirlo claro. */
+.error {
+  padding-left: var(--space-2);
+  border-left: 2px solid var(--ink);
+}
+
+.ok {
+  color: var(--ink-soft);
+}
+
+/* --- Formularios ----------------------------------------------------------- */
+.campos {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: stretch;
+}
+
+.campos > .boton {
+  justify-self: start;
+}
+
+.campo {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.campo__t {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono);
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+.campo__ayuda {
+  display: block;
+  font-size: 0.9375rem; /* 15 px */
+  line-height: 1.45;
+  color: var(--ink-soft);
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--font-body);
+}
+
+.campo input,
+.campo textarea,
+.campo select {
+  width: 100%;
+  padding: var(--space-1) var(--space-2);
+  font: inherit;
+  font-size: var(--text-small);
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  transition: border-color 0.2s var(--ease-reveal);
+}
+
+.campo textarea {
+  min-height: 7.5rem;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.campo input:focus,
+.campo textarea:focus,
+.campo select:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+
+.campo input[type='file'] {
+  padding: var(--space-1);
+  font-size: 0.9375rem;
+}
+
+.casilla {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-1);
+  align-items: start;
+  font-size: var(--text-small);
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.casilla input {
+  position: relative;
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  /* Centrada con la primera línea (24 px) sin salirse de la rejilla: el
+     desplazamiento no es un margen, así que no cuenta como espaciado. */
+  top: 0.25rem;
+  accent-color: var(--ink);
+}
+
+/* Un botón que es texto: «cancelar», «borrar» y compañía, que no compiten con
+   la acción principal. Mono y subrayado con la regla de los enlaces. */
+.btn-text {
+  padding: 0;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: var(--text-mono);
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  line-height: 1.4;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s var(--ease-reveal);
+}
+
+.btn-text:hover {
+  border-bottom-color: currentColor;
+}
+
+.btn-text[disabled] {
+  color: var(--ink-soft);
+  cursor: default;
+}
+
+/* --- Estados: la etiqueta de «en vivo», «borrador», «programado» ---------- */
+.estado {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0 var(--space-1);
+  border: 1px solid var(--rule);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem; /* 11 px */
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  /* 22 px de línea más las dos reglas: 24, en la rejilla. */
+  line-height: 2;
+  white-space: nowrap;
+  color: var(--ink-soft);
+}
+
+/* En vivo, publicado: invertido. Es lo que hay que ver de un vistazo. */
+.estado--vivo {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.estado--tinta {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+/* --- Barra de avance ------------------------------------------------------
+   Una regla de 2 px que se llena de tinta. Sin color: el progreso es un dato,
+   no una alarma. */
+.meter {
+  position: relative;
+  height: 2px;
+  background: var(--rule);
+  overflow: hidden;
+}
+
+.meter__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--pct, 0%);
+  background: var(--ink);
+  transition: width 0.6s var(--ease-reveal);
+}
+
+/* --- El portón: lo que tapa una pantalla mientras se comprueba el acceso --- */
+.porton {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  display: grid;
+  place-items: center;
+  padding: var(--space-3);
+  background: var(--paper);
+}
+
+.porton__caja {
+  max-width: 32rem;
+  text-align: center;
+}
+
+.porton__logo {
+  width: 8.5rem;
+  height: auto;
+  margin: 0 auto var(--space-4);
+}
+
+.porton__h {
+  margin-top: var(--space-2);
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--text-section);
+  line-height: var(--leading-section);
+  text-wrap: balance;
+}
+
+.porton__p {
+  margin-top: var(--space-2);
+  color: var(--ink-soft);
+  font-size: var(--text-small);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.porton__actos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+/* --- El aviso flotante de «guardado» ------------------------------------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: var(--space-3);
+  z-index: 300;
+  max-width: calc(100vw - 2 * var(--space-3));
+  padding: var(--space-1) var(--space-3);
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-mono);
+  font-size: var(--text-mono);
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  line-height: 1.8;
+  transform: translate(-50%, var(--space-2));
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.25s var(--ease-reveal),
+    transform 0.25s var(--ease-reveal);
+}
+
+.toast.is-on {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* --- Diálogos ---------------------------------------------------------------
+   Sin sombra y sin esquinas: una caja de papel con su regla de tinta sobre un
+   velo de papel. */
+.dialogo {
+  width: min(36rem, calc(100vw - 2 * var(--space-3)));
+  max-height: calc(100vh - 2 * var(--space-3));
+  padding: 0;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.dialogo::backdrop {
+  background: rgba(250, 250, 248, 0.82);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.dialogo__cuerpo {
+  padding: var(--space-4);
+}
+
+.dialogo__pie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+@media (max-width: 36rem) {
+  .dialogo__cuerpo {
+    padding: var(--space-3);
+  }
+}
+
+/* ==========================================================================
+   Piezas de formulario del panel
+   ========================================================================== */
+
+/* Un control de segmentos: la regla de 1 px y el seleccionado en tinta. Lo
+   usan los filtros y los selectores de «destino» o de estado. */
+.segmento {
+  display: inline-flex;
+  flex-wrap: wrap;
+  border: 1px solid var(--ink);
+}
+
+.segmento__b {
+  padding: var(--space-1) var(--space-2);
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.segmento__b + .segmento__b {
+  border-left: 1px solid var(--ink);
+}
+
+.segmento__b[aria-selected='true'],
+.segmento__b[aria-checked='true'],
+.segmento__b[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* Dos columnas: español a la izquierda, inglés a la derecha. Es la forma del
+   formulario de la academia, que Emi ya conoce, y se conserva a propósito. */
+.dos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3) var(--space-4);
+}
+
+.idioma {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--rule);
+}
+
+.idioma__tag {
+  padding: 0 var(--space-1);
+}
+
+@media (max-width: 48rem) {
+  .dos {
+    grid-template-columns: 1fr;
+  }
+}

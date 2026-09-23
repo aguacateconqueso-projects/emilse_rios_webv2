@@ -1,26 +1,25 @@
 ---
 /**
- * El marco de las pantallas de la puerta: entrar y poner la contraseña.
+ * El marco de las pantallas de la puerta: entrar, poner la contraseña, salir,
+ * el puente desde la academia y `/gracias/`.
  *
- * Lleva la ropa del aula —la crema, Hanken Grotesk, los botones con relleno—
- * porque quien está acá viene entrando al aula, pero **no lleva su barra**: esa
- * barra tiene enlaces al escritorio, a la membresía y a la tienda, y todavía no
- * se sabe quién es esta persona. Una barra que ofrece «Mi escritorio» a alguien
- * que no ha entrado promete algo que al pulsarlo rebota.
+ * **Desde el 23 sep 2026 va dentro de `Base.astro`**, con el menú, el pie, la
+ * letra y el papel del resto del sitio —«pásalo al estilo nuevo de la web,
+ * todo»—. Hasta ese día llevaba la ropa de la academia (crema, Hanken
+ * Grotesk) y una copia suelta de la cápsula del menú (`CabeceraSuelta.astro`,
+ * que se borró con esto: ya no hace falta, esta página carga el sitio entero).
  *
- * **Lo que sí lleva, desde el 23 sep 2026, es el menú del sitio**, la misma
- * cápsula de todas las páginas públicas (`CabeceraSuelta.astro`). Ese día
- * «Aula virtual» pasó a traer directo acá, y sin menú esta pantalla era un
- * callejón: solo el logo llevaba de vuelta.
+ * **No lleva la barra del aula**, y es a propósito: esa barra ofrece «Mi
+ * escritorio» y «Salir», y todavía no se sabe quién es esta persona. Una barra
+ * que promete lo que al pulsarlo rebota no ayuda.
  *
  * Va con `noindex`: un formulario de acceso no tiene nada que hacer en un
  * buscador.
  */
-import { Font } from 'astro:assets';
-import { type Lang, routePath, useTranslations } from '../i18n/ui';
+import Base from './Base.astro';
+import type { Lang } from '../i18n/ui';
 import { useAula } from '../i18n/aula';
-import CabeceraSuelta from '../components/CabeceraSuelta.astro';
-import '../styles/aula.css';
+import '../styles/app.css';
 
 interface Props {
   lang: Lang;
@@ -32,82 +31,48 @@ interface Props {
 
 const { lang, title, pathEs, pathEn } = Astro.props;
 const a = useAula(lang);
-const t = useTranslations(lang);
-const otro: Lang = lang === 'es' ? 'en' : 'es';
-const otroHref = otro === 'es' ? pathEs : pathEn;
 ---
 
-<!doctype html>
-<html lang={lang} class="aula">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="robots" content="noindex, nofollow" />
-    <title>{title} · {a('app.title')}</title>
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    {/* La base de la academia: de acá salen --font-body y --font-display, que
-        `aula.css` da por hechas. Sin esta línea el aula sale con la tipografía
-        del sistema. Ver el pendiente de servirlas desde casa. */}
-    <link rel="stylesheet" href="/colors_and_type.css" />
-    {/* La mono del sitio, para el menú. Después de la base de la academia: las
-        dos definen `--font-mono`, y el aula no la usa. */}
-    <Font cssVariable="--font-mono" />
-    <link rel="alternate" hreflang="es" href={pathEs} />
-    <link rel="alternate" hreflang="en" href={pathEn} />
-  </head>
-
-  <body class="aula__body puerta__body">
-    <CabeceraSuelta lang={lang} route="aula" hrefEs={pathEs} hrefEn={pathEn} />
-
-    <main class="puerta" id="main">
-      <div class="wrap wrap--narrow">
-        <a class="puerta__logo" href={routePath('home', lang)} aria-label="Emilse Ríos">
-          <img src="/logo.svg" alt="Emilse Ríos" width="1631" height="487" />
-        </a>
-
-        <slot />
-
-        {/*
-          El primer enlace llevaba a la portada del aula, que desde el 23 sep
-          2026 es esta misma pantalla. Ahora lleva al inicio del sitio.
-        */}
-        <p class="puerta__pie">
-          <a href={routePath('home', lang)}>{t('nav.start')}</a>
-          <span aria-hidden="true">·</span>
-          <a href={otroHref} hreflang={otro} lang={otro}>{otro === 'en' ? 'English' : 'Español'}</a>
-        </p>
-      </div>
-    </main>
-  </body>
-</html>
+<Base
+  lang={lang}
+  title={`${title} · ${a('app.title')}`}
+  description={a('app.title')}
+  route="aula"
+  pathEs={pathEs}
+  pathEn={pathEn}
+  noindex
+>
+  <div class="puerta app-wrap app-wrap--text">
+    <slot />
+  </div>
+</Base>
 
 <style>
-  /* Arriba, 76 px más: los de la cápsula del menú, que flota fija. */
+  /* La columna de lectura del sitio, con aire arriba: la cápsula del menú ya
+     está en el `padding` del `<main>` de `Base.astro`. */
   .puerta {
-    min-height: 100svh;
-    display: grid;
-    place-items: center;
-    padding: calc(76px + clamp(32px, 7vh, 72px)) 0 clamp(32px, 7vh, 72px);
+    padding-top: var(--space-6);
   }
 
-  .puerta__logo {
-    display: block;
-    width: 148px;
-    margin: 0 auto clamp(28px, 5vh, 44px);
+  /* Las piezas que comparten las cinco pantallas. Viven acá y no en cada una
+     porque son de este marco: el titular, la entradilla y el aviso. */
+  .puerta :global(.puerta__h) {
+    margin-top: var(--space-2);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--text-anchor);
+    line-height: var(--leading-anchor);
+    letter-spacing: var(--tracking-section);
+    text-wrap: balance;
   }
 
-  .puerta__logo img {
-    width: 100%;
-    height: auto;
+  .puerta :global(.puerta__lead) {
+    margin: var(--space-2) 0 var(--space-4);
+    color: var(--ink-soft);
+    text-wrap: pretty;
   }
 
-  .puerta__pie {
-    margin-top: clamp(28px, 5vh, 44px);
-    text-align: center;
-    font-size: 0.9rem;
-    color: var(--soft);
-    display: flex;
-    gap: 0.6em;
-    justify-content: center;
+  .puerta :global(.aviso) {
+    margin-bottom: var(--space-4);
   }
 </style>
