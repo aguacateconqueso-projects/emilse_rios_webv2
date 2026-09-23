@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { suscribir } from '../../lib/klaviyo';
+import { hayProveedor, suscribir } from '../../lib/klaviyo';
 
 /**
  * El alta al newsletter. Es a donde manda el campo «Acá te suscribes».
@@ -42,6 +42,21 @@ const MAX_EMAIL = 254;
  * confirmación, el propio dueño del buzón. Esto solo para los errores de dedo.
  */
 const PARECE_CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * La comprobación: abrir `/api/suscribir` en el navegador dice si **este
+ * despliegue** tiene la clave. `{"proveedor":true}` o `false`, y nada más —
+ * ni la clave, ni la lista, ni la cuenta—.
+ *
+ * Existe desde el 23 sep 2026. Hasta entonces la comprobación era buscar
+ * `data-endpoint` en el código fuente de la página, y eso dejó de servir el
+ * mismo día, cuando el formulario pasó a llamar siempre al servidor. Esto es
+ * más directo: contesta la función que da el alta, no el HTML del build.
+ *
+ * No toca Klaviyo: que la clave exista no dice que tenga los tres permisos.
+ * Eso lo dice el alta de prueba — ver `docs/CONECTAR-KLAVIYO.md`.
+ */
+export const GET: APIRoute = () => json({ proveedor: hayProveedor });
 
 export const POST: APIRoute = async ({ request }) => {
   let cuerpo: any = {};
