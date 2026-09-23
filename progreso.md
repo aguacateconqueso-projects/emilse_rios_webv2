@@ -4,7 +4,7 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 23 de septiembre de 2026.
+**Última actualización:** 23 de septiembre de 2026, al cierre del día.
 
 > **🚧 LA CORTINA ESTÁ BAJADA desde el 23 sep 2026.** Quien entra a
 > `www.emilserios.com` —a cualquier dirección— ve solo la firma de Emi sobre
@@ -30,87 +30,62 @@ de cero debería poder seguir trabajando sin preguntar nada.
 > par de minutos en construir después de cada push. Ver **La cortina → Cómo
 > se sigue viendo la web**.
 
-> **Para quien retome en una sesión nueva (23 sep 2026, por la tarde).** Con
-> la cortina bajada se está terminando la web detrás. Ese día entraron en
-> `main` tres PRs, los tres probados y mergeados:
+> **Para quien retome en una sesión nueva (cierre del 23 sep 2026).** Con la
+> cortina bajada se está terminando la web detrás. **Todo lo del día está en
+> `main`, probado y mergeado: del #42 al #49.** La rama
+> `claude/youthful-meitner-21x8ys` no tiene nada pendiente; si se sigue en
+> ella, se rearranca desde `main` (`git checkout -B … origin/main`) porque su
+> último PR ya entró.
 >
-> - **#42 · La cortina.** Ver **La cortina**.
-> - **#43 · «Productos» pasa a «Formaciones»** (en inglés «Courses»), con su
->   entrada nueva, y **la carta de la membresía reescrita entera**, con cinco
->   testimonios. Ver **Formaciones, y la carta nueva**.
-> - **#44 · Las direcciones viejas**, que con barra final daban 404. Ver **Las
->   direcciones viejas**.
+> | PR | Qué trajo | Dónde se cuenta |
+> |---|---|---|
+> | **#42** | La cortina. | **La cortina** |
+> | **#43** | «Productos» pasa a **Formaciones** («Courses») y la carta de la membresía se reescribe entera, con cinco testimonios. | **Formaciones, y la carta nueva** |
+> | **#44** | Las direcciones viejas, que con barra final daban 404. | **Las direcciones viejas** |
+> | **#45** | Solo `progreso.md`: el relevo de ese mediodía. | — |
+> | **#46** | El newsletter deja de fallar en silencio: el formulario llama siempre al servidor y el fallo queda en los logs. | **El newsletter, conectado → La primera prueba** |
+> | **#47** | Cinco retoques: la Home entra con la escalera al volver, «Te cuento otra cosa» abre la historia, Formaciones pierde el `00` y sus fotos toman color, *Sobre mí* estrena retrato. | **Cinco retoques del 23 de septiembre** |
+> | **#48** | El menú llega a la carta y al acceso, el aula se entra directo con correo y contraseña, *Sobre mí* con retrato horizontal, tres cursos con nombre y foto, y las dos primeras cartas de cursos. | **Siete cambios de la tarde…** y **Las cartas de los cursos** |
+> | **#49** | Las cuatro cartas pasan al sistema del sitio (`CartaVenta.astro` + `src/data/cartas.ts`), llega la del vibrato con la foto del mar ya con licencia, los cursos dicen «Avísame cuando abra», **todos los botones del sitio** son el de la academia —relleno, flecha, imán, zoom y notas— y la ficha de precio vuelve a invertirse a negro. | **Las cartas, en el sistema del sitio** y **Los botones del sitio** |
 >
-> Y por la tarde, dos más:
+> **Cómo quedó la web pública, en una línea:** Home, *Sobre mí*,
+> Formaciones y las cuatro cartas —membresía, «Todo el diapasón»,
+> «Contrabajo desde cero» y «Tu vibrato como un cantante»—, en español e
+> inglés, todas con el mismo menú, pie, letra y botón. **Lo único que sigue
+> con la ropa vieja es el aula por dentro.**
 >
-> - **#46 · El newsletter deja de fallar en silencio.** Ver **El newsletter,
->   conectado → La primera prueba**.
-> - **#47 · Cinco retoques que pidió Adrián:** la Home entra con la escalera
->   de *Sobre mí* al volver, «Te cuento otra cosa» baja a abrir la historia,
->   Formaciones pierde el `00` y sus fotos se acercan y toman color con el
->   cursor, y *Sobre mí* estrena retrato. Ver **Cinco retoques del 23 de
->   septiembre**.
-> - **Y siete más, al final de la tarde:** el menú del sitio llega a la carta
->   de la membresía y a la pantalla de acceso, el aula se entra directo con
->   correo y contraseña, *Sobre mí* cambia otra vez de retrato —ahora
->   horizontal— y Formaciones estrena tres cursos con nombre, texto y foto.
->   Ver **Siete cambios de la tarde del 23 de septiembre**.
-> - **#48 · Por la noche, las dos primeras cartas de cursos**, y Formaciones
->   pierde «Ver la membresía». Ver **Las cartas de los cursos**.
-> - **Y al final, las cuatro cartas pasan al sistema del sitio**: la de la
->   membresía deja la ropa de la academia y todas se leen como la Home y
->   *Sobre mí*, con su menú y su pie. Llega la tercera carta —«Tu vibrato
->   como un cantante», con la foto del mar, ya con licencia— y los tres
->   cursos tienen el mismo botón: «Avísame cuando abra». Ver **Las cartas,
->   en el sistema del sitio**. ⚠️ **Esperan a Emi:** el final del inglés de
->   «Todo el diapasón» y los testimonios del vibrato en inglés, traducidos
->   acá.
-> - **Y el último retoque del día: los botones.** Todos los del sitio son el
->   de la carta de la academia —relleno bajo el cursor, flecha, imán, un
->   poco de zoom y notas musicales—, y la ficha de precio de las cartas
->   vuelve a invertirse a negro. Ver **Los botones del sitio**.
+> **Lo que viene, en orden:**
 >
-> ⚠️ **Lo siguiente grande es el aula**: cambia de ropa al sistema del
-> sitio, como las cartas. Adrián lo confirmó el 23 sep, pero **lo deja para
-> después**: primero quiere todas las páginas públicas listas, y el aula
-> viene con sesiones pesadas.
->
-> **Lo que viene, en el orden en que lo pidieron Adrián y Emi:**
->
-> 1. **El newsletter todavía no da de alta** («suscribirse no funciona»). El
->    código está en `main` desde el 22 sep, ya con la API `2026-07-15`; lo que
->    falta es de paneles, en este orden:
->    1. **Klaviyo → Custom Key** con escritura sobre **Lists, Profiles y
->       Subscriptions**. Si ya había una clave hecha con la guía vieja, se
->       edita para añadir *Subscriptions*. ✅ Hecho (Adrián, 23 sep).
->    2. **Vercel → `KLAVIYO_API_KEY`** en Production **y Preview**, y
->       **redesplegar**. ✅ La variable está puesta (Adrián, 23 sep). **Solo
->       esa:** `KLAVIYO_LIST_ID` y `KLAVIYO_REVISION` no se crean, sus valores
->       buenos ya van en el código.
->    3. **Comprobar:** un alta de prueba y el correo dentro de la lista
->       `SaE8Px`. ⏸️ **Aplazado a propósito, por decisión de Adrián (23
->       sep):** se prueba **todo junto, al subir la cortina**, cuando Emi
->       tenga montada la bienvenida de siete correos —el punto 2—. Así un
->       solo correo de prueba comprueba el alta **y** la serie. La primera
->       prueba, en una vista previa vieja, dijo que no, casi seguro porque ese
->       build era de antes de la clave; el #46 dejó el fallo con rastro en los
->       logs. Ver **El newsletter, conectado → La primera prueba**.
->    4. **Klaviyo → apagar WooCommerce**, mirando antes los flujos. Y decidir
->       con Emi la doble confirmación (recomendada).
-> 2. **La bienvenida pasa a ser de siete correos** a cada persona que se
->    suscribe. Es un flujo de Klaviyo —una serie que dispara el alta a la
->    lista—, no código, y los textos los tiene Emi. Lo que sí es código: la Home
->    promete «un correo de bienvenida con un video» (`src/data/home.ts`), y eso
->    hay que alinearlo con la serie nueva.
-> 3. **El resto de copies nuevos de Emi.** Ya entraron Formaciones y la carta;
->    faltan los demás, que manda ella. Y cuatro decisiones de la carta que
->    quedaron abiertas: ver **Pendiente → Contenido que falta (de Emi)**.
-> 4. **Subir la cortina:** `CORTINA_BAJADA = false` en `src/lib/cortina.ts`,
->    en un PR. **Y ahí va la prueba del newsletter**, la que quedó aplazada.
->    Lo mejor es hacerla **en la vista previa de ese mismo PR, antes de
->    mergear**: las vistas previas nunca tienen cortina y ya leen la clave
->    (Adrián marcó Production y Preview). Si algo falla, se arregla sin que la
->    web esté abierta con un formulario roto. Los pasos:
+> 1. **⚠️ Vestir el aula con el sistema del sitio**, como se hizo con las
+>    cartas. Adrián lo confirmó el 23 sep y **lo dejó para después a
+>    propósito**: primero todas las páginas públicas listas, y el aula viene
+>    con sesiones pesadas. Es lo siguiente grande cuando él lo abra.
+> 2. **Lo que Adrián quiera seguir acomodando en las páginas públicas.** Él
+>    manda los cambios por tandas numeradas; se hacen todos, PR nuevo, push, y
+>    **los enlaces directos a la vista previa** (ver la regla de arriba).
+> 3. **El resto de copies de Emi**, y que **Emi revise tres traducciones
+>    hechas acá**: el final del inglés de «Todo el diapasón», los testimonios
+>    del vibrato en inglés y el título inglés de ese curso («Vibrato like a
+>    singer»). Están marcadas `TRADUCIDO` en `src/data/cartas.ts`. Y cuatro
+>    decisiones de la carta que quedaron abiertas: ver **Pendiente →
+>    Contenido que falta (de Emi)**.
+> 4. **La bienvenida de siete correos.** Es un flujo de Klaviyo —una serie
+>    que dispara el alta a la lista `SaE8Px`—, no código, y los textos los
+>    tiene Emi. Lo que sí es código: la Home promete «un correo de bienvenida
+>    con un video» (`src/data/home.ts`), y hay que alinearlo con la serie.
+> 5. **Stripe y los admins, que no son código:** las variables de Stripe en
+>    Vercel (sin ellas el botón de pagar da un 500 cuando abran las puertas,
+>    el 1 oct 2026 según `src/lib/membership.ts`) y `supabase/set_admin.sql`
+>    —antes, confirmar el correo real de Emi—. Ver `docs/UNIR-LAS-DOS-CASAS.md`
+>    y `docs/CONECTAR-EL-AULA.md`. Vender los cursos, además, pide sus precios
+>    en Stripe y un `/api/checkout` que sepa de cursos: hoy solo cobra la
+>    membresía.
+> 6. **Subir la cortina:** `CORTINA_BAJADA = false` en `src/lib/cortina.ts`,
+>    en un PR. **Y ahí va la prueba del newsletter**, aplazada a propósito por
+>    Adrián (23 sep) para probar **todo junto**: el alta y la serie de siete
+>    correos con un solo correo de prueba. Lo mejor es hacerla **en la vista
+>    previa de ese mismo PR, antes de mergear** —las vistas previas nunca
+>    tienen cortina y ya leen la clave—:
 >    1. abrir `/api/suscribir` en la vista previa → `{"proveedor":true}`;
 >    2. suscribir un correo de prueba de verdad;
 >    3. verlo en Klaviyo, en la lista `SaE8Px` (pendiente si hay doble
@@ -119,8 +94,15 @@ de cero debería poder seguir trabajando sin preguntar nada.
 >    5. si dice que no, buscar `[klaviyo]` en Vercel → Logs: la tabla de
 >       `docs/CONECTAR-KLAVIYO.md` dice qué es cada línea.
 >
->    Si se prefiere probar ya en `www.emilserios.com`, que sea lo primero
->    después de mergear: son dos minutos.
+>    Lo del newsletter que ya está hecho: la clave (Custom Key con escritura
+>    sobre **Lists, Profiles y Subscriptions**) y `KLAVIYO_API_KEY` en Vercel,
+>    Production y Preview (Adrián, 23 sep). `KLAVIYO_LIST_ID` y
+>    `KLAVIYO_REVISION` **no se crean**: sus valores buenos van en el código.
+>    Queda **apagar WooCommerce en Klaviyo**, mirando antes los flujos, y
+>    decidir con Emi la doble confirmación (recomendada).
+>
+> Opcional, si Adrián lo pide: la cápsula «Ingresar al aula» del menú no
+> suelta notas; es el único botón del sitio que no es `Boton.astro`.
 >
 > Y una comprobación que no depende de la cortina y nadie ha hecho todavía:
 > `curl -sI https://www.emilserios.com/aulavirtual/estudiemos-juntos/` tiene
@@ -186,13 +168,13 @@ pagando sin recibir acceso.
 |---|---|
 | **Publicado** | Sí, en Vercel, y desde el 21 sep 2026 **en `www.emilserios.com`**. Despliega solo en cada merge a `main`. **Desde el 23 sep, tapado por la cortina** — ver **La cortina**. |
 | **Dominio** | **Resuelto a medias.** El sitio ya vive en `www.emilserios.com` y el DNS lo sirve Cloudflare. **Falta el push del registro** a una cuenta de Namecheap de Emi: hoy el dominio sigue siendo de Edu. Ver **El dominio, y Edu → Cómo quedó**. |
-| **Páginas** | Home, Sobre mí, Formaciones —hasta el 23 sep 2026 se llamó Productos—, el Aula Virtual —puerta y aula por dentro— y sus pantallas de acceso, en español e inglés. Más `/panel/`, la consola de Emi, solo en español. |
+| **Páginas** | Home, Sobre mí, Formaciones —hasta el 23 sep 2026 se llamó Productos—, **las cuatro cartas de venta** (membresía y tres cursos) y el Aula Virtual —acceso directo y aula por dentro—, en español e inglés. Más `/panel/`, la consola de Emi, solo en español. **Todo en el sistema del sitio salvo el aula por dentro**, que cambia de ropa más adelante. |
 | **Identidad** | El logo de Emi, vectorizado, en cabecera, pie, entrada y favicon. |
 | **Alcance** | Desde el 31 ago 2026 esto deja de ser solo el sitio: aquí van también el aula, la membresía y los cursos. Ver **La plataforma**. |
 | **Sesión** | **Conectada y probada el 22 sep 2026**: se entra de verdad, contra el **mismo Supabase de la academia**, y el candado pide **suscripción al día**. Las variables y las Redirect URLs ya están puestas. Falta `set_admin.sql`. Ver `docs/CONECTAR-EL-AULA.md`. |
 | **Cobro** | **Desde el 22 sep 2026 vive acá.** `/api/checkout` crea la sesión de Stripe, `/gracias/` recoge a quien pagó y `/api/claim-account` le crea la cuenta. El **webhook sigue en la academia**, y es correcto que siga: ver **La unión de las dos casas**. |
 | **Newsletter** | **Conectado desde el 22 sep 2026.** `/api/suscribir` da de alta en la lista real de Klaviyo (`SaE8Px`), con la API en su versión `2026-07-15`. `KLAVIYO_API_KEY` **puesta en Vercel el 23 sep 2026**, con los permisos Lists, Profiles y Subscriptions; **la prueba se hace al subir la cortina**, junto con la bienvenida de siete correos —ver **El newsletter, conectado → La primera prueba**—. La integración de WooCommerce de Klaviyo está muerta desde el 21 sep y **se apaga**: los cobros son de Stripe. |
-| **Lo que falta para lanzar** | **Dos variables en Vercel, y ninguna es código:** `KLAVIYO_API_KEY` o el newsletter no da de alta, y las de Stripe o el botón de comprar da un 500. |
+| **Lo que falta para lanzar** | **Las variables de Stripe en Vercel**, o el botón de comprar da un 500 (`KLAVIYO_API_KEY` ya está, 23 sep). Y **subir la cortina**, con la prueba del newsletter y la bienvenida de siete correos de Emi en el mismo momento. |
 
 Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/` · `/productos/` ·
 `/en/products/` · `/productos/estudiemos-juntos/` ·
@@ -4398,6 +4380,13 @@ enseñárselo.
       cuanto los tenga (19 sep 2026).
 
 ### Próximos PRs
+
+- [ ] **Vestir el aula con el sistema del sitio.** Lo mismo que se hizo con
+      las cartas el 23 sep 2026: letra, papel, rejilla de 8, el menú y el pie
+      del sitio y `Boton.astro`, en el escritorio, las páginas de curso y el
+      reproductor. Adrián lo confirmó y **lo dejó para después**: primero
+      todas las páginas públicas, y el aula viene con sesiones pesadas. No se
+      empieza sin que él lo abra.
 
 - [ ] **Mudar el webhook de Stripe, y con él el correo de bienvenida.** Es la
       segunda mitad de **La unión de las dos casas**, y **tiene un orden que no
