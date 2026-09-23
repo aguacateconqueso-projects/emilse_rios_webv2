@@ -21,7 +21,8 @@ Mensajes— (ver **El panel de Emi, completo**).
 > exacta que cambió, en la vista previa de la rama, no «mira el PR»—. Adrián
 > no encontraba las vistas previas, y una vez estuvo mirando la de una rama
 > vieja buscando cambios que estaban en otra. **Desde la noche del 23 sep 2026
-> se trabaja en la rama `claude/epic-bardeen-k6zfn7`** (PR #51), y su raíz es:
+> se trabaja en la rama `claude/epic-bardeen-k6zfn7`** (PR #51, mergeado; y
+> después PR #52, con el resto del panel), y su raíz es:
 >
 > **https://emilse-rios-webv2-git-claude-e-21eb3e-adrians-projects-594b3131.vercel.app**
 >
@@ -39,7 +40,8 @@ Mensajes— (ver **El panel de Emi, completo**).
 > sesión abrió lo que la de la tarde dejó para después: **el aula con la ropa
 > del sitio, los cursos en la base de datos y el panel de Emi entero**: la
 > vista general, Hoy, Membresía, Cursos, Tienda, Págs. de ventas, Personas y
-> Mensajes. Rama `claude/epic-bardeen-k6zfn7`, **PR #51**. Todo en **El panel
+> Mensajes. Rama `claude/epic-bardeen-k6zfn7`: **PR #51** (mergeado: aula,
+> cursos, Hoy, Membresía, Cursos) y **PR #52** (el resto). Todo en **El panel
 > de Emi, completo** y **El aula y el panel de Emi, con la ropa del sitio**.
 >
 > **Lo que viene, en orden:**
@@ -489,8 +491,9 @@ no tenía salida a `vercel.app`:
 
 ## El panel de Emi, completo
 
-**23 de septiembre de 2026, más tarde esa noche.** Adrián miró lo anterior
-(«todo bello») y pidió cinco cosas:
+**23 de septiembre de 2026, más tarde esa noche. PR #52** —el #51 ya estaba
+mergeado, así que esto salió de `main` en la misma rama y en un PR nuevo—.
+Adrián miró lo anterior («todo bello») y pidió cinco cosas:
 
 1. Volver a **la vista general** como primera pantalla del panel: «extraño la
    vista general que teníamos antes; ahora solo muestra el Hoy».
