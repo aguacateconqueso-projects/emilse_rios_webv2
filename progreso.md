@@ -19,10 +19,13 @@ panel de Emi (ver **El aula y el panel de Emi, con la ropa del sitio**).
 > sube un cambio, se le deja el enlace directo para verlo** —a la página
 > exacta que cambió, en la vista previa de la rama, no «mira el PR»—. Adrián
 > no encontraba las vistas previas, y una vez estuvo mirando la de una rama
-> vieja buscando cambios que estaban en otra. Mientras se trabaje en la rama
-> `claude/youthful-meitner-21x8ys`, la raíz es siempre esta:
+> vieja buscando cambios que estaban en otra. **Desde la noche del 23 sep 2026
+> se trabaja en la rama `claude/epic-bardeen-k6zfn7`** (PR #51), y su raíz es:
 >
-> **https://emilse-rios-webv2-git-claude-y-2c57cd-adrians-projects-594b3131.vercel.app**
+> **https://emilse-rios-webv2-git-claude-e-21eb3e-adrians-projects-594b3131.vercel.app**
+>
+> La de antes, `claude/youthful-meitner-21x8ys`, era
+> `…-git-claude-y-2c57cd-…`: enseña `main` hasta el #50, sin el aula nueva.
 >
 > y se le añade la ruta: `/sobre-mi/`, `/en/products/`… Con otra rama, la
 > raíz cambia: sale en el comentario de **vercel[bot]** del PR, fila
@@ -31,6 +34,27 @@ panel de Emi (ver **El aula y el panel de Emi, con la ropa del sitio**).
 > par de minutos en construir después de cada push. Ver **La cortina → Cómo
 > se sigue viendo la web**.
 
+> **Para quien retome en una sesión nueva (noche del 23 sep 2026).** Esta
+> sesión abrió lo que la de la tarde dejó para después: **el aula con la ropa
+> del sitio, los cursos en la base de datos y el panel de Emi con Hoy,
+> Membresía y Cursos**. Rama `claude/epic-bardeen-k6zfn7`, **PR #51**. Todo en
+> **El aula y el panel de Emi, con la ropa del sitio**.
+>
+> **Lo que viene, en orden:**
+>
+> 1. **⚠️ Aplicar `supabase/migrations/0009_cursos.sql` en Supabase** (solo
+>    aditiva e idempotente), poner las variables de Supabase también en
+>    **Preview** en Vercel y `BUNNY_STREAM_API_KEY`. Sin la migración, la
+>    pestaña Cursos lo dice y no deja crear nada. Los cinco pasos, en esa
+>    sección → **Lo que hay que hacer fuera del código**.
+> 2. **Emi carga su primer curso desde el panel** y se mira con un video de
+>    verdad: el puente `player.js` que guarda el minuto sigue sin probarse
+>    contra uno.
+> 3. **Las pestañas que faltan**: Personas, Mensajes, Tienda y Cartas.
+> 4. Lo que seguía del relevo de la tarde (abajo): copies de Emi, la
+>    bienvenida de siete correos, Stripe y subir la cortina. **La membresía se
+>    muda la última**, con el dominio (Adrián, 23 sep 2026).
+>
 > **Para quien retome en una sesión nueva (cierre del 23 sep 2026).** Con la
 > cortina bajada se está terminando la web detrás. **Todo lo del día está en
 > `main`, probado y mergeado: del #42 al #49.** La rama
