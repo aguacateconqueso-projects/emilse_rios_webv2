@@ -40,7 +40,7 @@ export const ui = {
 
     'media.portrait': 'Retrato de Emi con el contrabajo — blanco y negro',
     'media.portraitAlt':
-      'Emilse Ríos en una calle, abrazada a su contrabajo, lanzando un beso con una pierna en alto',
+      'Emilse Ríos en una calle arbolada, abrazada a su contrabajo, lanzando un beso con una pierna en alto',
     'about.description':
       'Le dijeron que el contrabajo no era para ella. Esta es la historia de por qué se equivocaron: veinte años tocando y formando contrabajistas, de El Sistema a Madrid.',
 
@@ -64,23 +64,6 @@ export const ui = {
       'Este producto se cobra fuera de este sitio. Es el mismo pago de siempre, y quien ya esté dentro no tiene que hacer nada.',
     'products.enrolled': '¿Ya compraste? El aula es por acá',
 
-    /* --- El aula, que está adentro y pide haber pagado ------------------- */
-    'aula.title': 'Aula Virtual',
-    'aula.description':
-      'El aula de Emilse Ríos. Acá entran quienes ya son miembros o compraron un curso.',
-    'aula.lead':
-      'Acá dentro está lo que ya compraste: el ejercicio de esta semana, el concepto del mes y tus cursos.',
-    'aula.locked': 'Esta parte pide iniciar sesión',
-    'aula.hint':
-      'Si ya eres miembro o compraste un curso, entras con el correo con el que pagaste.',
-    'aula.away':
-      'El aula todavía vive en emilseriosacademy.com. Se muda a esta casa con el cambio de dominio, y quien ya esté dentro no tiene que hacer nada.',
-    'aula.noAccount': '¿Todavía no estudias con Emi?',
-    'aula.toProducts': 'Mira lo que hay a la venta',
-    'aula.previewLabel': 'En construcción',
-    'aula.preview':
-      'El aula nueva —la que vivirá acá dentro— ya se puede recorrer. Es una maqueta con contenido de muestra: sirve para verla y opinar, todavía no para estudiar.',
-    'aula.previewCta': 'Recorrer la maqueta del aula',
     'footer.email': 'info@emilserios.com',
   },
   en: {
@@ -115,7 +98,7 @@ export const ui = {
 
     'media.portrait': 'Portrait of Emi with the double bass — black and white',
     'media.portraitAlt':
-      'Emilse Ríos on a street, hugging her double bass and blowing a kiss, one leg kicked up behind her',
+      'Emilse Ríos on a tree-lined street, hugging her double bass and blowing a kiss, one leg kicked up behind her',
     'about.description':
       'They told her the double bass wasn\'t for her. This is the story of why they were wrong: twenty years playing and training bassists, from El Sistema to Madrid.',
 
@@ -136,23 +119,6 @@ export const ui = {
       'This product is paid for outside this site. It is the same checkout as always, and anyone already inside has nothing to do.',
     'products.enrolled': 'Already bought? The classroom is this way',
 
-    /* --- El aula, que está adentro y pide haber pagado ------------------- */
-    'aula.title': 'Virtual Classroom',
-    'aula.description':
-      "Emilse Ríos's classroom. This is where members and course students come in.",
-    'aula.lead':
-      "Inside is everything you already bought: this week's exercise, the month's concept and your courses.",
-    'aula.locked': 'This part asks you to sign in',
-    'aula.hint':
-      'If you are already a member or bought a course, you come in with the email you paid with.',
-    'aula.away':
-      'The classroom still lives at emilseriosacademy.com. It moves into this house with the domain change, and anyone already inside has nothing to do.',
-    'aula.noAccount': 'Not studying with Emi yet?',
-    'aula.toProducts': "See what's on sale",
-    'aula.previewLabel': 'Under construction',
-    'aula.preview':
-      "The new classroom — the one that will live in this house — can already be walked through. It's a mock-up with sample content: good for looking and giving notes, not yet for studying.",
-    'aula.previewCta': 'Walk through the classroom mock-up',
     'footer.email': 'info@emilserios.com',
   },
 } as const;

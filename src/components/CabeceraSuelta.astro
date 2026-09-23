@@ -1,0 +1,111 @@
+---
+/**
+ * La cápsula del menú, para las páginas que no van dentro de `Base.astro`.
+ *
+ * Son dos, y las dos traen su propia ropa —la crema, Hanken Grotesk, el
+ * cursor de clave de fa—: **la carta de la membresía** (`membresia/Carta.astro`)
+ * y **las pantallas de acceso al aula** (`layouts/Acceso.astro`). Hasta el
+ * 23 sep 2026 no tenían el menú del sitio, y quien entraba a la membresía
+ * desde Formaciones «entraba en la nada misma», en palabras de Adrián: la
+ * única salida era la píldora de «Entrar». El menú tiene que estar siempre.
+ *
+ * **Por qué no basta con poner `<Header>`.** El menú se pinta con los tokens
+ * del sitio —`--space-2`, `--menu-veil`, `--ink-soft`…— y con dos clases de
+ * `base.css`, `.mono` y `.visually-hidden`. Estas páginas no cargan ni
+ * `tokens.css` ni `base.css`, y **no pueden cargarlos**: Astro sube el CSS de
+ * todo lo que una página importa, y esas dos hojas le pisarían a la carta el
+ * fondo, la tipografía y la medida. Peor aún, `colors_and_type.css` —la base de
+ * la academia, que cargan las dos— define su propio `--space-2` (8 px, no 16)
+ * y un `a:hover` que subraya.
+ *
+ * Así que esto envuelve la cabecera y le da, **solo dentro del envoltorio**, lo
+ * que necesita. Las variables se heredan, así que el menú las ve y la página
+ * de alrededor no se entera.
+ *
+ * Lo que **no** se redefine, a propósito: `--paper` y `--ink`. Se heredan de la
+ * página, que los tiene cálidos —crema `#faf7f1`, tinta `#17140f`—, y así el
+ * cristal de la cápsula es de la misma crema que la carta y no del blanco frío
+ * del sitio. Por lo mismo, la tinta secundaria y la regla de acá son las del
+ * sitio pero sobre esa tinta cálida.
+ *
+ * ⚠️ **Los valores están copiados de `src/styles/tokens.css`**, y si allí
+ * cambian, hay que cambiarlos acá. Son pocos y están todos juntos, abajo.
+ *
+ * La tipografía mono —IBM Plex Mono— la pone la página con `<Font>` en su
+ * `<head>`, porque ahí es donde tiene que ir.
+ */
+import type { Lang, Route } from '../i18n/ui';
+import Header from './Header.astro';
+
+interface Props {
+  lang: Lang;
+  route: Route;
+  hrefEs: string;
+  hrefEn: string;
+}
+const { lang, route, hrefEs, hrefEn } = Astro.props;
+---
+
+<div class="suelta">
+  <Header lang={lang} route={route} hrefEs={hrefEs} hrefEn={hrefEn} />
+</div>
+
+<style>
+  .suelta {
+    /* Tinta secundaria y regla, sobre la tinta cálida de estas páginas
+       (#17140f = 23, 20, 15). Mismos porcentajes que en `tokens.css`. */
+    --ink-soft: rgba(23, 20, 15, 0.58);
+    --ink-soft-glass: rgba(23, 20, 15, 0.8);
+    --rule: rgba(23, 20, 15, 0.12);
+
+    --text-mono: 0.75rem;
+    --tracking-mono: 0.12em;
+
+    --space-1: 0.5rem;
+    --space-2: 1rem;
+    --space-3: 1.5rem;
+
+    --menu-width: 24rem;
+    --menu-veil: 70%;
+    --menu-blur: 24px;
+    --menu-duration: 0.34s;
+    --menu-radius: 1.5rem;
+    --menu-shadow: 0 0.5rem 2rem rgba(13, 13, 13, 0.1);
+    --ease-panel: cubic-bezier(0.76, 0, 0.24, 1);
+  }
+
+  /* Las dos clases de `base.css` que la cabecera da por hechas.
+
+     Con `:where()`, para que pesen lo mismo que en `base.css` —una clase— y
+     no más. Escritas como `.suelta .mono` pesaban dos, y le ganaban a las
+     reglas de la cabecera: la cápsula de «Ingresar al aula» perdía su
+     `line-height` de 28 px y salía 11 px más baja que la del menú. */
+  :global(:where(.suelta) .mono) {
+    font-family: var(--font-mono);
+    font-size: var(--text-mono);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    line-height: 1.4;
+  }
+
+  :global(:where(.suelta) .visually-hidden) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* El `a:hover` de `colors_and_type.css` pinta de azul y subraya. El color
+     no llega —las clases de la cabecera le ganan—, pero el subrayado sí,
+     porque la cabecera no dice nada de él. El hover del menú es el fondo
+     apenas insinuado de siempre, sin raya. El color no se toca acá: cada
+     enlace de la cabecera trae el suyo, y el botón de entrar es crema sobre
+     tinta. */
+  .suelta :global(a:hover) {
+    text-decoration: none;
+  }
+</style>

@@ -48,7 +48,14 @@
 //     solo el estándar (decisión ya tomada, ver `progreso.md`).
 //   · la píldora de idioma y el pie enlazan a este sitio, no a la academia.
 //
-// Y después del trasplante, una sola vez hasta hoy:
+// Y después del trasplante, dos veces hasta hoy:
+//   · 23 sep 2026 — el menú del sitio. La píldora de idioma y «Entrar» de
+//     arriba a la derecha sale, y en su lugar va la cápsula del menú, la
+//     misma de todo el sitio (`CabeceraSuelta.astro`): quien llegaba desde
+//     Formaciones se quedaba sin forma de volver, salvo por «Entrar». El
+//     idioma vive ahora dentro del menú, y sigue conservando el sitio de la
+//     lectura al cambiar; «Entrar» es la cápsula de la derecha, la misma de
+//     Formaciones.
 //   · 23 sep 2026 — copy nuevo de Emi, entero, y con testimonios. La ropa es
 //     la misma; lo que cambió es el texto y, con él, qué bloques hay. Salieron
 //     el video de un minuto, el tema del mes (septiembre), la historia de
@@ -56,8 +63,9 @@
 //     están en el copy nuevo. El cuerpo es ahora `t.carta`, una lista de
 //     bloques — ver su nota, más abajo.
 // ---------------------------------------------------------------------------
+import { Font } from 'astro:assets';
 import { productPath, routePath } from '../../i18n/ui';
-import { entrarHref } from '../../data/aula';
+import CabeceraSuelta from '../CabeceraSuelta.astro';
 import { CLOSES_AT, REOPENS_AT, NEWSLETTER_URL, INVITE_PARAM, doorsClosed } from '../../lib/membership';
 
 interface Props {
@@ -293,7 +301,6 @@ const t = isEN ? {
 
   footBack: 'Back to Courses', footHome: 'Home',
   footLegal: '© 2026 Emilse Rios',
-  enter: 'Log in',
 } : {
   htmlLang: 'es',
   metaTitle: 'Estudiemos Juntos — Membresía de Emilse Rios',
@@ -418,7 +425,6 @@ const t = isEN ? {
 
   footBack: 'Volver a Formaciones', footHome: 'Inicio',
   footLegal: '© 2026 Emilse Rios',
-  enter: 'Entrar',
 };
 
 // Textos de las puertas ya resueltos para el HTML del build (sin JS). El script
@@ -548,6 +554,10 @@ const jsonLd = {
 <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
 
 <link rel="stylesheet" href="/colors_and_type.css" />
+{/* La mono del sitio, para la cápsula del menú. Va DESPUÉS de la base de la
+    academia a propósito: las dos definen `--font-mono` en `:root`, y la carta
+    no la usa para nada —allí es la de los bloques de código—. */}
+<Font cssVariable="--font-mono" />
 <style is:inline>
   /* ---------------------------------------------------------------------------
      Carta editorial con ritmo. Un solo lienzo crema, una columna de lectura, pero
@@ -593,23 +603,9 @@ const jsonLd = {
   .page { max-width: var(--measure); margin: 0 auto; padding: clamp(28px, 7vw, 56px) var(--edge) clamp(48px, 9vw, 88px);
           transition: opacity 300ms ease; }
 
-  /* Píldora de idioma — fija, esquina superior derecha. Solo EN/ES. */
-  .langpill { position: fixed; top: clamp(14px, 2.6vw, 22px); right: clamp(14px, 2.6vw, 22px); z-index: 50;
-              display: inline-flex; align-items: center; gap: 2px;
-              background: rgba(250, 247, 241, 0.72);
-              -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4);
-              border: 1px solid rgba(23, 20, 15, 0.10); border-radius: 999px; padding: 4px 5px;
-              box-shadow: 0 6px 22px rgba(23, 20, 15, 0.09); }
-  .langpill a { text-decoration: none; color: var(--soft); font-size: 0.82rem; font-weight: 600;
-                letter-spacing: 0.04em; line-height: 1; padding: 6px 12px; border-radius: 999px;
-                transition: color 200ms ease, background 200ms ease; }
-  .langpill a:hover { color: var(--ink); }
-  /* Separador y acceso "Entrar" (miembros que ya pagaron y vuelven). */
-  .langpill__sep { width: 1px; align-self: stretch; margin: 4px 2px;
-                   background: rgba(23, 20, 15, 0.14); }
-  .langpill__enter { color: var(--ink) !important; }
-  .langpill__enter:hover { background: rgba(23, 20, 15, 0.06); }
-  .langpill a[aria-current="true"] { color: var(--ink); background: rgba(23, 20, 15, 0.06); }
+  /* La cápsula del menú flota arriba, fija, y mide 76 px con su margen: la
+     carta arranca debajo, para que el logo no nazca tapado. */
+  .page { padding-top: calc(76px + clamp(28px, 7vw, 56px)); }
 
   /* Fundido del texto al cambiar de idioma */
   .page.is-leaving { opacity: 0; }
@@ -911,18 +907,17 @@ const jsonLd = {
 <body>
 
   {/*
-    La píldora es la única navegación de la carta, que va suelta y sin la
-    cabecera del sitio. Cambian los destinos, no la pieza: ES/EN son ahora las
-    dos direcciones de ESTA página —`/productos/estudiemos-juntos/` y su gemela
-    inglesa—, y «Entrar» sigue siendo la puerta del aula, que hoy es la de la
-    academia (`entrarHref`, la misma que usa la cápsula de la tienda).
+    El menú del sitio, el mismo de todas las páginas. Hasta el 23 sep 2026
+    aquí había una píldora suelta con ES/EN y «Entrar», y era la única
+    navegación de la carta. Va como «Formaciones», que es de donde se llega:
+    marca esa opción y saca la cápsula de «Ingresar al aula» a la derecha.
   */}
-  <nav class="langpill" aria-label="Idioma / Language">
-    <a href={productPath(slug, 'es')} aria-current={(!isEN).toString()} data-lang-switch>ES</a>
-    <a href={productPath(slug, 'en')} aria-current={isEN.toString()} data-lang-switch>EN</a>
-    <span class="langpill__sep" aria-hidden="true"></span>
-    <a class="langpill__enter" href={entrarHref[lang]}>{t.enter}</a>
-  </nav>
+  <CabeceraSuelta
+    lang={lang}
+    route="products"
+    hrefEs={productPath(slug, 'es')}
+    hrefEn={productPath(slug, 'en')}
+  />
 
   <main class="page" data-doors={builtClosed ? 'closed' : (builtCountdown ? 'soon' : 'open')}>
 
@@ -1328,7 +1323,9 @@ const jsonLd = {
     } catch (e) { html.classList.remove('lang-enter'); }
 
     // AL SALIR: guardar sección/offset, fade-out y navegar.
-    document.querySelectorAll('[data-lang-switch]').forEach(function (a) {
+    // Los del pie y los del menú del sitio: los dos cambian de idioma sin
+    // perder el sitio de la lectura.
+    document.querySelectorAll('[data-lang-switch], [data-menu] a[hreflang]').forEach(function (a) {
       a.addEventListener('click', function (e) {
         e.preventDefault();
         if (a.getAttribute('aria-current') === 'true') return; // ya estamos en ese idioma

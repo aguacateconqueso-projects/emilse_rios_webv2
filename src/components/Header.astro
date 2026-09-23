@@ -43,13 +43,15 @@ const t = useTranslations(lang);
 
 /*
   El botón de ingresar sale solo en la tienda. En la Home y en Sobre mí no pinta
-  nada: quien llega ahí viene a leer, no a entrar a estudiar. Y **en la puerta
-  del aula tampoco**, aunque parezca el sitio natural: esa página entera ya es
-  la puerta, con su botón en el cuerpo, y una segunda cápsula arriba diciendo lo
-  mismo es repetir la única acción que hay. Donde sí hace falta es en el
-  catálogo, que es donde entra quien ya compró algo y viene a comprar otra cosa.
+  nada: quien llega ahí viene a leer, no a entrar a estudiar. Y **en la pantalla
+  de acceso tampoco**: esa página entera ya es la puerta, con su formulario, y
+  una segunda cápsula arriba diciendo lo mismo es repetir la única acción que
+  hay. Donde sí hace falta es en el catálogo —y en la carta de la membresía,
+  que es tienda—, que es donde entra quien ya compró algo y viene a comprar
+  otra cosa.
 
-  Hoy lleva fuera del sitio, a la academia, que es donde el aula funciona.
+  «Aula virtual», en el menú, lleva al mismo sitio: desde el 23 sep 2026 el
+  aula no tiene portada, se entra directo pidiendo correo y contraseña.
 */
 const enTienda = route === 'products';
 const entrar = entrarHref[lang];
@@ -106,7 +108,7 @@ const entrar = entrarHref[lang];
           >
           <a
             class="menu__item"
-            href={routePath('aula', lang)}
+            href={entrar}
             aria-current={route === 'aula' ? 'page' : undefined}>{t('nav.aula')}</a
           >
           {/*
