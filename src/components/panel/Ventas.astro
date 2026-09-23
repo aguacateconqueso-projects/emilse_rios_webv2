@@ -1,0 +1,1281 @@
+---
+/**
+ * Pestaña Págs. de ventas — el texto de cada página de ventas.
+ *
+ * Pedido de Adrián el 23 sep 2026: «arma cartas para que redacte y publique
+ * sus cartas de ventas (renombra a Págs. de Ventas)».
+ *
+ * **Lo que se edita es exactamente lo que la web ya sabe pintar**: el tipo
+ * `Carta` de `src/data/cartas.ts`, con sus bloques (párrafo, destacado, frase
+ * centrada, la frase grande, testimonio, listas, lo que trae). El editor pone
+ * cada bloque en una fila con el español a la izquierda y el inglés a la
+ * derecha: así los dos idiomas tienen siempre los mismos bloques en el mismo
+ * orden, que es lo que pide el cambio de idioma de la carta.
+ *
+ * **Borrador y publicada, separadas** (migración 0010): lo que Emi escribe se
+ * guarda solo, unos segundos después de dejar de escribir, en
+ * `sales_page_drafts`, que la web no ve. «Publicar» lo copia a `sales_pages`,
+ * y en un minuto está en la web. «Vista previa» abre la página tal como
+ * quedará, con lo que haya en el editor aunque no esté guardado.
+ *
+ * **La primera vez**, el editor arranca con la página que la web enseña hoy
+ * —la escrita en el código—, así que publicar sin tocar nada no cambia nada.
+ *
+ * El botón de un curso que no está «a la venta» dice «Avísame cuando abra»,
+ * escriba lo que escriba la página: lo decide el estado de la ficha en la
+ * Tienda (`src/lib/tienda.ts`). Así se puede dejar escrito el botón de pagar
+ * y no se vende nada hasta abrir.
+ */
+import { cartas, AVISAME } from '../../data/cartas';
+
+const paraJs = { cartas, avisame: AVISAME };
+---
+
+<script type="application/json" id="ventas-datos" set:html={JSON.stringify(paraJs)} />
+
+<div class="app-wrap pest ventas" data-ventas>
+  {/* --- La lista --------------------------------------------------------- */}
+  <div data-v-lista-vista>
+    <header class="pest-cab">
+      <div>
+        <p class="eyebrow">Págs. de ventas</p>
+        <h1 class="app-h1 pest-cab__h">Lo que se lee antes de comprar.</h1>
+      </div>
+    </header>
+
+    <p class="aviso ventas__aviso" data-v-falta hidden>
+      <b>Falta un paso</b> — La base de datos todavía no tiene las páginas de ventas: hay que pegar
+      <code>supabase/migrations/0010_tienda_paginas_mensajes.sql</code> en Supabase → SQL Editor, una vez.
+    </p>
+    <p class="aviso ventas__aviso" data-v-sin-tienda hidden>
+      <b>Primero, la Tienda</b> — Cada página es la de una ficha de Formaciones, y las fichas todavía
+      están en el código. Importa el catálogo en la <a href="#tienda">Tienda</a> y vuelve.
+    </p>
+
+    <ul class="filas" role="list" data-v-lista>
+      <li class="filas__vacio soft">Cargando…</li>
+    </ul>
+  </div>
+
+  {/* --- El editor ------------------------------------------------------------ */}
+  <div class="editor" data-v-editor hidden>
+    <a class="mono editor__volver" href="#ventas">← Todas las páginas</a>
+    <header class="editor__cab">
+      <p class="eyebrow" data-v-e-eyebrow>Página de ventas</p>
+      <h1 class="app-h1 app-h1--sm" data-v-e-h></h1>
+      <p class="mono soft" data-v-e-dir></p>
+    </header>
+
+    <p class="ficha-form__nota editor__origen" data-v-e-origen></p>
+    <p class="ficha-form__nota" data-v-e-boton-nota hidden></p>
+
+    <div class="editor__idiomas" aria-hidden="true">
+      <span class="mono">Español</span>
+      <span class="mono">English</span>
+    </div>
+
+    <div data-v-e-cuerpo></div>
+
+    {/* La barra de abajo: siempre a mano. */}
+    <div class="editor__barra">
+      <p class="mono soft editor__estado" data-v-e-estado aria-live="polite"></p>
+      <div class="editor__actos">
+        <button class="btn-text" type="button" data-v-e-previa="es">Vista previa ES ↗</button>
+        <button class="btn-text" type="button" data-v-e-previa="en">EN ↗</button>
+        <button class="btn-text" type="button" data-v-e-descartar hidden>Descartar el borrador</button>
+        <span data-v-e-guardar></span>
+        <span data-v-e-publicar></span>
+      </div>
+    </div>
+    <ul class="error editor__errores" data-v-e-errores hidden></ul>
+  </div>
+</div>
+
+<script>
+  import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+  import { alAbrir, armarBotones, avisar, boton, el, faltaTabla, fechaHora, hace, leerHash, ocupado } from '../../lib/panel';
+  import type { Bloque, Carta } from '../../data/cartas';
+
+  type Lang = 'es' | 'en';
+  type Par<T> = { es: T; en: T };
+  type Producto = {
+    slug: string;
+    tipo: 'curso' | 'membresia';
+    estado: 'borrador' | 'proximamente' | 'venta' | 'cerrado';
+    nombre_es: string;
+    nombre_en: string;
+    precio_es: string | null;
+    precio_en: string | null;
+  };
+
+  const D = JSON.parse(document.getElementById('ventas-datos')!.textContent!) as {
+    cartas: Record<string, Par<Carta>>;
+    avisame: Par<Carta['boton']>;
+  };
+  const raiz = document.querySelector<HTMLElement>('[data-ventas]')!;
+  const $ = <T extends HTMLElement = HTMLElement>(s: string) => raiz.querySelector<T>(s)!;
+  const LANGS: Lang[] = ['es', 'en'];
+  const NOMBRE_LANG: Record<Lang, string> = { es: 'español', en: 'inglés' };
+
+  /* ==========================================================================
+     El modelo del editor
+     ==========================================================================
+     Una `Carta` por idioma se parte en tres cosas que se editan en pares:
+     los campos sueltos (con nombre de ruta: «boton.texto», «pd.rotulo»…), los
+     bloques de la carta, los testimonios aparte y las preguntas. Al guardar
+     se vuelve a armar la `Carta` de cada idioma. */
+
+  type TipoBloque = 'parrafo' | 'fuerte' | 'grito' | 'acento' | 'testimonio' | 'lista-si' | 'lista-no' | 'puntos';
+  type TxtBloque = { text: string; autor: string; titulo: string; items: string };
+  type Bloq = { tipo: TipoBloque } & Par<TxtBloque>;
+  type Testi = Par<{ text: string; autor: string }>;
+  type Faq = Par<{ q: string; a: string; correo: string; a2: string }>;
+  type Modelo = {
+    campos: Par<Record<string, string>>;
+    bloques: Bloq[];
+    testimonios: Testi[];
+    faq: Faq[];
+    puertas: boolean;
+  };
+
+  const TIPOS: { v: TipoBloque; t: string }[] = [
+    { v: 'parrafo', t: 'Párrafo' },
+    { v: 'fuerte', t: 'Destacado' },
+    { v: 'grito', t: 'Frase centrada' },
+    { v: 'acento', t: 'La frase grande' },
+    { v: 'testimonio', t: 'Testimonio' },
+    { v: 'lista-si', t: 'Lista «para ti»' },
+    { v: 'lista-no', t: 'Lista «no es para ti»' },
+    { v: 'puntos', t: 'Lo que trae' },
+  ];
+
+  const vacioBloque = (): TxtBloque => ({ text: '', autor: '', titulo: '', items: '' });
+  const lineas = (t: string) =>
+    t
+      .split('\n')
+      .map((x) => x.trim())
+      .filter(Boolean);
+
+  function deBloque(b: Bloque | undefined): { tipo: TipoBloque; txt: TxtBloque } {
+    const txt = vacioBloque();
+    if (b === undefined) return { tipo: 'parrafo', txt };
+    if (typeof b === 'string') return { tipo: 'parrafo', txt: { ...txt, text: b } };
+    if (b.k === 'testimonio') return { tipo: 'testimonio', txt: { ...txt, text: b.text, autor: b.autor } };
+    if (b.k === 'lista')
+      return { tipo: b.tono === 'no' ? 'lista-no' : 'lista-si', txt: { ...txt, titulo: b.titulo, items: b.items.join('\n') } };
+    if (b.k === 'puntos') return { tipo: 'puntos', txt: { ...txt, titulo: b.titulo ?? '', items: b.items.join('\n') } };
+    return { tipo: b.k, txt: { ...txt, text: b.text } };
+  }
+
+  function aBloque(tipo: TipoBloque, t: TxtBloque): Bloque {
+    const text = t.text.trim();
+    switch (tipo) {
+      case 'parrafo':
+        return text;
+      case 'testimonio':
+        return { k: 'testimonio', text, autor: t.autor.trim() };
+      case 'lista-si':
+      case 'lista-no':
+        return { k: 'lista', tono: tipo === 'lista-no' ? 'no' : 'si', titulo: t.titulo.trim(), items: lineas(t.items) };
+      case 'puntos':
+        return t.titulo.trim()
+          ? { k: 'puntos', titulo: t.titulo.trim(), items: lineas(t.items) }
+          : { k: 'puntos', items: lineas(t.items) };
+      default:
+        return { k: tipo, text };
+    }
+  }
+
+  /** Los campos sueltos, con su ruta dentro de la `Carta`. */
+  const RUTAS = [
+    'metaTitle', 'metaDesc', 'title', 'subtitle', 'ledeA', 'ledeB', 'photoAlt',
+    'includesH', 'titleEcho', 'priceLabel', 'price', 'pricePer', 'priceNote', 'priceNoteRest', 'priceFeatures', 'priceFoot',
+    'boton.texto', 'boton.href', 'boton.fuera',
+    'final', 'testimonios.titulo', 'pd.rotulo', 'pd.text',
+    'faqH', 'news.pre', 'news.link',
+    'puertas.closeLeadToday', 'puertas.closeLeadDay', 'puertas.payClosed',
+    'puertas.closedNote', 'puertas.closedNoteNoDate', 'puertas.closedLink',
+  ];
+  const OPCIONALES = ['pricePer', 'priceNote', 'priceNoteRest', 'priceFoot', 'final'];
+
+  function leerRuta(c: Carta, ruta: string): string {
+    const v = ruta.split('.').reduce<any>((o, k) => (o == null ? undefined : o[k]), c);
+    if (ruta === 'priceFeatures') return (v ?? []).join('\n');
+    if (ruta === 'boton.fuera') return v ? '1' : '';
+    return v ?? '';
+  }
+
+  function desCarta(c: Par<Carta>, tipo: Producto['tipo']): Modelo {
+    const n = Math.max(c.es.carta?.length ?? 0, c.en.carta?.length ?? 0);
+    const bloques: Bloq[] = [];
+    for (let i = 0; i < n; i++) {
+      const es = deBloque(c.es.carta?.[i]);
+      const en = deBloque(c.en.carta?.[i]);
+      bloques.push({ tipo: es.tipo, es: es.txt, en: en.txt });
+    }
+    const nt = Math.max(c.es.testimonios?.items.length ?? 0, c.en.testimonios?.items.length ?? 0);
+    const nf = Math.max(c.es.faq?.length ?? 0, c.en.faq?.length ?? 0);
+    const testi = (l: Lang, i: number) => ({
+      text: c[l].testimonios?.items[i]?.text ?? '',
+      autor: c[l].testimonios?.items[i]?.autor ?? '',
+    });
+    const faq = (l: Lang, i: number) => {
+      const f = c[l].faq?.[i];
+      return { q: f?.q ?? '', a: f?.a ?? '', correo: f?.correo ?? '', a2: f?.a2 ?? '' };
+    };
+    return {
+      campos: {
+        es: Object.fromEntries(RUTAS.map((r) => [r, leerRuta(c.es, r)])),
+        en: Object.fromEntries(RUTAS.map((r) => [r, leerRuta(c.en, r)])),
+      },
+      bloques,
+      testimonios: Array.from({ length: nt }, (_, i) => ({ es: testi('es', i), en: testi('en', i) })),
+      faq: Array.from({ length: nf }, (_, i) => ({ es: faq('es', i), en: faq('en', i) })),
+      puertas: Boolean(c.es.puertas || c.en.puertas) || tipo === 'membresia',
+    };
+  }
+
+  function aCarta(m: Modelo): Par<Carta> {
+    const hay = (r: string) => Boolean(m.campos.es[r]?.trim() || m.campos.en[r]?.trim());
+    const una = (l: Lang): Carta => {
+      const v = (r: string) => (m.campos[l][r] ?? '').trim();
+      const c: Carta = {
+        metaTitle: v('metaTitle'),
+        metaDesc: v('metaDesc'),
+        title: v('title'),
+        subtitle: v('subtitle'),
+        ledeA: v('ledeA'),
+        ledeB: v('ledeB'),
+        photoAlt: v('photoAlt'),
+        carta: m.bloques.map((b) => aBloque(b.tipo, b[l])),
+        includesH: v('includesH'),
+        titleEcho: v('titleEcho'),
+        priceLabel: v('priceLabel'),
+        price: v('price'),
+        priceFeatures: lineas(m.campos[l].priceFeatures ?? ''),
+        boton: { texto: v('boton.texto'), href: v('boton.href'), ...(m.campos[l]['boton.fuera'] ? { fuera: true } : {}) },
+        faqH: v('faqH'),
+        faq: m.faq.map((f) => {
+          const x = f[l];
+          const o: Carta['faq'][number] = { q: x.q.trim(), a: x.a.trim() };
+          if (x.correo.trim()) {
+            o.correo = x.correo.trim();
+            if (x.a2.trim()) o.a2 = x.a2.trim();
+          }
+          return o;
+        }),
+      };
+      for (const r of OPCIONALES) if (hay(r)) (c as any)[r] = v(r);
+      if (m.testimonios.length)
+        c.testimonios = {
+          titulo: v('testimonios.titulo'),
+          items: m.testimonios.map((t) => ({ text: t[l].text.trim(), autor: t[l].autor.trim() })),
+        };
+      if (hay('pd.rotulo') || hay('pd.text')) c.pd = { rotulo: v('pd.rotulo'), text: v('pd.text') };
+      if (hay('news.pre') || hay('news.link')) c.news = { pre: v('news.pre'), link: v('news.link') };
+      if (m.puertas)
+        c.puertas = {
+          closeLeadToday: v('puertas.closeLeadToday'),
+          closeLeadDay: v('puertas.closeLeadDay'),
+          payClosed: v('puertas.payClosed'),
+          closedNote: v('puertas.closedNote'),
+          closedNoteNoDate: v('puertas.closedNoteNoDate'),
+          closedLink: v('puertas.closedLink'),
+        };
+      return c;
+    };
+    return { es: una('es'), en: una('en') };
+  }
+
+  /** Una página nueva: lo mínimo para que se pinte, con el nombre y el precio de la ficha. */
+  function plantilla(p: Producto): Par<Carta> {
+    const puertas = p.tipo === 'membresia' ? D.cartas['estudiemos-juntos'] : undefined;
+    const una = (l: Lang): Carta => ({
+      metaTitle: `${(l === 'en' ? p.nombre_en : p.nombre_es) || p.nombre_es} — ${l === 'en' ? 'Emilse Rios' : 'Formación de Emilse Rios'}`,
+      metaDesc: '',
+      title: (l === 'en' ? p.nombre_en : p.nombre_es) || p.nombre_es,
+      subtitle: '',
+      ledeA: '',
+      ledeB: '',
+      photoAlt: '',
+      carta: [''],
+      includesH: l === 'en' ? 'What’s included' : 'Qué incluye',
+      titleEcho: (l === 'en' ? p.nombre_es : p.nombre_en) || '',
+      priceLabel: l === 'en' ? 'Price' : 'Precio',
+      price: (l === 'en' ? p.precio_en : p.precio_es) ?? '',
+      priceFeatures: [],
+      boton: D.avisame[l],
+      faqH: l === 'en' ? 'Frequently asked questions' : 'Preguntas frecuentes',
+      faq: [],
+      ...(puertas ? { puertas: puertas[l].puertas } : {}),
+    });
+    return { es: una('es'), en: una('en') };
+  }
+
+  /* ==========================================================================
+     La lista
+     ========================================================================== */
+
+  let productos: Producto[] = [];
+  let publicadas = new Map<string, string>();
+  let borradores = new Map<string, string>();
+  let arrancada = false;
+
+  const ESTADO_FICHA: Record<Producto['estado'], string> = {
+    borrador: 'Ficha en borrador',
+    proximamente: 'Próximamente',
+    venta: 'A la venta',
+    cerrado: 'Cerrado',
+  };
+
+  function estadoPagina(slug: string): { t: string; cls: string } {
+    const pub = publicadas.get(slug);
+    const bor = borradores.get(slug);
+    if (bor && (!pub || Date.parse(bor) > Date.parse(pub))) return { t: 'Cambios sin publicar', cls: 'estado estado--tinta' };
+    if (pub) return { t: 'Publicada', cls: 'estado estado--vivo' };
+    if (D.cartas[slug]) return { t: 'La del código', cls: 'estado' };
+    return { t: 'Sin página', cls: 'estado' };
+  }
+
+  async function cargarLista(): Promise<boolean> {
+    const [p, pub, bor] = await Promise.all([
+      supabase.from('products').select('slug, tipo, estado, nombre_es, nombre_en, precio_es, precio_en').order('position').order('created_at'),
+      supabase.from('sales_pages').select('slug, published_at'),
+      supabase.from('sales_page_drafts').select('slug, updated_at'),
+    ]);
+    const ul = $('[data-v-lista]');
+    ul.textContent = '';
+    const error = p.error ?? pub.error ?? bor.error;
+    if (error) {
+      if (faltaTabla(error.message)) $('[data-v-falta]').hidden = false;
+      else ul.append(el('li', { class: 'filas__vacio', text: `No se pudo cargar: ${error.message}` }));
+      return false;
+    }
+    $('[data-v-falta]').hidden = true;
+    productos = p.data as Producto[];
+    publicadas = new Map((pub.data ?? []).map((x) => [x.slug, x.published_at]));
+    borradores = new Map((bor.data ?? []).map((x) => [x.slug, x.updated_at]));
+    $('[data-v-sin-tienda]').hidden = productos.length > 0;
+    if (!productos.length) return true;
+
+    productos.forEach((prod) => {
+      const e = estadoPagina(prod.slug);
+      const tienePagina = e.t !== 'Sin página';
+      const pub = publicadas.get(prod.slug);
+      const detalle = [
+        ESTADO_FICHA[prod.estado],
+        `/productos/${prod.slug}/`,
+        pub ? `publicada ${cuando(pub)}` : null,
+      ].filter(Boolean);
+      ul.append(
+        el(
+          'li',
+          { class: 'fila' },
+          el(
+            'div',
+            { class: 'fila__txt' },
+            el('a', { class: 'fila__t', href: `#ventas/${prod.slug}`, text: prod.nombre_es || prod.slug }),
+            el('p', { class: 'mono soft', text: detalle.join(' · ') }),
+          ),
+          el('span', { class: e.cls, text: e.t }),
+          el(
+            'div',
+            { class: 'fila__actos' },
+            tienePagina &&
+              prod.estado !== 'borrador' &&
+              el('a', { class: 'mono', href: `/productos/${prod.slug}/`, target: '_blank', rel: 'noopener', text: 'Ver ↗' }),
+            el('a', { class: 'mono ventas__escribir', href: `#ventas/${prod.slug}`, text: tienePagina ? 'Escribir →' : 'Empezarla →' }),
+          ),
+        ),
+      );
+    });
+    return true;
+  }
+
+  /* ==========================================================================
+     El editor
+     ========================================================================== */
+
+  let prod: Producto | null = null;
+  let modelo: Modelo | null = null;
+  let reloj: number | undefined;
+  let guardando: Promise<void> | null = null;
+  let sucio = false;
+  const cuerpo = $('[data-v-e-cuerpo]');
+  const estadoEl = $('[data-v-e-estado]');
+
+  function crecer(t: HTMLTextAreaElement) {
+    t.style.height = 'auto';
+    t.style.height = `${t.scrollHeight + 2}px`;
+  }
+
+  /** Un campo de texto que escribe en el modelo al teclear. */
+  function entrada(
+    valor: string,
+    alCambiar: (v: string) => void,
+    opts: { largo?: boolean; etiqueta: string; ph?: string },
+  ): HTMLInputElement | HTMLTextAreaElement {
+    const n = opts.largo
+      ? el('textarea', { rows: 2, 'aria-label': opts.etiqueta, placeholder: opts.ph })
+      : el('input', { type: 'text', 'aria-label': opts.etiqueta, placeholder: opts.ph });
+    n.value = valor;
+    n.addEventListener('input', () => {
+      alCambiar(n.value);
+      if (n instanceof HTMLTextAreaElement) crecer(n);
+      tocado();
+    });
+    return n;
+  }
+
+  /** Una fila ES | EN de un campo suelto. */
+  function par(ruta: string, t: string, tipo: 'linea' | 'texto' | 'lineas' | 'si', ayuda?: string, ph?: Par<string>) {
+    const m = modelo!;
+    const fila = el('div', { class: 'par' }, el('p', { class: 'par__t', text: t }));
+    for (const l of LANGS) {
+      const etiqueta = `${t} (${NOMBRE_LANG[l]})`;
+      if (tipo === 'si') {
+        const c = el('input', { type: 'checkbox', 'aria-label': etiqueta });
+        c.checked = Boolean(m.campos[l][ruta]);
+        c.addEventListener('change', () => {
+          m.campos[l][ruta] = c.checked ? '1' : '';
+          tocado();
+        });
+        fila.append(el('label', { class: 'casilla par__c' }, c, el('span', { text: l === 'es' ? 'Sí' : 'Yes' })));
+      } else {
+        fila.append(
+          el(
+            'div',
+            { class: 'campo par__c' },
+            entrada(m.campos[l][ruta] ?? '', (v) => (m.campos[l][ruta] = v), {
+              largo: tipo !== 'linea',
+              etiqueta,
+              ph: ph?.[l],
+            }),
+          ),
+        );
+      }
+    }
+    if (ayuda) fila.append(el('p', { class: 'campo__ayuda par__ayuda', text: ayuda }));
+    return fila;
+  }
+
+  function seccion(h: string, nota: string, ...hijos: Node[]) {
+    return el(
+      'section',
+      { class: 'v-sec' },
+      el('h2', { class: 'app-h2 v-sec__h', text: h }),
+      el('p', { class: 'v-sec__nota soft', text: nota }),
+      ...hijos,
+    );
+  }
+
+  /** «hace 3 min», «ayer», «el 12 sep 2026». */
+  const cuando = (iso: string) => {
+    const h = hace(iso);
+    return h === 'ahora' ? 'hace un momento' : /^(hace|ayer)/.test(h) ? h : `el ${h}`;
+  };
+
+  /** Las flechas, duplicar y borrar de un elemento de una lista. */
+  function mandos<T>(lista: T[], i: number, que: string, copiar: (x: T) => T, repintar: () => void) {
+    const b = (texto: string, etiqueta: string, fn: () => void, apagado = false) => {
+      const x = el('button', { class: 'btn-text', type: 'button', 'aria-label': etiqueta, text: texto });
+      x.disabled = apagado;
+      x.addEventListener('click', () => {
+        fn();
+        tocado();
+        repintar();
+      });
+      return x;
+    };
+    return el(
+      'div',
+      { class: 'item__actos' },
+      b('↑', `Subir ${que}`, () => ([lista[i - 1], lista[i]] = [lista[i], lista[i - 1]]), i === 0),
+      b('↓', `Bajar ${que}`, () => ([lista[i + 1], lista[i]] = [lista[i], lista[i + 1]]), i === lista.length - 1),
+      b('Duplicar', `Duplicar ${que}`, () => lista.splice(i + 1, 0, copiar(lista[i]))),
+      b('Borrar', `Borrar ${que}`, () => lista.splice(i, 1)),
+    );
+  }
+
+  /* --- Los bloques de la carta --------------------------------------------- */
+
+  const listaBloques = el('ol', { class: 'items', role: 'list' });
+
+  function camposBloque(b: Bloq, l: Lang, i: number) {
+    const t = b[l];
+    const et = (x: string) => `Bloque ${i + 1}, ${x} (${NOMBRE_LANG[l]})`;
+    const caja = el('div', { class: 'campo par__c item__campos' });
+    const texto = (largo: boolean) =>
+      entrada(t.text, (v) => (t.text = v), { largo, etiqueta: et('texto') });
+    switch (b.tipo) {
+      case 'parrafo':
+      case 'fuerte':
+        caja.append(texto(true));
+        break;
+      case 'grito':
+      case 'acento':
+        caja.append(texto(true));
+        break;
+      case 'testimonio':
+        caja.append(
+          texto(true),
+          entrada(t.autor, (v) => (t.autor = v), { etiqueta: et('nombre'), ph: l === 'es' ? 'Su nombre' : 'Her name' }),
+        );
+        break;
+      default:
+        caja.append(
+          entrada(t.titulo, (v) => (t.titulo = v), {
+            etiqueta: et('título'),
+            ph: b.tipo === 'puntos' ? (l === 'es' ? 'Título (opcional)' : 'Title (optional)') : l === 'es' ? 'Título de la lista' : 'List title',
+          }),
+          entrada(t.items, (v) => (t.items = v), {
+            largo: true,
+            etiqueta: et('puntos'),
+            ph: l === 'es' ? 'Un punto por renglón' : 'One item per line',
+          }),
+        );
+    }
+    return caja;
+  }
+
+  function pintarBloques() {
+    const m = modelo!;
+    listaBloques.textContent = '';
+    m.bloques.forEach((b, i) => {
+      const tipo = el('select', { 'aria-label': `Bloque ${i + 1}: qué es` });
+      TIPOS.forEach((x) => tipo.append(el('option', { value: x.v, text: x.t })));
+      tipo.value = b.tipo;
+      tipo.addEventListener('change', () => {
+        b.tipo = tipo.value as TipoBloque;
+        tocado();
+        pintarBloques();
+      });
+      const insertar = el('button', { class: 'btn-text item__mas', type: 'button', text: '+ Bloque aquí' });
+      insertar.addEventListener('click', () => {
+        m.bloques.splice(i + 1, 0, { tipo: 'parrafo', es: vacioBloque(), en: vacioBloque() });
+        tocado();
+        pintarBloques();
+        listaBloques.children[i + 1]?.querySelector('textarea')?.focus();
+      });
+      listaBloques.append(
+        el(
+          'li',
+          { class: `item item--${b.tipo}` },
+          el(
+            'div',
+            { class: 'item__cab' },
+            el('span', { class: 'mono soft tnum', text: String(i + 1).padStart(2, '0') }),
+            el('div', { class: 'campo item__tipo' }, tipo),
+            mandos(m.bloques, i, `el bloque ${i + 1}`, (x) => structuredClone(x), pintarBloques),
+          ),
+          el('div', { class: 'par par--sin-t' }, camposBloque(b, 'es', i), camposBloque(b, 'en', i)),
+          insertar,
+        ),
+      );
+    });
+    if (!m.bloques.length) {
+      const primero = el('button', { class: 'btn-text', type: 'button', text: '+ El primer bloque' });
+      primero.addEventListener('click', () => {
+        m.bloques.push({ tipo: 'parrafo', es: vacioBloque(), en: vacioBloque() });
+        tocado();
+        pintarBloques();
+      });
+      listaBloques.append(el('li', { class: 'filas__vacio' }, primero));
+    }
+    listaBloques.querySelectorAll('textarea').forEach((t) => crecer(t as HTMLTextAreaElement));
+  }
+
+  /* --- Testimonios aparte y preguntas -------------------------------------- */
+
+  const listaTestis = el('ol', { class: 'items', role: 'list' });
+  const listaFaq = el('ol', { class: 'items', role: 'list' });
+
+  function pintarTestis() {
+    const m = modelo!;
+    listaTestis.textContent = '';
+    m.testimonios.forEach((t, i) => {
+      const lado = (l: Lang) =>
+        el(
+          'div',
+          { class: 'campo par__c item__campos' },
+          entrada(t[l].text, (v) => (t[l].text = v), { largo: true, etiqueta: `Testimonio ${i + 1} (${NOMBRE_LANG[l]})` }),
+          entrada(t[l].autor, (v) => (t[l].autor = v), { etiqueta: `Nombre, testimonio ${i + 1} (${NOMBRE_LANG[l]})`, ph: l === 'es' ? 'Su nombre' : 'Her name' }),
+        );
+      listaTestis.append(
+        el(
+          'li',
+          { class: 'item' },
+          el('div', { class: 'item__cab' }, el('span', { class: 'mono soft tnum', text: String(i + 1).padStart(2, '0') }), el('span'), mandos(m.testimonios, i, `el testimonio ${i + 1}`, (x) => structuredClone(x), pintarTestis)),
+          el('div', { class: 'par par--sin-t' }, lado('es'), lado('en')),
+        ),
+      );
+    });
+    listaTestis.querySelectorAll('textarea').forEach((t) => crecer(t as HTMLTextAreaElement));
+  }
+
+  function pintarFaq() {
+    const m = modelo!;
+    listaFaq.textContent = '';
+    m.faq.forEach((f, i) => {
+      const lado = (l: Lang) => {
+        const x = f[l];
+        const et = (q: string) => `Pregunta ${i + 1}, ${q} (${NOMBRE_LANG[l]})`;
+        return el(
+          'div',
+          { class: 'campo par__c item__campos' },
+          entrada(x.q, (v) => (x.q = v), { etiqueta: et('la pregunta'), ph: l === 'es' ? 'La pregunta' : 'The question' }),
+          entrada(x.a, (v) => (x.a = v), { largo: true, etiqueta: et('la respuesta'), ph: l === 'es' ? 'La respuesta' : 'The answer' }),
+          entrada(x.correo, (v) => (x.correo = v), { etiqueta: et('correo'), ph: l === 'es' ? 'Un correo al final (opcional)' : 'An email at the end (optional)' }),
+          entrada(x.a2, (v) => (x.a2 = v), { etiqueta: et('después del correo'), ph: l === 'es' ? 'Lo que sigue al correo (opcional)' : 'After the email (optional)' }),
+        );
+      };
+      listaFaq.append(
+        el(
+          'li',
+          { class: 'item' },
+          el('div', { class: 'item__cab' }, el('span', { class: 'mono soft tnum', text: String(i + 1).padStart(2, '0') }), el('span'), mandos(m.faq, i, `la pregunta ${i + 1}`, (x) => structuredClone(x), pintarFaq)),
+          el('div', { class: 'par par--sin-t' }, lado('es'), lado('en')),
+        ),
+      );
+    });
+    listaFaq.querySelectorAll('textarea').forEach((t) => crecer(t as HTMLTextAreaElement));
+  }
+
+  function anadir(texto: string, fn: () => void) {
+    const b = el('button', { class: 'btn-text v-sec__mas', type: 'button', text: texto });
+    b.addEventListener('click', () => {
+      fn();
+      tocado();
+    });
+    return b;
+  }
+
+  /* --- El editor entero ---------------------------------------------------- */
+
+  function pintarEditor() {
+    const m = modelo!;
+    const p = prod!;
+    cuerpo.textContent = '';
+    cuerpo.append(
+      seccion(
+        'Arriba de todo',
+        'Lo primero que se lee: el título, la frase de debajo y la apertura grande, en dos renglones. Al lado va la foto de la ficha de la Tienda.',
+        par('title', 'Título', 'linea'),
+        par('subtitle', 'Debajo del título', 'linea'),
+        par('ledeA', 'La apertura, primer renglón', 'texto'),
+        par('ledeB', 'La apertura, segundo renglón', 'linea', 'Sale más grande, a continuación del primero.'),
+        par('photoAlt', 'Descripción de la foto', 'linea', 'Para quien no la ve: qué hay en la foto.'),
+      ),
+      seccion(
+        'La carta',
+        'El cuerpo de la página, bloque a bloque. Párrafo: texto normal. Destacado: en la letra de los títulos. Frase centrada: en cursiva, al centro. La frase grande: la más grande de la página (una o dos por carta). Testimonio: la cita y el nombre — la presentación va en el párrafo de antes. Listas: «para ti» y «no es para ti», un punto por renglón. Lo que trae: filas, un punto por renglón.',
+        listaBloques,
+        anadir('+ Bloque al final', () => {
+          m.bloques.push({ tipo: 'parrafo', es: vacioBloque(), en: vacioBloque() });
+          pintarBloques();
+          listaBloques.lastElementChild?.querySelector('textarea')?.focus();
+        }),
+      ),
+      seccion(
+        'La ficha de precio',
+        'La caja con el precio, lo que incluye y el botón.',
+        par('includesH', 'Título encima de la ficha', 'linea', undefined, { es: 'Qué incluye', en: 'What’s included' }),
+        par('titleEcho', 'El nombre en el otro idioma', 'linea', 'Va en cursiva al lado del título.'),
+        par('priceLabel', 'Rótulo del precio', 'linea', undefined, { es: 'Precio', en: 'Price' }),
+        par('price', 'Precio', 'linea', undefined, { es: '240 €', en: '€240' }),
+        par('pricePer', 'Detrás del precio (opcional)', 'linea', '«/mes» en la membresía. Los cursos no llevan.'),
+        par('priceNote', 'Bajo el precio, en negrita (opcional)', 'linea'),
+        par('priceNoteRest', 'Y cómo sigue esa frase (opcional)', 'texto'),
+        par('priceFeatures', 'Lo que incluye', 'lineas', 'Un punto por renglón.'),
+        par('priceFoot', 'La letra pequeña (opcional)', 'texto'),
+      ),
+      seccion(
+        'El botón',
+        p.tipo === 'membresia'
+          ? 'Sale en la ficha de precio y al final. En la membresía es el del cobro y respeta las puertas: con las puertas cerradas no se puede pulsar.'
+          : 'Sale en la ficha de precio y al final. Mientras la ficha no esté «a la venta» en la Tienda, dice «Avísame cuando abra» y lleva al newsletter, pongas lo que pongas acá.',
+        par('boton.texto', 'Lo que dice', 'linea'),
+        par(
+          'boton.href',
+          'Adónde lleva',
+          'linea',
+          p.tipo === 'membresia'
+            ? 'El cobro de la membresía: /api/checkout?lang=es y /api/checkout?lang=en.'
+            : 'Una dirección completa. Los cursos todavía no se cobran desde la web: sirve un enlace de pago de Stripe, y el acceso al curso se da en Personas.',
+        ),
+        par('boton.fuera', 'Abrir en otra pestaña', 'si'),
+      ),
+      seccion(
+        'Después del precio',
+        'Todo opcional. La frase grande de cierre va con otro botón debajo. Los testimonios aparte, en su propia sección. La posdata, antes de las preguntas.',
+        par('final', 'La frase grande de cierre', 'linea'),
+        par('testimonios.titulo', 'Testimonios aparte: título', 'linea', 'Solo se ve si hay testimonios abajo.'),
+        listaTestis,
+        anadir('+ Testimonio', () => {
+          m.testimonios.push({ es: { text: '', autor: '' }, en: { text: '', autor: '' } });
+          pintarTestis();
+        }),
+        par('pd.rotulo', 'La posdata: rótulo', 'linea', undefined, { es: 'P. D.', en: 'P.S.' }),
+        par('pd.text', 'La posdata', 'texto'),
+      ),
+      seccion(
+        'Preguntas frecuentes',
+        'Se abren al pulsarlas. Si la respuesta termina con un correo, va en su casilla: sale como enlace.',
+        par('faqH', 'Título de la sección', 'linea', undefined, { es: 'Preguntas frecuentes', en: 'Frequently asked questions' }),
+        listaFaq,
+        anadir('+ Pregunta', () => {
+          const v = () => ({ q: '', a: '', correo: '', a2: '' });
+          m.faq.push({ es: v(), en: v() });
+          pintarFaq();
+          listaFaq.lastElementChild?.querySelector('input')?.focus();
+        }),
+      ),
+      seccion(
+        'Al final',
+        'Opcional: una línea con el enlace al newsletter, debajo de todo.',
+        par('news.pre', 'La frase', 'linea', undefined, { es: '¿Todavía no estás en el newsletter?', en: 'Not subscribed to the newsletter yet?' }),
+        par('news.link', 'El enlace', 'linea', undefined, { es: 'Suscríbete acá', en: 'Subscribe here' }),
+      ),
+      seccion(
+        'Para Google y al compartir',
+        'No se ven en la página: son el título de la pestaña del navegador y lo que enseñan Google y WhatsApp al compartirla.',
+        par('metaTitle', 'Título', 'linea'),
+        par('metaDesc', 'Descripción', 'texto', 'Unos 150 caracteres.'),
+      ),
+      ...(m.puertas ? [
+        seccion(
+          'Las puertas',
+          'Solo la membresía. Lo que se lee bajo el botón mientras las puertas están abiertas y cuando se cierran. {time} es la hora, {tz} el huso (CEST o CET) y {date} la fecha: se rellenan solos. Las fechas de cierre y apertura siguen en el código.',
+          par('puertas.closeLeadToday', 'Cierra hoy', 'linea'),
+          par('puertas.closeLeadDay', 'Cierra otro día', 'linea'),
+          par('puertas.payClosed', 'El botón con las puertas cerradas', 'linea'),
+          par('puertas.closedNote', 'Aviso de puertas cerradas, con fecha', 'linea'),
+          par('puertas.closedNoteNoDate', 'Aviso de puertas cerradas, sin fecha', 'linea'),
+          par('puertas.closedLink', 'El enlace del aviso', 'linea'),
+        ),
+      ] : []),
+    );
+    pintarBloques();
+    pintarTestis();
+    pintarFaq();
+    cuerpo.querySelectorAll('textarea').forEach((t) => crecer(t as HTMLTextAreaElement));
+  }
+
+  /* --- Guardar solo --------------------------------------------------------- */
+
+  function tocado() {
+    sucio = true;
+    estadoEl.textContent = 'Sin guardar…';
+    window.clearTimeout(reloj);
+    reloj = window.setTimeout(() => void guardar(), 2500);
+  }
+
+  async function guardar(): Promise<boolean> {
+    window.clearTimeout(reloj);
+    if (guardando) await guardando;
+    if (!sucio || !prod || !modelo) return true;
+    sucio = false;
+    const slug = prod.slug;
+    let ok = true;
+    guardando = (async () => {
+      estadoEl.textContent = 'Guardando…';
+      const { data, error } = await supabase
+        .from('sales_page_drafts')
+        .upsert({ slug, carta: aCarta(modelo!) }, { onConflict: 'slug' })
+        .select('updated_at')
+        .single();
+      if (error) {
+        ok = false;
+        sucio = true;
+        estadoEl.textContent = `No se pudo guardar: ${error.message}`;
+        return;
+      }
+      borradores.set(slug, data.updated_at);
+      pintarEstado();
+    })();
+    await guardando;
+    guardando = null;
+    return ok;
+  }
+
+  function pintarEstado() {
+    if (!prod) return;
+    const pub = publicadas.get(prod.slug);
+    const bor = borradores.get(prod.slug);
+    const pendiente = bor && (!pub || Date.parse(bor) > Date.parse(pub));
+    const partes: string[] = [];
+    if (bor) partes.push(`Borrador guardado ${cuando(bor)}`);
+    if (pub) partes.push(pendiente ? `publicada ${cuando(pub)}, con cambios sin publicar` : `publicada ${cuando(pub)}, al día`);
+    else partes.push('todavía sin publicar');
+    const txt = partes.join(' · ');
+    estadoEl.textContent = txt.charAt(0).toUpperCase() + txt.slice(1);
+    $('[data-v-e-descartar]').hidden = !pendiente;
+  }
+
+  window.addEventListener('beforeunload', (e) => {
+    if (sucio || guardando) e.preventDefault();
+  });
+
+  /* --- Abrir una página ----------------------------------------------------- */
+
+  async function abrirEditor(slug: string) {
+    const p = productos.find((x) => x.slug === slug);
+    if (!p) {
+      avisar('Esa página no existe');
+      location.hash = '#ventas';
+      return;
+    }
+    $('[data-v-lista-vista]').hidden = true;
+    const ed = $('[data-v-editor]');
+    ed.hidden = false;
+    prod = p;
+    modelo = null;
+    sucio = false;
+    cuerpo.textContent = '';
+    cuerpo.append(el('p', { class: 'soft', text: 'Cargando…' }));
+    $('[data-v-e-h]').textContent = p.nombre_es || p.slug;
+    $('[data-v-e-eyebrow]').textContent = `Página de ventas · ${ESTADO_FICHA[p.estado]}`;
+    $('[data-v-e-dir]').textContent = `/productos/${p.slug}/`;
+    $('[data-v-e-errores]').hidden = true;
+    window.scrollTo({ top: 0 });
+
+    const [bor, pub] = await Promise.all([
+      supabase.from('sales_page_drafts').select('carta, updated_at').eq('slug', slug).maybeSingle(),
+      supabase.from('sales_pages').select('carta, published_at').eq('slug', slug).maybeSingle(),
+    ]);
+    if (prod !== p) return;
+    if (bor.error || pub.error) {
+      cuerpo.textContent = '';
+      cuerpo.append(el('p', { class: 'error', text: `No se pudo abrir: ${(bor.error ?? pub.error)!.message}` }));
+      return;
+    }
+
+    let fuente: Par<Carta>;
+    let origen: string;
+    const codigo = D.cartas[slug];
+    if (bor.data) {
+      fuente = bor.data.carta;
+      origen = `Estás en el borrador (guardado el ${fechaHora(bor.data.updated_at)}). ${
+        pub.data
+          ? `La web enseña la versión publicada el ${fechaHora(pub.data.published_at)} hasta que publiques.`
+          : codigo
+            ? 'La web enseña la versión escrita en el código hasta que publiques.'
+            : 'La página no existe en la web hasta que publiques.'
+      }`;
+    } else if (pub.data) {
+      fuente = pub.data.carta;
+      origen = `Es la página que está en la web, publicada el ${fechaHora(pub.data.published_at)}. Lo que cambies se guarda como borrador; la web no cambia hasta que publiques.`;
+    } else if (codigo) {
+      fuente = structuredClone(codigo);
+      origen = 'Es la página que la web enseña hoy, la escrita en el código. Lo que cambies se guarda como borrador; la web no cambia hasta que publiques. Publicarla sin tocar nada no cambia nada.';
+    } else {
+      fuente = plantilla(p);
+      origen = 'Página nueva: empieza con el título y el precio de la ficha. Lo que escribas se guarda como borrador; la página no existe en la web hasta que publiques.';
+    }
+    if (bor.data) borradores.set(slug, bor.data.updated_at);
+    else borradores.delete(slug);
+    if (pub.data) publicadas.set(slug, pub.data.published_at);
+    else publicadas.delete(slug);
+
+    modelo = desCarta(fuente, p.tipo);
+    $('[data-v-e-origen]').textContent = origen;
+    const nota = $('[data-v-e-boton-nota]');
+    nota.hidden = !(p.tipo === 'curso' && p.estado !== 'venta');
+    nota.textContent =
+      p.estado === 'borrador'
+        ? 'La ficha está en borrador en la Tienda: la página no se ve en la web aunque la publiques, hasta que la ficha salga de borrador. Y mientras no esté «a la venta», su botón dice «Avísame cuando abra».'
+        : 'La ficha no está «a la venta» en la Tienda: el botón de la página dice «Avísame cuando abra» y lleva al newsletter. Cuando la pongas a la venta, sale el botón que escribas acá.';
+    pintarEditor();
+    pintarEstado();
+  }
+
+  function cerrarEditor() {
+    prod = null;
+    modelo = null;
+    $('[data-v-editor]').hidden = true;
+    $('[data-v-lista-vista]').hidden = false;
+  }
+
+  /* --- Publicar ---------------------------------------------------------------- */
+
+  function revisar(c: Par<Carta>): string[] {
+    const faltas: string[] = [];
+    for (const l of LANGS) {
+      const x = c[l];
+      const en = ` (${NOMBRE_LANG[l]})`;
+      if (!x.title) faltas.push(`Falta el título${en}.`);
+      if (!x.boton.texto || !x.boton.href) faltas.push(`Al botón le falta el texto o la dirección${en}.`);
+      if (!x.metaTitle) faltas.push(`Falta el título para Google${en}.`);
+      x.carta.forEach((b, i) => {
+        const vacio = typeof b === 'string' ? !b : 'text' in b ? !b.text : !b.items.length;
+        if (vacio) faltas.push(`El bloque ${i + 1} está vacío${en}.`);
+        if (typeof b !== 'string' && b.k === 'testimonio' && !b.autor) faltas.push(`Al testimonio del bloque ${i + 1} le falta el nombre${en}.`);
+      });
+      x.faq.forEach((f, i) => {
+        if (!f.q || !f.a) faltas.push(`A la pregunta ${i + 1} le falta la pregunta o la respuesta${en}.`);
+      });
+    }
+    if (!c.es.carta.length) faltas.unshift('La carta no tiene ningún bloque.');
+    return faltas;
+  }
+
+  const guardarB = boton('Guardar', { chico: true, flecha: false });
+  const publicarB = boton('Publicar', { solido: true, chico: true });
+  $('[data-v-e-guardar]').replaceWith(guardarB);
+  $('[data-v-e-publicar]').replaceWith(publicarB);
+  armarBotones();
+
+  guardarB.addEventListener('click', () =>
+    ocupado(guardarB, 'Guardando…', async () => {
+      sucio = true;
+      if (await guardar()) avisar('Borrador guardado');
+    }),
+  );
+
+  publicarB.addEventListener('click', async () => {
+    if (!prod || !modelo) return;
+    const p = prod;
+    const carta = aCarta(modelo);
+    const errores = $('[data-v-e-errores]');
+    const faltas = revisar(carta);
+    errores.textContent = '';
+    if (faltas.length) {
+      faltas.slice(0, 8).forEach((f) => errores.append(el('li', { text: f })));
+      if (faltas.length > 8) errores.append(el('li', { text: `Y ${faltas.length - 8} más.` }));
+      errores.hidden = false;
+      errores.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      return;
+    }
+    errores.hidden = true;
+    const aviso =
+      p.estado === 'borrador'
+        ? `¿Publicar la página de «${p.nombre_es}»?\n\nLa ficha está en borrador: la página queda lista, pero no se ve hasta que la ficha salga de borrador en la Tienda.`
+        : `¿Publicar la página de «${p.nombre_es}»?\n\nEn un minuto la ve todo el mundo en /productos/${p.slug}/.`;
+    if (!window.confirm(aviso)) return;
+    await ocupado(publicarB, 'Publicando…', async () => {
+      sucio = true;
+      if (!(await guardar())) return;
+      const { data, error } = await supabase
+        .from('sales_pages')
+        .upsert({ slug: p.slug, carta }, { onConflict: 'slug' })
+        .select('published_at')
+        .single();
+      if (error) {
+        avisar(`No se pudo publicar: ${error.message}`);
+        return;
+      }
+      publicadas.set(p.slug, data.published_at);
+      pintarEstado();
+      avisar(p.estado === 'borrador' ? 'Publicada (la ficha sigue en borrador)' : 'Publicada: en un minuto está en la web');
+    });
+  });
+
+  $('[data-v-e-descartar]').addEventListener('click', async () => {
+    if (!prod) return;
+    if (!window.confirm('¿Descartar el borrador?\n\nSe pierden los cambios sin publicar y el editor vuelve a la versión que está en la web.')) return;
+    window.clearTimeout(reloj);
+    sucio = false;
+    const { error } = await supabase.from('sales_page_drafts').delete().eq('slug', prod.slug);
+    if (error) return avisar(`No se pudo descartar: ${error.message}`);
+    avisar('Borrador descartado');
+    await abrirEditor(prod.slug);
+  });
+
+  /* --- La vista previa --------------------------------------------------------
+     Un formulario que se envía a una pestaña nueva: el texto entero no cabe en
+     una dirección, y el token viaja en el cuerpo, no en la dirección. */
+  raiz.querySelectorAll<HTMLButtonElement>('[data-v-e-previa]').forEach((b) =>
+    b.addEventListener('click', async () => {
+      if (!prod || !modelo) return;
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) return avisar('La sesión caducó: vuelve a entrar');
+      const f = el('form', { method: 'post', action: '/panel/vista-previa/', target: '_blank', hidden: true });
+      const campo = (name: string, value: string) => {
+        const i = el('input', { type: 'hidden', name });
+        i.value = value;
+        f.append(i);
+      };
+      campo('token', session.access_token);
+      campo('slug', prod.slug);
+      campo('lang', b.dataset.vEPrevia!);
+      campo('carta', JSON.stringify(aCarta(modelo)));
+      document.body.append(f);
+      f.submit();
+      f.remove();
+    }),
+  );
+
+  /* ==========================================================================
+     Qué se enseña: la lista o una página (`#ventas/<slug>`)
+     ========================================================================== */
+
+  async function segunHash() {
+    const [p, slug] = leerHash();
+    if (p !== 'ventas') {
+      if (sucio) void guardar();
+      return;
+    }
+    if (slug && slug !== prod?.slug) {
+      if (sucio) await guardar();
+      if (!productos.length) await cargarLista();
+      await abrirEditor(slug);
+    } else if (!slug) {
+      if (sucio) await guardar();
+      cerrarEditor();
+      await cargarLista();
+    }
+  }
+
+  alAbrir('ventas', async () => {
+    if (!isSupabaseConfigured) {
+      const ul = $('[data-v-lista]');
+      ul.textContent = '';
+      ul.append(el('li', { class: 'filas__vacio soft', text: 'Sin conectar: no hay de dónde leer las páginas.' }));
+      return;
+    }
+    const ok = await cargarLista();
+    arrancada = true;
+    if (ok) await segunHash();
+  });
+
+  document.addEventListener('panel:pestana', () => {
+    if (arrancada) void segunHash();
+  });
+</script>
+
+<style>
+  .ventas__aviso {
+    margin-top: var(--space-4);
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+  }
+
+  .ventas :global(.ventas__escribir) {
+    color: var(--ink);
+  }
+
+  /* --- El editor ----------------------------------------------------------- */
+  .editor__volver {
+    display: inline-block;
+    border-bottom: 0;
+    color: var(--ink-soft);
+  }
+
+  .editor__volver:hover {
+    color: var(--ink);
+  }
+
+  .editor__cab {
+    margin-top: var(--space-3);
+  }
+
+  .editor__cab h1 {
+    margin-top: var(--space-1);
+  }
+
+  .editor__cab .mono {
+    margin-top: var(--space-1);
+  }
+
+  .editor__origen {
+    margin-top: var(--space-3);
+    max-width: 48rem;
+  }
+
+  [data-v-e-boton-nota] {
+    margin-top: var(--space-2);
+    max-width: 48rem;
+  }
+
+  /* Los rótulos de las dos columnas, una vez arriba. */
+  .editor__idiomas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+    padding-bottom: var(--space-1);
+    border-bottom: 1px solid var(--ink);
+  }
+
+  /* Las secciones se pintan desde el script: sus clases van con :global. */
+  .ventas :global(.v-sec) {
+    padding: var(--space-6) 0 var(--space-4);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .ventas :global(.v-sec__nota) {
+    max-width: 48rem;
+    margin-top: var(--space-1);
+    font-size: var(--text-small);
+    line-height: 1.5;
+  }
+
+  .ventas :global(.v-sec__mas) {
+    margin-top: var(--space-2);
+  }
+
+  /* Un campo en los dos idiomas: el nombre arriba, ES a la izquierda y EN a la
+     derecha. */
+  .ventas :global(.par) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-1) var(--space-3);
+    margin-top: var(--space-3);
+  }
+
+  .ventas :global(.par__t),
+  .ventas :global(.par__ayuda) {
+    grid-column: 1 / -1;
+  }
+
+  .ventas :global(.par__t) {
+    font-family: var(--font-mono);
+    font-size: var(--text-mono);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+  }
+
+  .ventas :global(.par--sin-t) {
+    margin-top: var(--space-1);
+  }
+
+  /* Crecen con lo escrito: sin el alto mínimo de los formularios del panel. */
+  .ventas :global(.par textarea) {
+    min-height: 0;
+    resize: vertical;
+    overflow: hidden;
+  }
+
+  /* --- Las listas: bloques, testimonios, preguntas -------------------------- */
+  .ventas :global(.items) {
+    margin: var(--space-3) 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--ink);
+  }
+
+  .ventas :global(.item) {
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .ventas :global(.item__cab) {
+    display: grid;
+    grid-template-columns: var(--space-4) minmax(0, 16rem) 1fr;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .ventas :global(.item__actos) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-1) var(--space-2);
+  }
+
+  .ventas :global(.item__campos) {
+    gap: var(--space-1);
+  }
+
+  .ventas :global(.item__mas) {
+    margin-top: var(--space-1);
+    color: var(--ink-soft);
+  }
+
+  /* Cada tipo de bloque se insinúa en el editor como se verá: el destacado
+     en la letra de titulares, la frase centrada en cursiva, la grande más
+     grande. Así Emi lee su carta con el ritmo que tendrá. */
+  .ventas :global(.item--fuerte textarea),
+  .ventas :global(.item--grito textarea),
+  .ventas :global(.item--acento textarea) {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    line-height: 1.3;
+  }
+
+  .ventas :global(.item--grito textarea),
+  .ventas :global(.item--acento textarea) {
+    font-style: italic;
+    text-align: center;
+  }
+
+  .ventas :global(.item--acento textarea) {
+    font-size: 1.75rem;
+  }
+
+  .ventas :global(.item--testimonio textarea) {
+    font-style: italic;
+  }
+
+  /* --- La barra de abajo --------------------------------------------------- */
+  .editor__barra {
+    position: sticky;
+    bottom: 0;
+    z-index: 30;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-3);
+    margin-top: var(--space-4);
+    padding: var(--space-2) 0;
+    background: var(--paper);
+    border-top: 1px solid var(--ink);
+  }
+
+  .editor__estado {
+    min-width: 0;
+  }
+
+  .editor__actos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  .editor__errores {
+    margin: var(--space-2) 0 0;
+    padding-left: var(--space-3);
+  }
+
+  @media (max-width: 48rem) {
+    .editor__idiomas {
+      display: none;
+    }
+
+    .ventas :global(.par) {
+      grid-template-columns: 1fr;
+    }
+
+    /* En una sola columna, cada caja dice su idioma. */
+    .ventas :global(.par__c:nth-of-type(1))::before,
+    .ventas :global(.par__c:nth-of-type(2))::before {
+      font-family: var(--font-mono);
+      font-size: var(--text-mono);
+      color: var(--ink-soft);
+    }
+
+    .ventas :global(.par__c:nth-of-type(1))::before {
+      content: 'ES';
+    }
+
+    .ventas :global(.par__c:nth-of-type(2))::before {
+      content: 'EN';
+    }
+
+    .ventas :global(.item__cab) {
+      grid-template-columns: var(--space-4) 1fr;
+    }
+
+    .ventas :global(.item__actos) {
+      grid-column: 1 / -1;
+      justify-content: flex-start;
+    }
+  }
+</style>

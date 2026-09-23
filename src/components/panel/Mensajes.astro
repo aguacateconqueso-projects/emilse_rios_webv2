@@ -1,0 +1,751 @@
+---
+/**
+ * Pestaña Mensajes — lo que le preguntan a Emi, para responderlo desde acá.
+ *
+ * Pedido de Adrián el 23 sep 2026: «arma los mensajes para que pueda
+ * responderlos». Junta las dos bandejas que hay:
+ *
+ * - **El foro de la membresía** (`questions` / `answers`, de la academia):
+ *   cada pregunta cuelga del ejercicio de la semana. Se responde con texto,
+ *   que es lo que el foro de la academia sabe pintar, y puede haber más de una
+ *   respuesta.
+ * - **Los hilos de los cursos** (`course_questions`, migración 0009): el hilo
+ *   privado de cada alumna con Emi, con la clase y el minuto pegados. Se
+ *   responde con **texto, video o audio**, o con una mezcla (decidido el 31 ago
+ *   2026). El video es un enlace de Bunny o de Vimeo, como en las clases. El
+ *   audio se graba acá mismo, con el micrófono, y va al bucket privado
+ *   «cursos» en `<curso>/respuestas/<alumna>/…`: solo lo oye ella (migración
+ *   0010). Al leerla, en su escritorio se apaga el aviso «Emi te respondió».
+ *
+ * Por defecto enseña lo que espera respuesta, de lo más viejo a lo más nuevo:
+ * se contesta en orden. La cifra al lado de «Mensajes» en la barra es esa.
+ */
+---
+
+<div class="app-wrap pest mensajes" data-mensajes>
+  <header class="pest-cab">
+    <div>
+      <p class="eyebrow">Mensajes</p>
+      <h1 class="app-h1 pest-cab__h">Lo que te preguntan.</h1>
+    </div>
+  </header>
+
+  <div class="mensajes__filtros">
+    <div class="segmento" role="tablist" aria-label="Qué enseñar" data-m-estado>
+      <button class="mono segmento__b" type="button" role="tab" data-v="pendientes" aria-selected="true">Sin responder</button>
+      <button class="mono segmento__b" type="button" role="tab" data-v="respondidas" aria-selected="false">Respondidas</button>
+      <button class="mono segmento__b" type="button" role="tab" data-v="todas" aria-selected="false">Todas</button>
+    </div>
+    <label class="campo mensajes__donde">
+      <span class="visually-hidden">Dónde</span>
+      <select data-m-donde>
+        <option value="todo">De todas partes</option>
+        <option value="foro">Foro de la membresía</option>
+      </select>
+    </label>
+  </div>
+
+  <p class="aviso mensajes__aviso" data-m-sin-medios hidden>
+    <b>Video y audio, en pausa</b> — Para responder en los cursos con video o con audio falta un paso en la base
+    de datos: pegar <code>supabase/migrations/0010_tienda_paginas_mensajes.sql</code> en Supabase → SQL Editor.
+    Mientras tanto, se responde con texto.
+  </p>
+
+  <p class="mono soft mensajes__cuenta" data-m-cuenta aria-live="polite"></p>
+  <ol class="mensajes__lista" role="list" data-m-lista>
+    <li class="filas__vacio soft">Cargando…</li>
+  </ol>
+</div>
+
+<script>
+  import type { Session } from '@supabase/supabase-js';
+  import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+  import { alAbrir, armarBotones, avisar, boton, el, fechaHora, hace, ocupado } from '../../lib/panel';
+  import { normalizeVideoUrl, videoEmbed } from '../../lib/video';
+
+  type Msj = {
+    tipo: 'foro' | 'curso';
+    id: string;
+    user_id: string;
+    quien: string;
+    correo: string | null;
+    body: string;
+    creada: string;
+    donde: string;
+    detalle: string;
+    donde_id: string;
+    respondida: boolean;
+    /** Foro: el ejercicio ya salió del aula y ella no ve el foro. No cuenta como pendiente. */
+    vencida?: boolean;
+    /* Foro */
+    respuestas?: { id: string; body: string; created_at: string }[];
+    /* Curso */
+    answer?: string | null;
+    answer_video?: string | null;
+    answer_audio_path?: string | null;
+    answer_seen_at?: string | null;
+    answered_at?: string | null;
+  };
+
+  const raiz = document.querySelector<HTMLElement>('[data-mensajes]')!;
+  const $ = <T extends HTMLElement = HTMLElement>(s: string) => raiz.querySelector<T>(s)!;
+
+  let sesion: Session | null = null;
+  let todos: Msj[] = [];
+  type Estado = 'pendientes' | 'respondidas' | 'todas';
+  let estado: Estado = 'pendientes';
+  let donde = 'todo';
+  let conMedios = true;
+  let arrancada = false;
+
+  /** Lo que espera respuesta: sin responder y que ella todavía puede leer. */
+  const espera = (m: Msj) => !m.respondida && !m.vencida;
+
+  const reloj = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+
+  /* ==========================================================================
+     Cargar las dos bandejas
+     ========================================================================== */
+
+  const CAMPOS_CURSO =
+    'id, course_id, lesson_id, user_id, author_name, minute_s, body, answer, answered_at, created_at, courses(title_es, slug), course_lessons(title_es), profiles(email, full_name)';
+
+  async function cargar() {
+    const pedirCursos = (extra: string) =>
+      supabase.from('course_questions').select(CAMPOS_CURSO + extra).order('created_at', { ascending: false }).limit(500);
+    const [foro, primero] = await Promise.all([
+      supabase
+        .from('questions')
+        .select(
+          'id, body, lang, created_at, author_name, user_id, exercises(title_es, week_label, publish_at, unpublish_at, kind), answers(id, body, created_at), profiles(email, full_name)',
+        )
+        .order('created_at', { ascending: false })
+        .limit(500),
+      pedirCursos(', answer_video, answer_audio_path, answer_seen_at'),
+    ]);
+    let cursos = primero;
+    conMedios = !cursos.error;
+    if (cursos.error && /answer_(video|audio_path|seen_at)/.test(cursos.error.message)) cursos = await pedirCursos('');
+    $('[data-m-sin-medios]').hidden = conMedios || Boolean(cursos.error);
+
+    const lista: Msj[] = [];
+    if (foro.error) console.error('[mensajes] foro', foro.error);
+    const ahora = Date.now();
+    (foro.data ?? []).forEach((q: any) => {
+      const ex = q.exercises ?? {};
+      /* La misma regla que «Hoy»: el foro se ve mientras el ejercicio está en
+         el aula (el bonus no caduca). */
+      const vivo = Boolean(q.exercises) && Date.parse(ex.publish_at) <= ahora && (ex.kind === 'bonus' || Date.parse(ex.unpublish_at) > ahora);
+      lista.push({
+        tipo: 'foro',
+        id: q.id,
+        user_id: q.user_id,
+        quien: q.author_name || q.profiles?.full_name || q.profiles?.email || '(alumna)',
+        correo: q.profiles?.email ?? null,
+        body: q.body,
+        creada: q.created_at,
+        donde: 'Foro de la membresía',
+        detalle: [ex.week_label, ex.title_es, q.lang === 'en' ? 'en inglés' : null].filter(Boolean).join(' · '),
+        donde_id: 'foro',
+        respondida: Boolean(q.answers?.length),
+        vencida: !vivo,
+        respuestas: [...(q.answers ?? [])].sort((a: any, b: any) => Date.parse(a.created_at) - Date.parse(b.created_at)),
+      });
+    });
+    if (cursos.error) console.error('[mensajes] cursos', cursos.error);
+    const cursosVistos = new Map<string, string>();
+    (cursos.data ?? []).forEach((q: any) => {
+      const titulo = q.courses?.title_es || q.courses?.slug || 'Un curso';
+      cursosVistos.set(q.course_id, titulo);
+      lista.push({
+        tipo: 'curso',
+        id: q.id,
+        user_id: q.user_id,
+        quien: q.author_name || q.profiles?.full_name || q.profiles?.email || '(alumna)',
+        correo: q.profiles?.email ?? null,
+        body: q.body,
+        creada: q.created_at,
+        donde: titulo,
+        detalle: [q.course_lessons?.title_es, q.minute_s != null ? `en el minuto ${reloj(q.minute_s)}` : null].filter(Boolean).join(' · '),
+        donde_id: q.course_id,
+        respondida: Boolean(q.answered_at),
+        answer: q.answer,
+        answer_video: q.answer_video ?? null,
+        answer_audio_path: q.answer_audio_path ?? null,
+        answer_seen_at: q.answer_seen_at ?? null,
+        answered_at: q.answered_at,
+      });
+    });
+    todos = lista;
+
+    /* El selector de «dónde», con los cursos que tienen preguntas. */
+    const sel = $<HTMLSelectElement>('[data-m-donde]');
+    const antes = sel.value;
+    sel.querySelectorAll('option[data-curso]').forEach((o) => o.remove());
+    cursosVistos.forEach((t, id) => sel.append(el('option', { value: id, 'data-curso': true, text: `Curso: ${t}` })));
+    sel.value = [...sel.options].some((o) => o.value === antes) ? antes : 'todo';
+    donde = sel.value;
+
+    document.dispatchEvent(new CustomEvent('panel:pendientes', { detail: todos.filter(espera).length }));
+    pintar();
+  }
+
+  /* ==========================================================================
+     Pintar
+     ========================================================================== */
+
+  function pintar() {
+    const ul = $('[data-m-lista]');
+    ul.textContent = '';
+    const lista = todos
+      .filter((m) => (donde === 'todo' ? true : m.donde_id === donde))
+      .filter((m) => (estado === 'todas' ? true : estado === 'pendientes' ? espera(m) : m.respondida))
+      .sort((a, b) =>
+        estado === 'pendientes' ? Date.parse(a.creada) - Date.parse(b.creada) : Date.parse(b.creada) - Date.parse(a.creada),
+      );
+    const sinResp = todos.filter(espera).length;
+    $('[data-m-cuenta]').textContent =
+      estado === 'pendientes'
+        ? lista.length
+          ? `${lista.length} ${lista.length === 1 ? 'espera' : 'esperan'} respuesta · de la más vieja a la más nueva`
+          : ''
+        : `${lista.length} ${lista.length === 1 ? 'mensaje' : 'mensajes'}${sinResp ? ` · ${sinResp} sin responder en total` : ''}`;
+    if (!lista.length) {
+      ul.append(
+        el('li', {
+          class: 'filas__vacio soft',
+          text: estado === 'pendientes' ? 'Todo respondido. Nadie espera nada.' : 'No hay mensajes acá.',
+        }),
+      );
+      return;
+    }
+    lista.forEach((m) => ul.append(tarjeta(m)));
+    armarBotones();
+  }
+
+  function tarjeta(m: Msj): HTMLElement {
+    const li = el('li', { class: `msj-card${espera(m) ? ' msj-card--pendiente' : ''}` });
+    const borrar = el('button', { class: 'btn-text msj-card__borrar', type: 'button', text: 'Borrar la pregunta' });
+    borrar.addEventListener('click', () => borrarPregunta(m));
+    li.append(
+      el(
+        'div',
+        { class: 'msj-card__cab' },
+        el('p', { class: 'mono' }, m.donde, m.detalle ? el('span', { class: 'soft', text: ` · ${m.detalle}` }) : null),
+        el('p', { class: 'mono soft', title: fechaHora(m.creada), text: hace(m.creada) }),
+      ),
+      el(
+        'p',
+        { class: 'msj-card__quien' },
+        el('a', { href: `#personas/${m.user_id}`, text: m.quien }),
+        m.correo && m.correo !== m.quien ? el('span', { class: 'soft', text: ` · ${m.correo}` }) : null,
+      ),
+      el('p', { class: 'msj-card__txt', text: m.body }),
+    );
+    if (m.vencida && !m.respondida)
+      li.append(el('p', { class: 'ficha-form__nota', text: 'Ese ejercicio ya no está en el aula, así que ella ya no ve el foro: una respuesta ahora no le llegaría.' }));
+
+    if (m.tipo === 'foro') {
+      (m.respuestas ?? []).forEach((r) => li.append(respuestaForo(r)));
+      const otra = !m.respondida && !m.vencida;
+      const comp = compositorForo(m);
+      if (otra) li.append(comp);
+      else {
+        const mas = el('button', { class: 'btn-text', type: 'button', text: m.respondida ? 'Añadir otra respuesta' : 'Responder igual' });
+        mas.addEventListener('click', () => {
+          mas.replaceWith(comp);
+          comp.querySelector('textarea')?.focus();
+          armarBotones();
+        });
+        li.append(el('div', { class: 'msj-card__pie' }, mas, borrar));
+        return li;
+      }
+    } else {
+      if (m.respondida) {
+        li.append(respuestaCurso(m));
+        const editar = el('button', { class: 'btn-text', type: 'button', text: 'Cambiar la respuesta' });
+        editar.addEventListener('click', () => {
+          const comp = compositorCurso(m);
+          editar.parentElement!.replaceWith(comp);
+          comp.querySelector('textarea')?.focus();
+          armarBotones();
+        });
+        li.append(
+          el(
+            'div',
+            { class: 'msj-card__pie' },
+            editar,
+            el('span', { class: 'mono soft', text: m.answer_seen_at ? `Ella la vio ${hace(m.answer_seen_at)}` : 'Todavía no la vio' }),
+            borrar,
+          ),
+        );
+        return li;
+      }
+      li.append(compositorCurso(m));
+    }
+    li.append(el('div', { class: 'msj-card__pie msj-card__pie--fin' }, borrar));
+    return li;
+  }
+
+  /* --- Foro ------------------------------------------------------------------ */
+
+  function respuestaForo(r: { id: string; body: string; created_at: string }) {
+    const quitar = el('button', { class: 'btn-text', type: 'button', text: 'Borrar' });
+    quitar.addEventListener('click', async () => {
+      if (!window.confirm('¿Borrar esta respuesta? Desaparece del foro.')) return;
+      const { error } = await supabase.from('answers').delete().eq('id', r.id);
+      if (error) return avisar(`No se pudo borrar: ${error.message}`);
+      avisar('Respuesta borrada');
+      await cargar();
+    });
+    return el(
+      'div',
+      { class: 'msj-card__resp' },
+      el('p', { class: 'mono msj-card__emi' }, 'Tú', el('span', { class: 'soft', text: ` · ${hace(r.created_at)}` })),
+      el('p', { class: 'msj-card__txt', text: r.body }),
+      el('div', { class: 'msj-card__resp-actos' }, quitar),
+    );
+  }
+
+  function compositorForo(m: Msj) {
+    const ta = el('textarea', { rows: 4, 'aria-label': `Tu respuesta a ${m.quien}`, placeholder: 'Tu respuesta…' });
+    const err = el('p', { class: 'error', hidden: true });
+    const enviar = boton('Responder', { solido: true, chico: true });
+    enviar.addEventListener('click', () =>
+      ocupado(enviar, 'Enviando…', async () => {
+        err.hidden = true;
+        const texto = ta.value.trim();
+        if (!texto) {
+          err.textContent = 'Escribe la respuesta antes de enviarla.';
+          err.hidden = false;
+          return;
+        }
+        const { error } = await supabase.from('answers').insert({ question_id: m.id, user_id: sesion?.user.id, body: texto });
+        if (error) {
+          err.textContent = `No se pudo enviar: ${error.message}`;
+          err.hidden = false;
+          return;
+        }
+        avisar('Respondida: ya la ve en el foro');
+        await cargar();
+      }),
+    );
+    return el(
+      'div',
+      { class: 'msj-card__comp' },
+      el('div', { class: 'campo' }, ta),
+      el('p', { class: 'campo__ayuda', text: 'La ve en el foro de la membresía, debajo de su pregunta. En el foro se responde con texto.' }),
+      err,
+      el('div', { class: 'msj-card__comp-actos' }, enviar),
+    );
+  }
+
+  /* --- Cursos ----------------------------------------------------------------- */
+
+  function respuestaCurso(m: Msj) {
+    const r = el(
+      'div',
+      { class: 'msj-card__resp' },
+      el('p', { class: 'mono msj-card__emi' }, 'Tú', m.answered_at ? el('span', { class: 'soft', text: ` · ${hace(m.answered_at)}` }) : null),
+    );
+    if (m.answer) r.append(el('p', { class: 'msj-card__txt', text: m.answer }));
+    const emb = m.answer_video ? videoEmbed(m.answer_video) : null;
+    if (emb?.ok) {
+      const marco = el('div', { class: 'msj-card__video' });
+      const iframe = el('iframe', { src: emb.src, title: 'Tu respuesta en video', loading: 'lazy', allow: emb.allow, allowfullscreen: true });
+      marco.append(iframe);
+      r.append(marco);
+    } else if (m.answer_video) {
+      r.append(el('p', { class: 'error', text: `No se reconoce el enlace del video: ${m.answer_video}` }));
+    }
+    if (m.answer_audio_path) {
+      const audio = el('audio', { class: 'msj-card__audio', controls: true, preload: 'none' });
+      r.append(audio);
+      void supabase.storage
+        .from('cursos')
+        .createSignedUrl(m.answer_audio_path, 3600)
+        .then(({ data }) => {
+          if (data?.signedUrl) audio.src = data.signedUrl;
+        });
+    }
+    return r;
+  }
+
+  /** La grabadora: micrófono → un audio que se escucha antes de mandarlo. */
+  function grabadora() {
+    const caja = el('div', { class: 'grab' });
+    let blob: Blob | null = null;
+    let rec: MediaRecorder | null = null;
+    let partes: Blob[] = [];
+    let t0 = 0;
+    let tic: number | undefined;
+
+    const pintar = (fase: 'nada' | 'grabando' | 'listo', msg?: string) => {
+      caja.textContent = '';
+      window.clearInterval(tic);
+      if (fase === 'nada') {
+        const b = el('button', { class: 'btn-text grab__b', type: 'button' }, el('span', { class: 'grab__punto', 'aria-hidden': 'true' }), 'Grabar un audio');
+        b.addEventListener('click', empezar);
+        caja.append(b);
+        if (msg) caja.append(el('span', { class: 'error grab__err', text: msg }));
+      } else if (fase === 'grabando') {
+        const t = el('span', { class: 'mono tnum grab__t', text: '0:00' });
+        const b = el('button', { class: 'btn-text grab__b grab__b--vivo', type: 'button' }, el('span', { class: 'grab__cuadro', 'aria-hidden': 'true' }), 'Detener');
+        b.addEventListener('click', () => rec?.stop());
+        tic = window.setInterval(() => (t.textContent = reloj((Date.now() - t0) / 1000)), 250);
+        caja.append(b, t, el('span', { class: 'mono soft', text: 'Grabando…' }));
+      } else {
+        const audio = el('audio', { controls: true, src: URL.createObjectURL(blob!) });
+        const otra = el('button', { class: 'btn-text', type: 'button', text: 'Volver a grabar' });
+        const quitar = el('button', { class: 'btn-text', type: 'button', text: 'Quitar el audio' });
+        otra.addEventListener('click', empezar);
+        quitar.addEventListener('click', () => {
+          blob = null;
+          pintar('nada');
+        });
+        caja.append(audio, otra, quitar);
+      }
+    };
+
+    async function empezar() {
+      if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined')
+        return pintar('nada', 'Este navegador no deja grabar. Prueba con Chrome, Safari o Firefox al día.');
+      let flujo: MediaStream;
+      try {
+        flujo = await navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch {
+        return pintar('nada', 'No hay permiso para el micrófono. Dáselo en la barra de la dirección y vuelve a intentarlo.');
+      }
+      const tipo = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg;codecs=opus'].find((x) => MediaRecorder.isTypeSupported(x));
+      rec = new MediaRecorder(flujo, tipo ? { mimeType: tipo } : undefined);
+      partes = [];
+      rec.addEventListener('dataavailable', (e) => e.data.size && partes.push(e.data));
+      rec.addEventListener('stop', () => {
+        flujo.getTracks().forEach((x) => x.stop());
+        blob = new Blob(partes, { type: rec?.mimeType || tipo || 'audio/webm' });
+        pintar(blob.size ? 'listo' : 'nada', blob.size ? undefined : 'No se grabó nada.');
+      });
+      t0 = Date.now();
+      rec.start(1000);
+      pintar('grabando');
+    }
+
+    pintar('nada');
+    return {
+      caja,
+      audio: () => blob,
+      grabando: () => rec?.state === 'recording',
+    };
+  }
+
+  function compositorCurso(m: Msj) {
+    const ta = el('textarea', { rows: 4, 'aria-label': `Tu respuesta a ${m.quien}`, placeholder: 'Tu respuesta…' });
+    ta.value = m.answer ?? '';
+    const video = el('input', { type: 'text', 'aria-label': 'Video de la respuesta', placeholder: 'Enlace del video en Bunny o Vimeo (opcional)', spellcheck: 'false' });
+    video.value = m.answer_video ?? '';
+    const g = grabadora();
+    let quitarAudioViejo = false;
+    const err = el('p', { class: 'error', hidden: true });
+    const enviar = boton(m.respondida ? 'Guardar la respuesta' : 'Responder', { solido: true, chico: true });
+
+    const medios = el('div', { class: 'msj-card__medios' });
+    if (conMedios) {
+      medios.append(el('div', { class: 'campo' }, video));
+      if (m.answer_audio_path) {
+        const viejo = el('p', { class: 'mono soft msj-card__viejo' }, 'Ya tiene un audio. ');
+        const q = el('button', { class: 'btn-text', type: 'button', text: 'Quitarlo' });
+        q.addEventListener('click', () => {
+          quitarAudioViejo = true;
+          viejo.replaceChildren('El audio de antes se quita al guardar.');
+        });
+        viejo.append(q, ' · Si grabas otro, lo reemplaza.');
+        medios.append(viejo);
+      }
+      medios.append(g.caja);
+    }
+
+    enviar.addEventListener('click', () =>
+      ocupado(enviar, 'Enviando…', async () => {
+        err.hidden = true;
+        const falla = (t: string) => {
+          err.textContent = t;
+          err.hidden = false;
+        };
+        if (g.grabando()) return falla('Detén la grabación antes de enviar.');
+        const texto = ta.value.trim();
+        const enlace = video.value.trim();
+        const nuevoAudio = g.audio();
+        const audioQueda = !quitarAudioViejo && !nuevoAudio ? m.answer_audio_path ?? null : null;
+        if (!texto && !enlace && !nuevoAudio && !audioQueda) return falla('Escribe algo, pon un video o graba un audio.');
+        if (enlace && !videoEmbed(enlace).ok) return falla('No reconozco ese enlace de video. Copia el de Bunny («Embed» o la dirección del video) o el de Vimeo.');
+
+        let ruta = audioQueda;
+        if (nuevoAudio) {
+          const ext = nuevoAudio.type.includes('mp4') ? 'm4a' : nuevoAudio.type.includes('ogg') ? 'ogg' : 'webm';
+          ruta = `${m.donde_id}/respuestas/${m.user_id}/${m.id}-${Date.now()}.${ext}`;
+          const up = await supabase.storage.from('cursos').upload(ruta, nuevoAudio, { contentType: nuevoAudio.type || 'audio/webm' });
+          if (up.error) return falla(`No se pudo subir el audio: ${up.error.message}`);
+        }
+        const cambios: Record<string, unknown> = { answer: texto || null, answered_at: new Date().toISOString() };
+        if (conMedios) {
+          cambios.answer_video = enlace ? normalizeVideoUrl(enlace) : null;
+          cambios.answer_audio_path = ruta;
+          /* Si la cambias, le vuelve a salir «Emi te respondió». */
+          cambios.answer_seen_at = null;
+        }
+        const { error } = await supabase.from('course_questions').update(cambios).eq('id', m.id);
+        if (error) return falla(`No se pudo guardar: ${error.message}`);
+        /* El audio de antes, si se quitó o se reemplazó, se borra del bucket. */
+        if (m.answer_audio_path && m.answer_audio_path !== ruta) await supabase.storage.from('cursos').remove([m.answer_audio_path]);
+        avisar(m.respondida ? 'Respuesta cambiada' : 'Respondida: la ve en el hilo del curso');
+        await cargar();
+      }),
+    );
+
+    return el(
+      'div',
+      { class: 'msj-card__comp' },
+      el('div', { class: 'campo' }, ta),
+      medios,
+      el('p', {
+        class: 'campo__ayuda',
+        text: 'La ve en el hilo del curso, debajo de su pregunta, y en su escritorio le sale «Emi te respondió». Puedes mandar texto, video, audio o varios.',
+      }),
+      err,
+      el('div', { class: 'msj-card__comp-actos' }, enviar),
+    );
+  }
+
+  /* --- Borrar una pregunta ------------------------------------------------------ */
+
+  async function borrarPregunta(m: Msj) {
+    if (!window.confirm(`¿Borrar la pregunta de ${m.quien}${m.respondida ? ' y tu respuesta' : ''}?\n\nDesaparece para ella también. Para spam o para lo que se mandó por error.`)) return;
+    const { error } =
+      m.tipo === 'foro'
+        ? await supabase.from('questions').delete().eq('id', m.id)
+        : await supabase.from('course_questions').delete().eq('id', m.id);
+    if (error) return avisar(`No se pudo borrar: ${error.message}`);
+    if (m.answer_audio_path) await supabase.storage.from('cursos').remove([m.answer_audio_path]);
+    avisar('Pregunta borrada');
+    await cargar();
+  }
+
+  /* ==========================================================================
+     Filtros y arranque
+     ========================================================================== */
+
+  raiz.querySelectorAll<HTMLElement>('[data-m-estado] [data-v]').forEach((b) =>
+    b.addEventListener('click', () => {
+      estado = b.dataset.v as Estado;
+      raiz.querySelectorAll<HTMLElement>('[data-m-estado] [data-v]').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+      pintar();
+    }),
+  );
+  $<HTMLSelectElement>('[data-m-donde]').addEventListener('change', (e) => {
+    donde = (e.target as HTMLSelectElement).value;
+    pintar();
+  });
+
+  alAbrir('mensajes', async (s) => {
+    sesion = s;
+    if (!isSupabaseConfigured) {
+      const ul = $('[data-m-lista]');
+      ul.textContent = '';
+      ul.append(el('li', { class: 'filas__vacio soft', text: 'Sin conectar: no hay de dónde leer los mensajes.' }));
+      return;
+    }
+    await cargar();
+    arrancada = true;
+  });
+
+  /* Se relee al volver: pudo llegar algo mientras Emi estaba en otra pestaña.
+     No mientras escribe: si hay un compositor con texto, se deja como está. */
+  document.addEventListener('panel:pestana', (e) => {
+    if ((e as CustomEvent).detail !== 'mensajes' || !arrancada) return;
+    const escribiendo = Array.from(raiz.querySelectorAll<HTMLTextAreaElement>('.msj-card__comp textarea')).some((t) => t.value.trim());
+    if (!escribiendo) void cargar();
+  });
+</script>
+
+<style>
+  .mensajes__filtros {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-3);
+    margin-top: var(--space-4);
+  }
+
+  .mensajes__donde {
+    flex: 0 1 20rem;
+  }
+
+  .mensajes__aviso {
+    margin-top: var(--space-3);
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+  }
+
+  .mensajes__cuenta {
+    margin-top: var(--space-3);
+  }
+
+  .mensajes__lista {
+    display: grid;
+    gap: var(--space-3);
+    margin: var(--space-2) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Una tarjeta por pregunta: la regla de 1 px; la que espera, en tinta. */
+  .mensajes :global(.msj-card) {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border: 1px solid var(--rule);
+  }
+
+  .mensajes :global(.msj-card--pendiente) {
+    border-color: var(--ink);
+  }
+
+  .mensajes :global(.msj-card__cab) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-1) var(--space-3);
+  }
+
+  .mensajes :global(.msj-card__quien a) {
+    font-family: var(--font-display);
+    font-size: 1.375rem;
+    line-height: 1.25;
+    border-bottom: 0;
+  }
+
+  .mensajes :global(.msj-card__txt) {
+    max-width: 44rem;
+    white-space: pre-wrap;
+    text-wrap: pretty;
+  }
+
+  .mensajes :global(.msj-card__resp) {
+    display: grid;
+    gap: var(--space-1);
+    padding-left: var(--space-2);
+    border-left: 2px solid var(--ink);
+  }
+
+  .mensajes :global(.msj-card__resp-actos) {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .mensajes :global(.msj-card__video) {
+    position: relative;
+    width: 100%;
+    max-width: 32rem;
+    aspect-ratio: 16 / 9;
+    background: var(--ink);
+  }
+
+  .mensajes :global(.msj-card__video iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .mensajes :global(.msj-card__audio) {
+    width: 100%;
+    max-width: 28rem;
+  }
+
+  .mensajes :global(.msj-card__comp) {
+    display: grid;
+    gap: var(--space-2);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--rule);
+  }
+
+  .mensajes :global(.msj-card__medios) {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .mensajes :global(.msj-card__comp-actos),
+  .mensajes :global(.msj-card__pie) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  .mensajes :global(.msj-card__pie) {
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--rule);
+  }
+
+  .mensajes :global(.msj-card__pie--fin) {
+    justify-content: flex-end;
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  .mensajes :global(.msj-card__borrar) {
+    margin-left: auto;
+    color: var(--ink-soft);
+  }
+
+  /* --- La grabadora --------------------------------------------------------- */
+  .mensajes :global(.grab) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  .mensajes :global(.grab audio) {
+    height: var(--space-4);
+  }
+
+  .mensajes :global(.grab__b) {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .mensajes :global(.grab__punto),
+  .mensajes :global(.grab__cuadro) {
+    display: inline-block;
+    width: var(--space-1);
+    height: var(--space-1);
+    background: var(--ink);
+  }
+
+  .mensajes :global(.grab__punto) {
+    border-radius: 50%;
+  }
+
+  .mensajes :global(.grab__b--vivo .grab__cuadro) {
+    animation: grab-late 1s steps(2, jump-none) infinite;
+  }
+
+  @keyframes grab-late {
+    to {
+      opacity: 0.2;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mensajes :global(.grab__b--vivo .grab__cuadro) {
+      animation: none;
+    }
+  }
+</style>

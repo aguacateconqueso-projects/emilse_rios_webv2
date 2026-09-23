@@ -44,6 +44,7 @@ export const aulaUi = {
     'desk.loading': 'Cargando tus cursos…',
     'desk.error': 'No pudimos cargar tus cursos. Recarga la página en un momento.',
     'desk.draft': 'Borrador · solo lo ves tú',
+    'desk.newAnswer': 'Emi te respondió',
     'desk.membershipTitle': 'Estudiemos Juntos',
     'desk.membershipLead':
       'El ejercicio de esta semana, el concepto del mes y el foro donde Emi responde.',
@@ -112,6 +113,8 @@ export const aulaUi = {
     'ask.answered': 'Respondida',
     'ask.deleteOne': 'Retirar',
     'ask.emi': 'Emi',
+    'ask.videoReply': 'La respuesta de Emi, en video',
+    'ask.audioReply': 'La respuesta de Emi, en audio',
     'ask.failed': 'No se pudo enviar. Vuelve a intentarlo en un momento.',
     'ask.local':
       'Maqueta: por ahora tus preguntas se guardan en este navegador. Cuando el aula esté enchufada, salen hacia Emi.',
@@ -253,6 +256,7 @@ export const aulaUi = {
     'desk.loading': 'Loading your courses…',
     'desk.error': "We couldn't load your courses. Reload the page in a moment.",
     'desk.draft': 'Draft · only you can see it',
+    'desk.newAnswer': 'Emi answered you',
     'desk.membershipTitle': "Let's study together",
     'desk.membershipLead':
       "This week's exercise, the month's concept and the forum where Emi answers.",
@@ -321,6 +325,8 @@ export const aulaUi = {
     'ask.answered': 'Answered',
     'ask.deleteOne': 'Withdraw',
     'ask.emi': 'Emi',
+    'ask.videoReply': 'Emi’s reply, on video',
+    'ask.audioReply': 'Emi’s reply, as a voice note',
     'ask.failed': "Couldn't send it. Try again in a moment.",
     'ask.local':
       "Mock-up: for now your questions are stored in this browser. Once the classroom is wired up, they go out to Emi.",

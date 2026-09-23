@@ -27,13 +27,19 @@
  * tiene carta **no lo son**, y se ven apagadas.
  */
 import { type Lang, useTranslations, productPath } from '../i18n/ui';
-import { catalogo, entrarHref, tienePagina } from '../data/aula';
+import { entrarHref } from '../data/aula';
+import type { Ficha as FichaTienda } from '../lib/tienda';
 import MediaSlot from './MediaSlot.astro';
 
 interface Props {
   lang: Lang;
+  /**
+   * Las fichas, ya leídas —de la base de datos o del código— por la página.
+   * Desde el 23 sep 2026 las maneja Emi desde la pestaña Tienda del panel.
+   */
+  fichas: FichaTienda[];
 }
-const { lang } = Astro.props;
+const { lang, fichas } = Astro.props;
 const t = useTranslations(lang);
 ---
 
@@ -56,10 +62,10 @@ const t = useTranslations(lang);
 <section class="tienda__wrap block">
   <ul class="cat" role="list">
     {
-      catalogo.map((producto) => {
+      fichas.map((producto) => {
         const copia = producto.copia[lang];
         const venta = producto.estado === 'venta';
-        const pagina = tienePagina(producto);
+        const pagina = producto.conPagina;
         const Ficha = pagina ? 'a' : 'div';
         return (
           <li class:list={['cat__item', 'reveal', !pagina && 'is-soon']}>
@@ -86,7 +92,9 @@ const t = useTranslations(lang);
                       {copia.precio} <span class="soft">{copia.cadencia}</span>
                     </span>
                   ) : (
-                    <span class="soft">{t('products.soon')}</span>
+                    <span class="soft">
+                      {producto.estado === 'cerrado' ? t('products.closed') : t('products.soon')}
+                    </span>
                   )
                 }
               </span>

@@ -13,8 +13,12 @@ import { Image } from 'astro:assets';
  *   <MediaSlot src={retrato} alt="…" ratio="3 / 4" />
  */
 interface Props {
-  /** Imagen importada desde `src/assets`. Si falta, se dibuja el marco vacío. */
-  src?: ImageMetadata;
+  /**
+   * Imagen importada desde `src/assets`, o una URL —las fotos que Emi sube
+   * desde la pestaña Tienda del panel, que viven en el bucket «tienda»—. Si
+   * falta, se dibuja el marco vacío.
+   */
+  src?: ImageMetadata | string;
   alt?: string;
   /** Texto del marco vacío. */
   placeholder: string;
@@ -35,7 +39,16 @@ const { src, alt = '', placeholder, ratio, width = 800, position } = Astro.props
 
 <div class="slot" style={ratio ? `aspect-ratio:${ratio}` : undefined}>
   {
-    src ? (
+    typeof src === 'string' ? (
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        class="slot__img"
+        style={position ? `object-position:${position}` : undefined}
+      />
+    ) : src ? (
       <Image
         src={src}
         alt={alt}

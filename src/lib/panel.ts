@@ -17,14 +17,24 @@ import type { Session } from '@supabase/supabase-js';
  * si Emi entró a mirar un curso.
  */
 
-export type Pestana = 'hoy' | 'membresia' | 'cursos' | 'tienda' | 'cartas' | 'personas' | 'mensajes';
+export type Pestana =
+  | 'inicio'
+  | 'hoy'
+  | 'membresia'
+  | 'cursos'
+  | 'tienda'
+  | 'ventas'
+  | 'personas'
+  | 'mensajes';
 
+/** `inicio` es la vista general: lo que se ve al entrar, sin `#`. */
 export const PESTANAS: Pestana[] = [
+  'inicio',
   'hoy',
   'membresia',
   'cursos',
   'tienda',
-  'cartas',
+  'ventas',
   'personas',
   'mensajes',
 ];
@@ -82,7 +92,7 @@ export function arrancar(s: Session | null) {
 /** `#cursos/<id>` → `['cursos', '<id>']`. */
 export function leerHash(): [Pestana, string | null] {
   const [p, resto] = location.hash.replace(/^#/, '').split('/');
-  const pest = (PESTANAS as string[]).includes(p) ? (p as Pestana) : 'hoy';
+  const pest = (PESTANAS as string[]).includes(p) ? (p as Pestana) : 'inicio';
   return [pest, resto ? decodeURIComponent(resto) : null];
 }
 
@@ -216,3 +226,43 @@ export async function ocupado<T>(b: HTMLButtonElement, texto: string, trabajo: (
 }
 
 export const armarBotones = () => document.dispatchEvent(new CustomEvent('botones:nuevos'));
+
+/* ==========================================================================
+   Fotos: se achican en el navegador antes de subirlas
+   ========================================================================== */
+
+/**
+ * Una foto lista para la web: como mucho `ancho` píxeles y en WebP. Lo que Emi
+ * sube desde el teléfono pesa 5 MB y mide 4000 px; la ficha de Formaciones se
+ * pinta a 520. Achicarla acá evita subir y servir lo que nadie ve. Si el
+ * navegador no sabe hacerlo, se sube tal cual.
+ */
+export async function achicarFoto(fichero: Blob, ancho = 1600): Promise<Blob> {
+  try {
+    const img = await createImageBitmap(fichero);
+    const escala = Math.min(1, ancho / img.width);
+    const lienzo = document.createElement('canvas');
+    lienzo.width = Math.round(img.width * escala);
+    lienzo.height = Math.round(img.height * escala);
+    lienzo.getContext('2d')!.drawImage(img, 0, 0, lienzo.width, lienzo.height);
+    const blob = await new Promise<Blob | null>((ok) => lienzo.toBlob(ok, 'image/webp', 0.85));
+    return blob ?? fichero;
+  } catch {
+    return fichero;
+  }
+}
+
+/** «Todo el Diapasón!» → «todo-el-diapason». */
+export const aSlug = (t: string) =>
+  t
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+export const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+/** Si el error dice que falta una tabla: la migración sin aplicar. */
+export const faltaTabla = (msg: string) =>
+  /does not exist|schema cache|Could not find the (table|function)|relation .* does not exist/i.test(msg);

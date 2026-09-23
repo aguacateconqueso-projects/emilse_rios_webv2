@@ -62,6 +62,7 @@ const paraJs = {
     vacio: a('desk.mineEmpty'),
     error: a('desk.error'),
     borrador: a('desk.draft'),
+    respuesta: a('desk.newAnswer'),
   },
 };
 
@@ -108,6 +109,7 @@ const membresiaHref = `${ACADEMIA}/aula/`;
         <span class="ficha__nombre" data-f-nombre></span>
         <span class="ficha__resumen soft" data-f-resumen></span>
         <span class="estado ficha__estado" data-f-borrador hidden></span>
+        <span class="estado estado--tinta ficha__estado" data-f-respuesta hidden></span>
       </a>
     </li>
   </template>
@@ -139,6 +141,7 @@ const membresiaHref = `${ACADEMIA}/aula/`;
 <script>
   import { datos, clasesDe, reloj, type Curso, type Avance } from '../../lib/aula-datos';
   import { acceso } from '../../lib/aula-acceso';
+  import { supabase } from '../../lib/supabase';
 
   type Ficha = { slug: string; nombre: string; alt: string; foto: string | null };
   const D = JSON.parse(document.getElementById('escritorio-datos')!.textContent!) as {
@@ -152,10 +155,32 @@ const membresiaHref = `${ACADEMIA}/aula/`;
   const $ = <T extends HTMLElement = HTMLElement>(s: string, en: ParentNode = document) =>
     en.querySelector<T>(s);
 
+  /* Las fichas que Emi sube desde la pestaña Tienda del panel mandan sobre las
+     del código: su foto es la que sale en Formaciones. Se busca por el curso
+     que abre la ficha y, si no lo dice, por el nombre corto. */
+  let tienda: { slug: string; course_id: string | null; nombre: string; alt: string; foto: string | null }[] = [];
+  async function leerTienda() {
+    if (datos.modo !== 'supabase') return;
+    const { data, error } = await supabase
+      .from('products')
+      .select('slug, course_id, nombre_es, nombre_en, foto_url, foto_alt_es, foto_alt_en')
+      .eq('tipo', 'curso');
+    if (error || !data) return;
+    tienda = data.map((p) => ({
+      slug: p.slug,
+      course_id: p.course_id,
+      nombre: (lang === 'en' ? p.nombre_en || p.nombre_es : p.nombre_es || p.nombre_en) || '',
+      alt: (lang === 'en' ? p.foto_alt_en || p.foto_alt_es : p.foto_alt_es) || '',
+      foto: p.foto_url,
+    }));
+  }
+  const fichaDe = (c: Curso): Ficha | undefined =>
+    tienda.find((f) => f.course_id === c.id) ??
+    tienda.find((f) => f.slug === c.slug) ??
+    D.catalogo.find((f) => f.slug === c.slug);
+
   const nombreDe = (c: Curso) =>
-    (lang === 'en' ? c.title_en || c.title_es : c.title_es || c.title_en) ||
-    D.catalogo.find((f) => f.slug === c.slug)?.nombre ||
-    c.slug;
+    (lang === 'en' ? c.title_en || c.title_es : c.title_es || c.title_en) || fichaDe(c)?.nombre || c.slug;
 
   const resumenDe = (c: Curso) => (lang === 'en' ? c.summary_en || c.summary_es : c.summary_es) || '';
 
@@ -167,7 +192,7 @@ const membresiaHref = `${ACADEMIA}/aula/`;
     (clase ? `#${clase}` : '');
 
   /* --- Mis cursos ---------------------------------------------------------- */
-  function pintarCursos(cursos: Curso[], avance: Record<string, Avance>, admin: boolean) {
+  function pintarCursos(cursos: Curso[], avance: Record<string, Avance>, admin: boolean, nuevas: Set<string>) {
     const lista = $('[data-cursos]')!;
     const molde = $<HTMLTemplateElement>('[data-ficha]')!;
     lista.textContent = '';
@@ -177,7 +202,7 @@ const membresiaHref = `${ACADEMIA}/aula/`;
       const hechas = clases.filter((l) => avance[l.id]?.hecho).length;
       const pct = clases.length ? Math.round((hechas / clases.length) * 100) : 0;
       const duracion = clases.reduce((s, l) => s + (l.duration_s ?? 0), 0);
-      const ficha = D.catalogo.find((f) => f.slug === c.slug);
+      const ficha = fichaDe(c);
 
       const li = molde.content.firstElementChild!.cloneNode(true) as HTMLElement;
       $<HTMLAnchorElement>('[data-f-link]', li)!.href = hrefCurso(c.slug);
@@ -205,6 +230,12 @@ const membresiaHref = `${ACADEMIA}/aula/`;
         const b = $('[data-f-borrador]', li)!;
         b.textContent = t.borrador;
         b.hidden = false;
+      }
+      /* Emi respondió algo que todavía no leyó: se apaga al abrir el hilo. */
+      if (nuevas.has(c.id)) {
+        const n = $('[data-f-respuesta]', li)!;
+        n.textContent = t.respuesta;
+        n.hidden = false;
       }
       lista.appendChild(li);
     });
@@ -267,8 +298,13 @@ const membresiaHref = `${ACADEMIA}/aula/`;
 
       $('[data-membresia]')!.hidden = !(quien.membresia || quien.admin || datos.modo === 'maqueta');
 
-      const [cursos, avance] = await Promise.all([datos.misCursos(), datos.avance()]);
-      pintarCursos(cursos, avance, quien.admin);
+      const [cursos, avance, nuevas] = await Promise.all([
+        datos.misCursos(),
+        datos.avance(),
+        datos.respuestasNuevas(),
+        leerTienda(),
+      ]);
+      pintarCursos(cursos, avance, quien.admin, nuevas);
       pintarRetomar(cursos, avance);
       estado.textContent = cursos.length ? '' : t.vacio;
       estado.hidden = cursos.length > 0;

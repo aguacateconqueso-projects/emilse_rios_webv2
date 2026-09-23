@@ -1,0 +1,718 @@
+---
+/**
+ * Pestaña Tienda — lo que se ve en Formaciones.
+ *
+ * Pedido de Adrián el 23 sep 2026: «arma el panel de tienda, para que Emi
+ * pueda subir lo que va a vender». Cada ficha es una fila de `products`
+ * (migración 0010): nombre, línea, precio, foto, orden y **uno de los cuatro
+ * estados**:
+ *
+ *   borrador      no se ve en ninguna parte
+ *   próximamente  se ve; su botón es «Avísame cuando abra»
+ *   a la venta    se ve y se compra
+ *   cerrado       se ve y no se compra; quien ya lo tiene, lo sigue teniendo
+ *
+ * La web lee esto en el servidor con un minuto de caché (`src/lib/tienda.ts`),
+ * así que un cambio tarda como mucho un minuto en verse.
+ *
+ * **La primera vez hay que importar el catálogo del código.** Mientras la
+ * tabla esté vacía, Formaciones enseña `src/data/aula.ts`; «Importar» copia
+ * esas cuatro fichas, con sus fotos, y desde ese momento manda la base de
+ * datos. La web no cambia al importar: son las mismas fichas.
+ *
+ * El texto de cada página de ventas se escribe en la pestaña de al lado, Págs.
+ * de ventas. El cobro de la membresía y sus puertas siguen en el código.
+ */
+import { getImage } from 'astro:assets';
+import { catalogo } from '../../data/aula';
+
+/** El catálogo del código, con sus fotos ya optimizadas, para importarlo. */
+const importable = await Promise.all(
+  catalogo.map(async (p, i) => ({
+    slug: p.slug,
+    tipo: p.tipo,
+    estado: p.estado,
+    position: i,
+    num: p.num,
+    nombre_es: p.copia.es.nombre,
+    nombre_en: p.copia.en.nombre,
+    resumen_es: p.copia.es.resumen,
+    resumen_en: p.copia.en.resumen,
+    precio_es: p.copia.es.precio || null,
+    precio_en: p.copia.en.precio || null,
+    cadencia_es: p.copia.es.cadencia || null,
+    cadencia_en: p.copia.en.cadencia || null,
+    foto_alt_es: p.copia.es.fotoAlt ?? null,
+    foto_alt_en: p.copia.en.fotoAlt ?? null,
+    foto:
+      p.foto && typeof p.foto !== 'string'
+        ? (await getImage({ src: p.foto, width: 1200, format: 'webp' })).src
+        : null,
+  })),
+);
+---
+
+<script type="application/json" id="tienda-importable" set:html={JSON.stringify(importable)} />
+
+<div class="app-wrap pest tienda" data-tienda>
+  <header class="pest-cab">
+    <div>
+      <p class="eyebrow">Tienda</p>
+      <h1 class="app-h1 pest-cab__h">Lo que vendes, como se ve.</h1>
+    </div>
+    <div class="tienda__cab-actos">
+      <a class="mono" href="/productos/" target="_blank" rel="noopener">Ver Formaciones ↗</a>
+      <span data-t-nuevo></span>
+    </div>
+  </header>
+
+  <div class="aviso tienda__importar" data-t-importar hidden>
+    <p>
+      <b>Primero, importar</b> — Formaciones enseña todavía el catálogo escrito en el código:
+      <span data-t-cuantas></span>. Impórtalo para poder cambiarlo desde acá. Se copian las fichas y sus
+      fotos tal cual, y la web no cambia.
+    </p>
+    <div class="tienda__importar-actos" data-t-importar-actos></div>
+  </div>
+
+  <p class="aviso tienda__falta" data-t-falta hidden>
+    <b>Falta un paso</b> — La base de datos todavía no tiene la tienda: hay que pegar
+    <code>supabase/migrations/0010_tienda_paginas_mensajes.sql</code> en Supabase → SQL Editor, una vez.
+  </p>
+
+  {/* --- El formulario --------------------------------------------------- */}
+  <form class="ficha-form tienda__form" data-t-form hidden novalidate>
+    <h2 class="app-h2" data-t-form-h>Nueva ficha</h2>
+
+    <div class="tienda__dos-segmentos">
+      <div class="campo">
+        <span class="campo__t">Qué es</span>
+        <div class="segmento" role="radiogroup" aria-label="Tipo" data-t-tipo>
+          <button class="mono segmento__b" type="button" role="radio" data-v="curso">Curso</button>
+          <button class="mono segmento__b" type="button" role="radio" data-v="membresia">Membresía</button>
+        </div>
+      </div>
+      <div class="campo">
+        <span class="campo__t">Estado</span>
+        <div class="segmento" role="radiogroup" aria-label="Estado" data-t-estado>
+          <button class="mono segmento__b" type="button" role="radio" data-v="borrador">Borrador</button>
+          <button class="mono segmento__b" type="button" role="radio" data-v="proximamente">Próximamente</button>
+          <button class="mono segmento__b" type="button" role="radio" data-v="venta">A la venta</button>
+          <button class="mono segmento__b" type="button" role="radio" data-v="cerrado">Cerrado</button>
+        </div>
+      </div>
+    </div>
+    <p class="ficha-form__nota" data-t-estado-nota></p>
+
+    <div class="dos">
+      <fieldset class="idioma">
+        <legend class="mono idioma__tag">Español</legend>
+        <label class="campo">
+          <span class="campo__t">Nombre</span>
+          <input type="text" data-p="nombre_es" placeholder="Ej. Todo el diapasón" />
+        </label>
+        <label class="campo">
+          <span class="campo__t">La línea de la ficha</span>
+          <textarea data-p="resumen_es" rows="3"></textarea>
+          <span class="campo__ayuda" data-cuenta="resumen_es"></span>
+        </label>
+        <div class="tienda__precio">
+          <label class="campo">
+            <span class="campo__t">Precio</span>
+            <input type="text" data-p="precio_es" placeholder="240 €" />
+          </label>
+          <label class="campo">
+            <span class="campo__t">Debajo del precio</span>
+            <input type="text" data-p="cadencia_es" placeholder="pago único · al mes" />
+          </label>
+        </div>
+        <label class="campo">
+          <span class="campo__t">Descripción de la foto</span>
+          <input type="text" data-p="foto_alt_es" placeholder="Para quien no la ve: qué hay en la foto" />
+        </label>
+      </fieldset>
+
+      <fieldset class="idioma">
+        <legend class="mono idioma__tag">English</legend>
+        <label class="campo">
+          <span class="campo__t">Name</span>
+          <input type="text" data-p="nombre_en" placeholder="E.g. Fingerboard" />
+        </label>
+        <label class="campo">
+          <span class="campo__t">Card line</span>
+          <textarea data-p="resumen_en" rows="3"></textarea>
+          <span class="campo__ayuda" data-cuenta="resumen_en"></span>
+        </label>
+        <div class="tienda__precio">
+          <label class="campo">
+            <span class="campo__t">Price</span>
+            <input type="text" data-p="precio_en" placeholder="€240" />
+          </label>
+          <label class="campo">
+            <span class="campo__t">Below the price</span>
+            <input type="text" data-p="cadencia_en" placeholder="one payment · a month" />
+          </label>
+        </div>
+        <label class="campo">
+          <span class="campo__t">Photo description</span>
+          <input type="text" data-p="foto_alt_en" />
+        </label>
+      </fieldset>
+    </div>
+
+    <div class="tienda__foto">
+      <div class="tienda__foto-marco" data-t-foto-marco>
+        <img alt="" data-t-foto-img hidden />
+        <span class="mono soft" data-t-foto-vacia>Sin foto</span>
+      </div>
+      <div class="campo">
+        <span class="campo__t">Foto</span>
+        <input type="file" accept="image/*" data-t-foto />
+        <span class="campo__ayuda">
+          Horizontal, 3:2. Se achica sola antes de subirla. En la web sale en blanco y negro y toma color al
+          pasar por encima.
+        </span>
+        <button class="btn-text" type="button" data-t-foto-quitar hidden>Quitar la foto</button>
+      </div>
+    </div>
+
+    <div class="tienda__tres">
+      <label class="campo">
+        <span class="campo__t">Nombre corto (dirección)</span>
+        <input type="text" data-p="slug" spellcheck="false" autocomplete="off" placeholder="todo-el-diapason" />
+        <span class="campo__ayuda" data-t-slug-ayuda>/productos/…/</span>
+      </label>
+      <label class="campo">
+        <span class="campo__t">Número</span>
+        <input type="text" data-p="num" placeholder="02" />
+        <span class="campo__ayuda">El que va al margen de la ficha.</span>
+      </label>
+      <label class="campo">
+        <span class="campo__t">Curso del aula</span>
+        <select data-p="course_id"></select>
+        <span class="campo__ayuda">El que se abre al comprarla.</span>
+      </label>
+    </div>
+
+    <p class="error" data-t-error hidden></p>
+    <div class="ficha-form__actos" data-t-actos></div>
+  </form>
+
+  {/* --- La lista ------------------------------------------------------------ */}
+  <ul class="filas" role="list" data-t-lista>
+    <li class="filas__vacio soft">Cargando…</li>
+  </ul>
+  <p class="mono soft tienda__pie">Los cambios se ven en Formaciones en un minuto como mucho.</p>
+</div>
+
+<script>
+  import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+  import {
+    achicarFoto,
+    alAbrir,
+    armarBotones,
+    aSlug,
+    avisar,
+    boton,
+    el,
+    faltaTabla,
+    ocupado,
+    SLUG_RE,
+  } from '../../lib/panel';
+
+  type Estado = 'borrador' | 'proximamente' | 'venta' | 'cerrado';
+  type Producto = {
+    slug: string;
+    tipo: 'curso' | 'membresia';
+    estado: Estado;
+    position: number;
+    num: string | null;
+    nombre_es: string;
+    nombre_en: string;
+    resumen_es: string | null;
+    resumen_en: string | null;
+    precio_es: string | null;
+    precio_en: string | null;
+    cadencia_es: string | null;
+    cadencia_en: string | null;
+    foto_url: string | null;
+    foto_alt_es: string | null;
+    foto_alt_en: string | null;
+    course_id: string | null;
+  };
+
+  const raiz = document.querySelector<HTMLElement>('[data-tienda]')!;
+  const $ = <T extends HTMLElement = HTMLElement>(s: string) => raiz.querySelector<T>(s)!;
+  const $$ = <T extends HTMLElement = HTMLElement>(s: string) => Array.from(raiz.querySelectorAll<T>(s));
+  const campo = <T extends HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement = HTMLInputElement>(k: string) =>
+    raiz.querySelector<T>(`[data-p="${k}"]`)!;
+  const IMPORTABLE = JSON.parse(document.getElementById('tienda-importable')!.textContent!) as (Omit<
+    Producto,
+    'foto_url' | 'course_id'
+  > & { foto: string | null })[];
+
+  const ESTADOS: Record<Estado, { t: string; nota: string; cls: string }> = {
+    borrador: {
+      t: 'Borrador',
+      nota: 'Borrador: no se ve en Formaciones ni tiene página. Para prepararla con calma.',
+      cls: 'estado',
+    },
+    proximamente: {
+      t: 'Próximamente',
+      nota: 'Próximamente: se ve en Formaciones y su página abre, pero el botón es «Avísame cuando abra».',
+      cls: 'estado estado--tinta',
+    },
+    venta: {
+      t: 'A la venta',
+      nota: 'A la venta: se ve y se compra. El botón de su página es el que escribas en Págs. de ventas.',
+      cls: 'estado estado--vivo',
+    },
+    cerrado: {
+      t: 'Cerrado',
+      nota: 'Cerrado: se ve, pero ya no se compra. Quien ya lo tiene lo sigue teniendo en su aula.',
+      cls: 'estado',
+    },
+  };
+
+  let lista: Producto[] = [];
+  let cursos: { id: string; title_es: string; slug: string }[] = [];
+  let editando: Producto | null = null;
+  let tipo: Producto['tipo'] = 'curso';
+  let estado: Estado = 'borrador';
+  let fotoNueva: Blob | null = null;
+  let fotoQuitada = false;
+  let slugTocado = false;
+  const form = $<HTMLFormElement>('[data-t-form]');
+
+  /* --- La lista --------------------------------------------------------- */
+
+  async function cargar() {
+    const [p, c] = await Promise.all([
+      supabase.from('products').select('*').order('position').order('created_at'),
+      supabase.from('courses').select('id, title_es, slug').order('position'),
+    ]);
+    const ul = $('[data-t-lista]');
+    ul.textContent = '';
+    if (p.error) {
+      if (faltaTabla(p.error.message)) {
+        $('[data-t-falta]').hidden = false;
+        nuevo.disabled = true;
+      } else ul.append(el('li', { class: 'filas__vacio', text: `No se pudo cargar: ${p.error.message}` }));
+      return;
+    }
+    $('[data-t-falta]').hidden = true;
+    lista = p.data as Producto[];
+    cursos = c.data ?? [];
+
+    /* Vacía: Formaciones enseña el código. Primero, importarlo. */
+    $('[data-t-importar]').hidden = lista.length > 0;
+    $('[data-t-cuantas]').textContent = `${IMPORTABLE.length} fichas (${IMPORTABLE.map((x) => x.nombre_es).join(', ')})`;
+    nuevo.disabled = lista.length === 0;
+    if (!lista.length) {
+      ul.append(el('li', { class: 'filas__vacio soft', text: 'Todavía no hay fichas en la base de datos.' }));
+      return;
+    }
+
+    lista.forEach((prod, i) => {
+      const e = ESTADOS[prod.estado];
+      const editar = boton('Editar', { chico: true, flecha: false });
+      editar.addEventListener('click', () => abrir(prod));
+      const sube = el('button', { class: 'btn-text', type: 'button', 'aria-label': 'Subir', text: '↑' });
+      const baja = el('button', { class: 'btn-text', type: 'button', 'aria-label': 'Bajar', text: '↓' });
+      sube.disabled = i === 0;
+      baja.disabled = i === lista.length - 1;
+      sube.addEventListener('click', () => mover(i, -1));
+      baja.addEventListener('click', () => mover(i, 1));
+      const precio = [prod.precio_es, prod.cadencia_es].filter(Boolean).join(' ');
+      ul.append(
+        el(
+          'li',
+          { class: 'fila tienda__fila' },
+          el(
+            'div',
+            { class: 'tienda__mini' },
+            prod.foto_url ? el('img', { src: prod.foto_url, alt: '', loading: 'lazy' }) : el('span', { class: 'mono soft', text: prod.num ?? '' }),
+          ),
+          el(
+            'div',
+            { class: 'fila__txt' },
+            el('p', { class: 'fila__t', text: prod.nombre_es || prod.slug }),
+            el(
+              'p',
+              { class: 'mono soft' },
+              [prod.num, prod.tipo === 'membresia' ? 'Membresía' : 'Curso', `/${prod.slug}/`, precio].filter(Boolean).join(' · '),
+            ),
+          ),
+          el('span', { class: e.cls, text: e.t }),
+          el(
+            'div',
+            { class: 'fila__actos' },
+            sube,
+            baja,
+            el('a', { class: 'mono', href: `#ventas/${prod.slug}`, text: 'Su página' }),
+            /* En borrador no hay nada que ver; el hueco se guarda para que las
+               columnas de la lista no bailen. */
+            prod.estado !== 'borrador'
+              ? el('a', { class: 'mono', href: `/productos/${prod.slug}/`, target: '_blank', rel: 'noopener', text: 'Ver ↗' })
+              : el('span', { class: 'mono tienda__hueco', 'aria-hidden': 'true', text: 'Ver ↗' }),
+            editar,
+          ),
+        ),
+      );
+    });
+    armarBotones();
+  }
+
+  async function mover(i: number, dir: -1 | 1) {
+    const j = i + dir;
+    [lista[i], lista[j]] = [lista[j], lista[i]];
+    const r = await Promise.all(lista.map((p, k) => supabase.from('products').update({ position: k }).eq('slug', p.slug)));
+    const fallo = r.find((x) => x.error);
+    if (fallo?.error) avisar(`No se pudo ordenar: ${fallo.error.message}`);
+    await cargar();
+  }
+
+  /* --- Importar el catálogo del código ----------------------------------- */
+
+  const importar = boton('Importar el catálogo actual', { solido: true });
+  $('[data-t-importar-actos]').append(importar);
+  importar.addEventListener('click', () =>
+    ocupado(importar, 'Importando…', async () => {
+      try {
+        for (const p of IMPORTABLE) {
+          let foto_url: string | null = null;
+          if (p.foto) {
+            const blob = await (await fetch(p.foto)).blob();
+            foto_url = await subirFoto(p.slug, blob);
+          }
+          const { foto: _f, ...fila } = p;
+          /* El curso del aula con el mismo nombre corto, si ya existe, queda atado. */
+          const course_id = cursos.find((c) => c.slug === p.slug)?.id ?? null;
+          const { error } = await supabase.from('products').upsert({ ...fila, foto_url, course_id }, { onConflict: 'slug' });
+          if (error) throw error;
+        }
+        avisar('Catálogo importado: desde ahora manda la tienda');
+        await cargar();
+      } catch (e: any) {
+        avisar(`No se pudo importar: ${e?.message ?? e}`);
+      }
+    }),
+  );
+
+  async function subirFoto(slug: string, blob: Blob): Promise<string> {
+    const ext = blob.type === 'image/webp' ? 'webp' : blob.type === 'image/png' ? 'png' : 'jpg';
+    const ruta = `productos/${slug}-${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from('tienda').upload(ruta, blob, { contentType: blob.type || undefined, upsert: false });
+    if (error) throw new Error(`La foto: ${error.message}`);
+    return supabase.storage.from('tienda').getPublicUrl(ruta).data.publicUrl;
+  }
+
+  /* --- El formulario ------------------------------------------------------ */
+
+  function marcar(grupo: string, v: string) {
+    $$(`[${grupo}] [data-v]`).forEach((b) => b.setAttribute('aria-checked', String(b.dataset.v === v)));
+  }
+  function ponerEstado(e: Estado) {
+    estado = e;
+    marcar('data-t-estado', e);
+    $('[data-t-estado-nota]').textContent = ESTADOS[e].nota;
+  }
+  function ponerTipo(t: Producto['tipo']) {
+    tipo = t;
+    marcar('data-t-tipo', t);
+  }
+  $$('[data-t-estado] [data-v]').forEach((b) => b.addEventListener('click', () => ponerEstado(b.dataset.v as Estado)));
+  $$('[data-t-tipo] [data-v]').forEach((b) => b.addEventListener('click', () => ponerTipo(b.dataset.v as Producto['tipo'])));
+
+  function cuenta(k: string) {
+    const n = (campo(k).value || '').length;
+    $(`[data-cuenta="${k}"]`).textContent = `${n} caracteres · lo ideal, entre 100 y 140`;
+  }
+  ['resumen_es', 'resumen_en'].forEach((k) => campo(k).addEventListener('input', () => cuenta(k)));
+
+  function ayudaSlug() {
+    $('[data-t-slug-ayuda]').textContent = `/productos/${campo('slug').value || '…'}/`;
+  }
+  campo('slug').addEventListener('input', () => {
+    slugTocado = true;
+    ayudaSlug();
+  });
+  campo('nombre_es').addEventListener('input', () => {
+    if (!editando && !slugTocado) {
+      campo('slug').value = aSlug(campo('nombre_es').value);
+      ayudaSlug();
+    }
+  });
+
+  function verFoto(url: string | null) {
+    const img = $<HTMLImageElement>('[data-t-foto-img]');
+    img.hidden = !url;
+    if (url) img.src = url;
+    $('[data-t-foto-vacia]').hidden = Boolean(url);
+    $('[data-t-foto-quitar]').hidden = !url;
+  }
+  $<HTMLInputElement>('[data-t-foto]').addEventListener('change', async (e) => {
+    const f = (e.target as HTMLInputElement).files?.[0];
+    if (!f) return;
+    fotoNueva = await achicarFoto(f);
+    fotoQuitada = false;
+    verFoto(URL.createObjectURL(fotoNueva));
+  });
+  $('[data-t-foto-quitar]').addEventListener('click', () => {
+    fotoNueva = null;
+    fotoQuitada = true;
+    $<HTMLInputElement>('[data-t-foto]').value = '';
+    verFoto(null);
+  });
+
+  function abrir(p?: Producto) {
+    form.reset();
+    editando = p ?? null;
+    fotoNueva = null;
+    fotoQuitada = false;
+    slugTocado = Boolean(p);
+    $('[data-t-error]').hidden = true;
+    $('[data-t-form-h]').textContent = p ? `Editar «${p.nombre_es || p.slug}»` : 'Nueva ficha';
+
+    const sel = campo<HTMLSelectElement>('course_id');
+    sel.textContent = '';
+    sel.append(el('option', { value: '', text: 'Ninguno' }));
+    cursos.forEach((c) => sel.append(el('option', { value: c.id, text: c.title_es || c.slug })));
+
+    const k = [
+      'slug', 'num', 'nombre_es', 'nombre_en', 'resumen_es', 'resumen_en', 'precio_es', 'precio_en',
+      'cadencia_es', 'cadencia_en', 'foto_alt_es', 'foto_alt_en', 'course_id',
+    ] as const;
+    k.forEach((n) => (campo(n).value = ((p?.[n] as string | null) ?? '') || ''));
+    if (!p) {
+      campo('num').value = String(lista.length + 1).padStart(2, '0');
+      /* Si ya hay un curso con el mismo nombre corto, se ata solo. */
+    }
+    ponerTipo(p?.tipo ?? 'curso');
+    ponerEstado(p?.estado ?? 'borrador');
+    verFoto(p?.foto_url ?? null);
+    cuenta('resumen_es');
+    cuenta('resumen_en');
+    ayudaSlug();
+    borrar.hidden = !p;
+    form.hidden = false;
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function cerrar() {
+    form.hidden = true;
+    editando = null;
+  }
+
+  const guardar = boton('Guardar la ficha', { solido: true, tipo: 'submit' });
+  const cancelar = el('button', { class: 'btn-text', type: 'button', text: 'Cancelar' });
+  const borrar = el('button', { class: 'btn-text', type: 'button', text: 'Borrar la ficha' });
+  cancelar.addEventListener('click', cerrar);
+  $('[data-t-actos]').append(guardar, cancelar, borrar);
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const err = $('[data-t-error]');
+    err.hidden = true;
+    const falla = (t: string) => {
+      err.textContent = t;
+      err.hidden = false;
+    };
+    const slug = campo('slug').value.trim();
+    if (!campo('nombre_es').value.trim()) return falla('La ficha necesita nombre, por lo menos en español.');
+    if (!SLUG_RE.test(slug)) return falla('El nombre corto solo puede llevar minúsculas, números y guiones.');
+    if (lista.some((p) => p.slug === slug && p !== editando)) return falla('Ya hay otra ficha con ese nombre corto.');
+    if (editando && slug !== editando.slug &&
+      !window.confirm('Cambiar el nombre corto cambia la dirección de su página: los enlaces que ya hayas compartido dejan de llevar a ella. ¿Seguir?'))
+      return;
+
+    await ocupado(guardar, 'Guardando…', async () => {
+      try {
+        const val = (k: string) => campo(k).value.trim() || null;
+        let foto_url = editando?.foto_url ?? null;
+        if (fotoNueva) foto_url = await subirFoto(slug, fotoNueva);
+        else if (fotoQuitada) foto_url = null;
+        const fila = {
+          slug,
+          tipo,
+          estado,
+          num: val('num'),
+          nombre_es: campo('nombre_es').value.trim(),
+          nombre_en: campo('nombre_en').value.trim(),
+          resumen_es: val('resumen_es'),
+          resumen_en: val('resumen_en'),
+          precio_es: val('precio_es'),
+          precio_en: val('precio_en'),
+          cadencia_es: val('cadencia_es'),
+          cadencia_en: val('cadencia_en'),
+          foto_url,
+          foto_alt_es: val('foto_alt_es'),
+          foto_alt_en: val('foto_alt_en'),
+          course_id: val('course_id'),
+        };
+        const r = editando
+          ? await supabase.from('products').update(fila).eq('slug', editando.slug)
+          : await supabase.from('products').insert({ ...fila, position: lista.length });
+        if (r.error) throw r.error;
+        cerrar();
+        avisar(estado === 'borrador' ? 'Guardada, en borrador' : 'Guardada: en un minuto está en Formaciones');
+        await cargar();
+      } catch (e: any) {
+        falla(e?.code === '23505' ? 'Ya hay otra ficha con ese nombre corto.' : `No se pudo guardar: ${e?.message ?? e}`);
+      }
+    });
+  });
+
+  borrar.addEventListener('click', async () => {
+    if (!editando) return;
+    if (!window.confirm(`¿Borrar la ficha «${editando.nombre_es || editando.slug}»?\n\nDesaparece de Formaciones y se borra su página de ventas (la publicada y el borrador). El curso del aula y quien ya lo compró no se tocan. Si solo quieres esconderla, ponla en borrador.`))
+      return;
+    const { error } = await supabase.from('products').delete().eq('slug', editando.slug);
+    if (error) return avisar(`No se pudo borrar: ${error.message}`);
+    cerrar();
+    avisar('Ficha borrada');
+    await cargar();
+  });
+
+  const nuevo = boton('Nueva ficha', { solido: true });
+  nuevo.addEventListener('click', () => (form.hidden ? abrir() : cerrar()));
+  $('[data-t-nuevo]').replaceWith(nuevo);
+  armarBotones();
+
+  alAbrir('tienda', async () => {
+    if (!isSupabaseConfigured) {
+      const ul = $('[data-t-lista]');
+      ul.textContent = '';
+      ul.append(el('li', { class: 'filas__vacio soft', text: 'Sin conectar: no hay de dónde leer la tienda.' }));
+      nuevo.disabled = true;
+      return;
+    }
+    await cargar();
+  });
+</script>
+
+<style>
+  .tienda__cab-actos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .tienda__cab-actos a {
+    border-bottom: 0;
+    color: var(--ink-soft);
+  }
+
+  .tienda__importar,
+  .tienda__falta {
+    margin-top: var(--space-4);
+    border-left: 2px solid var(--ink);
+  }
+
+  .tienda__importar-actos {
+    margin-top: var(--space-2);
+  }
+
+  .tienda__form {
+    margin-top: var(--space-4);
+  }
+
+  .tienda__dos-segmentos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-6);
+  }
+
+  .tienda__dos-segmentos .campo {
+    justify-items: start;
+  }
+
+  .tienda__precio {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+  }
+
+  .tienda__foto {
+    display: grid;
+    grid-template-columns: 15rem minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: start;
+  }
+
+  .tienda__foto .campo {
+    justify-items: start;
+  }
+
+  .tienda__foto-marco {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    border: 1px solid var(--rule);
+  }
+
+  .tienda__foto-marco img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(1);
+  }
+
+  .tienda__tres {
+    display: grid;
+    grid-template-columns: 2fr 1fr 2fr;
+    gap: var(--space-3);
+  }
+
+  @media (max-width: 48rem) {
+    .tienda__foto,
+    .tienda__tres {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* La fila de la lista lleva la foto pequeña delante. */
+  .filas :global(.tienda__fila) {
+    grid-template-columns: 6rem minmax(0, 1fr) auto auto;
+  }
+
+  .filas :global(.tienda__mini) {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    border: 1px solid var(--rule);
+  }
+
+  .filas :global(.tienda__mini img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(1);
+  }
+
+  @media (max-width: 40rem) {
+    .filas :global(.tienda__fila) {
+      grid-template-columns: 1fr;
+    }
+
+    .filas :global(.tienda__mini) {
+      width: 6rem;
+    }
+  }
+
+  .filas :global(.tienda__hueco) {
+    visibility: hidden;
+  }
+
+  .tienda__pie {
+    margin-top: var(--space-2);
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+  }
+</style>

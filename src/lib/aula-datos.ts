@@ -88,6 +88,10 @@ export type Pregunta = {
   body: string;
   answer: string | null;
   answered_at: string | null;
+  /** Las respuestas en video y en audio de Emi (migración 0010). */
+  answer_video?: string | null;
+  answer_audio_path?: string | null;
+  answer_seen_at?: string | null;
   created_at: string;
 };
 
@@ -158,6 +162,8 @@ async function uid(): Promise<string | null> {
   } = await supabase.auth.getSession();
   return session?.user.id ?? null;
 }
+
+const CAMPOS_PREGUNTA = 'id, course_id, lesson_id, minute_s, body, answer, answered_at, created_at';
 
 const deSupabase = {
   modo: 'supabase' as const,
@@ -269,14 +275,50 @@ const deSupabase = {
   async preguntas(curso: string): Promise<Pregunta[]> {
     const id = await uid();
     if (!id) return [];
+    const pedir = (campos: string) =>
+      supabase
+        .from('course_questions')
+        .select(campos)
+        .eq('course_id', curso)
+        .eq('user_id', id)
+        .order('created_at', { ascending: false });
+    let r = await pedir(`${CAMPOS_PREGUNTA}, answer_video, answer_audio_path, answer_seen_at`);
+    /* Sin la migración 0010 no existen las columnas del video y el audio: se
+       piden las de siempre y el hilo sigue funcionando. */
+    if (r.error && /answer_(video|audio_path|seen_at)/.test(r.error.message)) r = await pedir(CAMPOS_PREGUNTA);
+    if (r.error) throw r.error;
+    return (r.data ?? []) as unknown as Pregunta[];
+  },
+
+  /** La alumna leyó las respuestas de este curso: se apagan los avisos. */
+  async marcarVistas(curso: string): Promise<void> {
+    const { error } = await supabase.rpc('marcar_respuestas_vistas', { c: curso });
+    if (error && !/marcar_respuestas_vistas|schema cache/.test(error.message))
+      console.error('[aula] no se pudieron marcar las respuestas', error);
+  },
+
+  /** Los cursos donde Emi respondió algo que la alumna todavía no vio. */
+  async respuestasNuevas(): Promise<Set<string>> {
+    const id = await uid();
+    if (!id) return new Set();
     const { data, error } = await supabase
       .from('course_questions')
-      .select('id, course_id, lesson_id, minute_s, body, answer, answered_at, created_at')
-      .eq('course_id', curso)
+      .select('course_id')
       .eq('user_id', id)
-      .order('created_at', { ascending: false });
-    if (error) throw error;
-    return (data ?? []) as Pregunta[];
+      .not('answered_at', 'is', null)
+      .is('answer_seen_at', null);
+    if (error) return new Set();
+    return new Set((data ?? []).map((q) => q.course_id));
+  },
+
+  /** El audio de una respuesta: privado, con un enlace firmado de una hora. */
+  async audio(ruta: string): Promise<string | null> {
+    const { data, error } = await supabase.storage.from('cursos').createSignedUrl(ruta, 3600);
+    if (error) {
+      console.error('[aula] no se pudo abrir el audio', error);
+      return null;
+    }
+    return data.signedUrl;
   },
 
   async preguntar(p: {
@@ -426,6 +468,16 @@ const deMaqueta = {
       created_at: new Date().toISOString(),
     });
     escribir('preguntas', todas);
+  },
+
+  async marcarVistas(_curso: string): Promise<void> {},
+
+  async respuestasNuevas(): Promise<Set<string>> {
+    return new Set();
+  },
+
+  async audio(_ruta: string): Promise<string | null> {
+    return null;
   },
 
   async borrarPregunta(id: string): Promise<void> {

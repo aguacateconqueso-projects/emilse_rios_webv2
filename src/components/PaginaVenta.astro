@@ -1,0 +1,108 @@
+---
+/**
+ * Una página de ventas entera —el documento—: la membresía o un curso.
+ *
+ * La comparten `src/pages/productos/[producto].astro` y su gemela inglesa, que
+ * solo deciden el idioma y buscan la página. Desde el 23 sep 2026 las dos se
+ * resuelven en el servidor: la ficha y el texto salen de la base de datos (lo
+ * que Emi publica desde el panel) y, si no hay nada allí, del código. Ver
+ * `src/lib/tienda.ts`.
+ */
+import Base from '../layouts/Base.astro';
+import CartaVenta from './CartaVenta.astro';
+import { type Lang, productPath } from '../i18n/ui';
+import type { Ficha } from '../lib/tienda';
+import type { Carta } from '../data/cartas';
+
+interface Props {
+  lang: Lang;
+  producto: Ficha;
+  c: Carta;
+  /** La vista previa del panel: sin buscadores y con un aviso arriba. */
+  borrador?: boolean;
+}
+const { lang, producto, c, borrador = false } = Astro.props;
+
+const SITE = Astro.site?.origin ?? 'https://www.emilserios.com';
+const canonical = `${SITE}${productPath(producto.slug, lang)}`;
+/* La imagen al compartir es la foto del producto: una URL si viene de la
+   tienda del panel, o la original de `src/assets` si viene del código. */
+const ogImage = producto.foto
+  ? new URL(typeof producto.foto === 'string' ? producto.foto : producto.foto.src, SITE).href
+  : undefined;
+
+/* Lo que Google necesita para entender la página: qué es, de quién, y las
+   preguntas frecuentes con el mismo texto que se ve —si no coincide, Google
+   las descarta—. A propósito sin precio (Product/Offer): un importe horneado
+   acá se desfasa el día que cambie en Stripe. */
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebPage',
+      '@id': `${canonical}#webpage`,
+      url: canonical,
+      name: c.metaTitle,
+      description: c.metaDesc,
+      inLanguage: lang,
+      publisher: { '@id': `${SITE}/#emilse` },
+    },
+    {
+      '@type': 'Person',
+      '@id': `${SITE}/#emilse`,
+      name: 'Emilse Rios',
+      jobTitle: lang === 'en' ? 'Double bassist and teacher' : 'Contrabajista y profesora',
+      url: 'https://emilserios.com',
+      sameAs: ['https://emilserios.com'],
+    },
+    {
+      '@type': 'FAQPage',
+      '@id': `${canonical}#faq`,
+      inLanguage: lang,
+      mainEntity: (c.faq ?? []).map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: [f.a, f.correo, f.a2].filter(Boolean).join('') },
+      })),
+    },
+  ],
+};
+---
+
+<Base
+  lang={lang}
+  title={`${c.metaTitle}`}
+  description={c.metaDesc}
+  route="products"
+  pathEs={productPath(producto.slug, 'es')}
+  pathEn={productPath(producto.slug, 'en')}
+  noindex={borrador}
+>
+  <Fragment slot="head">
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    {ogImage && <meta property="og:image:alt" content={c.photoAlt} />}
+    {!borrador && <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />}
+  </Fragment>
+  {
+    borrador && (
+      <p class="mono borrador-aviso" role="status">
+        Vista previa del borrador · así se verá al publicarla · no la ve nadie más
+      </p>
+    )
+  }
+  <CartaVenta lang={lang} producto={producto} c={c} />
+</Base>
+
+<style>
+  .borrador-aviso {
+    position: sticky;
+    top: var(--space-1);
+    z-index: 40;
+    max-width: var(--width-text);
+    margin: 0 auto var(--space-3);
+    padding: var(--space-1) var(--space-2);
+    background: var(--ink);
+    color: var(--paper);
+    text-align: center;
+  }
+</style>

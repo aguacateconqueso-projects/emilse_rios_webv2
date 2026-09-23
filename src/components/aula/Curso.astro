@@ -67,6 +67,8 @@ const paraJs = {
     fallo: a('ask.failed'),
     en: a('ask.at'),
     emi: a('ask.emi'),
+    videoResp: a('ask.videoReply'),
+    audioResp: a('ask.audioReply'),
     borrador: a('desk.draft'),
   },
 };
@@ -608,26 +610,57 @@ const paraJs = {
       txt.textContent = q.body;
       li.append(cab, txt);
 
-      if (q.answer) {
+      /* La respuesta de Emi: texto, video, audio, o cualquier mezcla. Cuenta
+         como respondida por la fecha, no por el texto: puede ser solo audio. */
+      const respondida = Boolean(q.answered_at || q.answer);
+      if (respondida) {
         const r = document.createElement('div');
         r.className = 'msj__resp';
         const quien = document.createElement('p');
         quien.className = 'mono msj__quien';
         quien.textContent = t.emi;
-        const rt = document.createElement('p');
-        rt.className = 'msj__txt';
-        rt.textContent = q.answer;
-        r.append(quien, rt);
+        r.append(quien);
+        if (q.answer) {
+          const rt = document.createElement('p');
+          rt.className = 'msj__txt';
+          rt.textContent = q.answer;
+          r.append(rt);
+        }
+        const emb = q.answer_video ? videoEmbed(q.answer_video) : null;
+        if (emb?.ok) {
+          const marco = document.createElement('div');
+          marco.className = 'msj__video';
+          const iframe = document.createElement('iframe');
+          iframe.src = emb.src;
+          iframe.title = t.videoResp;
+          iframe.loading = 'lazy';
+          iframe.allow = emb.allow;
+          iframe.allowFullscreen = true;
+          marco.append(iframe);
+          r.append(marco);
+        }
+        if (q.answer_audio_path) {
+          const audio = document.createElement('audio');
+          audio.className = 'msj__audio';
+          audio.controls = true;
+          audio.preload = 'none';
+          audio.setAttribute('aria-label', t.audioResp);
+          r.append(audio);
+          void datos.audio(q.answer_audio_path).then((url) => {
+            if (url) audio.src = url;
+            else audio.remove();
+          });
+        }
         li.appendChild(r);
       }
 
       const pie = document.createElement('p');
       pie.className = 'msj__pie';
       const estado = document.createElement('span');
-      estado.className = q.answer ? 'estado estado--tinta' : 'estado';
-      estado.textContent = q.answer ? t.respondida : t.esperando;
+      estado.className = respondida ? 'estado estado--tinta' : 'estado';
+      estado.textContent = respondida ? t.respondida : t.esperando;
       pie.appendChild(estado);
-      if (!q.answer) {
+      if (!respondida) {
         const retirar = document.createElement('button');
         retirar.className = 'btn-text';
         retirar.type = 'button';
@@ -646,6 +679,8 @@ const paraJs = {
       li.appendChild(pie);
       lista.appendChild(li);
     });
+    /* Leídas: se apaga el aviso de «Emi te respondió» del escritorio. */
+    if (mias.some((q) => q.answered_at && !q.answer_seen_at)) void datos.marcarVistas(CURSO.id);
   }
 
   /* =======================================================================
@@ -1189,6 +1224,28 @@ const paraJs = {
     margin-top: var(--space-2);
     padding-left: var(--space-2);
     border-left: 2px solid var(--ink);
+  }
+
+  .hilo__lista :global(.msj__video) {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    margin-top: var(--space-2);
+    background: var(--ink);
+  }
+
+  .hilo__lista :global(.msj__video iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .hilo__lista :global(.msj__audio) {
+    display: block;
+    width: 100%;
+    max-width: 28rem;
+    margin-top: var(--space-2);
   }
 
   .hilo__lista :global(.msj__pie) {

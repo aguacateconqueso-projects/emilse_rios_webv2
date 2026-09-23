@@ -1,0 +1,49 @@
+---
+/**
+ * La vista previa de una página de ventas, desde el panel (pestaña Págs. de
+ * ventas → «Vista previa»).
+ *
+ * Pinta lo que Emi tiene en el editor —guardado o no— exactamente como lo
+ * pintará la web al publicarlo: el mismo `PaginaVenta`, la misma ficha, la
+ * misma regla del botón. Arriba, un aviso fijo de que es un borrador.
+ *
+ * Llega por POST desde un formulario que el panel arma y envía a una pestaña
+ * nueva: el texto entero de la página (que no cabe en una dirección) y el
+ * token de la sesión, que acá se valida contra Supabase antes de pintar nada.
+ * Sin token de admin no se pinta: nadie puede usar esta dirección para hacer
+ * pasar por página de Emi un texto que no es suyo.
+ */
+import PaginaVenta from '../../components/PaginaVenta.astro';
+import { botonSegunEstado, fichaParaVistaPrevia } from '../../lib/tienda';
+import type { Carta } from '../../data/cartas';
+import type { Lang } from '../../i18n/ui';
+
+export const prerender = false;
+
+if (Astro.request.method !== 'POST') return Astro.redirect('/panel/#ventas');
+
+const form = await Astro.request.formData();
+const token = String(form.get('token') ?? '');
+const slug = String(form.get('slug') ?? '');
+const lang: Lang = form.get('lang') === 'en' ? 'en' : 'es';
+let carta: Record<Lang, Carta> | null = null;
+try {
+  carta = JSON.parse(String(form.get('carta') ?? ''));
+} catch {
+  carta = null;
+}
+
+const ficha = await fichaParaVistaPrevia(token, slug);
+if (!ficha || !carta?.es || !carta?.en) {
+  return new Response('Esta vista previa solo se abre desde el panel, con la sesión de Emi.', {
+    status: 403,
+    headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' },
+  });
+}
+
+Astro.response.headers.set('Cache-Control', 'no-store');
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+const c = botonSegunEstado(ficha, carta)[lang];
+---
+
+<PaginaVenta lang={lang} producto={ficha} c={c} borrador />

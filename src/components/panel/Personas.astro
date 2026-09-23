@@ -1,0 +1,808 @@
+---
+/**
+ * Pestaña Personas — todas las cuentas, y lo que tiene cada una.
+ *
+ * Adrián preguntó el 23 sep 2026: «acá aparecerían todos los que han comprado
+ * algo, ¿correcto? ¿Y tendrían una subpestaña para mostrar qué compraron?».
+ * La respuesta, que es cómo está hecha:
+ *
+ * - **Aparecen todas las cuentas**, hayan comprado o no: quien pagó la
+ *   membresía, quien tiene un curso, a quien Emi le dio acceso a mano, quien
+ *   se creó la cuenta y no compró nada, y las dos cuentas de admin. Un filtro
+ *   arriba separa «con membresía», «con cursos» y «sin nada».
+ * - **Sin subpestaña: una ficha por persona.** Al pulsar a alguien se abre su
+ *   ficha (`#personas/<id>`) con lo que TIENE —la membresía y cada curso, con
+ *   de dónde le vino (Stripe o a mano), desde cuándo y cuánto avanzó— y desde
+ *   ahí mismo se lo das o se lo quitas. Lo que compró es lo que tiene: la web
+ *   no guarda un historial de pagos aparte, eso vive en Stripe.
+ *
+ * La membresía a mano sigue la convención de la academia, para que las dos
+ * webs se entiendan: una fila en `subscriptions` con
+ * `stripe_subscription_id = 'manual_' + id`, activa y sin fecha de fin.
+ * Quitarla borra **solo esa fila**: una suscripción de Stripe no se toca desde
+ * acá, se cancela en Stripe.
+ *
+ * Crear una cuenta nueva pide la `service_role` y va por `/api/panel/personas`.
+ * Todo lo demás, directo contra Supabase con la RLS de admin.
+ */
+---
+
+<div class="app-wrap pest personas" data-personas>
+  {/* --- La lista --------------------------------------------------------- */}
+  <div data-pe-lista-vista>
+    <header class="pest-cab">
+      <div>
+        <p class="eyebrow">Personas</p>
+        <h1 class="app-h1 pest-cab__h">Quién está, y qué tiene.</h1>
+      </div>
+      <span data-pe-nueva></span>
+    </header>
+    <p class="personas__que soft">
+      Todas las cuentas, hayan comprado o no. Pulsa a alguien para ver su ficha: qué tiene —la membresía,
+      los cursos—, desde cuándo, cuánto avanzó, y darle o quitarle acceso.
+    </p>
+
+    {/* Alta de una persona nueva */}
+    <form class="ficha-form personas__form" data-pe-form hidden novalidate>
+      <h2 class="app-h2">Nueva persona</h2>
+      <div class="personas__dos">
+        <label class="campo">
+          <span class="campo__t">Correo</span>
+          <input type="email" data-pe-email autocomplete="off" spellcheck="false" />
+        </label>
+        <label class="campo">
+          <span class="campo__t">Nombre (opcional)</span>
+          <input type="text" data-pe-nombre autocomplete="off" />
+        </label>
+      </div>
+      <fieldset class="personas__dar">
+        <legend class="campo__t">Darle</legend>
+        <label class="casilla"><input type="checkbox" data-pe-dar-memb /> <span>La membresía</span></label>
+        <div data-pe-dar-cursos></div>
+      </fieldset>
+      <div class="personas__dos">
+        <label class="casilla">
+          <input type="checkbox" data-pe-enlace checked />
+          <span>Mandarle el correo para poner su contraseña</span>
+        </label>
+        <div class="segmento" role="radiogroup" aria-label="Idioma del correo" data-pe-idioma>
+          <button class="mono segmento__b" type="button" role="radio" data-v="es" aria-checked="true">Español</button>
+          <button class="mono segmento__b" type="button" role="radio" data-v="en" aria-checked="false">English</button>
+        </div>
+      </div>
+      <p class="ficha-form__nota">
+        Si ya tiene cuenta con ese correo, no se crea otra: se le da lo marcado a la que ya tiene.
+      </p>
+      <p class="error" data-pe-form-error hidden></p>
+      <div class="ficha-form__actos" data-pe-form-actos></div>
+    </form>
+
+    <div class="personas__filtros">
+      <div class="segmento" role="tablist" aria-label="Filtrar" data-pe-filtros></div>
+      <label class="campo personas__buscar">
+        <span class="visually-hidden">Buscar</span>
+        <input type="search" placeholder="Buscar por correo o nombre" data-pe-buscar />
+      </label>
+    </div>
+
+    <ul class="filas" role="list" data-pe-lista>
+      <li class="filas__vacio soft">Cargando…</li>
+    </ul>
+  </div>
+
+  {/* --- La ficha de una persona ------------------------------------------- */}
+  <div data-pe-ficha hidden>
+    <a class="mono personas__volver" href="#personas">← Todas las personas</a>
+    <header class="personas__cab">
+      <p class="eyebrow" data-pe-f-eyebrow>Persona</p>
+      <h1 class="app-h1 app-h1--sm" data-pe-f-h></h1>
+      <p class="mono soft" data-pe-f-sub></p>
+      <div class="personas__cab-actos" data-pe-f-actos></div>
+    </header>
+    <div data-pe-f-cuerpo></div>
+  </div>
+</div>
+
+<script>
+  import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+  import { alAbrir, armarBotones, avisar, boton, el, fecha, hace, leerHash, ocupado } from '../../lib/panel';
+  import { clavePath } from '../../i18n/aula';
+
+  type Perfil = { id: string; email: string | null; full_name: string | null; role: string; created_at: string; preferred_lang: string | null };
+  type Sub = {
+    user_id: string;
+    status: string;
+    stripe_subscription_id: string | null;
+    current_period_start: string | null;
+    current_period_end: string | null;
+    cancel_at_period_end: boolean;
+    updated_at: string;
+  };
+  type Acceso = { user_id: string; course_id: string; source: string; granted_at: string; expires_at: string | null };
+  type CursoMin = { id: string; slug: string; title_es: string; published: boolean };
+
+  const raiz = document.querySelector<HTMLElement>('[data-personas]')!;
+  const $ = <T extends HTMLElement = HTMLElement>(s: string) => raiz.querySelector<T>(s)!;
+
+  let perfiles: Perfil[] = [];
+  let subs: Sub[] = [];
+  let accesos: Acceso[] = [];
+  let cursos: CursoMin[] = [];
+  type Filtro = 'todas' | 'membresia' | 'cursos' | 'nada' | 'admin';
+  let filtro: Filtro = 'todas';
+  let busqueda = '';
+  let arrancada = false;
+  let abierta: string | null = null;
+
+  const FUENTE: Record<string, string> = { manual: 'a mano', stripe: 'Stripe', paypal: 'PayPal' };
+  const esManual = (s: Sub) => (s.stripe_subscription_id ?? '').startsWith('manual_');
+  const activa = (s: Sub) => s.status === 'active' && (!s.current_period_end || Date.parse(s.current_period_end) > Date.now());
+  const membresiaDe = (id: string) => subs.filter((s) => s.user_id === id && activa(s));
+  const cursosDe = (id: string) =>
+    accesos.filter((a) => a.user_id === id && (!a.expires_at || Date.parse(a.expires_at) > Date.now()));
+  const nombre = (p: Perfil) => p.full_name || p.email || '(sin nombre)';
+  const tituloCurso = (id: string) => {
+    const c = cursos.find((x) => x.id === id);
+    return c ? c.title_es || c.slug : 'Un curso borrado';
+  };
+
+  async function token() {
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token ?? '';
+  }
+
+  /* ==========================================================================
+     Cargar
+     ========================================================================== */
+
+  async function cargar(): Promise<boolean> {
+    const [p, s, a, c] = await Promise.all([
+      supabase.from('profiles').select('id, email, full_name, role, created_at, preferred_lang').order('created_at', { ascending: false }),
+      supabase.from('subscriptions').select('user_id, status, stripe_subscription_id, current_period_start, current_period_end, cancel_at_period_end, updated_at'),
+      supabase.from('course_access').select('user_id, course_id, source, granted_at, expires_at'),
+      supabase.from('courses').select('id, slug, title_es, published').order('position'),
+    ]);
+    if (p.error) {
+      const ul = $('[data-pe-lista]');
+      ul.textContent = '';
+      ul.append(el('li', { class: 'filas__vacio', text: `No se pudo cargar: ${p.error.message}` }));
+      return false;
+    }
+    perfiles = p.data as Perfil[];
+    subs = (s.data ?? []) as Sub[];
+    accesos = (a.error ? [] : a.data ?? []) as Acceso[];
+    cursos = (c.error ? [] : c.data ?? []) as CursoMin[];
+    pintarCursosDelForm();
+    return true;
+  }
+
+  /* ==========================================================================
+     La lista
+     ========================================================================== */
+
+  const FILTROS: { v: Filtro; t: string; pasa: (p: Perfil) => boolean }[] = [
+    { v: 'todas', t: 'Todas', pasa: () => true },
+    { v: 'membresia', t: 'Con membresía', pasa: (p) => membresiaDe(p.id).length > 0 },
+    { v: 'cursos', t: 'Con cursos', pasa: (p) => cursosDe(p.id).length > 0 },
+    { v: 'nada', t: 'Sin nada', pasa: (p) => p.role !== 'admin' && !membresiaDe(p.id).length && !cursosDe(p.id).length },
+    { v: 'admin', t: 'Admins', pasa: (p) => p.role === 'admin' },
+  ];
+
+  function pintarFiltros() {
+    const caja = $('[data-pe-filtros]');
+    caja.textContent = '';
+    FILTROS.forEach((f) => {
+      const n = perfiles.filter(f.pasa).length;
+      const b = el('button', { class: 'mono segmento__b', type: 'button', role: 'tab', 'aria-selected': String(f.v === filtro) }, `${f.t} `, el('span', { class: 'tnum soft-inv', text: String(n) }));
+      b.addEventListener('click', () => {
+        filtro = f.v;
+        pintarFiltros();
+        pintarLista();
+      });
+      caja.append(b);
+    });
+  }
+
+  function pintarLista() {
+    const ul = $('[data-pe-lista]');
+    ul.textContent = '';
+    const pasa = FILTROS.find((f) => f.v === filtro)!.pasa;
+    const q = busqueda
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .toLowerCase();
+    const sinTilde = (t: string) =>
+      t
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .toLowerCase();
+    const lista = perfiles.filter((p) => pasa(p) && (!q || sinTilde(`${p.email ?? ''} ${p.full_name ?? ''}`).includes(q)));
+    if (!lista.length) {
+      ul.append(el('li', { class: 'filas__vacio soft', text: q ? 'Nadie coincide con esa búsqueda.' : 'Nadie en este grupo.' }));
+      return;
+    }
+    lista.forEach((p) => {
+      const memb = membresiaDe(p.id);
+      const cs = cursosDe(p.id);
+      const pastillas = el('div', { class: 'personas__pastillas' });
+      if (p.role === 'admin') pastillas.append(el('span', { class: 'estado estado--tinta', text: 'Admin' }));
+      if (memb.length)
+        pastillas.append(el('span', { class: 'estado estado--vivo', text: memb.some((s) => !esManual(s)) ? 'Membresía' : 'Membresía · a mano' }));
+      if (cs.length) pastillas.append(el('span', { class: 'estado', text: cs.length === 1 ? tituloCurso(cs[0].course_id) : `${cs.length} cursos` }));
+      ul.append(
+        el(
+          'li',
+          { class: 'fila personas__fila' },
+          el(
+            'div',
+            { class: 'fila__txt' },
+            el('a', { class: 'fila__t', href: `#personas/${p.id}`, text: nombre(p) }),
+            el('p', { class: 'mono-plain soft', text: [p.full_name ? p.email : null, `cuenta desde el ${fecha(p.created_at)}`].filter(Boolean).join(' · ') }),
+          ),
+          pastillas,
+          el('div', { class: 'fila__actos' }, el('a', { class: 'mono', href: `#personas/${p.id}`, text: 'Ficha →' })),
+        ),
+      );
+    });
+  }
+
+  $<HTMLInputElement>('[data-pe-buscar]').addEventListener('input', (e) => {
+    busqueda = (e.target as HTMLInputElement).value.trim();
+    pintarLista();
+  });
+
+  /* ==========================================================================
+     Nueva persona
+     ========================================================================== */
+
+  const form = $<HTMLFormElement>('[data-pe-form]');
+  const nueva = boton('Nueva persona', { solido: true });
+  $('[data-pe-nueva]').replaceWith(nueva);
+  nueva.addEventListener('click', () => {
+    form.hidden = !form.hidden;
+    if (!form.hidden) {
+      form.reset();
+      $('[data-pe-form-error]').hidden = true;
+      pintarCursosDelForm();
+      $<HTMLInputElement>('[data-pe-email]').focus();
+    }
+  });
+  let idiomaCorreo: 'es' | 'en' = 'es';
+  raiz.querySelectorAll<HTMLElement>('[data-pe-idioma] [data-v]').forEach((b) =>
+    b.addEventListener('click', () => {
+      idiomaCorreo = b.dataset.v as 'es' | 'en';
+      raiz.querySelectorAll<HTMLElement>('[data-pe-idioma] [data-v]').forEach((x) => x.setAttribute('aria-checked', String(x === b)));
+    }),
+  );
+
+  function pintarCursosDelForm() {
+    const caja = $('[data-pe-dar-cursos]');
+    caja.textContent = '';
+    cursos.forEach((c) =>
+      caja.append(
+        el('label', { class: 'casilla' }, el('input', { type: 'checkbox', 'data-curso': c.id }), el('span', { text: `El curso «${c.title_es || c.slug}»${c.published ? '' : ' (en borrador)'}` })),
+      ),
+    );
+  }
+
+  const crear = boton('Crear', { solido: true, tipo: 'submit' });
+  const cancelar = el('button', { class: 'btn-text', type: 'button', text: 'Cancelar' });
+  cancelar.addEventListener('click', () => (form.hidden = true));
+  $('[data-pe-form-actos]').append(crear, cancelar);
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const err = $('[data-pe-form-error]');
+    err.hidden = true;
+    const email = $<HTMLInputElement>('[data-pe-email]').value.trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      err.textContent = 'Escribe un correo válido.';
+      err.hidden = false;
+      return;
+    }
+    await ocupado(crear, 'Creando…', async () => {
+      const r = await fetch('/api/panel/personas', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: `Bearer ${await token()}` },
+        body: JSON.stringify({ email, nombre: $<HTMLInputElement>('[data-pe-nombre]').value.trim() }),
+      }).catch(() => null);
+      const out = r ? await r.json().catch(() => ({})) : {};
+      if (!r?.ok || !out.id) {
+        err.textContent = `No se pudo crear: ${out.error ?? (r ? `error ${r.status}` : 'sin conexión')}`;
+        err.hidden = false;
+        return;
+      }
+      const hechos: string[] = [out.creada ? 'Cuenta creada' : 'Ya tenía cuenta'];
+      const fallos: string[] = [];
+      if ($<HTMLInputElement>('[data-pe-dar-memb]').checked) {
+        const e1 = await darMembresia(out.id);
+        if (e1) fallos.push(`la membresía (${e1})`);
+        else hechos.push('membresía dada');
+      }
+      const marcados = Array.from(raiz.querySelectorAll<HTMLInputElement>('[data-pe-dar-cursos] input:checked')).map((i) => i.dataset.curso!);
+      for (const c of marcados) {
+        const e2 = await darCurso(out.id, c);
+        if (e2) fallos.push(`«${tituloCurso(c)}» (${e2})`);
+      }
+      if (marcados.length && fallos.length < marcados.length) hechos.push(marcados.length === 1 ? 'curso dado' : 'cursos dados');
+      if ($<HTMLInputElement>('[data-pe-enlace]').checked) {
+        const e3 = await mandarEnlace(email, idiomaCorreo);
+        if (e3) fallos.push(`el correo (${e3})`);
+        else hechos.push('correo enviado');
+      }
+      form.hidden = true;
+      avisar(fallos.length ? `${hechos.join(' · ')}. Falló: ${fallos.join(', ')}` : hechos.join(' · '));
+      await cargar();
+      location.hash = `#personas/${out.id}`;
+    });
+  });
+
+  /* ==========================================================================
+     Dar y quitar
+     ========================================================================== */
+
+  /** La membresía a mano, con la convención de la academia. Devuelve el error o null. */
+  async function darMembresia(id: string): Promise<string | null> {
+    const ahora = new Date().toISOString();
+    const { error } = await supabase.from('subscriptions').upsert(
+      {
+        user_id: id,
+        stripe_customer_id: null,
+        stripe_subscription_id: `manual_${id}`,
+        status: 'active',
+        tier: null,
+        current_period_start: ahora,
+        current_period_end: null,
+        cancel_at_period_end: false,
+        updated_at: ahora,
+      },
+      { onConflict: 'stripe_subscription_id' },
+    );
+    return error?.message ?? null;
+  }
+
+  /** Quita SOLO la membresía a mano: la de Stripe se cancela en Stripe. */
+  async function quitarMembresia(id: string): Promise<string | null> {
+    const { error } = await supabase.from('subscriptions').delete().eq('stripe_subscription_id', `manual_${id}`);
+    return error?.message ?? null;
+  }
+
+  async function darCurso(id: string, curso: string): Promise<string | null> {
+    const { error } = await supabase
+      .from('course_access')
+      .upsert({ user_id: id, course_id: curso, source: 'manual' }, { onConflict: 'user_id,course_id', ignoreDuplicates: true });
+    return error?.message ?? null;
+  }
+
+  /** El mismo correo de «primera vez» de la pantalla de acceso. */
+  async function mandarEnlace(email: string, lang: 'es' | 'en'): Promise<string | null> {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: location.origin + clavePath(lang) });
+    return error?.message ?? null;
+  }
+
+  /* ==========================================================================
+     La ficha
+     ========================================================================== */
+
+  const cuerpo = $('[data-pe-f-cuerpo]');
+
+  function bloque(h: string, ...hijos: (Node | null | false)[]) {
+    return el('section', { class: 'personas__sec' }, el('h2', { class: 'app-h2', text: h }), ...hijos);
+  }
+
+  async function abrirFicha(id: string) {
+    const p = perfiles.find((x) => x.id === id);
+    if (!p) {
+      avisar('Esa persona no está');
+      location.hash = '#personas';
+      return;
+    }
+    abierta = id;
+    $('[data-pe-lista-vista]').hidden = true;
+    $('[data-pe-ficha]').hidden = false;
+    window.scrollTo({ top: 0 });
+    $('[data-pe-f-h]').textContent = nombre(p);
+    $('[data-pe-f-eyebrow]').textContent = p.role === 'admin' ? 'Persona · admin' : 'Persona';
+    $('[data-pe-f-sub]').textContent = [
+      p.full_name ? p.email : null,
+      `cuenta desde el ${fecha(p.created_at)}`,
+      p.preferred_lang === 'en' ? 'prefiere inglés' : null,
+    ]
+      .filter(Boolean)
+      .join(' · ');
+
+    /* Las acciones de arriba: el correo de la contraseña y el nombre. */
+    const actos = $('[data-pe-f-actos]');
+    actos.textContent = '';
+    const enlace = el('button', { class: 'btn-text', type: 'button', text: 'Mandarle el correo para poner su contraseña' });
+    enlace.addEventListener('click', async () => {
+      if (!p.email) return;
+      const lang = p.preferred_lang === 'en' ? 'en' : 'es';
+      if (!window.confirm(`¿Mandar a ${p.email} el correo para poner (o cambiar) su contraseña? Le llega en ${lang === 'en' ? 'inglés' : 'español'}.`)) return;
+      enlace.disabled = true;
+      const e = await mandarEnlace(p.email, lang);
+      enlace.disabled = false;
+      avisar(e ? `No se pudo mandar: ${e}` : 'Correo enviado');
+    });
+    const renombrar = el('button', { class: 'btn-text', type: 'button', text: p.full_name ? 'Cambiar el nombre' : 'Ponerle nombre' });
+    renombrar.addEventListener('click', async () => {
+      const n = window.prompt('El nombre con el que la ves en el panel (ella no lo ve):', p.full_name ?? '');
+      if (n === null) return;
+      const { error } = await supabase.from('profiles').update({ full_name: n.trim() || null }).eq('id', p.id);
+      if (error) return avisar(`No se pudo: ${error.message}`);
+      p.full_name = n.trim() || null;
+      avisar('Nombre guardado');
+      void abrirFicha(p.id);
+    });
+    actos.append(enlace, renombrar);
+
+    cuerpo.textContent = '';
+    cuerpo.append(el('p', { class: 'soft', text: 'Cargando…' }));
+
+    const [prog, lecc, foro, dudas] = await Promise.all([
+      supabase.from('course_progress').select('course_id, lesson_id, completed, updated_at').eq('user_id', id),
+      supabase.from('course_lessons').select('id, course_id, published'),
+      supabase.from('questions').select('id, body, created_at, answers(id)').eq('user_id', id).order('created_at', { ascending: false }).limit(20),
+      supabase.from('course_questions').select('id, course_id, body, created_at, answered_at').eq('user_id', id).order('created_at', { ascending: false }).limit(20),
+    ]);
+    if (abierta !== id) return;
+    cuerpo.textContent = '';
+
+    /* --- La membresía ----------------------------------------------------- */
+    const suyas = subs.filter((s) => s.user_id === id);
+    const vivas = suyas.filter(activa);
+    const manual = vivas.find(esManual);
+    const stripe = vivas.find((s) => !esManual(s));
+    const pasadas = suyas.filter((s) => !activa(s));
+    const memb = el('div', { class: 'personas__caja' });
+    if (stripe) {
+      const fin = stripe.current_period_end ? fecha(stripe.current_period_end) : null;
+      memb.append(
+        el('p', {}, el('span', { class: 'estado estado--vivo', text: 'Activa · Stripe' })),
+        el(
+          'p',
+          { class: 'personas__linea' },
+          stripe.cancel_at_period_end && fin
+            ? `La pagó y la canceló: la tiene hasta el ${fin}.`
+            : `La paga cada mes por Stripe${fin ? `; se renueva el ${fin}` : ''}.`,
+        ),
+        el('p', { class: 'soft personas__nota', text: 'La que se paga por Stripe se cancela o se devuelve en Stripe, no desde acá.' }),
+      );
+    }
+    if (manual) {
+      const quitar = el('button', { class: 'btn-text', type: 'button', text: 'Quitarle la membresía dada a mano' });
+      quitar.addEventListener('click', async () => {
+        if (!window.confirm(`¿Quitarle a ${nombre(p)} la membresía dada a mano?\n\nDeja de ver la membresía en el acto. Su cuenta y sus cursos no se tocan.`)) return;
+        const e = await quitarMembresia(id);
+        if (e) return avisar(`No se pudo: ${e}`);
+        avisar('Membresía quitada');
+        await cargar();
+        void abrirFicha(id);
+      });
+      memb.append(
+        el('p', {}, el('span', { class: 'estado estado--vivo', text: 'Activa · a mano' })),
+        el('p', { class: 'personas__linea', text: `Se la diste el ${fecha(manual.current_period_start ?? manual.updated_at)}. No caduca: la tiene hasta que se la quites.` }),
+        el('div', { class: 'personas__actos' }, quitar),
+      );
+    }
+    if (!stripe && !manual) {
+      const dar = boton('Darle la membresía', { chico: true });
+      dar.addEventListener('click', () =>
+        ocupado(dar, 'Dando…', async () => {
+          const e = await darMembresia(id);
+          if (e) return avisar(`No se pudo: ${e}`);
+          avisar('Membresía dada');
+          await cargar();
+          void abrirFicha(id);
+        }),
+      );
+      const ultima = pasadas.sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at))[0];
+      memb.append(
+        el('p', {}, el('span', { class: 'estado', text: 'No la tiene' })),
+        el(
+          'p',
+          { class: 'personas__linea' },
+          ultima
+            ? `La tuvo${ultima.current_period_end ? ` hasta el ${fecha(ultima.current_period_end)}` : ''} (${esManual(ultima) ? 'a mano' : `Stripe, ${ultima.status}`}).`
+            : 'Nunca la tuvo.',
+        ),
+        el('p', { class: 'soft personas__nota', text: 'Dársela a mano es gratis para ella y no caduca, hasta que se la quites.' }),
+        el('div', { class: 'personas__actos' }, dar),
+      );
+    }
+
+    /* --- Los cursos --------------------------------------------------------- */
+    const porCurso = new Map<string, { total: number }>();
+    (lecc.data ?? []).forEach((l) => {
+      if (!l.published) return;
+      const x = porCurso.get(l.course_id) ?? { total: 0 };
+      x.total++;
+      porCurso.set(l.course_id, x);
+    });
+    const avance = new Map<string, { hechas: number; ultima: string | null }>();
+    (prog.data ?? []).forEach((r) => {
+      const x = avance.get(r.course_id) ?? { hechas: 0, ultima: null };
+      if (r.completed) x.hechas++;
+      if (!x.ultima || r.updated_at > x.ultima) x.ultima = r.updated_at;
+      avance.set(r.course_id, x);
+    });
+    const mios = cursosDe(id);
+    const listaCursos = el('ul', { class: 'filas', role: 'list' });
+    if (!cursos.length) listaCursos.append(el('li', { class: 'filas__vacio soft', text: 'Todavía no hay cursos en el aula.' }));
+    cursos.forEach((c) => {
+      const acc = mios.find((a) => a.course_id === c.id);
+      const av = avance.get(c.id);
+      const total = porCurso.get(c.id)?.total ?? 0;
+      let accion: HTMLElement;
+      if (acc) {
+        accion = el('button', { class: 'btn-text', type: 'button', text: 'Quitárselo' });
+        accion.addEventListener('click', async () => {
+          if (!window.confirm(`¿Quitarle «${c.title_es || c.slug}» a ${nombre(p)}?\n\nDeja de verlo en el acto. Su avance se guarda por si se lo vuelves a dar.${acc.source === 'stripe' ? '\n\nOjo: lo pagó por Stripe. Quitárselo no le devuelve el dinero.' : ''}`))
+            return;
+          const { error } = await supabase.from('course_access').delete().eq('user_id', id).eq('course_id', c.id);
+          if (error) return avisar(`No se pudo: ${error.message}`);
+          avisar('Curso quitado');
+          await cargar();
+          void abrirFicha(id);
+        });
+      } else {
+        const b = boton('Dárselo', { chico: true, flecha: false });
+        b.addEventListener('click', () =>
+          ocupado(b, 'Dando…', async () => {
+            const e = await darCurso(id, c.id);
+            if (e) return avisar(`No se pudo: ${e}`);
+            avisar('Curso dado');
+            await cargar();
+            void abrirFicha(id);
+          }),
+        );
+        accion = b;
+      }
+      const detalle = acc
+        ? [
+            `${FUENTE[acc.source] ?? acc.source} · desde el ${fecha(acc.granted_at)}`,
+            av?.ultima ? `entró por última vez ${hace(av.ultima)}` : 'todavía no entró',
+          ]
+        : [av?.hechas ? 'Lo tuvo: su avance sigue guardado' : 'No lo tiene'];
+      listaCursos.append(
+        el(
+          'li',
+          { class: 'fila' },
+          el(
+            'div',
+            { class: 'fila__txt' },
+            el('p', { class: 'fila__t', text: `${c.title_es || c.slug}${c.published ? '' : ' (en borrador)'}` }),
+            el('p', { class: 'mono-plain soft', text: detalle.join(' · ') }),
+          ),
+          acc ? el('span', { class: 'mono tnum', text: `${av?.hechas ?? 0} / ${total} clases` }) : el('span'),
+          el('div', { class: 'fila__actos' }, accion),
+        ),
+      );
+    });
+
+    /* --- Sus mensajes --------------------------------------------------------- */
+    const mensajes = [
+      ...(foro.error ? [] : (foro.data ?? [])).map((q: any) => ({
+        donde: 'Foro de la membresía',
+        body: q.body as string,
+        cuando: q.created_at as string,
+        respondida: Boolean(q.answers?.length),
+      })),
+      ...(dudas.error ? [] : (dudas.data ?? [])).map((q: any) => ({
+        donde: tituloCurso(q.course_id),
+        body: q.body as string,
+        cuando: q.created_at as string,
+        respondida: Boolean(q.answered_at),
+      })),
+    ].sort((a, b) => Date.parse(b.cuando) - Date.parse(a.cuando));
+    const listaMsj = el('ul', { class: 'filas', role: 'list' });
+    if (!mensajes.length) listaMsj.append(el('li', { class: 'filas__vacio soft', text: 'No ha escrito nada todavía.' }));
+    mensajes.slice(0, 10).forEach((m) =>
+      listaMsj.append(
+        el(
+          'li',
+          { class: 'fila' },
+          el(
+            'div',
+            { class: 'fila__txt' },
+            el('p', { class: 'personas__msj', text: m.body.length > 180 ? `${m.body.slice(0, 180)}…` : m.body }),
+            el('p', { class: 'mono-plain soft', text: `${m.donde} · ${hace(m.cuando)}` }),
+          ),
+          el('span', { class: m.respondida ? 'estado' : 'estado estado--tinta', text: m.respondida ? 'Respondida' : 'Sin responder' }),
+          el('span'),
+        ),
+      ),
+    );
+    const pendientes = mensajes.filter((m) => !m.respondida).length;
+
+    cuerpo.append(
+      bloque('Membresía', memb),
+      bloque('Cursos', listaCursos),
+      bloque(
+        'Sus mensajes',
+        listaMsj,
+        pendientes > 0 && el('p', { class: 'personas__ir' }, el('a', { class: 'mono', href: '#mensajes', text: `Responder ${pendientes === 1 ? 'la pendiente' : `las ${pendientes} pendientes`} en Mensajes →` })),
+      ),
+    );
+    armarBotones();
+  }
+
+  function cerrarFicha() {
+    abierta = null;
+    $('[data-pe-ficha]').hidden = true;
+    $('[data-pe-lista-vista]').hidden = false;
+  }
+
+  /* ==========================================================================
+     Qué se enseña: la lista o una ficha (`#personas/<id>`)
+     ========================================================================== */
+
+  async function segunHash() {
+    const [pest, id] = leerHash();
+    if (pest !== 'personas') return;
+    if (id) {
+      if (id !== abierta) await abrirFicha(id);
+    } else {
+      cerrarFicha();
+      await cargar();
+      pintarFiltros();
+      pintarLista();
+    }
+  }
+
+  alAbrir('personas', async () => {
+    if (!isSupabaseConfigured) {
+      const ul = $('[data-pe-lista]');
+      ul.textContent = '';
+      ul.append(el('li', { class: 'filas__vacio soft', text: 'Sin conectar: no hay de dónde leer las cuentas.' }));
+      nueva.disabled = true;
+      return;
+    }
+    if (!(await cargar())) return;
+    pintarFiltros();
+    pintarLista();
+    armarBotones();
+    arrancada = true;
+    await segunHash();
+  });
+
+  document.addEventListener('panel:pestana', () => {
+    if (arrancada) void segunHash();
+  });
+</script>
+
+<style>
+  .personas__que {
+    max-width: 44rem;
+    margin-top: var(--space-2);
+    font-size: var(--text-small);
+    line-height: 1.5;
+  }
+
+  .personas__form {
+    margin-top: var(--space-4);
+  }
+
+  .personas__dos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  .personas__dar {
+    display: grid;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .personas__dar [data-pe-dar-cursos] {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .personas__filtros {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-3);
+    margin-top: var(--space-4);
+  }
+
+  .personas__buscar {
+    flex: 0 1 20rem;
+  }
+
+  .personas :global(.personas__pastillas) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-1);
+  }
+
+  .personas :global(.fila__t[href]) {
+    color: var(--ink);
+  }
+
+  .personas__volver {
+    display: inline-block;
+    border-bottom: 0;
+    color: var(--ink-soft);
+  }
+
+  .personas__volver:hover {
+    color: var(--ink);
+  }
+
+  .personas__cab {
+    margin-top: var(--space-3);
+  }
+
+  .personas__cab h1,
+  .personas__cab .mono {
+    margin-top: var(--space-1);
+  }
+
+  .personas__cab-actos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    margin-top: var(--space-2);
+  }
+
+  .personas :global(.personas__sec) {
+    margin-top: var(--space-6);
+  }
+
+  .personas :global(.personas__caja) {
+    display: grid;
+    gap: var(--space-1);
+    margin-top: var(--space-2);
+    padding: var(--space-3);
+    border: 1px solid var(--rule);
+  }
+
+  .personas :global(.personas__linea) {
+    max-width: 44rem;
+  }
+
+  .personas :global(.personas__nota) {
+    font-size: var(--text-small);
+  }
+
+  .personas :global(.personas__actos) {
+    margin-top: var(--space-1);
+  }
+
+  .personas :global(.personas__msj) {
+    max-width: 44rem;
+    font-size: var(--text-small);
+    line-height: 1.5;
+  }
+
+  .personas :global(.personas__ir) {
+    margin-top: var(--space-2);
+  }
+
+  .personas :global(.personas__ir a) {
+    border-bottom: 0;
+  }
+
+  /* La cifra de cada filtro, más suave; en el filtro elegido, sobre tinta. */
+  .personas :global(.soft-inv) {
+    opacity: 0.6;
+  }
+
+  @media (max-width: 48rem) {
+    .personas__dos {
+      grid-template-columns: 1fr;
+    }
+
+    .personas :global(.personas__pastillas) {
+      justify-content: flex-start;
+    }
+  }
+</style>

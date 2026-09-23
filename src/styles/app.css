@@ -454,3 +454,110 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   Listas y formularios del panel — compartidos por todas las pestañas
+   ========================================================================== */
+
+/* El formulario de alta o edición: una caja con regla de tinta. */
+.ficha-form {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--ink);
+}
+
+.ficha-form__actos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.ficha-form__nota {
+  padding: var(--space-1) var(--space-2);
+  border-left: 2px solid var(--ink);
+  font-size: var(--text-small);
+  line-height: 1.5;
+}
+
+@media (max-width: 48rem) {
+  .ficha-form {
+    padding: var(--space-3);
+  }
+}
+
+/* Una lista de filas: título en la letra de titulares, datos en mono,
+   estado y acciones a la derecha. */
+.filas {
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--ink);
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.fila__t {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  line-height: 1.25;
+  border-bottom: 0;
+}
+
+.fila__txt .mono,
+.fila__txt .mono-plain {
+  margin-top: var(--space-1);
+}
+
+.fila__actos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.fila__actos a {
+  border-bottom: 0;
+  color: var(--ink-soft);
+}
+
+.fila__actos a:hover {
+  color: var(--ink);
+}
+
+.filas__vacio {
+  padding: var(--space-3) 0;
+}
+
+@media (max-width: 40rem) {
+  .fila {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+}
+
+/* La cabecera de una pestaña: título a la izquierda, acción a la derecha. */
+.pest-cab {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.pest-cab__h {
+  margin-top: var(--space-2);
+  max-width: 16ch;
+}
+
+.pest {
+  padding-top: var(--space-6);
+}
