@@ -11,17 +11,34 @@ interface Props {
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 const { blocks } = getHomeCopy(lang);
+
+/*
+ * Lo que entra al volver: todo lo que hay antes de la lámina, que es lo que se
+ * ve al cargar —la portada, el párrafo del video y el primer formulario—. De
+ * la lámina para abajo la página ya tiene su revelado, que va con el scroll.
+ * Se cuenta desde los datos y no con un número escrito, porque el orden de la
+ * Home lo edita Emi: si mañana sube algo por encima de la lámina, entra solo.
+ */
+const corte = blocks.findIndex((b) => b.k === 'plate');
+const entra = (n: number) => n > 0 && n < corte;
+/* La portada gasta los dos primeros peldaños —el rótulo y la entradilla— y
+   los bloques de debajo siguen la escalera desde ahí. */
+const peldano = (n: number) => `--i:${n + 1}`;
 ---
 
 {
-  blocks.map((block) => {
+  blocks.map((block, n) => {
     switch (block.k) {
       case 'hero':
         return (
           <section class="hero">
             <h1 class="hero__title">{block.title}</h1>
-            <p class="mono soft hero__eyebrow">{block.eyebrow}</p>
-            <p class="hero__lead">{block.lead}</p>
+            <p class="mono soft hero__eyebrow entra" style="--i:0">
+              {block.eyebrow}
+            </p>
+            <p class="hero__lead entra" style="--i:1">
+              {block.lead}
+            </p>
           </section>
         );
 
@@ -61,7 +78,10 @@ const { blocks } = getHomeCopy(lang);
 
       case 'runs':
         return (
-          <section class="row row--flush block">
+          <section
+            class:list={['row row--flush block', entra(n) && 'entra']}
+            style={entra(n) ? peldano(n) : undefined}
+          >
             <div class="row__body prose lede">
               <p>
                 {block.runs.map((run) =>
@@ -100,7 +120,13 @@ const { blocks } = getHomeCopy(lang);
         );
 
       case 'form':
-        return <SubscribeForm lang={lang} id={block.id} flush />;
+        return entra(n) ? (
+          <div class="entra" style={peldano(n)}>
+            <SubscribeForm lang={lang} id={block.id} flush />
+          </div>
+        ) : (
+          <SubscribeForm lang={lang} id={block.id} flush />
+        );
 
       case 'fine':
         return (
@@ -155,6 +181,52 @@ const { blocks } = getHomeCopy(lang);
     font-size: var(--text-section);
     line-height: var(--leading-section);
     text-wrap: balance;
+  }
+
+  /* --- La entrada al volver -----------------------------------------------
+     La firma sobre negro sale una vez por sesión, y hasta el 23 sep 2026 eso
+     dejaba la Home sin entrada las demás veces: se salía a *Sobre mí*, se
+     volvía, y la portada aparecía de golpe. Lo pidió Adrián: que al volver
+     entre como *Sobre mí*.
+
+     Así que es la misma entrada, copiada tal cual: cada renglón sube 16 px y
+     se funde, 0,7 s, en la curva del revelado, en escalera de 60 ms —el
+     porqué de cada número está en `About.astro`—. El titular primero, después
+     el rótulo, la entradilla, el párrafo del video y el formulario.
+
+     **No es una quinta animación de la Home.** Es la entrada, en su segunda
+     forma: la firma la primera vez, esto las demás. Nunca salen las dos en la
+     misma carga. Ver la enmienda del 23 sep 2026 en `progreso.md`.
+
+     Lo decide el script de `<head>` antes de pintar: `data-intro='seen'`
+     solo cuando la firma ya salió en esta sesión. Al terminar la firma el
+     valor pasa a `done`, no a `seen`, a propósito: si pasara a `seen`, la
+     portada se apagaría y volvería a entrar justo cuando el panel negro
+     acaba de destaparla. */
+  @media (prefers-reduced-motion: no-preference) {
+    :global([data-intro='seen']) .hero__title,
+    :global([data-intro='seen']) .entra {
+      animation: home-rise 0.7s var(--ease-reveal) both;
+    }
+
+    :global([data-intro='seen']) .hero__title {
+      animation-delay: 0.05s;
+    }
+
+    :global([data-intro='seen']) .entra {
+      animation-delay: calc(0.13s + var(--i, 0) * 0.06s);
+    }
+  }
+
+  @keyframes home-rise {
+    from {
+      opacity: 0;
+      transform: translateY(var(--space-2));
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 
   /* --- La lámina ----------------------------------------------------------

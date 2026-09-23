@@ -80,7 +80,14 @@ const altEn = new URL(hrefEn, Astro.site);
     <Font cssVariable="--font-body" />
     <Font cssVariable="--font-mono" />
 
-    {/* Decide la entrada antes de pintar, para que no parpadee. */}
+    {/*
+      Decide la entrada antes de pintar, para que no parpadee.
+
+      `play`: la firma sobre negro, la primera vez de la sesión.
+      `seen`: la firma ya salió; la Home entra con la escalera de *Sobre mí*.
+      `done`: lo pone `Intro.astro` cuando la firma termina. No es `seen` a
+      propósito: la escalera no tiene que dispararse detrás del panel.
+    */}
     <script is:inline define:vars={{ intro }}>
       document.documentElement.classList.remove('no-js');
       if (intro) {
@@ -91,7 +98,7 @@ const altEn = new URL(hrefEn, Astro.site);
         } catch (e) {
           seen = true;
         }
-        document.documentElement.dataset.intro = seen ? 'done' : 'play';
+        document.documentElement.dataset.intro = seen ? 'seen' : 'play';
       }
     </script>
   </head>

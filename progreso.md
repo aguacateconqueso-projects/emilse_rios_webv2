@@ -25,6 +25,16 @@ de cero debería poder seguir trabajando sin preguntar nada.
 > - **#44 · Las direcciones viejas**, que con barra final daban 404. Ver **Las
 >   direcciones viejas**.
 >
+> Y por la tarde, dos más:
+>
+> - **#46 · El newsletter deja de fallar en silencio.** Ver **El newsletter,
+>   conectado → La primera prueba**.
+> - **Cinco retoques que pidió Adrián**, en un PR aparte: la Home entra con
+>   la escalera de *Sobre mí* al volver, «Te cuento otra cosa» baja a abrir la
+>   historia, Formaciones pierde el `00` y sus fotos se acercan y toman color
+>   con el cursor, y *Sobre mí* estrena retrato vertical. Ver **Cinco
+>   retoques del 23 de septiembre**.
+>
 > **Lo que viene, en el orden en que lo pidieron Adrián y Emi:**
 >
 > 1. **El newsletter todavía no da de alta** («suscribirse no funciona»). El
@@ -37,14 +47,14 @@ de cero debería poder seguir trabajando sin preguntar nada.
 >       **redesplegar**. ✅ La variable está puesta (Adrián, 23 sep). **Solo
 >       esa:** `KLAVIYO_LIST_ID` y `KLAVIYO_REVISION` no se crean, sus valores
 >       buenos ya van en el código.
->    3. **Comprobar:** un alta de prueba en una vista previa y el correo dentro
->       de la lista `SaE8Px`. En producción no se puede mientras la cortina
->       esté bajada: `/api/suscribir` contesta 503. ⏳ **La primera prueba
->       dijo que no**, en la vista previa de `claude/busy-heisenberg-2ig8dt`,
->       casi seguro porque ese build es de antes de la clave. Se prueba en una
->       vista previa construida después: abrir `/api/suscribir` tiene que dar
->       `{"proveedor":true}`. Ver **El newsletter, conectado → La primera
->       prueba**.
+>    3. **Comprobar:** un alta de prueba y el correo dentro de la lista
+>       `SaE8Px`. ⏸️ **Aplazado a propósito, por decisión de Adrián (23
+>       sep):** se prueba **todo junto, al subir la cortina**, cuando Emi
+>       tenga montada la bienvenida de siete correos —el punto 2—. Así un
+>       solo correo de prueba comprueba el alta **y** la serie. La primera
+>       prueba, en una vista previa vieja, dijo que no, casi seguro porque ese
+>       build era de antes de la clave; el #46 dejó el fallo con rastro en los
+>       logs. Ver **El newsletter, conectado → La primera prueba**.
 >    4. **Klaviyo → apagar WooCommerce**, mirando antes los flujos. Y decidir
 >       con Emi la doble confirmación (recomendada).
 > 2. **La bienvenida pasa a ser de siete correos** a cada persona que se
@@ -56,7 +66,21 @@ de cero debería poder seguir trabajando sin preguntar nada.
 >    faltan los demás, que manda ella. Y cuatro decisiones de la carta que
 >    quedaron abiertas: ver **Pendiente → Contenido que falta (de Emi)**.
 > 4. **Subir la cortina:** `CORTINA_BAJADA = false` en `src/lib/cortina.ts`,
->    en un PR.
+>    en un PR. **Y ahí va la prueba del newsletter**, la que quedó aplazada.
+>    Lo mejor es hacerla **en la vista previa de ese mismo PR, antes de
+>    mergear**: las vistas previas nunca tienen cortina y ya leen la clave
+>    (Adrián marcó Production y Preview). Si algo falla, se arregla sin que la
+>    web esté abierta con un formulario roto. Los pasos:
+>    1. abrir `/api/suscribir` en la vista previa → `{"proveedor":true}`;
+>    2. suscribir un correo de prueba de verdad;
+>    3. verlo en Klaviyo, en la lista `SaE8Px` (pendiente si hay doble
+>       confirmación, hasta pulsar el enlace);
+>    4. que llegue el primero de los siete correos;
+>    5. si dice que no, buscar `[klaviyo]` en Vercel → Logs: la tabla de
+>       `docs/CONECTAR-KLAVIYO.md` dice qué es cada línea.
+>
+>    Si se prefiere probar ya en `www.emilserios.com`, que sea lo primero
+>    después de mergear: son dos minutos.
 >
 > Y una comprobación que no depende de la cortina y nadie ha hecho todavía:
 > `curl -sI https://www.emilserios.com/aulavirtual/estudiemos-juntos/` tiene
@@ -127,7 +151,7 @@ pagando sin recibir acceso.
 | **Alcance** | Desde el 31 ago 2026 esto deja de ser solo el sitio: aquí van también el aula, la membresía y los cursos. Ver **La plataforma**. |
 | **Sesión** | **Conectada y probada el 22 sep 2026**: se entra de verdad, contra el **mismo Supabase de la academia**, y el candado pide **suscripción al día**. Las variables y las Redirect URLs ya están puestas. Falta `set_admin.sql`. Ver `docs/CONECTAR-EL-AULA.md`. |
 | **Cobro** | **Desde el 22 sep 2026 vive acá.** `/api/checkout` crea la sesión de Stripe, `/gracias/` recoge a quien pagó y `/api/claim-account` le crea la cuenta. El **webhook sigue en la academia**, y es correcto que siga: ver **La unión de las dos casas**. |
-| **Newsletter** | **Conectado desde el 22 sep 2026.** `/api/suscribir` da de alta en la lista real de Klaviyo (`SaE8Px`), con la API en su versión `2026-07-15`. `KLAVIYO_API_KEY` **puesta en Vercel el 23 sep 2026**, con los permisos Lists, Profiles y Subscriptions; **falta la prueba buena** en una vista previa construida después de la clave —ver **El newsletter, conectado → La primera prueba**—. La integración de WooCommerce de Klaviyo está muerta desde el 21 sep y **se apaga**: los cobros son de Stripe. |
+| **Newsletter** | **Conectado desde el 22 sep 2026.** `/api/suscribir` da de alta en la lista real de Klaviyo (`SaE8Px`), con la API en su versión `2026-07-15`. `KLAVIYO_API_KEY` **puesta en Vercel el 23 sep 2026**, con los permisos Lists, Profiles y Subscriptions; **la prueba se hace al subir la cortina**, junto con la bienvenida de siete correos —ver **El newsletter, conectado → La primera prueba**—. La integración de WooCommerce de Klaviyo está muerta desde el 21 sep y **se apaga**: los cobros son de Stripe. |
 | **Lo que falta para lanzar** | **Dos variables en Vercel, y ninguna es código:** `KLAVIYO_API_KEY` o el newsletter no da de alta, y las de Stripe o el botón de comprar da un 500. |
 
 Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/` · `/productos/` ·
@@ -353,6 +377,16 @@ cortina porque ahí `VERCEL_ENV` vale `preview`:
   acorta los nombres largos con un código). Una sesión que trabaja siempre en
   la misma rama tiene, por tanto, un solo enlace para todo el día.
 
+**Cómo se abre, paso a paso** (Adrián preguntó el 23 sep 2026 y no estaba
+escrito):
+
+- **Desde GitHub, lo más corto:** abrir el PR → bajar hasta el comentario del
+  bot de Vercel → **Visit Preview**. Un PR ya mergeado conserva el comentario y
+  el enlace sigue funcionando.
+- **Desde Vercel:** el proyecto → **Deployments** → buscar la rama en la
+  columna de la rama (o filtrar por ella) → pulsar el despliegue → **Visit**.
+  El de arriba del todo es el último push.
+
 Tres cosas que muerden, y ninguna se pudo comprobar desde la sesión, porque
 no tenía salida a `vercel.app`:
 
@@ -372,6 +406,49 @@ no tenía salida a `vercel.app`:
   builds ni confundir variables.
 
 ---
+
+## Cinco retoques del 23 de septiembre
+
+Los pidió Adrián de una vez, con la cortina bajada, y van en un solo PR. Se
+ven en su vista previa.
+
+1. **La Home entra al volver.** La firma sobre negro sale una vez por sesión;
+   las demás veces la portada aparecía de golpe. Ahora entra con la escalera
+   de *Sobre mí*: el titular, el rótulo, la entradilla, el párrafo del video y
+   el primer formulario, uno detrás de otro. Está en `Home.astro`, y lo decide
+   `data-intro='seen'`, que pone el script de `<head>` de `Base.astro`. Por qué
+   no cuenta como quinta animación: en **Enmiendas, con fecha**.
+2. **«Te cuento otra cosa» baja.** Cerraba la entrada de *Sobre mí*, al lado
+   del retrato, y ahora abre la historia, encima de «En mi primer día…». En
+   los dos idiomas —en inglés, «Let me tell you something else»—. Es
+   `src/data/about.ts`. Deshace a medias lo del 21 sep, que había subido las
+   tres frases a la entrada: «No puedo» y «No es mi caso» se quedan arriba.
+3. **Formaciones pierde el `00`** de encima del titular. En su lugar, 16 px de
+   aire, para que el titular no suba a pegarse a la píldora del menú: se queda
+   exactamente donde estaba. Los números de las fichas —`01`, `02`— siguen.
+4. **Las fotos de Formaciones responden al cursor:** toman color y se acercan
+   un 4 % dentro de su marco. Solo en las fichas que son enlace. El detalle,
+   en la enmienda del mismo día.
+5. **Retrato nuevo en *Sobre mí*.** Emi en la calle, abrazada al contrabajo y
+   lanzando un beso. Es **vertical**, y el marco sigue siendo el de siempre:
+   lo llena a lo ancho y se recorta arriba y abajo, anclado al 35 % de alto
+   para que la cara y la mano salgan en los tres tamaños.
+
+   Dos cosas que conviene saber:
+
+   - **El marco ya no lo puede estirar la foto.** Con la horizontal no pasaba
+     nada, pero la vertical, a su alto natural, llevaba el marco a 720 × 1080
+     en el escritorio y a 390 × 586 en el teléfono. Ahora la foto va colgada
+     del marco (`position: absolute`), y el marco mide lo que medía: el alto
+     del texto de al lado en el escritorio, 336 px de alto en el teléfono.
+   - **El fichero.** Adrián la subió a `public/img/about_me2.jpg`: 3993 ×
+     6002 y 8,3 MB, que Vercel habría servido tal cual a quien pidiera la
+     dirección. Se redujo a 1800 de ancho —lo que pide el sitio a doble
+     densidad— y reemplaza a `src/assets/img/about-me.jpg`, que es de donde
+     Astro saca los tamaños: 96 kB y 218 kB en WebP. El original se borró de
+     `public/`; sigue en el historial de git, en el commit `7984abd`, y la
+     foto horizontal de antes, en cualquier commit anterior. El texto
+     alternativo se reescribió para la foto nueva.
 
 ## Formaciones, y la carta nueva
 
@@ -1841,11 +1918,20 @@ Lo que se cambió para que esto no vuelva a quedar mudo:
 - **La guía** explica lo de redesplegar la vista previa y trae una tabla de
   qué significa cada línea de `[klaviyo]` en los logs.
 
-**Lo que falta:** abrir `/api/suscribir` en una vista previa construida
-después de poner la clave —la de esta rama, o la vieja después de un
-*Redeploy*—, ver `{"proveedor":true}`, suscribir un correo de prueba y
-buscarlo en la lista `SaE8Px`. Si sigue diciendo que no, el motivo está en los
-logs.
+Se mergeó como el **#46**, ese mismo día.
+
+**Y la prueba buena se aplazó, a propósito.** Adrián prefirió no probar en
+una vista previa y hacerlo **todo junto al subir la cortina**, cuando Emi
+tenga montada la bienvenida de siete correos: así un solo correo de prueba
+comprueba el alta y la serie. La clave está en Production y en Preview, así
+que no falta nada de paneles. Los pasos de esa prueba, y por qué conviene
+hacerla en la vista previa del PR que sube la cortina, están arriba del todo,
+en **Lo que viene → 4**.
+
+Un apunte de ese día, para quien lea los logs: a esa hora en los logs de
+producción no había ni una línea `[klaviyo]`, y es lo esperado. Con la cortina
+bajada nadie ve el formulario, así que nadie llega a llamar a
+`/api/suscribir`.
 
 #### WooCommerce, que ya no está
 
@@ -2501,7 +2587,33 @@ componentes**: si hace falta uno nuevo, se añade como token.
 
 El sistema es de Emi y se puede cambiar. Lo que no se puede es cambiarlo sin
 dejar constancia, porque si no la tabla de arriba deja de ser fiable. Hasta hoy
-se ha tocado once veces:
+se ha tocado doce veces:
+
+- **23 sep 2026 · La entrada de la Home tiene dos formas, y las fotos de
+  Formaciones responden al cursor.** Lo pidió Adrián.
+
+  **La entrada.** La firma sobre negro sale una vez por sesión, y las demás
+  veces la Home aparecía de golpe: se iba a *Sobre mí*, se volvía, y la
+  portada ya estaba puesta. Ahora, cuando la firma ya salió, la portada entra
+  con **la escalera de *Sobre mí*** —cada renglón sube 16 px y se funde, 0,7 s,
+  60 ms entre uno y otro—, y con ella el párrafo del video y el primer
+  formulario, que es todo lo que se ve antes de la lámina. **No es una quinta
+  animación**: es la misma entrada en su segunda forma, y nunca salen las dos
+  en la misma carga. Las cuatro de la Home siguen siendo la entrada, las
+  frases-ancla, el fondo del contrabajo y la lámina. Tampoco arranca sola en
+  el sentido de la enmienda del 12 de agosto: la dispara la carga, igual que
+  la firma.
+
+  **Las fotos de Formaciones.** Al pasar el cursor por una ficha, su foto
+  **toma color y se acerca un 4 % dentro de su marco**, con la curva y el medio
+  segundo del retrato de *Sobre mí*. No cuenta contra el tope, por la enmienda
+  del 20 de agosto: es respuesta a una acción. **Se acerca y no se levanta**,
+  a diferencia del retrato: lo que se levantaría acá es la ficha entera, y
+  eso es una tarjeta que se levanta, que el sistema prohíbe. Y **no es el
+  «zoom automático» prohibido**: no arranca solo, lo dispara el cursor, y el
+  marco no se mueve. Solo en las fichas que son enlace, solo con cursor de
+  verdad o foco de teclado, y sin movimiento para quien lo pide, que se queda
+  con el color.
 
 - **21 sep 2026 · *Sobre mí* sube a dos animaciones, y su retrato responde al
   cursor.** Lo pidió Emi: «entra sin más, ease in, agrega animaciones, que se
@@ -3615,10 +3727,16 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
       desdoble desaparece el día que el webhook se mude; hasta entonces, **se
       cambian en los dos proyectos de Vercel o no se cambian en ninguno**.
 
-- [ ] **⚠️ `KLAVIYO_API_KEY` en Vercel, o el newsletter no da de alta.** El
-      código está hecho desde el 22 sep 2026 —ver **El newsletter,
-      conectado**— y **esto es lo único que falta**: una variable. Sin ella el
-      formulario no miente, pero tampoco suscribe a nadie.
+- [ ] **⚠️ El newsletter: la clave está, falta la prueba.** ✅ `KLAVIYO_API_KEY`
+      puesta en Vercel el **23 sep 2026**, en Production y Preview, con los
+      tres permisos (Adrián). ⏸️ **La prueba se hace al subir la cortina**,
+      junto con la bienvenida de siete correos: decisión de Adrián del mismo
+      día. Los pasos están arriba del todo, en **Lo que viene → 4**. Lo de
+      abajo queda como referencia, por si hubiera que rehacer la clave.
+
+      El código está hecho desde el 22 sep 2026 —ver **El newsletter,
+      conectado**—. Sin la clave el formulario no miente, pero tampoco
+      suscribe a nadie.
 
       La clave se saca de klaviyo.com → Settings → API keys → Create Private
       API Key → **Custom Key**, con permiso de escritura sobre **Lists,
@@ -4025,14 +4143,29 @@ enseñárselo.
 
 ## Notas sueltas
 
+- **Los 404 de direcciones del WordPress viejo son normales.** En los logs de
+  Vercel salen cosas como `GET /podcast/create-success-happiness-and-fulfillment/`
+  → 404, con referer `emilserios.com/podcast/…` y un bot como agente
+  —PetalBot, el buscador de Huawei, el 23 sep 2026—. Son direcciones que
+  sirvió el WordPress de Edu hasta el 21 sep 2026 y que los buscadores siguen
+  visitando de memoria. **No hay que hacer nada**: con el 404 aprenden solos
+  que ya no existen. Si algún día interesa rescatar alguna, se mira en Google
+  Search Console → **Páginas → No encontrada (404)** cuáles tenían visitas de
+  verdad, y solo esas se redirigen, en `redirects` de `astro.config.mjs`.
+  Esas de `/podcast/` suenan a episodios de otro podcast, no a nada de Emi,
+  así que es probable que no haya nada que rescatar.
 - El sitio **no lleva analítica ni cookies**. Si se añade algo, hay que poner
   aviso y revisar la nota legal.
 - **Se maqueta con el español**, que es el texto más largo. El inglés entra en
   las mismas cajas sin ajustar nada.
 - Sin JavaScript no se pierde contenido: las frases-ancla quedan visibles y el
   panel negro de la entrada no llega a aparecer.
-- La entrada se reproduce **una vez por sesión** (`sessionStorage`). Para
-  volver a verla, abrir una ventana nueva o borrar la clave `cec_intro`.
+- La firma de la entrada sale **una vez por sesión** (`sessionStorage`). Para
+  volver a verla, abrir una ventana nueva o borrar la clave `cec_intro`. Las
+  demás veces, desde el 23 sep 2026, la Home entra con la escalera de *Sobre
+  mí*. Lo decide `data-intro` en `<html>`: `play` la firma, `seen` la
+  escalera, y `done` cuando la firma termina — que no dispara la escalera, a
+  propósito.
 - El fondo del contrabajo **solo está en la Home**, y se enciende con la prop
   `backdrop` del layout `Base`. En *Sobre mí* no va: ahí manda el retrato.
 - La lámina **se queda quieta y en blanco y negro** si el navegador no soporta

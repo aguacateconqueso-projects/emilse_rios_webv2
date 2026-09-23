@@ -37,11 +37,13 @@ const t = useTranslations(lang);
 {/*
   La entrada comparte el ancho de la rejilla, no el de la columna de lectura:
   si no, el titular arrancaría a media pantalla de la primera foto y se vería
-  la costura entre dos anchos distintos. Por eso el número va encima y no al
-  margen — al margen se saldría del contenedor.
+  la costura entre dos anchos distintos.
+
+  Hasta el 23 sep 2026 llevaba encima el numeral `00`. Salió a pedido de
+  Adrián —«no pinta nada»—, lo mismo que los de la Home y *Sobre mí* el 21 sep.
+  Los números de las fichas se quedan: esos sí ordenan algo.
 */}
-<section class="tienda__wrap reveal">
-  <div class="mono-plain soft" aria-hidden="true">00</div>
+<section class="tienda__wrap tienda__head reveal">
   <h1 class="tienda__title">{t('products.heading')}</h1>
   <p class="tienda__lead">{t('products.lead')}</p>
   <p class="tienda__lead tienda__lead--close">{t('products.close')}</p>
@@ -107,6 +109,13 @@ const t = useTranslations(lang);
 </section>
 
 <style>
+  /* El hueco que dejó el `00`: su renglón, 17 px, redondeado a la rejilla.
+     Sumado al margen del titular son 40 px, así que el titular se queda
+     donde estaba y no sube a pegarse a la píldora del menú. */
+  .tienda__head {
+    padding-top: var(--space-2);
+  }
+
   .tienda__title {
     margin-top: var(--space-3);
     font-family: var(--font-display);
@@ -250,4 +259,55 @@ const t = useTranslations(lang);
     cursor: default;
   }
 
+  /* --- La foto al pasar por encima -----------------------------------------
+     Toma color y se acerca un poco, **dentro de su marco**. Lo pidió Adrián el
+     23 sep 2026, «como en el *Sobre mí*»: el mismo color, la misma curva y el
+     mismo medio segundo que el retrato de allí. Lo que cambia es el gesto. El
+     retrato se levanta 8 px; acá la foto se acerca y el marco no se mueve,
+     porque una ficha entera que se levanta es una tarjeta, y el sistema las
+     prohíbe.
+
+     Cuatro centésimas, y recortado por el marco: la regla de 1 px no se mueve
+     y la foto no se sale de ella. `clip` y no `hidden`, por lo mismo que en la
+     lámina de la Home: recorta sin crear un contenedor de scroll.
+
+     Lo dispara la ficha entera, no solo la foto, porque la zona pulsable es la
+     ficha entera. Y solo en las que son enlace: en las que están por llegar,
+     una foto que responde al cursor promete un clic que no lleva a ningún
+     sitio. Hoy ninguna de esas tiene foto; el día que la tenga, se queda
+     quieta hasta que salga a la venta.
+
+     Con el teclado, el mismo color y el mismo acercamiento al enfocar la
+     ficha. El resto, como en *Sobre mí*: solo con cursor de verdad —en una
+     pantalla táctil el `:hover` se queda pegado— y sin movimiento para quien
+     lo pide, que se queda con el color. `:global` porque el marco y la imagen
+     son de `MediaSlot`. */
+  .cat__media :global(.slot) {
+    overflow: clip;
+  }
+
+  .cat__link :global(.slot__img) {
+    transition:
+      filter 0.5s var(--ease-reveal),
+      transform 0.5s var(--ease-reveal);
+  }
+
+  a.cat__link:focus-visible :global(.slot__img) {
+    filter: grayscale(0);
+    transform: scale(1.04);
+  }
+
+  @media (hover: hover) {
+    a.cat__link:hover :global(.slot__img) {
+      filter: grayscale(0);
+      transform: scale(1.04);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    a.cat__link:hover :global(.slot__img),
+    a.cat__link:focus-visible :global(.slot__img) {
+      transform: none;
+    }
+  }
 </style>

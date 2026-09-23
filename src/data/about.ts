@@ -23,12 +23,15 @@ const es: AboutCopy = {
         'Acá se supone que te cuente que vengo de una familia de generaciones de músicos, que a los 7 años ya era una niña prodigio y que toco un instrumento prehistórico valorado en 150 billones.',
         'No puedo.',
         'No es mi caso. Y además no te sirve para nada.',
-        'Te cuento otra cosa.',
       ],
     },
     {
       k: 'prose',
       paras: [
+        /* Abre la historia y no cierra la entrada. Desde el 21 sep 2026 iba
+           pegada a «No es mi caso», al lado del retrato; el 23 sep Adrián la
+           bajó acá, encima del primer día: es la puerta a lo que sigue. */
+        'Te cuento otra cosa.',
         'En mi primer día con el instrumento, el profesor del conservatorio me escuchó y me dijo que el contrabajo no era para mí. Que mi mano era muy pequeña. Que no tenía fuerza. Que estaba pasada de edad.',
         'Tenía diez años más que mis compañeros y estaba en la universidad estudiando Sociología. Empezar adulto a estudiar un instrumento tiene eso: para el mundo académico siempre vas atrás. Pero ciertamente tienes algo extra.',
       ],
@@ -118,12 +121,12 @@ const en: AboutCopy = {
         "This is where I'm supposed to tell you I come from generations of musicians, that I was a child prodigy at seven, and that I play a prehistoric instrument worth 150 billion.",
         "Can't do it.",
         "Not my story. And it wouldn't help you anyway.",
-        'Let me tell you something else.',
       ],
     },
     {
       k: 'prose',
       paras: [
+        'Let me tell you something else.',
         "On my first day with the instrument, the conservatory teacher listened to me and said the double bass wasn't for me. That my hand was too small. That I didn't have the strength. That I was past «the right age».",
         "I was ten years older than my classmates and I was at university studying Sociology. Starting an instrument as an adult is like that: in the academic world you're always behind. But you do bring something extra.",
       ],
