@@ -4,7 +4,31 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 22 de septiembre de 2026.
+**Última actualización:** 23 de septiembre de 2026.
+
+> **Para quien retome en una sesión nueva.** Lo último —las correcciones de
+> Klaviyo— está en la rama **`claude/compassionate-gates-is7e15`** y **todavía
+> no está en `main`**: falta abrir el PR y mergearlo. Hasta ese merge, lo que
+> está en el aire sigue usando la versión `2024-10-15` de la API de Klaviyo, que
+> se retira el **15 oct 2026**. Después del merge, lo que queda del newsletter es
+> todo de paneles, en este orden:
+>
+> 1. **Klaviyo → Custom Key** con escritura sobre **Lists, Profiles y
+>    Subscriptions**. Si ya había una clave hecha con la guía vieja, se edita
+>    para añadir *Subscriptions*.
+> 2. **Vercel → `KLAVIYO_API_KEY`** en Production, y **redesplegar**.
+> 3. **Comprobar:** `data-endpoint="/api/suscribir"` en el código fuente de la
+>    Home, un alta de prueba, y el correo dentro de la lista `SaE8Px`.
+> 4. **Klaviyo → apagar WooCommerce**, mirando antes los flujos. Y decidir con
+>    Emi la doble confirmación (recomendada).
+>
+> **No se sabe todavía si la clave ya está puesta en Vercel:** el entorno de la
+> sesión del 22 sep no tenía salida ni hacia `emilserios.com` ni hacia Klaviyo,
+> así que no se pudo mirar. Es lo primero que hay que comprobar, con el paso 3.
+>
+> **El correo de Emi funciona**, en las dos direcciones y a la bandeja de
+> entrada (Adrián, 22 sep). Queda solo mirar la línea `DKIM:` en «Mostrar
+> original» para cerrar lo de los CNAME proxied.
 
 **EL AULA ESTÁ CONECTADA Y SE ENTRA.** Adrián entró con su cuenta contra el
 Supabase de siempre: variables, Redirect URLs, sesión y candado de pago
