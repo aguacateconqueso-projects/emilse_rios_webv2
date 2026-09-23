@@ -327,13 +327,10 @@ y renombrar la ruta obliga a redirigir las viejas —y el día que el nombre
 vuelva a cambiar, otra vez—. Si se quiere `/formaciones/`, es una línea en
 `routes` de `src/i18n/ui.ts` más las redirecciones en `astro.config.mjs`.
 
-⚠️ **Y ojo con esas redirecciones, que parece que ya fallan:** las que genera
-Astro para Vercel no aceptan la barra final. Según `.vercel/output/config.json`
-después de un build —las expresiones acaban en `$` justo después del nombre—,
-`/aulavirtual/estudiemos-juntos` redirige y `/aulavirtual/estudiemos-juntos/`,
-con barra, cae en el 404. No se pudo comprobar en vivo desde la sesión (sin
-salida a `emilserios.com`); es lo primero que hay que mirar antes de mover más
-direcciones.
+Ojo con esas redirecciones: hasta el 23 sep 2026 las que genera Astro para
+Vercel no aceptaban la barra final, y `/aulavirtual/estudiemos-juntos/` daba
+404. Se arregló en el PR #44 —ver **Las direcciones viejas**— y
+`npm run audit:redirecciones` lo comprueba antes de mover ninguna dirección.
 
 **La carta de la membresía se reescribió entera** (`src/components/membresia/Carta.astro`),
 con **cinco testimonios**: Magdalena, Mario, Laura, Sergio y Paloma. La ropa
