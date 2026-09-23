@@ -636,8 +636,13 @@ const clase = (b: Bloque) => (typeof b === 'string' ? '' : `venta__${b.k}`);
   }
 
   /* --- La ficha de precio ----------------------------------------------------
-     La de la ficha de compra del sitio: encuadrada por reglas, no por una
-     caja; la de arriba en tinta plena para que pese más que una división. */
+     Un recuadro de tinta a escuadra que **se invierte al pasarle el cursor**:
+     fondo de tinta, letra de papel, reglas de papel. Es el gesto de la ficha
+     de la carta de la academia, que Adrián quiso de vuelta el 23 sep 2026 —«que
+     todo el cuadro cambie a negro y las letras blancas»—, con la ropa del
+     sitio: sin radio, sin sombra, con los papeles sobre tinta de `tokens.css`
+     (`--paper-soft`, `--paper-rule`), que se guardaban justo para esto. El
+     botón de dentro se invierte con ella: ver `BotonVenta.astro`. */
   .venta__incluye {
     margin-top: var(--space-12);
     padding-inline: var(--space-3);
@@ -650,9 +655,48 @@ const clase = (b: Bloque) => (typeof b === 'string' ? '' : `venta__${b.k}`);
   }
 
   .venta__ficha {
-    border-top: 1px solid var(--ink);
-    border-bottom: 1px solid var(--rule);
-    padding: var(--space-4) 0;
+    border: 1px solid var(--ink);
+    padding: var(--space-6);
+    background: var(--paper);
+    transition:
+      background 0.45s ease,
+      color 0.45s ease;
+  }
+
+  @media (max-width: 38rem) {
+    .venta__ficha {
+      padding: var(--space-3);
+    }
+  }
+
+  .venta__eco,
+  .venta__etiqueta,
+  .venta__per,
+  .venta__letra,
+  .venta__filas,
+  .venta__filas li {
+    transition:
+      color 0.45s ease,
+      border-color 0.45s ease;
+  }
+
+  @media (hover: hover) {
+    .venta__ficha:hover {
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .venta__ficha:hover .venta__eco,
+    .venta__ficha:hover .venta__etiqueta,
+    .venta__ficha:hover .venta__per,
+    .venta__ficha:hover .venta__letra {
+      color: var(--paper-soft);
+    }
+
+    .venta__ficha:hover .venta__filas,
+    .venta__ficha:hover .venta__filas li {
+      border-color: var(--paper-rule);
+    }
   }
 
   .venta__cols {

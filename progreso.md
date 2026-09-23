@@ -65,6 +65,15 @@ de cero debería poder seguir trabajando sin preguntar nada.
 >   en el sistema del sitio**. ⚠️ **Esperan a Emi:** el final del inglés de
 >   «Todo el diapasón» y los testimonios del vibrato en inglés, traducidos
 >   acá.
+> - **Y el último retoque del día: los botones.** Todos los del sitio son el
+>   de la carta de la academia —relleno bajo el cursor, flecha, imán, un
+>   poco de zoom y notas musicales—, y la ficha de precio de las cartas
+>   vuelve a invertirse a negro. Ver **Los botones del sitio**.
+>
+> ⚠️ **Lo siguiente grande es el aula**: cambia de ropa al sistema del
+> sitio, como las cartas. Adrián lo confirmó el 23 sep, pero **lo deja para
+> después**: primero quiere todas las páginas públicas listas, y el aula
+> viene con sesiones pesadas.
 >
 > **Lo que viene, en el orden en que lo pidieron Adrián y Emi:**
 >
@@ -452,6 +461,49 @@ no tenía salida a `vercel.app`:
 
 ---
 
+## Los botones del sitio
+
+**23 de septiembre de 2026, lo último del día.** Adrián, con la carta ya en el
+sistema del sitio delante: «me gustaría traer la animación de antes, que todo
+el cuadro cambie a negro y las letras blancas… y la animación de las notas
+musicales en los botones», y después: «todos los botones de toda la web, con
+la animación de las notas musicales que teníamos antes, y el leve zoom in y
+movimiento, esos botones me encantan». El cursor de clave de fa, no.
+
+- **Un solo botón para todo el sitio:** `src/components/Boton.astro`, con su
+  aspecto en `base.css` (`.boton`) y su movimiento en un script de
+  `Base.astro`, que busca `[data-boton]`. Es el de la carta de la academia con
+  los mismos números —el relleno de tinta que nace donde está el cursor, la
+  flecha que se desliza, el imán de 8 × 6 px, las notas de colores cada
+  460 ms— más **un zoom del 3 %** mientras el cursor está encima, que es el
+  «leve zoom in» que pidió. La letra es la mono del sitio. En reposo, borde
+  de tinta y fondo transparente; encima, tinta llena.
+- **Dónde está:** los botones de las cartas (`BotonVenta.astro`) y el del
+  formulario del newsletter, en la Home y en *Sobre mí*. En el formulario la
+  regla pasó del formulario entero al campo del correo: el botón ya tiene su
+  borde. En el teléfono el botón baja a su propia línea.
+- **Dónde no, a propósito:** la cápsula de «Ingresar al aula» de la cabecera,
+  que es cristal como el menú y no un botón de página; y **el aula** —acceso,
+  gracias, escritorio—, que tiene su propio botón (`aula/Boton.astro`) con la
+  ropa de la academia hasta que cambie de ropa entera.
+- **La ficha de precio de las cartas es un recuadro de tinta que se invierte
+  al pasarle el cursor**: fondo de tinta, letra de papel, reglas de papel
+  —`--paper-soft` y `--paper-rule`, que `tokens.css` guardaba para la
+  próxima sección oscura—. El botón de dentro se invierte con ella, como en
+  la academia: relleno de papel. Solo con cursor de verdad; en el teléfono se
+  queda en papel.
+- **Con las puertas de la membresía cerradas** el botón sigue muerto: sin
+  enlace, sin relleno, sin flecha y sin notas.
+
+Pasó la auditoría del sitio (`scripts/audit.mjs`) en la Home, *Sobre mí* y una
+carta: nada fuera de la rejilla y ningún contraste por debajo de AA.
+
+⚠️ **Un tropiezo de ese día, para no repetirlo:** al reescribir un comentario
+del CSS de `CartaVenta.astro` se quedó sin su `*/`, y se tragó todas las
+reglas hasta el siguiente cierre —la ficha salía sin estilo—. Astro no avisa:
+el minificador descarta lo que queda dentro. Se comprobó después que en
+ningún `<style>` del sitio queden comentarios descuadrados.
+
 ## Las cartas, en el sistema del sitio
 
 **23 de septiembre de 2026, al final del día.** Adrián: «cambiemos el estilo
@@ -517,8 +569,9 @@ la enmienda del 9 de septiembre: ver **Enmiendas, con fecha**.
   curso»; se unifica igual.
 - **Las cuatro fichas de Formaciones son enlace.**
 
-**Lo que queda abierto, y conviene decidirlo:** **el aula** —el acceso, el
-escritorio, el reproductor— **sigue con la ropa de la academia**. Se vistió
+**Lo que queda abierto:** **el aula** —el acceso, el escritorio, el
+reproductor— **sigue con la ropa de la academia**. (Decidido horas después:
+cambia, pero después de las páginas públicas; ver el relevo, arriba.) Se vistió
 así el 11 sep para que la alumna no notara la costura al pasar de la carta al
 aula; ahora la carta ya no la lleva, así que la costura está en otro sitio.
 Unificarla también es la continuación natural, pero es un cambio grande y
@@ -2878,7 +2931,23 @@ componentes**: si hace falta uno nuevo, se añade como token.
 
 El sistema es de Emi y se puede cambiar. Lo que no se puede es cambiarlo sin
 dejar constancia, porque si no la tabla de arriba deja de ser fiable. Hasta hoy
-se ha tocado trece veces:
+se ha tocado catorce veces:
+
+- **23 sep 2026 · El botón del sitio: relleno, imán, zoom y notas de colores.**
+  Lo pidió Adrián para todos los botones de la web (ver **Los botones del
+  sitio**). Tres cosas que la tabla no preveía, y por qué pasan:
+  - **Las notas musicales son color**, y la tabla dice «ningún otro color en la
+    interfaz». Pasan porque duran un segundo y solo salen cuando el cursor
+    está encima: la página quieta sigue en papel y tinta. Los seis colores son
+    los de la carta de la academia, tal cual.
+  - **El relleno es un círculo**, y la tabla dice radios cero. Es una forma
+    en movimiento que el botón recorta: el botón sigue a escuadra.
+  - **El imán y el zoom mueven el botón.** No cuentan contra el tope de
+    animaciones, por la enmienda del 20 de agosto: son respuesta a una acción.
+    Quien pide menos movimiento no los tiene, ni las notas.
+
+  Y la ficha de precio de las cartas pasa a ser un **recuadro** que se invierte
+  a tinta: un borde de 1 px, sin radio ni sombra, así que dentro de la tabla.
 
 - **23 sep 2026 · Las cartas de venta vuelven al sistema, las cuatro.**
   Deshace la del 9 de septiembre, más abajo. Lo pidió Adrián: «tenemos que
@@ -3110,6 +3179,7 @@ src/
                                    no van en Base.astro: el acceso al aula
     CartaVenta.astro               Las cartas de venta: la membresía y los
                                    cursos, con el sistema del sitio
+    Boton.astro                    El botón del sitio: relleno, imán, notas
     BotonVenta.astro               Su botón, con las puertas de la membresía
     Footer · LangSwitch            Pie y conmutador ES/EN
     Logo.astro                     La firma de Emi, como máscara

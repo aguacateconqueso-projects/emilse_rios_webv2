@@ -1,0 +1,31 @@
+---
+/**
+ * El botón del sitio: relleno que nace bajo el cursor, flecha, un poco de
+ * imán y notas musicales. El aspecto está en `base.css` (`.boton`) y el
+ * movimiento, en el script de `Base.astro`, que busca `[data-boton]`.
+ *
+ * Es un enlace, salvo que traiga `type` —`submit` o `button`—: entonces es un
+ * `<button>`, como el del formulario del newsletter. Lo que va en el `<slot>`
+ * es el rótulo; la carta de la membresía mete ahí dos, el de puertas abiertas
+ * y el de cerradas.
+ *
+ * No es el botón del aula (`aula/Boton.astro`), que sigue con la ropa de la
+ * academia hasta que el aula cambie de ropa.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+type Props = HTMLAttributes<'a'> &
+  HTMLAttributes<'button'> & {
+    /** Sin flecha: para el botón de puertas cerradas, que no lleva a ningún sitio. */
+    flecha?: boolean;
+  };
+
+const { class: clase, flecha = true, ...resto } = Astro.props;
+const Tag = resto.type ? 'button' : 'a';
+---
+
+<Tag class:list={['boton', clase]} data-boton {...resto}>
+  <span class="boton__fill" aria-hidden="true"></span>
+  <span class="boton__label"><slot /></span>
+  {flecha && <span class="boton__ar" aria-hidden="true">→</span>}
+</Tag>

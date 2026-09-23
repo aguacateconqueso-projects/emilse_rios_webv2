@@ -2,9 +2,10 @@
 /**
  * El botón de una carta de venta, con lo que va debajo.
  *
- * Es el botón macizo del sitio —tinta llena, letra mono—, el mismo de la ficha
- * de compra: el final del recorrido, y no hay color de acento con el que
- * destacarlo de otra manera. Sale dos o tres veces por carta.
+ * Es el botón del sitio (`Boton.astro`): relleno bajo el cursor, flecha,
+ * imán y notas musicales. Sale dos o tres veces por carta. Dentro de la ficha
+ * de precio, que se invierte a tinta al pasarle por encima, se invierte con
+ * ella: relleno de papel sobre fondo de tinta.
  *
  * **Con puertas (la membresía)** es el botón de pagar y lleva debajo la cuenta
  * atrás o el aviso de puertas cerradas. Con las puertas cerradas deja de ser
@@ -17,6 +18,7 @@
  */
 import type { Carta } from '../data/cartas';
 import { NEWSLETTER } from '../data/cartas';
+import Boton from './Boton.astro';
 
 interface Props {
   c: Carta;
@@ -29,19 +31,19 @@ const fuera = c.boton.fuera ? { target: '_blank', rel: 'noopener' } : {};
 
 {
   puertas ? (
-    <a
-      class="mono venta__btn venta__btn--pay"
+    <Boton
+      class="venta__btn venta__btn--pay"
       href={puertas.cerrado ? undefined : c.boton.href}
       aria-disabled={puertas.cerrado ? 'true' : undefined}
       tabindex={puertas.cerrado ? '-1' : undefined}
     >
       <span class="venta__btn-open">{c.boton.texto}</span>
       <span class="venta__btn-closed">{c.puertas?.payClosed}</span>
-    </a>
+    </Boton>
   ) : (
-    <a class="mono venta__btn" href={c.boton.href} {...fuera}>
+    <Boton class="venta__btn" href={c.boton.href} {...fuera}>
       {c.boton.texto}
-    </a>
+    </Boton>
   )
 }
 {
@@ -73,20 +75,9 @@ const fuera = c.boton.fuera ? { target: '_blank', rel: 'noopener' } : {};
 }
 
 <style>
-  /* El único botón macizo del sitio, el mismo de la ficha de compra. */
-  .venta__btn {
-    display: inline-block;
-    padding: var(--space-2) var(--space-4);
-    background: var(--ink);
-    color: var(--paper);
-    border: 1px solid var(--ink);
-  }
-
-  .venta__btn:hover {
-    background: var(--ink-soft);
-    border-color: transparent;
-  }
-
+  /* Los rótulos de la membresía: abierto o cerrado, según `data-doors`. Van
+     con `:global` porque el `<span>` lo pinta este componente pero el botón
+     que lo envuelve es de `Boton.astro`. */
   .venta__btn-closed {
     display: none;
   }
@@ -98,6 +89,7 @@ const fuera = c.boton.fuera ? { target: '_blank', rel: 'noopener' } : {};
   .venta__timer {
     display: none;
     margin-top: var(--space-2);
+    transition: color 0.45s ease;
   }
 
   :global([data-doors='soon']) .venta__timer,
@@ -117,6 +109,7 @@ const fuera = c.boton.fuera ? { target: '_blank', rel: 'noopener' } : {};
     margin-top: var(--space-1);
     color: var(--ink);
     font-variant-numeric: tabular-nums;
+    transition: color 0.45s ease;
   }
 
   .venta__u[hidden] {
@@ -133,6 +126,7 @@ const fuera = c.boton.fuera ? { target: '_blank', rel: 'noopener' } : {};
 
   .venta__closed a {
     color: var(--ink);
+    transition: color 0.45s ease;
   }
 
   :global([data-doors='closed']) .venta__timer-lead,
@@ -145,19 +139,46 @@ const fuera = c.boton.fuera ? { target: '_blank', rel: 'noopener' } : {};
   }
 
   /* Puertas cerradas: el botón sigue ahí —la carta se lee igual— pero deja de
-     ser un botón: sin relleno, en tinta secundaria, y sin enlace. */
-  :global([data-doors='closed']) .venta__btn--pay {
-    background: transparent;
+     ser un botón: en tinta secundaria, sin relleno, sin flecha, sin notas y
+     sin enlace. */
+  :global([data-doors='closed'] .venta__btn--pay) {
     color: var(--ink-soft);
     border-color: var(--rule);
     pointer-events: none;
   }
 
+  :global([data-doors='closed'] .venta__btn--pay .boton__ar),
   :global([data-doors='closed']) .venta__btn-open {
     display: none;
   }
 
   :global([data-doors='closed']) .venta__btn-closed {
     display: inline;
+  }
+
+  /* --- Dentro de la ficha invertida -----------------------------------------
+     La ficha de precio se vuelve tinta al pasarle el cursor, y el botón y lo
+     de debajo se invierten con ella. Solo donde hay cursor de verdad: en una
+     pantalla táctil el `:hover` se queda pegado. */
+  @media (hover: hover) {
+    :global(.venta__ficha:hover .venta__btn) {
+      --fill: var(--paper);
+      --fg: var(--paper);
+      --fg-hover: var(--ink);
+    }
+
+    :global([data-doors='closed'] .venta__ficha:hover .venta__btn--pay) {
+      color: var(--paper-soft);
+      border-color: var(--paper-rule);
+    }
+
+    :global(.venta__ficha:hover) .venta__timer {
+      color: var(--paper-soft);
+    }
+
+    :global(.venta__ficha:hover) .venta__clock,
+    :global(.venta__ficha:hover) .venta__closed a {
+      color: var(--paper);
+    }
   }
 </style>

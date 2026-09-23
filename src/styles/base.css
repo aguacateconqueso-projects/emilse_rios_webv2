@@ -294,3 +294,131 @@ a:hover {
   opacity: 1;
   transform: none;
 }
+
+/* ==========================================================================
+   El botón — uno solo para todo el sitio (23 sep 2026)
+   ==========================================================================
+   Es el de la carta de la membresía que vino de la academia, el que Adrián
+   quiso de vuelta en todas partes: «esos botones me encantan». Al pasar el
+   cursor, un relleno de tinta crece DESDE donde está el cursor, la flecha se
+   desliza, el botón se acerca un poco y sigue al puntero, y suelta notas
+   musicales de colores. Lo que cambia respecto a aquella carta es la letra:
+   acá es la mono del sitio, no Hanken Grotesk.
+
+   El marcado lo pone `Boton.astro`; el movimiento y las notas, el script de
+   `Base.astro`, que busca `[data-boton]`. Los tiempos y las curvas son los
+   del original, tal cual: 360 ms el color, 560 ms el relleno, 420 ms la
+   vuelta a su sitio.
+
+   Cambia de paleta con tres variables, para las fichas que se invierten a
+   tinta al pasar por encima: `--fill` el relleno, `--fg` el texto y el borde
+   en reposo, `--fg-hover` el texto sobre el relleno. */
+.boton {
+  --fill: var(--ink);
+  --fg: var(--ink);
+  --fg-hover: var(--paper);
+  --mx: 50%;
+  --my: 50%;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid currentColor;
+  font-family: var(--font-mono);
+  font-size: var(--text-mono);
+  letter-spacing: var(--tracking-mono);
+  text-transform: uppercase;
+  line-height: 1.4;
+  cursor: pointer;
+  transition:
+    color 360ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 360ms ease,
+    transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* El relleno: un círculo que nace a escala cero bajo el cursor y crece hasta
+   cubrir el botón, que lo recorta. */
+.boton__fill {
+  position: absolute;
+  top: var(--my);
+  left: var(--mx);
+  z-index: -1;
+  width: 260%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--fill);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.boton__label,
+.boton__ar {
+  position: relative;
+  z-index: 1;
+}
+
+.boton__ar {
+  transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.boton:hover {
+  color: var(--fg-hover);
+  border-color: var(--fg);
+}
+
+.boton:hover .boton__fill {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.boton:hover .boton__ar {
+  transform: translateX(6px);
+}
+
+.boton:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+.boton:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* Las notas que suelta al pasar el cursor. Van fijas a la ventana, y el
+   script las quita cuando terminan de subir. Son el único color de la
+   interfaz, y duran un segundo: ver la enmienda del 23 sep 2026. */
+.note-pop {
+  position: fixed;
+  z-index: 60;
+  pointer-events: none;
+  font-weight: 700;
+  will-change: transform, opacity;
+  animation: notefloat 1s ease-out forwards;
+}
+
+@keyframes notefloat {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.6) rotate(0deg);
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx, 0), -66px) scale(1.15) rotate(var(--rot, 0deg));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boton,
+  .boton__fill,
+  .boton__ar {
+    transition-duration: 0.01ms;
+  }
+}
