@@ -4,13 +4,15 @@
  *
  * Vive **afuera del aula y no pide nada**: es lo que ve quien todavía no ha
  * pagado. El aula, que es lo que se compra, quedó del otro lado del inicio de
- * sesión — ver `Aula.astro`. Por eso el único enlace de esta página hacia
+ * sesión. Por eso el único enlace de esta página hacia
  * dentro es la línea de «¿ya compraste?», que es un atajo para quien vuelve,
  * no una puerta abierta.
  *
  * Cada producto lleva su foto arriba, el nombre, una línea de qué es y su
  * estado. La forma es la que pidió Emi con el sitio viejo delante: una rejilla
- * de tres columnas, imagen, título, texto y llamada.
+ * de tres columnas, imagen, título y texto. La llamada de debajo —«Ver la
+ * membresía»— salió el 23 sep 2026: pinchar la foto ya es lo intuitivo, y
+ * menos opciones es más.
  *
  * Lo que **no** se copia de esa referencia es la ropa: allí las fichas son
  * cajas negras con esquinas redondeadas y botones de píldora, y acá el sistema
@@ -19,12 +21,13 @@
  * imagen del resto del sitio. Las fotos van en blanco y negro, como la lámina
  * de la Home — de eso se encarga `MediaSlot`.
  *
- * Las fichas de lo que está a la venta son enlaces. Las de lo que está por
- * llegar **no lo son**, y se ven apagadas: es la misma regla que tuvo apagada
- * esta sección entera hasta hoy.
+ * Las fichas que tienen página son enlaces: las de lo que está a la venta y,
+ * desde el 23 sep 2026, las de los cursos que todavía no se venden pero ya
+ * tienen su carta escrita (`tienePagina`). Las de lo que está por llegar y no
+ * tiene carta **no lo son**, y se ven apagadas.
  */
-import { type Lang, useTranslations, productPath, routePath } from '../i18n/ui';
-import { catalogo } from '../data/aula';
+import { type Lang, useTranslations, productPath } from '../i18n/ui';
+import { catalogo, entrarHref, tienePagina } from '../data/aula';
 import MediaSlot from './MediaSlot.astro';
 
 interface Props {
@@ -47,7 +50,7 @@ const t = useTranslations(lang);
   <h1 class="tienda__title">{t('products.heading')}</h1>
   <p class="tienda__lead">{t('products.lead')}</p>
   <p class="tienda__lead tienda__lead--close">{t('products.close')}</p>
-  <a class="mono tienda__in" href={routePath('aula', lang)}>{t('products.enrolled')}</a>
+  <a class="mono tienda__in" href={entrarHref[lang]}>{t('products.enrolled')}</a>
 </section>
 
 <section class="tienda__wrap block">
@@ -56,13 +59,14 @@ const t = useTranslations(lang);
       catalogo.map((producto) => {
         const copia = producto.copia[lang];
         const venta = producto.estado === 'venta';
-        const Ficha = venta ? 'a' : 'div';
+        const pagina = tienePagina(producto);
+        const Ficha = pagina ? 'a' : 'div';
         return (
-          <li class:list={['cat__item', 'reveal', !venta && 'is-soon']}>
+          <li class:list={['cat__item', 'reveal', !pagina && 'is-soon']}>
             <Ficha
               class="cat__link"
-              href={venta ? productPath(producto.slug, lang) : undefined}
-              aria-disabled={venta ? undefined : 'true'}
+              href={pagina ? productPath(producto.slug, lang) : undefined}
+              aria-disabled={pagina ? undefined : 'true'}
             >
               <span class="cat__media">
                 <MediaSlot
@@ -89,17 +93,6 @@ const t = useTranslations(lang);
 
               <span class="cat__name">{copia.nombre}</span>
               <span class="cat__sum">{copia.resumen}</span>
-
-              {/*
-                Nada debajo del resumen en lo que está por llegar: la línea de
-                datos ya dice «Próximamente» y repetirlo con otras palabras solo
-                le da a un hueco el peso visual de un producto.
-              */}
-              {venta && (
-                <span class="mono cat__cta">
-                  {producto.tipo === 'membresia' ? t('products.seeMembership') : t('products.see')}
-                </span>
-              )}
             </Ficha>
           </li>
         );
@@ -233,21 +226,6 @@ const t = useTranslations(lang);
     text-wrap: pretty;
   }
 
-  /* La llamada se pega al fondo de la ficha para que las tres queden alineadas
-     aunque los textos midan distinto. Se subraya con una regla, como los
-     enlaces del sitio. */
-  .cat__cta {
-    display: inline-block;
-    align-self: flex-start;
-    margin-top: auto;
-    padding-top: var(--space-3);
-    border-bottom: 1px solid var(--ink-soft);
-  }
-
-  a.cat__link:hover .cat__cta {
-    border-bottom-color: currentColor;
-  }
-
   /* --- Lo que todavía no está ---------------------------------------------
      Apagado y sin enlace. Se dice que llega, no se finge que existe. */
   .is-soon .cat__name,
@@ -271,11 +249,14 @@ const t = useTranslations(lang);
      y la foto no se sale de ella. `clip` y no `hidden`, por lo mismo que en la
      lámina de la Home: recorta sin crear un contenedor de scroll.
 
-     Lo dispara la ficha entera, no solo la foto, porque la zona pulsable es la
-     ficha entera. Y solo en las que son enlace: en las que están por llegar,
-     una foto que responde al cursor promete un clic que no lleva a ningún
-     sitio. Hoy ninguna de esas tiene foto; el día que la tenga, se queda
-     quieta hasta que salga a la venta.
+     Lo dispara la ficha entera, no solo la foto, porque en las que son enlace
+     la zona pulsable es la ficha entera. **Y va en todas las fichas, también
+     en las que están por llegar.** Hasta el 23 sep 2026 era solo en los
+     enlaces, para no prometer un clic que no lleva a ningún sitio; ese día
+     llegaron las fotos de los tres cursos, que están por llegar, y la regla
+     dejaba quietas tres de cuatro fotos. En esas la flecha sigue siendo la
+     de siempre —`cursor: default`— y no hay subrayado que invite a pulsar: la
+     foto responde, la ficha no promete nada.
 
      Con el teclado, el mismo color y el mismo acercamiento al enfocar la
      ficha. El resto, como en *Sobre mí*: solo con cursor de verdad —en una
@@ -286,7 +267,7 @@ const t = useTranslations(lang);
     overflow: clip;
   }
 
-  .cat__link :global(.slot__img) {
+  .cat__media :global(.slot__img) {
     transition:
       filter 0.5s var(--ease-reveal),
       transform 0.5s var(--ease-reveal);
@@ -298,14 +279,14 @@ const t = useTranslations(lang);
   }
 
   @media (hover: hover) {
-    a.cat__link:hover :global(.slot__img) {
+    .cat__link:hover :global(.slot__img) {
       filter: grayscale(0);
       transform: scale(1.04);
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    a.cat__link:hover :global(.slot__img),
+    .cat__link:hover :global(.slot__img),
     a.cat__link:focus-visible :global(.slot__img) {
       transform: none;
     }

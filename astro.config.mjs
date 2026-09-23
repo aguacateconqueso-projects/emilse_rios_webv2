@@ -137,7 +137,7 @@ export default defineConfig({
   /**
    * Las direcciones viejas, que no se rompen: Emi las pegó en sus correos.
    *
-   * Son cuatro y están escritas a mano. Hasta el 23 sep 2026 había además dos
+   * Son seis y están escritas a mano. Hasta el 23 sep 2026 había además dos
    * patrones dinámicos —`/aulavirtual/[producto]` → `/productos/[producto]` y
    * su gemelo inglés— y **se quitaron porque hacían daño**: en Vercel se
    * convierten en «cualquier cosa bajo /aulavirtual/», así que se comían las
@@ -171,6 +171,18 @@ export default defineConfig({
      */
     '/aulavirtual/panel': '/aulavirtual/escritorio',
     '/en/classroom/panel': '/en/classroom/desk',
+
+    /*
+     * El aula no tiene portada desde el 23 sep 2026: se entra directo a la
+     * pantalla de acceso. Lo pidió Adrián —«que pida directo usuario y
+     * contraseña»—. Hasta ese día `/aulavirtual/` era una página que
+     * presentaba el aula y tenía un botón que llevaba a esa misma pantalla.
+     * Los enlaces del sitio ya van directo; esto es para los que están fuera,
+     * en correos y marcadores. Y quien ya tiene la sesión abierta no se queda
+     * ahí: la pantalla de acceso lo pasa al escritorio.
+     */
+    '/aulavirtual': '/aulavirtual/entrar',
+    '/en/classroom': '/en/classroom/signin',
   },
 
   build: {

@@ -203,7 +203,7 @@ const cursoDeMuestra: Unidad[] = [
  */
 export const cursos: Curso[] = [
   {
-    slug: 'curso-01',
+    slug: 'todo-el-diapason',
     copia: {
       es: {
         resumen:
@@ -243,17 +243,17 @@ export const clasesDe = (curso: Curso): Clase[] =>
 export const ALUMNA_DEMO = {
   nombre: 'Ana',
   membresia: true,
-  cursos: ['curso-01'],
+  cursos: ['todo-el-diapason'],
 } as const;
 
 /** Las fichas de catálogo de los cursos comprados, en el orden del catálogo. */
 export const misCursos = (): Product[] =>
-  catalogo.filter((p) => p.tipo === 'curso' && ALUMNA_DEMO.cursos.includes(p.slug as 'curso-01'));
+  catalogo.filter((p) => p.tipo === 'curso' && ALUMNA_DEMO.cursos.includes(p.slug as 'todo-el-diapason'));
 
 /** Los cursos del catálogo que esta alumna todavía no tiene. */
 export const cursosPorComprar = (): Product[] =>
   catalogo.filter(
-    (p) => p.tipo === 'curso' && !ALUMNA_DEMO.cursos.includes(p.slug as 'curso-01'),
+    (p) => p.tipo === 'curso' && !ALUMNA_DEMO.cursos.includes(p.slug as 'todo-el-diapason'),
   );
 
 /**

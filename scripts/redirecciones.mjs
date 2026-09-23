@@ -74,6 +74,9 @@ const viejas = {
   '/en/classroom/estudiemos-juntos': '/en/products/estudiemos-juntos/',
   '/aulavirtual/panel': '/aulavirtual/escritorio/',
   '/en/classroom/panel': '/en/classroom/desk/',
+  // Desde el 23 sep 2026 el aula no tiene portada: se entra por el acceso.
+  '/aulavirtual': '/aulavirtual/entrar/',
+  '/en/classroom': '/en/classroom/signin/',
 };
 for (const [vieja, nueva] of Object.entries(viejas)) {
   casos.push({ ruta: vieja, llega: nueva }, { ruta: `${vieja}/`, llega: nueva });

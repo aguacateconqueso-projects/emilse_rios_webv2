@@ -453,8 +453,16 @@ export const graciasPath = (lang: Lang): string => (lang === 'en' ? '/en/thank-y
  */
 export const pasarPath = (lang: Lang): string => `${raiz[lang]}/${segmentoPasar[lang]}/`;
 
-/** La puerta: la única página del aula que se ve sin haber pagado. */
-export const puertaPath = (lang: Lang): string => `${raiz[lang]}/`;
+/**
+ * La puerta: la única página del aula que se ve sin haber pagado.
+ *
+ * **Desde el 23 sep 2026 es la pantalla de acceso.** Hasta ese día era
+ * `/aulavirtual/`, una portada que presentaba el aula y tenía un botón hacia
+ * el acceso; Adrián pidió que se entrara directo. `/aulavirtual/` sigue
+ * existiendo como redirección —ver `astro.config.mjs`—, pero los enlaces van
+ * directo, sin el salto.
+ */
+export const puertaPath = (lang: Lang): string => entrarPath(lang);
 
 /**
  * El escritorio: la primera pantalla después de iniciar sesión.

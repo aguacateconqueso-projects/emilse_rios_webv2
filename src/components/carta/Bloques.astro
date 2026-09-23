@@ -1,0 +1,48 @@
+---
+/**
+ * El cuerpo de una carta de venta: la lista de bloques, pintada.
+ *
+ * Sacado de `membresia/Carta.astro` el 23 sep 2026 para que las cartas de los
+ * cursos pinten sus bloques igual. Qué es cada tipo, en `Bloque`
+ * (`src/data/cartas.ts`).
+ *
+ * ⚠️ **Cada bloque es un hijo directo de `.page`**, sin envoltorio: el cambio de
+ * idioma se ancla a esos hijos por su posición (ver `Scripts.astro`). Por eso
+ * esto pinta hermanos sueltos y no una lista dentro de un `<div>`.
+ */
+import type { Bloque } from '../../data/cartas';
+
+interface Props {
+  bloques: Bloque[];
+}
+const { bloques } = Astro.props;
+---
+
+{
+  bloques.map((b) => {
+    if (typeof b === 'string') return <p class="reveal">{b}</p>;
+    if (b.k === 'fuerte') return <p class="reveal"><strong>{b.text}</strong></p>;
+    if (b.k === 'grito') return <p class="grito reveal">{b.text}</p>;
+    if (b.k === 'acento') return <p class="acento reveal">{b.text}</p>;
+    if (b.k === 'testimonio')
+      return (
+        <figure class="testi reveal">
+          <blockquote class="testi__q"><p>“{b.text}”</p></blockquote>
+          <figcaption class="testi__who">— {b.autor}</figcaption>
+        </figure>
+      );
+    if (b.k === 'puntos')
+      return (
+        <div class="puntos reveal">
+          {b.titulo && <p class="puntos__h">{b.titulo}</p>}
+          <ul>{b.items.map((li) => <li>{li}</li>)}</ul>
+        </div>
+      );
+    return (
+      <div class:list={['fit', 'compare__col', b.tono === 'si' ? 'compare__col--yes' : 'compare__col--no', 'reveal']}>
+        <p class="compare__h">{b.titulo}</p>
+        <ul>{b.items.map((li) => <li>{li}</li>)}</ul>
+      </div>
+    );
+  })
+}

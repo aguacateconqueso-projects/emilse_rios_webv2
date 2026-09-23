@@ -8,11 +8,18 @@
  * se sabe quién es esta persona. Una barra que ofrece «Mi escritorio» a alguien
  * que no ha entrado promete algo que al pulsarlo rebota.
  *
+ * **Lo que sí lleva, desde el 23 sep 2026, es el menú del sitio**, la misma
+ * cápsula de todas las páginas públicas (`CabeceraSuelta.astro`). Ese día
+ * «Aula virtual» pasó a traer directo acá, y sin menú esta pantalla era un
+ * callejón: solo el logo llevaba de vuelta.
+ *
  * Va con `noindex`: un formulario de acceso no tiene nada que hacer en un
  * buscador.
  */
-import { type Lang, routePath } from '../i18n/ui';
-import { useAula, puertaPath } from '../i18n/aula';
+import { Font } from 'astro:assets';
+import { type Lang, routePath, useTranslations } from '../i18n/ui';
+import { useAula } from '../i18n/aula';
+import CabeceraSuelta from '../components/CabeceraSuelta.astro';
 import '../styles/aula.css';
 
 interface Props {
@@ -25,6 +32,7 @@ interface Props {
 
 const { lang, title, pathEs, pathEn } = Astro.props;
 const a = useAula(lang);
+const t = useTranslations(lang);
 const otro: Lang = lang === 'es' ? 'en' : 'es';
 const otroHref = otro === 'es' ? pathEs : pathEn;
 ---
@@ -41,11 +49,16 @@ const otroHref = otro === 'es' ? pathEs : pathEn;
         `aula.css` da por hechas. Sin esta línea el aula sale con la tipografía
         del sistema. Ver el pendiente de servirlas desde casa. */}
     <link rel="stylesheet" href="/colors_and_type.css" />
+    {/* La mono del sitio, para el menú. Después de la base de la academia: las
+        dos definen `--font-mono`, y el aula no la usa. */}
+    <Font cssVariable="--font-mono" />
     <link rel="alternate" hreflang="es" href={pathEs} />
     <link rel="alternate" hreflang="en" href={pathEn} />
   </head>
 
   <body class="aula__body puerta__body">
+    <CabeceraSuelta lang={lang} route="aula" hrefEs={pathEs} hrefEn={pathEn} />
+
     <main class="puerta" id="main">
       <div class="wrap wrap--narrow">
         <a class="puerta__logo" href={routePath('home', lang)} aria-label="Emilse Ríos">
@@ -54,8 +67,12 @@ const otroHref = otro === 'es' ? pathEs : pathEn;
 
         <slot />
 
+        {/*
+          El primer enlace llevaba a la portada del aula, que desde el 23 sep
+          2026 es esta misma pantalla. Ahora lleva al inicio del sitio.
+        */}
         <p class="puerta__pie">
-          <a href={puertaPath(lang)}>{a('app.title')}</a>
+          <a href={routePath('home', lang)}>{t('nav.start')}</a>
           <span aria-hidden="true">·</span>
           <a href={otroHref} hreflang={otro} lang={otro}>{otro === 'en' ? 'English' : 'Español'}</a>
         </p>
@@ -65,11 +82,12 @@ const otroHref = otro === 'es' ? pathEs : pathEn;
 </html>
 
 <style>
+  /* Arriba, 76 px más: los de la cápsula del menú, que flota fija. */
   .puerta {
     min-height: 100svh;
     display: grid;
     place-items: center;
-    padding: clamp(32px, 7vh, 72px) 0;
+    padding: calc(76px + clamp(32px, 7vh, 72px)) 0 clamp(32px, 7vh, 72px);
   }
 
   .puerta__logo {

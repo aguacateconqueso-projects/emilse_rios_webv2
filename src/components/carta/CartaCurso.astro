@@ -1,0 +1,222 @@
+---
+/**
+ * La carta de venta de un curso, en el formato de la de la membresía.
+ *
+ * Nació el 23 sep 2026, con las de «Todo el diapasón» y «Contrabajo desde
+ * cero». Adrián pidió «mantenemos el formato de la membresía», así que esto es
+ * la carta de `membresia/Carta.astro` con otro contenido: la misma ropa
+ * (`Estilos.astro`), los mismos bloques (`Bloques.astro`), los mismos scripts
+ * (`Scripts.astro`) y el mismo menú del sitio arriba (`CabeceraSuelta.astro`).
+ * Los textos, en `src/data/cartas.ts`.
+ *
+ * Lo que la membresía tiene y esto no, a propósito:
+ *
+ * - **Las puertas y la cuenta atrás.** Son del cobro mensual de la membresía.
+ *   Estos cursos todavía no se venden.
+ * - **El cobro.** El botón sale en gris, o lleva al aviso del newsletter. Para
+ *   venderlos hace falta su precio en Stripe y un `/api/checkout` que sepa de
+ *   cursos; cuando lo haya, `boton.href` pasa a apuntar ahí.
+ * - **La foto de Emi.** Cada curso lleva la suya, la misma de su ficha en
+ *   Formaciones, que es horizontal: por eso el marco es más ancho.
+ *
+ * Imprime el documento entero, como la carta de la membresía, y por la misma
+ * razón: no puede ir dentro de `Base.astro`, que le colaría la hoja del
+ * sistema del sitio. Por eso cada curso tiene su fichero de página suelto en
+ * `src/pages/productos/` y `src/pages/en/products/`, y no pasa por
+ * `[producto].astro`, que sí importa `Base.astro`.
+ */
+import { Font, Image } from 'astro:assets';
+import { type Lang, productPath, routePath } from '../../i18n/ui';
+import { buscarProducto } from '../../data/aula';
+import { cartas } from '../../data/cartas';
+import CabeceraSuelta from '../CabeceraSuelta.astro';
+import AntesDePintar from './AntesDePintar.astro';
+import Estilos from './Estilos.astro';
+import Scripts from './Scripts.astro';
+import Bloques from './Bloques.astro';
+import BotonCurso from './BotonCurso.astro';
+
+interface Props {
+  lang: Lang;
+  slug: string;
+}
+const { lang, slug } = Astro.props;
+const isEN = lang === 'en';
+const t = cartas[slug][lang];
+const producto = buscarProducto(slug);
+const foto = producto?.foto;
+
+const SITE = Astro.site?.origin ?? 'https://www.emilserios.com';
+const urlES = `${SITE}${productPath(slug, 'es')}`;
+const urlEN = `${SITE}${productPath(slug, 'en')}`;
+const canonical = isEN ? urlEN : urlES;
+/* La tarjeta al compartir el enlace es la foto del curso. `foto.src` es la
+   original, que Astro publica en `/_astro/` en cuanto alguien la nombra. */
+const ogImage = foto ? new URL(foto.src, SITE).href : `${SITE}/img/foto.jpg`;
+
+/* Lo mismo que la membresía le cuenta a Google, menos el precio: el curso no
+   se vende todavía. Las preguntas frecuentes, con el mismo texto que se ve. */
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebPage',
+      '@id': `${canonical}#webpage`,
+      url: canonical,
+      name: t.metaTitle,
+      description: t.metaDesc,
+      inLanguage: lang,
+      publisher: { '@id': `${SITE}/#emilse` },
+    },
+    {
+      '@type': 'Person',
+      '@id': `${SITE}/#emilse`,
+      name: 'Emilse Rios',
+      jobTitle: isEN ? 'Double bassist and teacher' : 'Contrabajista y profesora',
+      url: 'https://emilserios.com',
+      sameAs: ['https://emilserios.com'],
+    },
+    {
+      '@type': 'FAQPage',
+      '@id': `${canonical}#faq`,
+      inLanguage: lang,
+      mainEntity: t.faq.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    },
+  ],
+};
+---
+
+<!DOCTYPE html>
+<html lang={lang}>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<AntesDePintar />
+<title>{t.metaTitle}</title>
+<meta name="description" content={t.metaDesc} />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+<meta name="robots" content="index, follow, max-image-preview:large" />
+<link rel="canonical" href={canonical} />
+<link rel="alternate" hreflang="es" href={urlES} />
+<link rel="alternate" hreflang="en" href={urlEN} />
+<link rel="alternate" hreflang="x-default" href={urlES} />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Emilse Rios" />
+<meta property="og:title" content={t.metaTitle} />
+<meta property="og:description" content={t.metaDesc} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:alt" content={t.photoAlt} />
+<meta property="og:locale" content={isEN ? 'en_US' : 'es_ES'} />
+<meta property="og:locale:alternate" content={isEN ? 'es_ES' : 'en_US'} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={t.metaTitle} />
+<meta name="twitter:description" content={t.metaDesc} />
+<meta name="twitter:image" content={ogImage} />
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
+
+<link rel="stylesheet" href="/colors_and_type.css" />
+{/* La mono del sitio, para el menú. Después de la base de la academia: ver
+    la nota igual en `membresia/Carta.astro`. */}
+<Font cssVariable="--font-mono" />
+<Estilos />
+</head>
+<body>
+
+  <CabeceraSuelta
+    lang={lang}
+    route="products"
+    hrefEs={productPath(slug, 'es')}
+    hrefEn={productPath(slug, 'en')}
+  />
+
+  <main class="page">
+
+    <p class="logo">
+      <img class="logo__img" src="/img/logo_emi_alpha.png" alt="Emilse Rios"
+           onerror="this.style.display='none';var f=this.parentNode&&this.parentNode.querySelector('.logo__text');if(f)f.hidden=false;" />
+      <span class="logo__text" hidden>Emilse Rios</span>
+    </p>
+
+    {
+      foto && (
+        <figure class="photo photo--ancha reveal">
+          <Image src={foto} alt={t.photoAlt} width={520} densities={[1, 2]} />
+        </figure>
+      )
+    }
+
+    <h1 class="title reveal">{t.title}</h1>
+    <p class="subtitle reveal">{t.subtitle}</p>
+    <p class="lede reveal">
+      <span class="lede__a">{t.ledeA}</span>
+      <span class="lede__b">{t.ledeB}</span>
+    </p>
+
+    <Bloques bloques={t.carta} />
+
+    <p class="incluye reveal">{t.includesH}</p>
+
+    <div class="plan reveal">
+      <div class="pricecard">
+        <div class="pricecard__left">
+          <p class="pricecard__name">{t.title} <span class="echo">{t.titleEcho}</span></p>
+          <p class="pricecard__plan">{t.priceLabel}</p>
+          <p class="pricecard__price"><span class="num">{t.price}</span></p>
+          <p class="pricecard__note"><strong>{t.priceNote}</strong></p>
+        </div>
+        <div class="pricecard__right">
+          <ul class="pricecard__feat">{t.priceFeatures.map((f) => <li>{f}</li>)}</ul>
+          <div class="pricecard__action">
+            <BotonCurso t={t} />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {
+      t.pd && (
+        <p class="pd reveal">
+          <span class="pd__r">{t.pd.rotulo}</span> {t.pd.text}
+        </p>
+      )
+    }
+
+    <section class="faq reveal">
+      <h2 class="faq__h">{t.faqH}</h2>
+      {t.faq.map((f, i) => (
+        <details class="qa">
+          <summary><span class="n">{i + 1}.</span>{f.q}</summary>
+          <p class="qa__a">{f.a}</p>
+        </details>
+      ))}
+    </section>
+
+    <div class="cta reveal">
+      <BotonCurso t={t} />
+    </div>
+
+    <footer class="foot">
+      <a href={routePath('products', lang)}>{t.footBack}</a>
+      <span class="sep" aria-hidden="true">·</span>
+      <a href={routePath('home', lang)}>{t.footHome}</a>
+      <span class="sep" aria-hidden="true">·</span>
+      <span>{t.footLegal}</span>
+      <span class="lang" aria-label="Idioma / Language">
+        <a href={productPath(slug, 'es')} aria-current={(!isEN).toString()} data-lang-switch>ES</a>
+        <a href={productPath(slug, 'en')} aria-current={isEN.toString()} data-lang-switch>EN</a>
+      </span>
+    </footer>
+
+  </main>
+
+<Scripts />
+</body>
+</html>

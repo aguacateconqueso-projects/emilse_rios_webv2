@@ -14,6 +14,22 @@ de cero debería poder seguir trabajando sin preguntar nada.
 > `CORTINA_BAJADA = false` en `src/lib/cortina.ts`, en un PR. Todo en **La
 > cortina**, justo debajo de **Dónde estamos**.
 
+> **🔗 REGLA DE TRABAJO (pedida por Adrián el 23 sep 2026): cada vez que se
+> sube un cambio, se le deja el enlace directo para verlo** —a la página
+> exacta que cambió, en la vista previa de la rama, no «mira el PR»—. Adrián
+> no encontraba las vistas previas, y una vez estuvo mirando la de una rama
+> vieja buscando cambios que estaban en otra. Mientras se trabaje en la rama
+> `claude/youthful-meitner-21x8ys`, la raíz es siempre esta:
+>
+> **https://emilse-rios-webv2-git-claude-y-2c57cd-adrians-projects-594b3131.vercel.app**
+>
+> y se le añade la ruta: `/sobre-mi/`, `/en/products/`… Con otra rama, la
+> raíz cambia: sale en el comentario de **vercel[bot]** del PR, fila
+> `emilse-rios-webv2`, enlace **Preview** (desde la sesión se lee con las
+> herramientas de GitHub, pidiendo los comentarios del PR). Vercel tarda un
+> par de minutos en construir después de cada push. Ver **La cortina → Cómo
+> se sigue viendo la web**.
+
 > **Para quien retome en una sesión nueva (23 sep 2026, por la tarde).** Con
 > la cortina bajada se está terminando la web detrás. Ese día entraron en
 > `main` tres PRs, los tres probados y mergeados:
@@ -29,11 +45,22 @@ de cero debería poder seguir trabajando sin preguntar nada.
 >
 > - **#46 · El newsletter deja de fallar en silencio.** Ver **El newsletter,
 >   conectado → La primera prueba**.
-> - **Cinco retoques que pidió Adrián**, en un PR aparte: la Home entra con
->   la escalera de *Sobre mí* al volver, «Te cuento otra cosa» baja a abrir la
->   historia, Formaciones pierde el `00` y sus fotos se acercan y toman color
->   con el cursor, y *Sobre mí* estrena retrato vertical. Ver **Cinco
->   retoques del 23 de septiembre**.
+> - **#47 · Cinco retoques que pidió Adrián:** la Home entra con la escalera
+>   de *Sobre mí* al volver, «Te cuento otra cosa» baja a abrir la historia,
+>   Formaciones pierde el `00` y sus fotos se acercan y toman color con el
+>   cursor, y *Sobre mí* estrena retrato. Ver **Cinco retoques del 23 de
+>   septiembre**.
+> - **Y siete más, al final de la tarde:** el menú del sitio llega a la carta
+>   de la membresía y a la pantalla de acceso, el aula se entra directo con
+>   correo y contraseña, *Sobre mí* cambia otra vez de retrato —ahora
+>   horizontal— y Formaciones estrena tres cursos con nombre, texto y foto.
+>   Ver **Siete cambios de la tarde del 23 de septiembre**.
+> - **Y por la noche, las dos primeras cartas de cursos:** «Todo el
+>   diapasón» y «Contrabajo desde cero», en el formato de la membresía, en
+>   «Próximamente». Formaciones pierde «Ver la membresía». Ver **Las cartas
+>   de los cursos**. ⚠️ **Dos cosas esperan a Emi o a Adrián:** la foto del
+>   mar para el vibrato (tiene marca de agua) y el final del inglés de «Todo
+>   el diapasón», que llegó cortado y se tradujo acá.
 >
 > **Lo que viene, en el orden en que lo pidieron Adrián y Emi:**
 >
@@ -156,7 +183,11 @@ pagando sin recibir acceso.
 
 Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/` · `/productos/` ·
 `/en/products/` · `/productos/estudiemos-juntos/` ·
-`/en/products/estudiemos-juntos/` · `/aulavirtual/` · `/en/classroom/`
+`/en/products/estudiemos-juntos/` · `/productos/todo-el-diapason/` ·
+`/en/products/todo-el-diapason/` · `/productos/contrabajo-desde-cero/` ·
+`/en/products/contrabajo-desde-cero/` · `/aulavirtual/entrar/` ·
+`/en/classroom/signin/`. **`/aulavirtual/` y `/en/classroom/` ya no son
+páginas** desde el 23 sep 2026: redirigen a la pantalla de acceso.
 
 Y el aula por dentro: `/aulavirtual/escritorio/` · `/aulavirtual/curso/<slug>/` ·
 `/en/classroom/desk/` · `/en/classroom/course/<slug>/`. Van con `noindex` y
@@ -380,9 +411,17 @@ cortina porque ahí `VERCEL_ENV` vale `preview`:
 **Cómo se abre, paso a paso** (Adrián preguntó el 23 sep 2026 y no estaba
 escrito):
 
-- **Desde GitHub, lo más corto:** abrir el PR → bajar hasta el comentario del
-  bot de Vercel → **Visit Preview**. Un PR ya mergeado conserva el comentario y
-  el enlace sigue funcionando.
+- **Desde GitHub, lo más corto:** abrir el PR → pestaña **Conversation** →
+  bajar hasta el comentario de **vercel[bot]**, que es una tabla con los dos
+  proyectos → en la fila de `emilse-rios-webv2`, columna *Actions*, el enlace
+  **Preview**. (No dice «Visit Preview», como se escribió aquí al principio.)
+  Un PR ya mergeado conserva el comentario y el enlace sigue funcionando.
+- **Ojo con abrir la de otra rama.** Cada rama tiene su dirección, y la de una
+  rama vieja enseña esa rama, no la última. El 23 sep 2026 Adrián miraba la de
+  `claude/busy-heisenberg-2ig8dt` (`…-git-claude-b-bc8959-…`) buscando los
+  cambios del PR #47, que estaban en la de `claude/youthful-meitner-21x8ys`
+  (`…-git-claude-y-2c57cd-…`). Lo más seguro es entrar siempre desde el
+  comentario del PR.
 - **Desde Vercel:** el proyecto → **Deployments** → buscar la rama en la
   columna de la rama (o filtrar por ella) → pulsar el despliegue → **Visit**.
   El de arriba del todo es el último push.
@@ -407,6 +446,167 @@ no tenía salida a `vercel.app`:
 
 ---
 
+## Las cartas de los cursos
+
+**23 de septiembre de 2026, por la noche.** Adrián pasó el copy de Emi de dos
+cartas de venta, en español y en inglés, y pidió «mantenemos el formato de la
+membresía». Van en «Próximamente»: tienen página, precio y botón, pero no se
+venden todavía.
+
+| | Todo el diapasón | Contrabajo desde cero |
+|---|---|---|
+| Dirección | `/productos/todo-el-diapason/` | `/productos/contrabajo-desde-cero/` |
+| En inglés | «Fingerboard» | «Double bass from scratch» |
+| Precio | 240 € —son dos formaciones: esta y «Todas las escalas (sin aburrirte)»— | 140 € |
+| Botón | «Nos vemos dentro», **en gris y sin enlace**, con «Avísame cuando abra» debajo | «Avísame cuando abra», **al alta del newsletter** |
+| Además | | La posdata de El Sistema |
+
+**Cómo están hechas.** Con la misma ropa que la carta de la membresía, y no
+una copia: esa carta se partió en piezas que ahora comparten las tres, en
+`src/components/carta/` —`Estilos.astro` (la hoja entera, en línea),
+`Scripts.astro` (fundidos, botones con notas, cambio de idioma que conserva el
+sitio), `Bloques.astro` (el cuerpo) y `AntesDePintar.astro`—. **La membresía
+sale idéntica**: se comparó su HTML antes y después de partirla, y la única
+diferencia son las reglas nuevas que se añadieron al final de la hoja. La
+carta de un curso es `carta/CartaCurso.astro`, y los textos, `src/data/cartas.ts`.
+
+Cada curso tiene sus dos ficheros de página sueltos —`src/pages/productos/` y
+`src/pages/en/products/`—, igual que la membresía, y por lo mismo: la carta
+imprime su documento entero y no puede pasar por `[producto].astro`, que
+importa `Base.astro` y le colaría la hoja del sitio. Un curso nuevo con carta
+son dos ficheros de tres líneas más su entrada en `cartas.ts`.
+
+**Lo que es nuestro y no de Emi**, para que lo mire:
+
+- **La ropa del texto**: qué frase va en negrita, cuál centrada en cursiva,
+  «HER·MO·SO.» en grande. El copy llegó en texto plano.
+- **La lista de la tarjeta de precio** («Te cuento qué incluye»). Sale de su
+  propio copy —las preguntas frecuentes, la lista de lo que trae—, no se
+  inventó nada, pero la selección es nuestra.
+- ⚠️ **El final del inglés de «Todo el diapasón» llegó cortado** en el mensaje
+  de Adrián: faltaba desde «All you need is consistency…» hasta la última
+  pregunta, incluidas las preguntas 1 a 6. **Se tradujo acá desde el
+  español**, con el tono de la carta de «Double bass from scratch», que sí
+  llegó entera. Está marcado con «TRADUCIDO» en `cartas.ts`.
+
+**En Formaciones**, dos cambios que van con esto:
+
+- **Sale «Ver la membresía»** de debajo de su ficha. Lo pidió Adrián: pinchar
+  la foto ya es lo intuitivo, y menos opciones es más. Ninguna ficha lleva
+  llamada ya.
+- **Las fichas con carta son enlace aunque no se vendan** (`tienePagina` en
+  `aula.ts`), y dejan de verse apagadas. La del vibrato, sin carta todavía,
+  sigue igual.
+
+**Los slugs se leen.** Hasta esa noche eran `curso-01`, `02` y `03`. Con
+carta, son la dirección que Emi va a compartir, así que pasaron a
+`todo-el-diapason`, `contrabajo-desde-cero` y `tu-vibrato-como-un-cantante`.
+`curso-01` era también el curso de muestra del aula (`cursos.ts`), que se
+cambió con él: la maqueta del escritorio ahora vive en
+`/aulavirtual/curso/todo-el-diapason/`.
+
+**Para venderlos de verdad** falta lo mismo que faltaba: su precio en Stripe,
+un `/api/checkout` que sepa de cursos —hoy solo sabe de la membresía— y que el
+webhook dé acceso al curso. Entonces `boton.href` pasa a apuntar al cobro y el
+curso a `venta`.
+
+### La foto del mar, que no se puso
+
+Adrián subió `public/img/course_4.jpg` —el mar, «es el concepto»— para «Tu
+vibrato como un cantante». **No se usó, y a propósito:** tiene una marca de
+agua de *pngtree* repetida por toda la imagen, que se ve al aclararla y en
+color. Es la vista previa de un banco de imágenes, sin licencia, y a 960 px.
+Publicarla en la web de Emi es usar una foto que no es suya, y además se
+nota. La ficha del vibrato sigue con la foto de la puerta.
+
+Para ponerla hace falta **la versión sin marca**: comprando la licencia en
+pngtree y bajando el fichero limpio, o cualquier foto de mar con licencia
+libre (Unsplash, Pexels). Con el fichero, es cambiarlo en
+`src/assets/img/curso-vibrato.jpg`. **`course_4.jpg` sigue en `public/img/`**
+hasta que se decida: no está enlazado desde ninguna página, pero todo lo que
+hay en `public/` se publica, así que conviene borrarlo si no se va a usar.
+
+## Siete cambios de la tarde del 23 de septiembre
+
+Los pidió Adrián de una vez, después del #47, y van en un solo PR. Todos se
+ven en la vista previa de la rama —la raíz está en la regla de arriba del
+todo—.
+
+1. **El menú está siempre, también en la carta de la membresía.** Quien
+   entraba a la membresía desde Formaciones «entraba en la nada misma»: la
+   carta es un documento aparte, trasplantado de la academia con su propia
+   ropa, y su única navegación era una píldora con ES/EN y «Entrar». Ahora
+   lleva la cápsula del menú de todo el sitio, marcando «Formaciones», con la
+   cápsula de «Ingresar al aula» a la derecha como en Formaciones. La píldora
+   salió. El idioma vive dentro del menú y **sigue conservando el sitio de
+   la lectura** al cambiar, como lo hacía la píldora.
+
+   **Cómo se hizo, porque no es obvio:** la carta no puede cargar `tokens.css`
+   ni `base.css` —le pisarían el fondo crema y la tipografía— y la base de la
+   academia que sí carga define su propio `--space-2` (8 px y no 16) y un
+   `a:hover` que subraya. Así que la cabecera va dentro de
+   `src/components/CabeceraSuelta.astro`, que le da, **solo dentro del
+   envoltorio**, los tokens y las dos clases (`.mono`, `.visually-hidden`)
+   que necesita. `--paper` y `--ink` se heredan de la página, así que el
+   cristal es de la misma crema cálida que la carta. ⚠️ **Esos tokens están
+   copiados de `tokens.css`**: si allí cambian, hay que cambiarlos allá.
+2. **El mismo menú, en la pantalla de acceso al aula** (`layouts/Acceso.astro`,
+   que sirve a entrar y a la contraseña nueva). No lo pidió con esas
+   palabras, pero es la misma regla —«el menú tiene que estar siempre
+   presente»— y con el punto 3 se volvió imprescindible: «Aula virtual» trae
+   directo acá, y sin menú era un callejón. El enlace del pie que decía
+   «Aula Virtual» —y que ahora llevaría a esta misma pantalla— pasa a
+   «Inicio».
+3. **El aula se entra directo con correo y contraseña.** Se borró la portada
+   —`/aulavirtual/` y `/en/classroom/`, con `components/Aula.astro` y sus
+   textos `aula.*`—, que presentaba el aula y tenía un botón hacia el
+   acceso. El menú, el pie y el «¿Ya compraste?» de Formaciones van directo
+   a `/aulavirtual/entrar/`. Las dos direcciones viejas **redirigen** al
+   acceso, para los enlaces que haya fuera (`astro.config.mjs`; lo comprueba
+   `npm run audit:redirecciones`, que ya pasa las 32). Quien tiene la sesión
+   abierta no se queda en el acceso: la pantalla lo pasa al escritorio, como
+   siempre. `puertaPath` —la puerta— es ahora el acceso, así que al salir del
+   aula se vuelve ahí.
+4. **Otro retrato en *Sobre mí*, y este es el bueno:** la versión horizontal
+   de la foto de la calle —`about_me3`—. El marco sigue igual: la foto llena
+   el alto y se recorta por los lados, centrada, que es donde está Emi.
+5. **Curso 1 ya tiene nombre: «Todo el diapasón»** («Fingerboard» en
+   inglés), con el texto de la portada de Emi: «De posición 1 al pulgar, sin
+   miedo…», y que incluye el curso completo «Todas las escalas (sin
+   aburrirte)».
+6. **Curso 2: «Contrabajo desde cero»** («Double Bass from Scratch»).
+7. **Curso 3: «Tu vibrato como un cantante»** («Your Vibrato Like a
+   Singer»). Su portada llegó solo en español: **el inglés es traducción
+   nuestra** y conviene que Emi lo mire.
+
+Sobre los cursos:
+
+- **Siguen «Próximamente»**: sin precio, sin carta de ventas y sin página,
+  así que su ficha no es un enlace. Lo que cambió es que ya no son huecos:
+  tienen nombre, texto y foto. Salen de `proximo()` en `src/data/aula.ts`.
+- **Los textos salen de las portadas de Emi**, casi palabra por palabra. Lo
+  único que se tocó: en la del vibrato, «a través del contrabajo» salía dos
+  veces —arriba y abajo de la portada, donde se leen por separado— y en una
+  línea se queda una.
+- **Las fotos.** Adrián subió cinco ficheros a `public/img/`: `course_1`,
+  `course_1ok`, `course_2`, `course_3` y `about_me3`. **`course_1` y
+  `course_2` eran idénticas byte a byte** —el contrabajo tumbado en la
+  escalinata, que es la portada de «Contrabajo desde cero»—, y `course_1ok`
+  es la corrección: la mano sobre el contrabajo, que es la de «Todo el
+  diapasón». Se usaron `course_1ok`, `course_2` y `course_3`, reducidas a
+  1400 px en `src/assets/img/curso-*.jpg`, y los cinco originales se
+  borraron de `public/` (siguen en el historial de git).
+- **El hover de las fotos pasó a todas las fichas**, también a las de
+  «Próximamente». En el #47 era solo en las que son enlace; con las tres
+  fotos nuevas, eso dejaba quietas tres de cuatro. En esas la flecha sigue
+  siendo la normal y no hay nada que invite a pulsar.
+- **Los slugs eran `curso-01`, `curso-02`, `curso-03`**, y esa misma noche
+  pasaron a leerse —`todo-el-diapason`, `contrabajo-desde-cero`,
+  `tu-vibrato-como-un-cantante`— al llegar las cartas. Ver **Las cartas de
+  los cursos**.
+- Con cuatro fichas en tres columnas, la cuarta queda sola en su fila. Es lo
+  esperado; con el siguiente curso se completa.
+
 ## Cinco retoques del 23 de septiembre
 
 Los pidió Adrián de una vez, con la cortina bajada, y van en un solo PR. Se
@@ -427,9 +627,13 @@ ven en su vista previa.
    aire, para que el titular no suba a pegarse a la píldora del menú: se queda
    exactamente donde estaba. Los números de las fichas —`01`, `02`— siguen.
 4. **Las fotos de Formaciones responden al cursor:** toman color y se acercan
-   un 4 % dentro de su marco. Solo en las fichas que son enlace. El detalle,
-   en la enmienda del mismo día.
-5. **Retrato nuevo en *Sobre mí*.** Emi en la calle, abrazada al contrabajo y
+   un 4 % dentro de su marco. El detalle, en la enmienda del mismo día.
+   (Empezó solo en las fichas que son enlace; horas después, con las fotos
+   de los tres cursos, pasó a todas. Ver **Siete cambios de la tarde**.)
+5. **Retrato nuevo en *Sobre mí*.** ⚠️ **Duró unas horas:** esa misma tarde
+   Adrián subió la versión horizontal de la misma foto, y es la que se
+   queda. Ver **Siete cambios de la tarde**. Lo de abajo sigue valiendo
+   para el marco. Emi en la calle, abrazada al contrabajo y
    lanzando un beso. Es **vertical**, y el marco sigue siendo el de siempre:
    lo llena a lo ancho y se recorta arriba y abajo, anclado al 35 % de alto
    para que la cara y la mano salgan en los tres tamaños.
@@ -2611,7 +2815,8 @@ se ha tocado doce veces:
   a diferencia del retrato: lo que se levantaría acá es la ficha entera, y
   eso es una tarjeta que se levanta, que el sistema prohíbe. Y **no es el
   «zoom automático» prohibido**: no arranca solo, lo dispara el cursor, y el
-  marco no se mueve. Solo en las fichas que son enlace, solo con cursor de
+  marco no se mueve. En todas las fichas —al principio solo en las que son
+  enlace; ver **Siete cambios de la tarde**—, solo con cursor de
   verdad o foco de teclado, y sin movimiento para quien lo pide, que se queda
   con el color.
 
@@ -2788,8 +2993,16 @@ src/
                          emilse-hero.jpg, la lámina de la Home
                          about-me.jpg, el retrato de Sobre mí
                          emilse-membresia.jpg, el retrato de la carta
+                         curso-diapason · curso-desde-cero ·
+                         curso-vibrato .jpg, las fotos de los cursos
   components/
     Header.astro                   Cabecera: la firma centrada y el menú
+    CabeceraSuelta.astro           La misma cabecera, para las páginas que
+                                   no van en Base.astro: las cartas de venta
+                                   y el acceso al aula
+    carta/CartaCurso.astro         La carta de venta de un curso
+    carta/Estilos · Scripts ·      Lo que comparten las tres cartas: la hoja,
+      Bloques · AntesDePintar      los scripts y el cuerpo en bloques
     Footer · LangSwitch            Pie y conmutador ES/EN
     Logo.astro                     La firma de Emi, como máscara
     Intro.astro                    Animación de entrada (solo Home)
@@ -2802,7 +3015,6 @@ src/
                                    va trasplantada
     membresia/Carta.astro          La carta de la membresía, traída entera de
                                    la academia. Imprime el documento completo
-    Aula.astro                     La puerta del aula: entrar, o ir a la tienda
     aula/Escritorio.astro          El escritorio: retomar, membresía, mis cursos
     aula/Curso.astro               El reproductor: índice, clase, hilo de dudas
     aula/Boton.astro               El botón de la carta (relleno + flecha + notas)
@@ -2823,6 +3035,7 @@ src/
                          varias líneas—, formulario y testimonios. El de
                          testimonios está montado y sin usar: espera los de Emi
   data/aula.ts           El catálogo: los productos y sus cartas (es / en)
+  data/cartas.ts         Las cartas de venta de los cursos (es / en)
                          — la FACHADA, lo que se vende
   data/cursos.ts         Unidades, clases y videos de Bunny — lo que se COMPRA.
                          Se ata a data/aula.ts por el slug

@@ -48,7 +48,14 @@
 //     solo el estándar (decisión ya tomada, ver `progreso.md`).
 //   · la píldora de idioma y el pie enlazan a este sitio, no a la academia.
 //
-// Y después del trasplante, una sola vez hasta hoy:
+// Y después del trasplante, dos veces hasta hoy:
+//   · 23 sep 2026 — el menú del sitio. La píldora de idioma y «Entrar» de
+//     arriba a la derecha sale, y en su lugar va la cápsula del menú, la
+//     misma de todo el sitio (`CabeceraSuelta.astro`): quien llegaba desde
+//     Formaciones se quedaba sin forma de volver, salvo por «Entrar». El
+//     idioma vive ahora dentro del menú, y sigue conservando el sitio de la
+//     lectura al cambiar; «Entrar» es la cápsula de la derecha, la misma de
+//     Formaciones.
 //   · 23 sep 2026 — copy nuevo de Emi, entero, y con testimonios. La ropa es
 //     la misma; lo que cambió es el texto y, con él, qué bloques hay. Salieron
 //     el video de un minuto, el tema del mes (septiembre), la historia de
@@ -56,8 +63,14 @@
 //     están en el copy nuevo. El cuerpo es ahora `t.carta`, una lista de
 //     bloques — ver su nota, más abajo.
 // ---------------------------------------------------------------------------
+import { Font } from 'astro:assets';
 import { productPath, routePath } from '../../i18n/ui';
-import { entrarHref } from '../../data/aula';
+import CabeceraSuelta from '../CabeceraSuelta.astro';
+import AntesDePintar from '../carta/AntesDePintar.astro';
+import Estilos from '../carta/Estilos.astro';
+import Scripts from '../carta/Scripts.astro';
+import Bloques from '../carta/Bloques.astro';
+import type { Bloque } from '../../data/cartas';
 import { CLOSES_AT, REOPENS_AT, NEWSLETTER_URL, INVITE_PARAM, doorsClosed } from '../../lib/membership';
 
 interface Props {
@@ -163,11 +176,8 @@ const madridTz = (ms: number) => {
 // final): si un idioma tiene un párrafo más, quien cambie de idioma aterriza
 // un bloque más arriba o más abajo de donde estaba leyendo.
 // ---------------------------------------------------------------------------
-type Bloque =
-  | string
-  | { k: 'fuerte' | 'grito' | 'acento'; text: string }
-  | { k: 'testimonio'; text: string; autor: string }
-  | { k: 'lista'; tono: 'si' | 'no'; titulo: string; items: string[] };
+// El tipo `Bloque` vive en `src/data/cartas.ts` desde el 23 sep 2026: lo
+// comparten las cartas de los cursos, que se pintan con los mismos bloques.
 
 const t = isEN ? {
   htmlLang: 'en',
@@ -293,7 +303,6 @@ const t = isEN ? {
 
   footBack: 'Back to Courses', footHome: 'Home',
   footLegal: '© 2026 Emilse Rios',
-  enter: 'Log in',
 } : {
   htmlLang: 'es',
   metaTitle: 'Estudiemos Juntos — Membresía de Emilse Rios',
@@ -418,7 +427,6 @@ const t = isEN ? {
 
   footBack: 'Volver a Formaciones', footHome: 'Inicio',
   footLegal: '© 2026 Emilse Rios',
-  enter: 'Entrar',
 };
 
 // Textos de las puertas ya resueltos para el HTML del build (sin JS). El script
@@ -493,24 +501,7 @@ const jsonLd = {
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<script is:inline>
-  // El rescate del enlace mágico de Supabase se quedó en la academia: allí esta
-  // carta vive en la raíz, que es el Site URL adonde Supabase reenvía los tokens,
-  // y había que empujarlos a /entrar/ o a /nueva-clave/. Acá no existe ninguna de
-  // las dos páginas —la sesión sigue siendo la de la academia—, así que traerlo
-  // solo serviría para mandar a alguien a un 404.
-
-  // Cambio de idioma sin saltar al inicio: si venimos de un toggle EN/ES,
-  // pre-ocultamos el contenido antes de pintar para reposicionar sin parpadeo.
-  // Red de seguridad: se revela igual a los 1.5s por si algo falla.
-  try {
-    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-    if (sessionStorage.getItem('langSwitch')) {
-      document.documentElement.classList.add('lang-enter');
-      setTimeout(function () { document.documentElement.classList.remove('lang-enter'); }, 1500);
-    }
-  } catch (e) {}
-</script>
+<AntesDePintar />
 <title>{t.metaTitle}</title>
 <meta name="description" content={t.metaDesc} />
 {/* La «E» del logo de Emi, la misma que el resto del sitio. */}
@@ -548,381 +539,26 @@ const jsonLd = {
 <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
 
 <link rel="stylesheet" href="/colors_and_type.css" />
-<style is:inline>
-  /* ---------------------------------------------------------------------------
-     Carta editorial con ritmo. Un solo lienzo crema, una columna de lectura, pero
-     con jerarquía: logo, foto, apertura grande, dos descubrimientos, cuadro
-     comparativo, cuadro de precio que se invierte, FAQ desplegable y fundidos.
-     Acentos: terracota (botones) + marrón instrumento (hovers de texto).
-     --------------------------------------------------------------------------- */
-  :root {
-    --ink: #17140f;            /* casi negro, cálido — contraste alto */
-    --paper: #faf7f1;          /* crema muy suave */
-    --soft: #6f6a61;           /* gris para notas menores y footer */
-    --accent: #a94f2b;         /* terracota — botones */
-    --accent-strong: #8f4222;
-    --wood: #6b3f2a;           /* marrón del instrumento — hovers de texto */
-    --measure: 680px;          /* ancho máximo de lectura */
-    --edge: clamp(22px, 6vw, 40px);
-  }
-  * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; }
-  body {
-    background: var(--paper);
-    color: var(--ink);
-    font-family: var(--font-body), system-ui, sans-serif;
-    font-size: clamp(17px, 0.4vw + 16px, 19px);
-    line-height: 1.66;
-    margin: 0;
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-    /* 14 · Cursor: clave de fa (clave del contrabajo) */
-    cursor: url('/img/clef-cursor.svg') 11 13, auto;
-  }
-  /* El cursor de clave de fa se mantiene también sobre enlaces y botones (no vuelve a la manito) */
-  /* Cuando el fondo se pone oscuro, el cursor cambia a su versión clara para no perderse: */
-  /*  · la tarjeta de precio al invertirse a negro */
-  .pricecard:hover, .pricecard:hover * { cursor: url('/img/clef-cursor-light.svg') 11 13, auto; }
-  /*  · los botones al rellenarse de tinta (el relleno nace bajo el cursor) */
-  .btn:hover { cursor: url('/img/clef-cursor-light.svg') 11 13, auto; }
-  /*  · excepción: el botón DENTRO de la tarjeta negra se rellena de crema → cursor oscuro */
-  .pricecard:hover .btn:hover { cursor: url('/img/clef-cursor.svg') 11 13, auto; }
-  ::selection { background: var(--ink); color: var(--paper); }
-  img { display: block; max-width: 100%; }
-
-  .page { max-width: var(--measure); margin: 0 auto; padding: clamp(28px, 7vw, 56px) var(--edge) clamp(48px, 9vw, 88px);
-          transition: opacity 300ms ease; }
-
-  /* Píldora de idioma — fija, esquina superior derecha. Solo EN/ES. */
-  .langpill { position: fixed; top: clamp(14px, 2.6vw, 22px); right: clamp(14px, 2.6vw, 22px); z-index: 50;
-              display: inline-flex; align-items: center; gap: 2px;
-              background: rgba(250, 247, 241, 0.72);
-              -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4);
-              border: 1px solid rgba(23, 20, 15, 0.10); border-radius: 999px; padding: 4px 5px;
-              box-shadow: 0 6px 22px rgba(23, 20, 15, 0.09); }
-  .langpill a { text-decoration: none; color: var(--soft); font-size: 0.82rem; font-weight: 600;
-                letter-spacing: 0.04em; line-height: 1; padding: 6px 12px; border-radius: 999px;
-                transition: color 200ms ease, background 200ms ease; }
-  .langpill a:hover { color: var(--ink); }
-  /* Separador y acceso "Entrar" (miembros que ya pagaron y vuelven). */
-  .langpill__sep { width: 1px; align-self: stretch; margin: 4px 2px;
-                   background: rgba(23, 20, 15, 0.14); }
-  .langpill__enter { color: var(--ink) !important; }
-  .langpill__enter:hover { background: rgba(23, 20, 15, 0.06); }
-  .langpill a[aria-current="true"] { color: var(--ink); background: rgba(23, 20, 15, 0.06); }
-
-  /* Fundido del texto al cambiar de idioma */
-  .page.is-leaving { opacity: 0; }
-  html.lang-enter .page { opacity: 0; }
-
-  /* 13 · Fundido al hacer scroll (reveal) */
-  .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); }
-  .reveal.is-visible { opacity: 1; transform: none; }
-
-  /* 1 · Logo (reemplaza la firma en texto) */
-  .logo { text-align: center; margin: 0; }
-  .logo__img { display: inline-block; width: clamp(260px, 66vw, 400px); height: auto; margin: 0 auto; }
-  .logo__text { font-size: 0.95rem; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; }
-
-  /* 2 · Foto — misma distancia al logo (arriba) que al título (abajo); el logo tiene
-     aire interno propio, así que el margen inferior compensa ese hueco. Drop shadow
-     marcado para que no se vea plana. B&W → color al hacer hover (solo donde hay hover;
-     en táctil se ve siempre a color). */
-  .logo { line-height: 0; }
-  .photo { margin: 0 auto clamp(46px, 8vw, 66px); width: clamp(190px, 48vw, 250px); }
-  .photo img { width: 100%; height: auto; border-radius: 0;
-               box-shadow: 0 26px 56px -12px rgba(23, 20, 15, 0.34), 0 10px 20px -8px rgba(23, 20, 15, 0.22);
-               transition: filter 0.7s ease, box-shadow 0.5s ease, transform 0.5s ease; }
-  @media (hover: hover) {
-    .photo img { filter: grayscale(1) contrast(1.02); }
-    .photo img:hover { filter: grayscale(0); box-shadow: 0 34px 70px -14px rgba(23, 20, 15, 0.4), 0 12px 24px -8px rgba(23, 20, 15, 0.24);
-                       transform: translateY(-4px); }
-  }
-
-  /* 3 · Titular + apertura */
-  .title { font-size: clamp(2.2rem, 7.6vw, 3rem); line-height: 1.06; letter-spacing: -0.025em;
-           font-weight: 600; margin: 0; text-align: center; text-wrap: balance; }
-  .subtitle { font-size: clamp(1.15rem, 3.4vw, 1.5rem); font-weight: 500; color: var(--ink);
-              text-align: center; margin: 0.35em 0 0; letter-spacing: -0.01em; }
-  /* Más pequeña que el título para que no compita con él. Hasta el 23 sep 2026
-     la primera oración iba forzada en UNA línea (`nowrap`); la del copy nuevo
-     es el doble de larga y se salía de la columna, así que ahora se balancea
-     como la segunda. El margen de abajo separa la apertura del cuerpo. */
-  .lede { margin: clamp(28px, 6vw, 40px) 0 clamp(26px, 5vw, 38px); text-align: center;
-          font-style: italic; font-weight: 700; font-size: clamp(1.12rem, 3vw, 1.5rem); line-height: 1.38;
-          letter-spacing: -0.005em; transition: color 0.45s ease; }
-  .lede:hover { color: var(--wood); }
-  .lede__a, .lede__b { display: block; text-wrap: balance; }
-
-  /* 3b · El cuerpo de la carta (copy del 23 sep 2026). Los párrafos llevan el
-     margen global de <p>; estos son los bloques con registro propio.
-     · grito: centrado, cursiva y negrita, marrón al pasar el cursor — el mismo
-       registro que tenían «¿Necesitas ayuda?» y el puente a la historia.
-     · acento: la frase más grande del cuerpo, con la voz del mensaje final. */
-  .grito { text-align: center; font-weight: 700; font-style: italic;
-           font-size: clamp(1.3rem, 4vw, 1.7rem); line-height: 1.32;
-           margin: clamp(32px, 6vw, 46px) 0; text-wrap: balance;
-           transition: color 0.4s ease; }
-  .grito:hover { color: var(--wood); }
-  .acento { text-align: center; font-weight: 800; font-style: italic;
-            font-size: clamp(1.7rem, 6.5vw, 2.5rem); line-height: 1.14; letter-spacing: -0.02em;
-            margin: clamp(30px, 6vw, 44px) 0 0; transition: color 0.4s ease; }
-  .acento:hover { color: var(--wood); }
-
-  /* 3c · Testimonios — la voz de las alumnas dentro de la carta. Recuadro a
-     escuadra con la regla de 1 px del cuadro comparativo y un filo de tinta a
-     la izquierda, que es lo que lo marca como cita; el texto en cursiva y la
-     firma en versalitas espaciadas, como el rótulo de la posdata. La
-     presentación («Mira lo que me escribió…») va FUERA, en el párrafo de antes. */
-  .testi { margin: clamp(20px, 4vw, 28px) 0 clamp(32px, 6vw, 46px);
-           padding: clamp(22px, 3.4vw, 32px) clamp(22px, 3.6vw, 36px);
-           border: 1px solid rgba(23, 20, 15, 0.16); border-left: 3px solid var(--ink);
-           background: rgba(255, 255, 255, 0.5); }
-  .testi__q { margin: 0; }
-  .testi__q p { margin: 0; font-style: italic; text-wrap: pretty; }
-  .testi__who { margin-top: 0.9em; font-size: 0.78em; font-weight: 600; letter-spacing: 0.16em;
-                text-transform: uppercase; color: var(--soft); }
-
-  /* Cuerpo corrido */
-  p { margin: 0 0 1.15em; }
-
-  /* 6 · Los recuadros de «para ti» y «no es para ti». Hasta el 23 sep 2026
-     iban lado a lado en un cuadro comparativo más ancho que la columna; en el
-     copy nuevo los separan un testimonio y un párrafo, así que cada uno va
-     solo, a lo ancho de la columna, con la misma ropa de antes. */
-  .fit { margin: clamp(30px, 6vw, 44px) 0; }
-  .compare__col { border: 1px solid rgba(23, 20, 15, 0.16); border-radius: 0; padding: clamp(22px, 3.4vw, 34px);
-                  background: rgba(255, 255, 255, 0.5); }
-  .compare__col--no { background: rgba(23, 20, 15, 0.035); }
-  .compare__h { font-weight: 700; margin: 0 0 1em; font-size: 1.05em; line-height: 1.25; text-wrap: balance; }
-  .compare__col ul { list-style: none; padding: 0; margin: 0; }
-  .compare__col li { position: relative; padding-left: 1.5em; margin-bottom: 0.9em; font-size: 0.96em; line-height: 1.55; }
-  .compare__col li:last-child { margin-bottom: 0; }
-  .compare__col--yes li::before { content: "✓"; position: absolute; left: 0; color: var(--ink); font-weight: 700; }
-  .compare__col--no li::before { content: "–"; position: absolute; left: 0; color: var(--soft); font-weight: 700; }
-
-  /* 7 · Tarjeta de precio — formato de dos columnas (referencia de Emi):
-     izquierda = nombre + precio + nota; derecha = qué incluye + botón. Cuadrada
-     (coherente con la página) y se invierte de color al pasar el cursor. */
-  .plan { margin-top: clamp(40px, 8vw, 60px); }
-  .pricecard { width: min(940px, 96vw);
-               margin-left: calc((100% - min(940px, 96vw)) / 2);
-               margin-right: calc((100% - min(940px, 96vw)) / 2);
-               border: 1.5px solid var(--ink); border-radius: 0; overflow: hidden;
-               background: #fff; color: #17140f;
-               display: grid; grid-template-columns: 1.05fr 0.95fr;
-               transition: background 0.45s ease, color 0.45s ease; }
-  .pricecard:hover { background: var(--ink); color: var(--paper); }
-  .pricecard__left { padding: clamp(28px, 4vw, 50px); border-right: 1px solid rgba(23, 20, 15, 0.14);
-                     transition: border-color 0.45s ease; }
-  .pricecard:hover .pricecard__left { border-right-color: rgba(250, 247, 241, 0.18); }
-  .pricecard__name { font-weight: 700; font-size: clamp(1.4rem, 3vw, 1.8rem); letter-spacing: -0.02em;
-                     margin: 0; line-height: 1.1; }
-  .pricecard__name .echo { font-style: italic; font-weight: 400; color: var(--soft); font-size: 0.66em;
-                           letter-spacing: 0; transition: color 0.45s ease; }
-  .pricecard:hover .pricecard__name .echo { color: rgba(250, 247, 241, 0.7); }
-  .pricecard__plan { text-transform: uppercase; letter-spacing: 0.16em; font-size: 0.74rem; font-weight: 700;
-                     margin: clamp(18px, 3vw, 26px) 0 0.4em; opacity: 0.8; }
-  .pricecard__price { display: flex; align-items: baseline; gap: 10px; margin: 0 0 4px; }
-  .pricecard__price .num { font-size: clamp(3.2rem, 8vw, 5rem); font-weight: 800; letter-spacing: -0.04em; line-height: 0.9; }
-  .pricecard__price .per { font-size: 1.05rem; opacity: 0.62; }
-  .pricecard__note { font-size: 0.9em; margin: clamp(14px, 2.5vw, 20px) 0 0; opacity: 0.82; line-height: 1.55; }
-  .pricecard__right { padding: clamp(28px, 4vw, 50px); display: flex; flex-direction: column; justify-content: space-between;
-                      gap: clamp(22px, 3vw, 32px); }
-  .pricecard__feat { list-style: none; padding: 0; margin: 0; }
-  .pricecard__feat li { position: relative; padding-left: 1.9em; margin-bottom: 0.9em; font-size: 0.96em; line-height: 1.45; }
-  .pricecard__feat li:last-child { margin-bottom: 0; }
-  .pricecard__feat li::before { content: "→"; position: absolute; left: 0; top: 0; opacity: 0.7; }
-  .pricecard__action { display: flex; flex-direction: column; gap: 12px; }
-  .pricecard__fine { font-size: 0.82em; color: var(--soft); text-align: center; margin: 0; transition: color 0.45s ease; }
-  .pricecard:hover .pricecard__fine { color: rgba(250, 247, 241, 0.6); }
-  /* Fila inferior a todo el ancho: info de facturación destacada (negrita, centrada).
-     max-width: none anula el límite global de <p> (var(--measure)) para que ocupe
-     todo el ancho de la tarjeta y el texto quede centrado de verdad. */
-  .pricecard__foot { grid-column: 1 / -1; max-width: none; border-top: 1px solid rgba(23, 20, 15, 0.14);
-                     margin: 0; padding: clamp(20px, 3vw, 30px) clamp(40px, 6vw, 80px);
-                     text-align: center; font-weight: 700; font-size: clamp(1rem, 1.6vw, 1.12rem);
-                     line-height: 1.5; text-wrap: pretty; transition: border-color 0.45s ease; }
-  .pricecard:hover .pricecard__foot { border-top-color: rgba(250, 247, 241, 0.18); }
-  @media (max-width: 620px) {
-    .pricecard { grid-template-columns: 1fr; }
-    .pricecard__left { border-right: 0; border-bottom: 1px solid rgba(23, 20, 15, 0.14); }
-    .pricecard:hover .pricecard__left { border-bottom-color: rgba(250, 247, 241, 0.18); }
-  }
-
-  /* Botones — cuadrados, monocromáticos. Animación (referencia de Emi): al pasar
-     el cursor, un relleno de tinta crece DESDE la posición del cursor y la flecha
-     se desliza. Sin color de acento. */
-  .cta { text-align: center; margin: clamp(32px, 6vw, 48px) 0; }
-  .cta--inbox { margin: 0; }
-  .btn { --fill: var(--ink); --fg: var(--ink); --fg-hover: var(--paper); --mx: 50%; --my: 50%;
-         position: relative; isolation: isolate; overflow: hidden;
-         display: inline-flex; align-items: center; justify-content: center; gap: 12px;
-         background: transparent; color: var(--fg);
-         text-decoration: none; font-family: var(--font-body), system-ui, sans-serif; font-weight: 600;
-         font-size: 0.92rem; letter-spacing: 0.16em; text-transform: uppercase;
-         padding: 20px 46px; border: 1.5px solid currentColor; border-radius: 0; cursor: inherit;
-         transition: color 360ms cubic-bezier(.22,1,.36,1), border-color 360ms ease,
-                     transform 420ms cubic-bezier(.22,1,.36,1); will-change: transform; }
-  .btn__fill { position: absolute; top: var(--my); left: var(--mx); width: 260%; aspect-ratio: 1; z-index: -1;
-               background: var(--fill); border-radius: 50%; transform: translate(-50%, -50%) scale(0);
-               transition: transform 560ms cubic-bezier(.22,1,.36,1); }
-  .btn__label, .btn__ar { position: relative; z-index: 1; }
-  .btn__ar { transition: transform 360ms cubic-bezier(.22,1,.36,1); }
-  .btn, .btn:hover { text-decoration: none; }
-  .btn:hover { color: var(--fg-hover); }
-  .btn:hover .btn__fill { transform: translate(-50%, -50%) scale(1); }
-  .btn:hover .btn__ar { transform: translateX(6px); }
-  .btn:active { transform: translateY(1px) scale(0.99); }
-  /* Dentro de la tarjeta invertida, el botón usa la paleta contraria para verse */
-  .pricecard:hover .btn { --fill: var(--paper); --fg: var(--paper); --fg-hover: var(--ink); }
-  /* Botón de compra standalone — ancho */
-  .cta:not(.cta--inbox) .btn { min-width: min(420px, 80%); }
-
-  /* «Te cuento qué incluye» — el título de la tarjeta de precio. Mismo
-     registro que los gritos del cuerpo, pegado a la tarjeta que presenta. */
-  .incluye { text-align: center; font-weight: 700; font-style: italic;
-             font-size: clamp(1.3rem, 4vw, 1.7rem); line-height: 1.32;
-             margin: clamp(40px, 7.5vw, 62px) 0 0; text-wrap: balance;
-             transition: color 0.4s ease; }
-  .incluye:hover { color: var(--wood); }
-  .incluye + .plan { margin-top: clamp(18px, 3.5vw, 26px); }
-
-  /* Cuenta atrás bajo cada botón de pago. Habla el mismo idioma que el botón
-     (mayúsculas, letra muy espaciada, tinta): la urgencia la ponen los números,
-     no un rojo de rebajas. Los dígitos van en cifras tabulares para que el
-     contador no baile de ancho a cada segundo.
-     El estado lo manda `data-doors` en <main> (build + script): `soon` = falta
-     para el cierre, `closed` = puertas cerradas, `open` = no hay cierre a la
-     vista y el bloque entero desaparece. */
-  .timer { display: none; margin: 14px 0 0; text-align: center;
-           font-size: 0.76rem; letter-spacing: 0.14em; text-transform: uppercase;
-           color: var(--soft); line-height: 1.7; }
-  [data-doors="soon"] .timer,
-  [data-doors="closed"] .timer { display: block; }
-  .timer__lead { display: block; }
-  .timer__clock { display: inline-flex; align-items: baseline; justify-content: center;
-                  gap: 13px; margin-top: 4px; color: var(--ink); }
-  .timer__u { display: inline-flex; align-items: baseline; gap: 3px; }
-  /* El `display` de arriba le gana al `[hidden]` del navegador, así que la
-     casilla de los días (que solo aparece cuando faltan 24h o más) necesita
-     su propia regla o se vería un «0 d» permanente. */
-  .timer__u[hidden] { display: none; }
-  .timer__u b { font-size: 1.16rem; font-weight: 700; letter-spacing: 0.04em;
-                font-variant-numeric: tabular-nums; }
-  .timer__u i { font-style: normal; font-size: 0.7rem; opacity: 0.62; }
-  .timer__closed { display: none; }
-  /* La salida para quien llega tarde: línea propia y subrayada, que si no se
-     confunde con el aviso (todo va en mayúsculas y del mismo color). */
-  .timer__news { display: block; margin-top: 6px; color: var(--ink);
-                 text-decoration: underline; text-underline-offset: 4px;
-                 transition: color 0.3s ease; }
-  .timer__news:hover { color: var(--wood); }
-  [data-doors="closed"] .timer__lead,
-  [data-doors="closed"] .timer__clock { display: none; }
-  [data-doors="closed"] .timer__closed { display: block; }
-
-  /* Puertas cerradas: el botón sigue ahí (la carta se lee igual) pero deja de
-     ser un botón — sin href, sin relleno al pasar el cursor, sin flecha. */
-  .btn__label--closed { display: none; }
-  [data-doors="closed"] .btn--pay { color: var(--soft); border-color: rgba(23, 20, 15, 0.28);
-                                    pointer-events: none; }
-  [data-doors="closed"] .btn--pay .btn__label { display: none; }
-  [data-doors="closed"] .btn--pay .btn__label--closed { display: inline; }
-  [data-doors="closed"] .btn--pay .btn__ar { display: none; }
-  [data-doors="closed"] .pricecard:hover .btn--pay { color: rgba(250, 247, 241, 0.55); }
-
-  /* Dentro de la tarjeta de precio, que se invierte a tinta al pasar el cursor,
-     el contador tiene que invertirse con ella. */
-  .pricecard .timer { margin-top: 2px; transition: color 0.45s ease; }
-  .pricecard:hover .timer { color: rgba(250, 247, 241, 0.6); }
-  .pricecard:hover .timer__clock { color: var(--paper); }
-
-  /* Notas musicales de colores que flotan al pasar el cursor por los botones */
-  .note-pop { position: fixed; z-index: 60; pointer-events: none; font-weight: 700;
-              will-change: transform, opacity; animation: notefloat 1s ease-out forwards; }
-  @keyframes notefloat {
-    0%   { opacity: 0; transform: translate(0, 0) scale(0.6) rotate(0deg); }
-    18%  { opacity: 1; }
-    100% { opacity: 0; transform: translate(var(--dx, 0), -66px) scale(1.15) rotate(var(--rot, 0deg)); }
-  }
-
-  /* 9 · FAQ desplegable (click para ver la respuesta) */
-  .faq { margin-top: clamp(44px, 8vw, 68px); }
-  .faq__h { font-size: clamp(1.5rem, 5vw, 1.9rem); font-weight: 600; letter-spacing: -0.015em;
-            margin: 0 0 clamp(10px, 2vw, 16px); }
-  .qa { border-top: 1px solid rgba(23, 20, 15, 0.12); }
-  .qa:last-of-type { border-bottom: 1px solid rgba(23, 20, 15, 0.12); }
-  .qa summary { list-style: none; padding: clamp(15px, 3vw, 19px) 2em clamp(15px, 3vw, 19px) 0; position: relative;
-                font-weight: 600; line-height: 1.4; }
-  .qa summary::-webkit-details-marker { display: none; }
-  .qa summary .n { color: var(--soft); margin-right: 0.5em; }
-  .qa summary::after { content: "+"; position: absolute; right: 0; top: 50%; transform: translateY(-50%);
-                       font-size: 1.4em; line-height: 1; color: var(--ink); transition: transform 0.25s ease; }
-  .qa[open] summary::after { content: "–"; }
-  .qa summary:hover { color: var(--wood); }
-  .qa__a { margin: 0; padding: 0 0 clamp(15px, 3vw, 19px); color: var(--ink); animation: faqin 0.32s ease; }
-  @keyframes faqin { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
-
-  /* 11 · Mensaje final — grande, bold, italic */
-  .finalmsg { text-align: center; font-weight: 800; font-style: italic; font-size: clamp(1.7rem, 6.5vw, 2.5rem);
-              line-height: 1.14; letter-spacing: -0.02em; margin: clamp(36px, 7vw, 52px) 0 0; text-wrap: balance;
-              transition: color 0.4s ease; }
-  .finalmsg:hover { color: var(--wood); }
-
-  /* Referidos — texto suave centrado */
-  .referral { margin-top: clamp(24px, 5vw, 34px); text-align: center; font-size: 0.94em; color: var(--soft); text-wrap: pretty; }
-
-  /* 12 · Newsletter — centrado, botón que lleva al alta real */
-  .news { margin-top: clamp(34px, 7vw, 50px); text-align: center; }
-  .news__pre { margin: 0 0 1em; color: var(--soft); }
-  .btn--news { font-size: 0.8rem; padding: 15px 40px; }
-
-  /* Footer mínimo */
-  .foot { margin-top: clamp(48px, 9vw, 80px); font-size: 0.8rem; color: var(--soft);
-          display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
-  .foot a { color: var(--soft); text-decoration: none; }
-  .foot a:hover { text-decoration: underline; }
-  .foot .sep { opacity: 0.5; }
-  .foot .lang { margin-left: auto; display: inline-flex; gap: 6px; }
-  .foot .lang a[aria-current="true"] { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
-
-  @media (max-width: 460px) {
-    .btn { display: block; padding: 18px 24px; }
-    .btn--news { display: inline-block; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .reveal { opacity: 1; transform: none; transition: none; }
-    .photo img { transition: filter 0.3s ease; }
-    .photo img:hover { transform: none; }
-  }
-</style>
-<noscript>
-  <!-- Sin JavaScript no corre el observador y `.reveal` se quedaría en
-       opacity: 0 para siempre: la carta entera invisible. Esto la enseña
-       quieta y completa, que es lo mismo que ve quien pide reducir el
-       movimiento. -->
-  <style>
-    .reveal { opacity: 1 !important; transform: none !important; }
-    .page { opacity: 1 !important; }
-  </style>
-</noscript>
+{/* La mono del sitio, para la cápsula del menú. Va DESPUÉS de la base de la
+    academia a propósito: las dos definen `--font-mono` en `:root`, y la carta
+    no la usa para nada —allí es la de los bloques de código—. */}
+<Font cssVariable="--font-mono" />
+<Estilos />
 </head>
 <body>
 
   {/*
-    La píldora es la única navegación de la carta, que va suelta y sin la
-    cabecera del sitio. Cambian los destinos, no la pieza: ES/EN son ahora las
-    dos direcciones de ESTA página —`/productos/estudiemos-juntos/` y su gemela
-    inglesa—, y «Entrar» sigue siendo la puerta del aula, que hoy es la de la
-    academia (`entrarHref`, la misma que usa la cápsula de la tienda).
+    El menú del sitio, el mismo de todas las páginas. Hasta el 23 sep 2026
+    aquí había una píldora suelta con ES/EN y «Entrar», y era la única
+    navegación de la carta. Va como «Formaciones», que es de donde se llega:
+    marca esa opción y saca la cápsula de «Ingresar al aula» a la derecha.
   */}
-  <nav class="langpill" aria-label="Idioma / Language">
-    <a href={productPath(slug, 'es')} aria-current={(!isEN).toString()} data-lang-switch>ES</a>
-    <a href={productPath(slug, 'en')} aria-current={isEN.toString()} data-lang-switch>EN</a>
-    <span class="langpill__sep" aria-hidden="true"></span>
-    <a class="langpill__enter" href={entrarHref[lang]}>{t.enter}</a>
-  </nav>
+  <CabeceraSuelta
+    lang={lang}
+    route="products"
+    hrefEs={productPath(slug, 'es')}
+    hrefEn={productPath(slug, 'en')}
+  />
 
   <main class="page" data-doors={builtClosed ? 'closed' : (builtCountdown ? 'soon' : 'open')}>
 
@@ -949,24 +585,7 @@ const jsonLd = {
       hijos por su posición, así que cuantos más haya, más fino aterriza.
       Qué es cada bloque, en la nota de `Bloque`, arriba.
     */}
-    {t.carta.map((b) => {
-      if (typeof b === 'string') return <p class="reveal">{b}</p>;
-      if (b.k === 'fuerte') return <p class="reveal"><strong>{b.text}</strong></p>;
-      if (b.k === 'grito') return <p class="grito reveal">{b.text}</p>;
-      if (b.k === 'acento') return <p class="acento reveal">{b.text}</p>;
-      if (b.k === 'testimonio') return (
-        <figure class="testi reveal">
-          <blockquote class="testi__q"><p>“{b.text}”</p></blockquote>
-          <figcaption class="testi__who">— {b.autor}</figcaption>
-        </figure>
-      );
-      return (
-        <div class:list={['fit', 'compare__col', b.tono === 'si' ? 'compare__col--yes' : 'compare__col--no', 'reveal']}>
-          <p class="compare__h">{b.titulo}</p>
-          <ul>{b.items.map((li) => (<li>{li}</li>))}</ul>
-        </div>
-      );
-    })}
+    <Bloques bloques={t.carta} />
 
     <p class="incluye reveal">{t.includesH}</p>
 
@@ -1220,130 +839,6 @@ const jsonLd = {
   })();
 </script>
 
-<script is:inline>
-  // 13 · Fundido al hacer scroll + notas musicales al hover de los botones.
-  (function () {
-    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    // Reveal por IntersectionObserver
-    var revs = document.querySelectorAll('.reveal');
-    if (reduce || !('IntersectionObserver' in window)) {
-      revs.forEach(function (el) { el.classList.add('is-visible'); });
-    } else {
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (en) {
-          if (en.isIntersecting) { en.target.classList.add('is-visible'); io.unobserve(en.target); }
-        });
-      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.06 });
-      revs.forEach(function (el) { io.observe(el); });
-    }
-
-    // Red de seguridad, la que pide el punto 4.3 de la guía del trasplante y que
-    // en la academia vive en public/membresia-ui.js. Todo bloque `.reveal`
-    // arranca en opacity: 0, así que si el observador falla —o si un error de
-    // otro script corta la ejecución antes— la carta se queda EN BLANCO, que es
-    // el fallo número uno al portarla. A 1,4 s aparece todo, pase lo que pase.
-    setTimeout(function () {
-      document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('is-visible'); });
-    }, 1400);
-
-    var fine = window.matchMedia('(pointer: fine)').matches;
-
-    // Relleno de tinta que crece desde el cursor (--mx/--my) + magnético sutil.
-    document.querySelectorAll('.btn').forEach(function (btn) {
-      btn.addEventListener('pointermove', function (e) {
-        var r = btn.getBoundingClientRect();
-        var x = e.clientX - r.left, y = e.clientY - r.top;
-        btn.style.setProperty('--mx', x + 'px');
-        btn.style.setProperty('--my', y + 'px');
-        if (fine && !reduce) {
-          var dx = (x - r.width / 2) / r.width, dy = (y - r.height / 2) / r.height;
-          btn.style.transform = 'translate(' + (dx * 8).toFixed(1) + 'px,' + (dy * 6).toFixed(1) + 'px)';
-        }
-      });
-      btn.addEventListener('pointerleave', function () { btn.style.transform = ''; });
-    });
-
-    // Notas musicales de colores que salen de los botones al hacer hover.
-    if (!reduce && fine) {
-      var GLYPHS = ['♪', '♫', '♩', '♬'];
-      var COLORS = ['#a94f2b', '#6b3f2a', '#c9a24a', '#7a8b5a', '#4a6d8c', '#b5504a'];
-      function pop(btn) {
-        var r = btn.getBoundingClientRect();
-        var count = 2 + Math.floor(Math.random() * 2);
-        for (var i = 0; i < count; i++) {
-          var s = document.createElement('span');
-          s.className = 'note-pop';
-          s.textContent = GLYPHS[Math.floor(Math.random() * GLYPHS.length)];
-          s.style.left = (r.left + 12 + Math.random() * (r.width - 24)) + 'px';
-          s.style.top = (r.top + r.height * 0.3) + 'px';
-          s.style.color = COLORS[Math.floor(Math.random() * COLORS.length)];
-          s.style.fontSize = (15 + Math.random() * 13) + 'px';
-          s.style.setProperty('--dx', ((Math.random() * 2 - 1) * 46).toFixed(0) + 'px');
-          s.style.setProperty('--rot', ((Math.random() * 2 - 1) * 40).toFixed(0) + 'deg');
-          document.body.appendChild(s);
-          s.addEventListener('animationend', function () { this.remove(); });
-        }
-      }
-      document.querySelectorAll('.btn').forEach(function (btn) {
-        var timer = null;
-        btn.addEventListener('pointerenter', function () {
-          pop(btn);
-          timer = setInterval(function () { pop(btn); }, 460);
-        });
-        btn.addEventListener('pointerleave', function () { if (timer) { clearInterval(timer); timer = null; } });
-      });
-    }
-  })();
-</script>
-<script is:inline>
-  (function () {
-    // Cambio de idioma EN/ES sin volver al inicio. Las dos páginas son SSR
-    // independientes (/ y /en/): al togglear guardamos DÓNDE está el scroll
-    // (anclado a un bloque + offset, porque el texto mide distinto entre
-    // idiomas), hacemos fade-out, navegamos, y en la otra página restauramos
-    // la posición y hacemos fade-in.
-    var page = document.querySelector('.page');
-    var html = document.documentElement;
-    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    function blocks() { return page ? Array.prototype.slice.call(page.children) : []; }
-    function absTop(el) { return el.getBoundingClientRect().top + (window.scrollY || window.pageYOffset || 0); }
-
-    // AL ENTRAR: si venimos de un toggle, restaurar posición y revelar.
-    try {
-      var saved = sessionStorage.getItem('langSwitch');
-      if (saved) {
-        sessionStorage.removeItem('langSwitch');
-        var d = JSON.parse(saved);
-        var bs = blocks();
-        var anchor = bs[d.i];
-        var y = anchor ? absTop(anchor) + d.d : d.y;
-        var prev = html.style.scrollBehavior; html.style.scrollBehavior = 'auto';
-        window.scrollTo(0, Math.max(0, y));
-        html.style.scrollBehavior = prev;
-        requestAnimationFrame(function () { html.classList.remove('lang-enter'); });
-      } else {
-        html.classList.remove('lang-enter');
-      }
-    } catch (e) { html.classList.remove('lang-enter'); }
-
-    // AL SALIR: guardar sección/offset, fade-out y navegar.
-    document.querySelectorAll('[data-lang-switch]').forEach(function (a) {
-      a.addEventListener('click', function (e) {
-        e.preventDefault();
-        if (a.getAttribute('aria-current') === 'true') return; // ya estamos en ese idioma
-        var href = a.getAttribute('href');
-        var bs = blocks();
-        var sy = window.scrollY || window.pageYOffset || 0;
-        var idx = 0;
-        for (var k = 0; k < bs.length; k++) { if (absTop(bs[k]) <= sy + 2) idx = k; else break; }
-        var delta = bs[idx] ? sy - absTop(bs[idx]) : 0;
-        try { sessionStorage.setItem('langSwitch', JSON.stringify({ i: idx, d: delta, y: sy })); } catch (err) {}
-        if (page && !reduce) page.classList.add('is-leaving');
-        setTimeout(function () { window.location.href = href; }, reduce ? 0 : 300);
-      });
-    });
-  })();
-</script>
+<Scripts />
 </body>
 </html>
