@@ -37,14 +37,14 @@ de cero debería poder seguir trabajando sin preguntar nada.
 >       **redesplegar**. ✅ La variable está puesta (Adrián, 23 sep). **Solo
 >       esa:** `KLAVIYO_LIST_ID` y `KLAVIYO_REVISION` no se crean, sus valores
 >       buenos ya van en el código.
->    3. **Comprobar:** un alta de prueba en una vista previa y el correo dentro
->       de la lista `SaE8Px`. En producción no se puede mientras la cortina
->       esté bajada: `/api/suscribir` contesta 503. ⏳ **La primera prueba
->       dijo que no**, en la vista previa de `claude/busy-heisenberg-2ig8dt`,
->       casi seguro porque ese build es de antes de la clave. Se prueba en una
->       vista previa construida después: abrir `/api/suscribir` tiene que dar
->       `{"proveedor":true}`. Ver **El newsletter, conectado → La primera
->       prueba**.
+>    3. **Comprobar:** un alta de prueba y el correo dentro de la lista
+>       `SaE8Px`. ⏸️ **Aplazado a propósito, por decisión de Adrián (23
+>       sep):** se prueba **todo junto, al subir la cortina**, cuando Emi
+>       tenga montada la bienvenida de siete correos —el punto 2—. Así un
+>       solo correo de prueba comprueba el alta **y** la serie. La primera
+>       prueba, en una vista previa vieja, dijo que no, casi seguro porque ese
+>       build era de antes de la clave; el #46 dejó el fallo con rastro en los
+>       logs. Ver **El newsletter, conectado → La primera prueba**.
 >    4. **Klaviyo → apagar WooCommerce**, mirando antes los flujos. Y decidir
 >       con Emi la doble confirmación (recomendada).
 > 2. **La bienvenida pasa a ser de siete correos** a cada persona que se
@@ -56,7 +56,21 @@ de cero debería poder seguir trabajando sin preguntar nada.
 >    faltan los demás, que manda ella. Y cuatro decisiones de la carta que
 >    quedaron abiertas: ver **Pendiente → Contenido que falta (de Emi)**.
 > 4. **Subir la cortina:** `CORTINA_BAJADA = false` en `src/lib/cortina.ts`,
->    en un PR.
+>    en un PR. **Y ahí va la prueba del newsletter**, la que quedó aplazada.
+>    Lo mejor es hacerla **en la vista previa de ese mismo PR, antes de
+>    mergear**: las vistas previas nunca tienen cortina y ya leen la clave
+>    (Adrián marcó Production y Preview). Si algo falla, se arregla sin que la
+>    web esté abierta con un formulario roto. Los pasos:
+>    1. abrir `/api/suscribir` en la vista previa → `{"proveedor":true}`;
+>    2. suscribir un correo de prueba de verdad;
+>    3. verlo en Klaviyo, en la lista `SaE8Px` (pendiente si hay doble
+>       confirmación, hasta pulsar el enlace);
+>    4. que llegue el primero de los siete correos;
+>    5. si dice que no, buscar `[klaviyo]` en Vercel → Logs: la tabla de
+>       `docs/CONECTAR-KLAVIYO.md` dice qué es cada línea.
+>
+>    Si se prefiere probar ya en `www.emilserios.com`, que sea lo primero
+>    después de mergear: son dos minutos.
 >
 > Y una comprobación que no depende de la cortina y nadie ha hecho todavía:
 > `curl -sI https://www.emilserios.com/aulavirtual/estudiemos-juntos/` tiene
@@ -127,7 +141,7 @@ pagando sin recibir acceso.
 | **Alcance** | Desde el 31 ago 2026 esto deja de ser solo el sitio: aquí van también el aula, la membresía y los cursos. Ver **La plataforma**. |
 | **Sesión** | **Conectada y probada el 22 sep 2026**: se entra de verdad, contra el **mismo Supabase de la academia**, y el candado pide **suscripción al día**. Las variables y las Redirect URLs ya están puestas. Falta `set_admin.sql`. Ver `docs/CONECTAR-EL-AULA.md`. |
 | **Cobro** | **Desde el 22 sep 2026 vive acá.** `/api/checkout` crea la sesión de Stripe, `/gracias/` recoge a quien pagó y `/api/claim-account` le crea la cuenta. El **webhook sigue en la academia**, y es correcto que siga: ver **La unión de las dos casas**. |
-| **Newsletter** | **Conectado desde el 22 sep 2026.** `/api/suscribir` da de alta en la lista real de Klaviyo (`SaE8Px`), con la API en su versión `2026-07-15`. `KLAVIYO_API_KEY` **puesta en Vercel el 23 sep 2026**, con los permisos Lists, Profiles y Subscriptions; **falta la prueba buena** en una vista previa construida después de la clave —ver **El newsletter, conectado → La primera prueba**—. La integración de WooCommerce de Klaviyo está muerta desde el 21 sep y **se apaga**: los cobros son de Stripe. |
+| **Newsletter** | **Conectado desde el 22 sep 2026.** `/api/suscribir` da de alta en la lista real de Klaviyo (`SaE8Px`), con la API en su versión `2026-07-15`. `KLAVIYO_API_KEY` **puesta en Vercel el 23 sep 2026**, con los permisos Lists, Profiles y Subscriptions; **la prueba se hace al subir la cortina**, junto con la bienvenida de siete correos —ver **El newsletter, conectado → La primera prueba**—. La integración de WooCommerce de Klaviyo está muerta desde el 21 sep y **se apaga**: los cobros son de Stripe. |
 | **Lo que falta para lanzar** | **Dos variables en Vercel, y ninguna es código:** `KLAVIYO_API_KEY` o el newsletter no da de alta, y las de Stripe o el botón de comprar da un 500. |
 
 Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/` · `/productos/` ·
@@ -352,6 +366,16 @@ cortina porque ahí `VERCEL_ENV` vale `preview`:
   `emilse-rios-webv2-git-<rama>-adrians-projects-594b3131.vercel.app` (Vercel
   acorta los nombres largos con un código). Una sesión que trabaja siempre en
   la misma rama tiene, por tanto, un solo enlace para todo el día.
+
+**Cómo se abre, paso a paso** (Adrián preguntó el 23 sep 2026 y no estaba
+escrito):
+
+- **Desde GitHub, lo más corto:** abrir el PR → bajar hasta el comentario del
+  bot de Vercel → **Visit Preview**. Un PR ya mergeado conserva el comentario y
+  el enlace sigue funcionando.
+- **Desde Vercel:** el proyecto → **Deployments** → buscar la rama en la
+  columna de la rama (o filtrar por ella) → pulsar el despliegue → **Visit**.
+  El de arriba del todo es el último push.
 
 Tres cosas que muerden, y ninguna se pudo comprobar desde la sesión, porque
 no tenía salida a `vercel.app`:
@@ -1841,11 +1865,20 @@ Lo que se cambió para que esto no vuelva a quedar mudo:
 - **La guía** explica lo de redesplegar la vista previa y trae una tabla de
   qué significa cada línea de `[klaviyo]` en los logs.
 
-**Lo que falta:** abrir `/api/suscribir` en una vista previa construida
-después de poner la clave —la de esta rama, o la vieja después de un
-*Redeploy*—, ver `{"proveedor":true}`, suscribir un correo de prueba y
-buscarlo en la lista `SaE8Px`. Si sigue diciendo que no, el motivo está en los
-logs.
+Se mergeó como el **#46**, ese mismo día.
+
+**Y la prueba buena se aplazó, a propósito.** Adrián prefirió no probar en
+una vista previa y hacerlo **todo junto al subir la cortina**, cuando Emi
+tenga montada la bienvenida de siete correos: así un solo correo de prueba
+comprueba el alta y la serie. La clave está en Production y en Preview, así
+que no falta nada de paneles. Los pasos de esa prueba, y por qué conviene
+hacerla en la vista previa del PR que sube la cortina, están arriba del todo,
+en **Lo que viene → 4**.
+
+Un apunte de ese día, para quien lea los logs: a esa hora en los logs de
+producción no había ni una línea `[klaviyo]`, y es lo esperado. Con la cortina
+bajada nadie ve el formulario, así que nadie llega a llamar a
+`/api/suscribir`.
 
 #### WooCommerce, que ya no está
 
@@ -3615,10 +3648,16 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
       desdoble desaparece el día que el webhook se mude; hasta entonces, **se
       cambian en los dos proyectos de Vercel o no se cambian en ninguno**.
 
-- [ ] **⚠️ `KLAVIYO_API_KEY` en Vercel, o el newsletter no da de alta.** El
-      código está hecho desde el 22 sep 2026 —ver **El newsletter,
-      conectado**— y **esto es lo único que falta**: una variable. Sin ella el
-      formulario no miente, pero tampoco suscribe a nadie.
+- [ ] **⚠️ El newsletter: la clave está, falta la prueba.** ✅ `KLAVIYO_API_KEY`
+      puesta en Vercel el **23 sep 2026**, en Production y Preview, con los
+      tres permisos (Adrián). ⏸️ **La prueba se hace al subir la cortina**,
+      junto con la bienvenida de siete correos: decisión de Adrián del mismo
+      día. Los pasos están arriba del todo, en **Lo que viene → 4**. Lo de
+      abajo queda como referencia, por si hubiera que rehacer la clave.
+
+      El código está hecho desde el 22 sep 2026 —ver **El newsletter,
+      conectado**—. Sin la clave el formulario no miente, pero tampoco
+      suscribe a nadie.
 
       La clave se saca de klaviyo.com → Settings → API keys → Create Private
       API Key → **Custom Key**, con permiso de escritura sobre **Lists,
@@ -4025,6 +4064,17 @@ enseñárselo.
 
 ## Notas sueltas
 
+- **Los 404 de direcciones del WordPress viejo son normales.** En los logs de
+  Vercel salen cosas como `GET /podcast/create-success-happiness-and-fulfillment/`
+  → 404, con referer `emilserios.com/podcast/…` y un bot como agente
+  —PetalBot, el buscador de Huawei, el 23 sep 2026—. Son direcciones que
+  sirvió el WordPress de Edu hasta el 21 sep 2026 y que los buscadores siguen
+  visitando de memoria. **No hay que hacer nada**: con el 404 aprenden solos
+  que ya no existen. Si algún día interesa rescatar alguna, se mira en Google
+  Search Console → **Páginas → No encontrada (404)** cuáles tenían visitas de
+  verdad, y solo esas se redirigen, en `redirects` de `astro.config.mjs`.
+  Esas de `/podcast/` suenan a episodios de otro podcast, no a nada de Emi,
+  así que es probable que no haya nada que rescatar.
 - El sitio **no lleva analítica ni cookies**. Si se añade algo, hay que poner
   aviso y revisar la nota legal.
 - **Se maqueta con el español**, que es el texto más largo. El inglés entra en
