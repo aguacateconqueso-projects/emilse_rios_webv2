@@ -1,0 +1,171 @@
+---
+/**
+ * La cortina. Mientras está bajada, es lo único que se ve en todo el sitio:
+ * `src/middleware.ts` la escribe dentro de cada página en el build. Ver
+ * `src/lib/cortina.ts` para bajarla y subirla.
+ *
+ * Es la entrada de la Home que no se levanta: la firma de Emi se escribe en
+ * papel sobre tinta, igual que al llegar, y el panel negro se queda puesto.
+ * Debajo, una línea que dice lo que pasa, y nada que pulsar.
+ *
+ * Dos animaciones, el tope fuera de la Home: la firma que se escribe —la misma
+ * curva y la misma duración que `Intro.astro`— y el texto que se funde cuando
+ * la firma termina.
+ *
+ * No usa `Base.astro` a propósito: sin cabecera, sin menú, sin pie y sin
+ * conmutador de idioma. Los dos idiomas salen a la vez — el de la dirección en
+ * grande y el otro debajo.
+ */
+import { Font } from 'astro:assets';
+import Logo from '../components/Logo.astro';
+import { cortina } from '../data/cortina';
+import { useTranslations } from '../i18n/ui';
+import '../styles/tokens.css';
+import '../styles/base.css';
+
+/* La dirección que se pidió, no la de esta página: el middleware reescribe
+   cada ruta hacia acá, y `originPathname` es la de antes de reescribir. */
+const origen = Astro.originPathname;
+const lang = origen === '/en' || origen.startsWith('/en/') ? 'en' : 'es';
+const otra = lang === 'es' ? 'en' : 'es';
+const t = cortina[lang];
+const o = cortina[otra];
+
+/* En su propia dirección, `/cortina/`, no se indexa: no es una página, es lo
+   que tapa a las demás. Tapando la Home NO lleva `noindex`, porque eso le
+   pediría a Google que olvide la Home, y la cortina es cosa de días. */
+const propia = origen.replace(/\/$/, '') === '/cortina';
+---
+
+<!doctype html>
+<html lang={lang} class="cortina">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{t.title}</title>
+    <meta name="description" content={t.description} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {propia && <meta name="robots" content="noindex" />}
+    <Font cssVariable="--font-display" />
+    <Font cssVariable="--font-mono" />
+  </head>
+
+  <body>
+    <main class="cortina__panel">
+      <h1 class="cortina__firma">
+        <Logo name={useTranslations(lang)('site.name')} />
+      </h1>
+
+      <div class="cortina__texto">
+        <p class="cortina__titular">{t.heading}</p>
+        <p class="cortina__titular cortina__titular--otra" lang={otra}>{o.heading}</p>
+        <p class="cortina__linea mono">
+          <span>{t.line}</span>
+          <span aria-hidden="true">·</span>
+          <span lang={otra}>{o.line}</span>
+        </p>
+      </div>
+    </main>
+  </body>
+</html>
+
+<style>
+  /* La raíz la pinta `base.css` de papel. La clase le gana por especificidad
+     sin depender del orden en que lleguen las hojas. */
+  :global(html.cortina) {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  :global(.cortina ::selection) {
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  .cortina__panel {
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-6);
+    padding: var(--space-8) var(--space-3);
+    text-align: center;
+    /* `base.css` le da tinta al body; acá todo va en papel. */
+    color: var(--paper);
+  }
+
+  .cortina__firma {
+    /* El mismo tamaño que en la entrada de la Home: es la misma cortina. */
+    --logo-height: calc(min(72vw, 40rem) * 487 / 1631);
+    /* Sin `forwards`, a diferencia de la entrada: al acabar, el recorte se
+       quita en vez de quedarse puesto. Aquella se va a los dos segundos; esta
+       se queda, y con el recorte puesto Chrome pinta una raya de un píxel
+       sobre el borde de arriba de la firma. */
+    animation: cortina-escribe 1.1s var(--ease-write) backwards;
+  }
+
+  .cortina__texto {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+    max-width: var(--measure);
+    opacity: 0;
+    animation: cortina-funde var(--duration-reveal) var(--ease-reveal) 1.1s forwards;
+  }
+
+  .cortina__titular {
+    font-family: var(--font-display);
+    font-size: var(--text-section);
+    line-height: var(--leading-section);
+    letter-spacing: var(--tracking-section);
+    text-wrap: balance;
+  }
+
+  .cortina__titular--otra {
+    font-size: var(--text-small);
+    font-style: italic;
+    letter-spacing: 0;
+    color: var(--paper-soft);
+  }
+
+  .cortina__linea {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0 var(--space-1);
+    margin-top: var(--space-3);
+    color: var(--paper-soft);
+  }
+
+  /* El filo del barrido va inclinado al mismo ángulo que la letra: la firma
+     no aparece, se escribe. Copiado de `Intro.astro`. */
+  @keyframes cortina-escribe {
+    from {
+      clip-path: polygon(-20% 0, 0% 0, -12% 100%, -20% 100%);
+    }
+    to {
+      clip-path: polygon(-20% 0, 120% 0, 108% 100%, -20% 100%);
+    }
+  }
+
+  @keyframes cortina-funde {
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Quien pide menos movimiento la ve ya puesta. */
+  @media (prefers-reduced-motion: reduce) {
+    .cortina__firma {
+      animation: none;
+    }
+
+    .cortina__texto {
+      opacity: 1;
+      animation: none;
+    }
+  }
+</style>
