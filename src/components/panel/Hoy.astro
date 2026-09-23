@@ -517,8 +517,9 @@
     border-bottom: 1px solid currentColor;
   }
 
-  .lista :global(.lista__txt .mono) {
-    margin-top: 0.25rem;
+  .lista :global(.lista__txt .mono),
+  .lista :global(.lista__txt .mono-plain) {
+    margin-top: var(--space-1);
   }
 
   .lista :global(.lista__i > a.mono) {

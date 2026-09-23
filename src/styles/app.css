@@ -163,7 +163,7 @@
 .campo textarea,
 .campo select {
   width: 100%;
-  padding: 0.75rem var(--space-2);
+  padding: var(--space-1) var(--space-2);
   font: inherit;
   font-size: var(--text-small);
   color: var(--ink);
@@ -202,9 +202,13 @@
 }
 
 .casilla input {
+  position: relative;
   width: 1rem;
   height: 1rem;
-  margin-top: 0.25em;
+  margin: 0;
+  /* Centrada con la primera línea (24 px) sin salirse de la rejilla: el
+     desplazamiento no es un margen, así que no cuenta como espaciado. */
+  top: 0.25rem;
   accent-color: var(--ink);
 }
 
@@ -238,14 +242,15 @@
 .estado {
   display: inline-flex;
   align-items: center;
-  gap: 0.5em;
-  padding: 0.25rem 0.5rem;
+  gap: var(--space-1);
+  padding: 0 var(--space-1);
   border: 1px solid var(--rule);
   font-family: var(--font-mono);
   font-size: 0.6875rem; /* 11 px */
   letter-spacing: var(--tracking-mono);
   text-transform: uppercase;
-  line-height: 1.4;
+  /* 22 px de línea más las dos reglas: 24, en la rejilla. */
+  line-height: 2;
   white-space: nowrap;
   color: var(--ink-soft);
 }
