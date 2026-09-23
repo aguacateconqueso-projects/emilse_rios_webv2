@@ -16,6 +16,14 @@ import { hayProveedor } from '../lib/klaviyo';
  *   · en desarrollo, simula el envío para poder revisar el diseño;
  *   · en producción, muestra el error en vez de mentirle a quien se suscribe.
  *
+ * ⚠️ **Desde el 23 sep 2026 el formulario llama siempre al servidor**, también
+ * sin clave. Hasta ese día, sin clave, el `data-endpoint` nacía vacío y el
+ * navegador enseñaba el error **sin llamar a nadie**. Esta página se escribe en
+ * el build, así que eso quedaba congelado en el HTML: una vista previa
+ * construida antes de poner la clave seguía fallando después, y en los logs de
+ * Vercel no aparecía nada, porque no había llegado ninguna petición. Ahora el
+ * que dice que no es `/api/suscribir`, y lo deja escrito en los logs.
+ *
  * `PUBLIC_NEWSLETTER_ENDPOINT` sigue existiendo y sigue mandando sobre todo lo
  * demás: es la salida para apuntar a otro sitio —otro proveedor, un formulario
  * alojado— sin tocar código. Vacía, que es lo normal, manda la ruta de casa.
@@ -42,12 +50,13 @@ const t = useTranslations(lang);
  * variable más — la misma razón por la que `comprarHref` de la membresía es
  * relativo desde que el cobro se mudó acá.
  *
- * ⚠️ `hayProveedor` viaja al navegador como un booleano y **solo como un
- * booleano**. `klaviyo.ts` es de servidor y la clave no sale de ahí; lo único
- * que cruza es un sí o un no.
+ * ⚠️ `hayProveedor` solo decide si se simula en desarrollo, y viaja al
+ * navegador como un booleano y **solo como un booleano**. `klaviyo.ts` es de
+ * servidor y la clave no sale de ahí; lo único que cruza es un sí o un no.
  */
 const endpoint = import.meta.env.PUBLIC_NEWSLETTER_ENDPOINT || '/api/suscribir';
 const conectado = hayProveedor || Boolean(import.meta.env.PUBLIC_NEWSLETTER_ENDPOINT);
+const simular = import.meta.env.DEV && !conectado;
 const inputId = `${id}-email`;
 const statusId = `${id}-status`;
 ---
@@ -59,12 +68,12 @@ const statusId = `${id}-status`;
     <form
       class="subscribe__form"
       data-subscribe
-      data-endpoint={conectado ? endpoint : ''}
-      data-dev={import.meta.env.DEV ? 'true' : 'false'}
+      data-endpoint={endpoint}
+      data-simular={simular ? 'true' : 'false'}
       data-done={t('form.done')}
       data-invalid={t('form.error')}
       data-failed={t('form.failed')}
-      action={conectado ? endpoint : undefined}
+      action={endpoint}
       method="post"
       novalidate
     >
@@ -199,7 +208,7 @@ const statusId = `${id}-status`;
     if (!input || !status) return;
 
     const endpoint = form.dataset.endpoint ?? '';
-    const isDev = form.dataset.dev === 'true';
+    const simular = form.dataset.simular === 'true';
     const doneCopy = form.dataset.done ?? '';
     const invalidCopy = form.dataset.invalid ?? '';
     const failedCopy = form.dataset.failed ?? '';
@@ -224,19 +233,13 @@ const statusId = `${id}-status`;
         return;
       }
 
-      // Sin proveedor conectado —`KLAVIYO_API_KEY` vacía y sin endpoint
-      // propio— el `data-endpoint` nace vacío. En desarrollo se simula para
-      // poder revisar el diseño; en producción no se finge un alta que no ha
-      // ocurrido: se dice que no y se da una dirección a la que escribir.
-      if (!endpoint) {
-        if (isDev) {
-          console.warn(
-            '[suscripción] sin proveedor (falta KLAVIYO_API_KEY): envío simulado.',
-          );
-          succeed();
-        } else {
-          say(failedCopy);
-        }
+      // Solo en desarrollo y sin proveedor —`KLAVIYO_API_KEY` vacía y sin
+      // endpoint propio—: se simula para poder revisar el diseño. Fuera de
+      // ahí se llama siempre al servidor, con clave o sin ella; sin clave
+      // contesta 503, se dice que no y se da una dirección a la que escribir.
+      if (simular) {
+        console.warn('[suscripción] sin proveedor (falta KLAVIYO_API_KEY): envío simulado.');
+        succeed();
         return;
       }
 

@@ -32,12 +32,19 @@ de cero debería poder seguir trabajando sin preguntar nada.
 >    falta es de paneles, en este orden:
 >    1. **Klaviyo → Custom Key** con escritura sobre **Lists, Profiles y
 >       Subscriptions**. Si ya había una clave hecha con la guía vieja, se
->       edita para añadir *Subscriptions*.
->    2. **Vercel → `KLAVIYO_API_KEY`** en Production —y en Preview, si se
->       quiere probar en las vistas previas—, y **redesplegar**.
+>       edita para añadir *Subscriptions*. ✅ Hecho (Adrián, 23 sep).
+>    2. **Vercel → `KLAVIYO_API_KEY`** en Production **y Preview**, y
+>       **redesplegar**. ✅ La variable está puesta (Adrián, 23 sep). **Solo
+>       esa:** `KLAVIYO_LIST_ID` y `KLAVIYO_REVISION` no se crean, sus valores
+>       buenos ya van en el código.
 >    3. **Comprobar:** un alta de prueba en una vista previa y el correo dentro
 >       de la lista `SaE8Px`. En producción no se puede mientras la cortina
->       esté bajada: `/api/suscribir` contesta 503.
+>       esté bajada: `/api/suscribir` contesta 503. ⏳ **La primera prueba
+>       dijo que no**, en la vista previa de `claude/busy-heisenberg-2ig8dt`,
+>       casi seguro porque ese build es de antes de la clave. Se prueba en una
+>       vista previa construida después: abrir `/api/suscribir` tiene que dar
+>       `{"proveedor":true}`. Ver **El newsletter, conectado → La primera
+>       prueba**.
 >    4. **Klaviyo → apagar WooCommerce**, mirando antes los flujos. Y decidir
 >       con Emi la doble confirmación (recomendada).
 > 2. **La bienvenida pasa a ser de siete correos** a cada persona que se
@@ -120,7 +127,7 @@ pagando sin recibir acceso.
 | **Alcance** | Desde el 31 ago 2026 esto deja de ser solo el sitio: aquí van también el aula, la membresía y los cursos. Ver **La plataforma**. |
 | **Sesión** | **Conectada y probada el 22 sep 2026**: se entra de verdad, contra el **mismo Supabase de la academia**, y el candado pide **suscripción al día**. Las variables y las Redirect URLs ya están puestas. Falta `set_admin.sql`. Ver `docs/CONECTAR-EL-AULA.md`. |
 | **Cobro** | **Desde el 22 sep 2026 vive acá.** `/api/checkout` crea la sesión de Stripe, `/gracias/` recoge a quien pagó y `/api/claim-account` le crea la cuenta. El **webhook sigue en la academia**, y es correcto que siga: ver **La unión de las dos casas**. |
-| **Newsletter** | **Conectado desde el 22 sep 2026.** `/api/suscribir` da de alta en la lista real de Klaviyo (`SaE8Px`), con la API en su versión `2026-07-15`. Falta poner `KLAVIYO_API_KEY` en Vercel —**con los permisos Lists, Profiles y Subscriptions**—; sin ella el formulario avisa en vez de fingir. La integración de WooCommerce de Klaviyo está muerta desde el 21 sep y **se apaga**: los cobros son de Stripe. |
+| **Newsletter** | **Conectado desde el 22 sep 2026.** `/api/suscribir` da de alta en la lista real de Klaviyo (`SaE8Px`), con la API en su versión `2026-07-15`. `KLAVIYO_API_KEY` **puesta en Vercel el 23 sep 2026**, con los permisos Lists, Profiles y Subscriptions; **falta la prueba buena** en una vista previa construida después de la clave —ver **El newsletter, conectado → La primera prueba**—. La integración de WooCommerce de Klaviyo está muerta desde el 21 sep y **se apaga**: los cobros son de Stripe. |
 | **Lo que falta para lanzar** | **Dos variables en Vercel, y ninguna es código:** `KLAVIYO_API_KEY` o el newsletter no da de alta, y las de Stripe o el botón de comprar da un 500. |
 
 Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/` · `/productos/` ·
@@ -1802,6 +1809,43 @@ Y dos cosas que se añadieron de paso:
   baja**. Con confirmación simple, cualquiera puede volver a apuntar a otra
   persona tecleando su correo; con doble, a esa persona le llega un correo para
   confirmar y nada más. Sigue siendo decisión de Emi.
+
+#### La primera prueba, y por qué dijo que no (23 sep 2026)
+
+Adrián hizo la clave con los tres permisos y puso `KLAVIYO_API_KEY` en Vercel.
+Se saltó la doble confirmación porque Emi ya la tenía decidida en la lista. Y
+**no creó `KLAVIYO_LIST_ID` ni `KLAVIYO_REVISION`, que es lo correcto**: sus
+valores buenos van por defecto en el código, y ponerlos en Vercel solo
+sirve para clavarlos —el día que se suba la versión en el código, la variable
+seguiría mandando la vieja—.
+
+Probó en la vista previa de `claude/busy-heisenberg-2ig8dt`
+(`…-git-claude-b-bc8959-…vercel.app`) y el formulario dijo «We couldn't
+complete the subscription». **La causa casi segura no es Klaviyo ni el
+dominio: es el build.** Las páginas de este sitio se escriben al construir, y
+el formulario decidía entonces si tenía proveedor —`hayProveedor`— y lo dejaba
+escrito en el HTML. Ese build es del merge del #45, de antes de poner la clave:
+el formulario nació sin `data-endpoint` y el navegador enseñaba el error **sin
+llegar a llamar al servidor**. Por eso tampoco habría nada en los logs.
+
+Lo que se cambió para que esto no vuelva a quedar mudo:
+
+- **El formulario llama siempre a `/api/suscribir`**, con clave o sin ella.
+  Solo simula en `astro dev` sin clave, como antes. Sin clave, el servidor
+  contesta 503 y lo deja escrito en los logs: `[klaviyo] falta
+  KLAVIYO_API_KEY en este despliegue`.
+- **`GET /api/suscribir` dice si el despliegue tiene la clave**:
+  `{"proveedor":true}` o `false`, y nada más. Es la comprobación nueva,
+  desde el navegador; la de buscar `data-endpoint` en el código fuente dejó de
+  servir con el cambio de arriba.
+- **La guía** explica lo de redesplegar la vista previa y trae una tabla de
+  qué significa cada línea de `[klaviyo]` en los logs.
+
+**Lo que falta:** abrir `/api/suscribir` en una vista previa construida
+después de poner la clave —la de esta rama, o la vieja después de un
+*Redeploy*—, ver `{"proveedor":true}`, suscribir un correo de prueba y
+buscarlo en la lista `SaE8Px`. Si sigue diciendo que no, el motivo está en los
+logs.
 
 #### WooCommerce, que ya no está
 

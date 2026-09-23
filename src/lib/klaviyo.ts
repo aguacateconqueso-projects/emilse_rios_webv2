@@ -93,7 +93,17 @@ export type Resultado =
  * casos, que es lo correcto para no delatar quién está suscrito.
  */
 export async function suscribir(email: string): Promise<Resultado> {
-  if (!API_KEY) return { ok: false, motivo: 'sin-proveedor' };
+  if (!API_KEY) {
+    /* Va a los logs para que este fallo no sea mudo: hasta el 23 sep 2026 el
+       formulario ni llamaba sin clave, y en Vercel no quedaba rastro. Vercel
+       no aplica una variable nueva a un despliegue que ya existe: hay que
+       redesplegar, y en el entorno —Production o Preview— que se esté mirando. */
+    console.error(
+      '[klaviyo] falta KLAVIYO_API_KEY en este despliegue: nadie queda apuntado.',
+      { entorno: process.env.VERCEL_ENV || 'local' },
+    );
+    return { ok: false, motivo: 'sin-proveedor' };
+  }
 
   const cuerpo = {
     data: {

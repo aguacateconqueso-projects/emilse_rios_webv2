@@ -5,8 +5,10 @@ de verdad. Son dos pasos en Klaviyo y uno en Vercel, más una comprobación.
 
 Escrito el **22 de septiembre de 2026**, con el PR que montó `/api/suscribir`,
 y corregido el mismo día: pedía dos permisos donde hacen falta tres, y usaba una
-versión de la API que Klaviyo retira el 15 de octubre. El porqué de cada
-decisión está en `progreso.md` → **El newsletter, conectado**.
+versión de la API que Klaviyo retira el 15 de octubre. Retocado el **23 sep
+2026**, cuando la clave ya estaba puesta y la vista previa seguía diciendo que
+no —casi seguro, por ser un build de antes de la clave—. El porqué de cada decisión está en
+`progreso.md` → **El newsletter, conectado**.
 
 ---
 
@@ -123,9 +125,28 @@ En el proyecto de `emilserios.com`: **Settings** → **Environment Variables**.
 | `KLAVIYO_LIST_ID` | otro ID de lista | no · por defecto `SaE8Px` |
 | `KLAVIYO_REVISION` | otra fecha de la API | no · por defecto `2026-07-15` |
 
-Marcarla para **Production** (y para Preview, si se quiere probar antes de
-publicar). **Y redesplegar**: Vercel no aplica una variable nueva al despliegue
-que ya está en el aire.
+**Solo se pone la primera.** Las otras dos no se crean: sus valores buenos ya
+están en el código —`SaE8Px` es la lista real del newsletter, `2026-07-15` la
+versión de la API— y existen solo para cambiarlos sin tocar código. Escribirlas
+en Vercel con esos mismos valores no rompe nada, pero es peor: la variable manda
+sobre el código, así que el día que se suba la versión en el código, Vercel
+seguiría clavando la vieja sin que nadie lo note.
+
+Marcarla para **Production y Preview**. Con la cortina bajada, **las vistas
+previas son el único sitio donde se puede probar**: en producción
+`/api/suscribir` contesta 503 pase lo que pase.
+
+**Y redesplegar, y es el paso que más se olvida.** Vercel no aplica una
+variable nueva a un despliegue que ya existe: la lee al construir. Una vista
+previa —las `…-git-claude-…vercel.app`— es siempre el **último build de su
+rama**, así que si ese build es de antes de poner la clave, **sigue sin clave
+aunque la variable ya esté en Vercel**. Se arregla de cualquiera de estas dos
+maneras:
+
+- **Vercel → Deployments** → ese despliegue → **⋯ → Redeploy**; o
+- un push nuevo a la rama, que construye otro con las variables de ese momento.
+
+Se comprueba en diez segundos: ver **4 · Comprobarlo → Después de desplegar**.
 
 ⚠️ **`KLAVIYO_API_KEY` no lleva prefijo `PUBLIC_`, y no es un descuido.** En
 Astro, lo que empieza por `PUBLIC_` viaja al navegador y se ve en el HTML. Esta
@@ -181,9 +202,21 @@ Usa un correo de prueba de verdad, y después bórralo del perfil en Klaviyo.
 
 ### Después de desplegar: el sitio
 
-1. Ver el código fuente de `www.emilserios.com` y buscar `data-endpoint`.
-   - `data-endpoint="/api/suscribir"` → la clave está puesta. ✅
-   - `data-endpoint` a secas → falta la clave, o falta redesplegar.
+**Mientras la cortina esté bajada, todo esto se hace en una vista previa, no
+en `www.emilserios.com`**: ahí `/api/suscribir` contesta 503 y el formulario
+dirá que no aunque la clave esté bien.
+
+1. Abrir **`/api/suscribir`** en el navegador, en el mismo dominio que se va a
+   probar —por ejemplo `https://…vercel.app/api/suscribir`—.
+   - `{"proveedor":true}` → este despliegue tiene la clave. ✅
+   - `{"proveedor":false}` → no la tiene: falta la variable en ese entorno
+     (Production o Preview), o falta redesplegar. Ver el paso 3.
+   - `{"error":"cortina"}` → es producción con la cortina bajada. Probar en una
+     vista previa.
+
+   Hasta el 23 sep 2026 esto se miraba buscando `data-endpoint` en el código
+   fuente de la página. Ya no sirve: desde ese día vale siempre
+   `/api/suscribir`, haya clave o no.
 2. Escribir un correo en **Acá te suscribes** y pulsar.
    - «**Listo. Revisa tu bandeja de entrada.**» → dado de alta.
    - «No pudimos completar la suscripción…» → algo falla; ver abajo.
@@ -200,6 +233,14 @@ El motivo de verdad está en **Vercel → el proyecto → Logs**, buscando
 `[klaviyo]`. Se registra el estado HTTP, la `revision` y la lista que se usaron,
 y **el cuerpo del error de Klaviyo entero**, que es donde se lee la causa. A la
 pantalla no va nada de eso a propósito: nombra la lista y la cuenta.
+
+| En los logs | Qué pasa | Qué se hace |
+|---|---|---|
+| `falta KLAVIYO_API_KEY en este despliegue` | el despliegue no tiene la clave | paso 3: la variable en ese entorno, y redesplegar |
+| `status: 401` | la clave no vale o está mal copiada | paso 1, y pegarla de nuevo en Vercel |
+| `status: 403` | la clave vale pero le falta un permiso, casi seguro *Subscriptions* | paso 1: editar la clave |
+| `status: 400` | el cuerpo o la lista no cuadran | leer el `cuerpo` del log: dice qué campo |
+| nada con `[klaviyo]` | la petición no llegó a la función | ¿es producción con la cortina bajada? Probar en una vista previa |
 
 ---
 
