@@ -90,7 +90,7 @@ pagando sin recibir acceso.
 |---|---|
 | **Publicado** | Sí, en Vercel, y desde el 21 sep 2026 **en `www.emilserios.com`**. Despliega solo en cada merge a `main`. **Desde el 23 sep, tapado por la cortina** — ver **La cortina**. |
 | **Dominio** | **Resuelto a medias.** El sitio ya vive en `www.emilserios.com` y el DNS lo sirve Cloudflare. **Falta el push del registro** a una cuenta de Namecheap de Emi: hoy el dominio sigue siendo de Edu. Ver **El dominio, y Edu → Cómo quedó**. |
-| **Páginas** | Home, Sobre mí, Productos, el Aula Virtual —puerta y aula por dentro— y sus pantallas de acceso, en español e inglés. Más `/panel/`, la consola de Emi, solo en español. |
+| **Páginas** | Home, Sobre mí, Formaciones —hasta el 23 sep 2026 se llamó Productos—, el Aula Virtual —puerta y aula por dentro— y sus pantallas de acceso, en español e inglés. Más `/panel/`, la consola de Emi, solo en español. |
 | **Identidad** | El logo de Emi, vectorizado, en cabecera, pie, entrada y favicon. |
 | **Alcance** | Desde el 31 ago 2026 esto deja de ser solo el sitio: aquí van también el aula, la membresía y los cursos. Ver **La plataforma**. |
 | **Sesión** | **Conectada y probada el 22 sep 2026**: se entra de verdad, contra el **mismo Supabase de la academia**, y el candado pide **suscripción al día**. Las variables y las Redirect URLs ya están puestas. Falta `set_admin.sql`. Ver `docs/CONECTAR-EL-AULA.md`. |
@@ -305,6 +305,64 @@ Tres cosas que conviene saber:
   que todavía no tiene su mitad pegada en la academia.
 - **Las redirecciones viejas siguen funcionando**, y llevan a la cortina:
   `.vercel/output/config.json` sale idéntico con la cortina bajada y subida.
+
+---
+
+## Formaciones, y la carta nueva
+
+**23 de septiembre de 2026, con la cortina bajada.** Es el primer cambio de
+los que Emi mandó ese día; llegó entero, con el copy en los dos idiomas.
+
+**«Productos» pasa a llamarse «Formaciones»**, y en inglés **«Courses»**: en el
+menú, en el pie, en el título de la pestaña, en «Volver a…» de la carta y en
+la consola de Emi. La página estrena entrada: «Tú también puedes lograrlo», el
+párrafo de las historias —la profesora que odiaba las escalas, el vibrato de
+cabra— y «No necesitas un talento innato ni una edad específica. Solo
+constancia.». Está en `src/i18n/ui.ts` (`products.heading`, `products.lead`,
+`products.close`).
+
+**La dirección NO cambió, a propósito:** sigue siendo `/productos/` y
+`/en/products/`. `/productos/estudiemos-juntos/` está pegada en correos de Emi,
+y renombrar la ruta obliga a redirigir las viejas —y el día que el nombre
+vuelva a cambiar, otra vez—. Si se quiere `/formaciones/`, es una línea en
+`routes` de `src/i18n/ui.ts` más las redirecciones en `astro.config.mjs`.
+
+⚠️ **Y ojo con esas redirecciones, que parece que ya fallan:** las que genera
+Astro para Vercel no aceptan la barra final. Según `.vercel/output/config.json`
+después de un build —las expresiones acaban en `$` justo después del nombre—,
+`/aulavirtual/estudiemos-juntos` redirige y `/aulavirtual/estudiemos-juntos/`,
+con barra, cae en el 404. No se pudo comprobar en vivo desde la sesión (sin
+salida a `emilserios.com`); es lo primero que hay que mirar antes de mover más
+direcciones.
+
+**La carta de la membresía se reescribió entera** (`src/components/membresia/Carta.astro`),
+con **cinco testimonios**: Magdalena, Mario, Laura, Sergio y Paloma. La ropa
+es la misma —crema, botones de tinta, notas, la tarjeta de precio que se
+invierte, la FAQ—; cambian el texto y, con él, qué bloques hay:
+
+- **Salieron**, porque no están en el copy nuevo: el video de un minuto, el
+  tema del mes (septiembre, flexibilidad de la muñeca), la historia de 2016,
+  los tres descubrimientos, la posdata, «Mucho para muchos» y la línea
+  «Cancela cuando quieras» de la tarjeta. La pregunta «¿Puedo pagar en mi
+  moneda?» también salió de la FAQ.
+- **El cuerpo es ahora una lista de bloques**, `t.carta`: un texto suelto es
+  un párrafo, y el resto dice qué es —`fuerte`, `grito`, `acento`,
+  `testimonio`, `lista`—. Cambiar la carta es tocar texto, no maquetación.
+- **ES y EN tienen que tener los mismos bloques en el mismo orden.** El cambio
+  de idioma de la píldora se ancla al bloque por su posición; hoy son 54 hijos
+  de `.page` en los dos.
+- **La presentación de cada testimonio va en el párrafo de antes, nunca
+  dentro de la cita.** En el inglés que mandó Emi venía pegada a la cita, y en
+  el español de Magdalena quedaba «Lo corté y pegué tal cual:» dentro de las
+  comillas; las dos se sacaron al párrafo de presentación.
+- **Los «para ti» y «no es para ti» dejaron de ir lado a lado:** en el copy
+  nuevo los separan un testimonio y un párrafo, así que cada recuadro va solo,
+  a lo ancho de la columna.
+- **La apertura ya no va forzada en una línea.** «Siete tomos de un método no
+  te preparan…» es el doble de larga que la anterior y se salía de la columna.
+
+La versión en blanco y negro de la carta, en `src/data/aula.ts`, **no se tocó**:
+no se ve —la membresía lleva `cartaPropia: true`— y sigue con el copy viejo.
 
 ---
 

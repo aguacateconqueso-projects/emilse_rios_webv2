@@ -42,8 +42,9 @@ const t = useTranslations(lang);
 */}
 <section class="tienda__wrap reveal">
   <div class="mono-plain soft" aria-hidden="true">00</div>
-  <h1 class="tienda__title">{t('products.title')}</h1>
-  <p class="tienda__lead">{t('products.description')}</p>
+  <h1 class="tienda__title">{t('products.heading')}</h1>
+  <p class="tienda__lead">{t('products.lead')}</p>
+  <p class="tienda__lead tienda__lead--close">{t('products.close')}</p>
   <a class="mono tienda__in" href={routePath('aula', lang)}>{t('products.enrolled')}</a>
 </section>
 
@@ -119,6 +120,12 @@ const t = useTranslations(lang);
     margin-top: var(--space-3);
     max-width: var(--measure);
     text-wrap: pretty;
+  }
+
+  /* El remate de la entrada va pegado al párrafo, no a un bloque de
+     distancia: es la misma idea dicha en corto. */
+  .tienda__lead--close {
+    margin-top: var(--space-2);
   }
 
   /* El atajo de quien ya pagó. Va acá arriba y no abajo del todo: quien vuelve

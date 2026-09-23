@@ -15,7 +15,7 @@ export const ui = {
     'site.name': 'Emilse Ríos',
 
     'nav.about': 'Sobre mí',
-    'nav.products': 'Productos',
+    'nav.products': 'Formaciones',
     'nav.aula': 'Aula Virtual',
     'nav.enter': 'Ingresar al aula',
     'nav.home': 'Ir al inicio',
@@ -44,15 +44,22 @@ export const ui = {
     'about.description':
       'Le dijeron que el contrabajo no era para ella. Esta es la historia de por qué se equivocaron: veinte años tocando y formando contrabajistas, de El Sistema a Madrid.',
 
-    /* --- La tienda, que está afuera y no pide nada ---------------------- */
-    'products.title': 'Productos',
+    /* --- La tienda, que está afuera y no pide nada ----------------------
+       Se llamó «Productos» hasta el 23 sep 2026; desde entonces, a pedido de
+       Emi, «Formaciones». La dirección sigue siendo `/productos/`: ver
+       `routes`, más abajo. */
+    'products.title': 'Formaciones',
     'products.description':
       'Los cursos y la membresía de Emilse Ríos. Aprende contrabajo a tu ritmo, con acompañamiento de verdad.',
+    'products.heading': 'Tú también puedes lograrlo',
+    'products.lead':
+      'Cada formación de contrabajo nace de una historia: una profesora que odiaba las escalas, un estudiante que después de año y medio no conocía ninguna obra para contrabajo, una contrabajista con vibrato de cabra. Entra y te la cuento. Tal vez te funcione a ti también.',
+    'products.close': 'No necesitas un talento innato ni una edad específica. Solo constancia.',
     'products.soon': 'Próximamente',
     'products.see': 'Ver el curso',
     'products.seeMembership': 'Ver la membresía',
     'products.buy': 'Comprar',
-    'products.back': 'Volver a Productos',
+    'products.back': 'Volver a Formaciones',
     'products.leaving':
       'Este producto se cobra fuera de este sitio. Es el mismo pago de siempre, y quien ya esté dentro no tiene que hacer nada.',
     'products.enrolled': '¿Ya compraste? El aula es por acá',
@@ -83,7 +90,7 @@ export const ui = {
     'site.name': 'Emilse Ríos',
 
     'nav.about': 'About',
-    'nav.products': 'Products',
+    'nav.products': 'Courses',
     'nav.aula': 'Virtual Classroom',
     'nav.enter': 'Enter the classroom',
     'nav.home': 'Go to the home page',
@@ -113,14 +120,18 @@ export const ui = {
       'They told her the double bass wasn\'t for her. This is the story of why they were wrong: twenty years playing and training bassists, from El Sistema to Madrid.',
 
     /* --- La tienda, que está afuera y no pide nada ---------------------- */
-    'products.title': 'Products',
+    'products.title': 'Courses',
     'products.description':
       "Emilse Ríos's courses and membership. Learn double bass at your own pace, with real guidance.",
+    'products.heading': 'You can do it too',
+    'products.lead':
+      "Every double bass course was born from a story: a teacher who hated scales, a student who, after a year and a half, didn't know a single piece for double bass, a bassist with a goat vibrato. Come in and I'll tell you. Maybe it'll work for you too.",
+    'products.close': "You don't need innate talent or a specific age. Just consistency.",
     'products.soon': 'Coming soon',
     'products.see': 'View the course',
     'products.seeMembership': 'View the membership',
     'products.buy': 'Buy',
-    'products.back': 'Back to Products',
+    'products.back': 'Back to Courses',
     'products.leaving':
       'This product is paid for outside this site. It is the same checkout as always, and anyone already inside has nothing to do.',
     'products.enrolled': 'Already bought? The classroom is this way',
@@ -155,6 +166,12 @@ export function useTranslations(lang: Lang) {
 
 /**
  * Las páginas del sitio y su dirección en cada idioma.
+ *
+ * `products` se llama «Formaciones» / «Courses» desde el 23 sep 2026, y su
+ * dirección **no cambió a propósito**: `/productos/estudiemos-juntos/` ya está
+ * pegada en los correos de Emi, y renombrar la ruta obliga a redirigir las
+ * viejas. Si un día se quiere `/formaciones/`, es esta línea más esas
+ * redirecciones en `astro.config.mjs`.
  *
  * Cada idioma tiene su propio slug: en inglés la página es `/en/about/`, no
  * `/en/sobre-mi/`. Al añadir una página, se añade acá y en `src/pages`.
