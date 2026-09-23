@@ -55,6 +55,12 @@ de cero debería poder seguir trabajando sin preguntar nada.
 >   correo y contraseña, *Sobre mí* cambia otra vez de retrato —ahora
 >   horizontal— y Formaciones estrena tres cursos con nombre, texto y foto.
 >   Ver **Siete cambios de la tarde del 23 de septiembre**.
+> - **Y por la noche, las dos primeras cartas de cursos:** «Todo el
+>   diapasón» y «Contrabajo desde cero», en el formato de la membresía, en
+>   «Próximamente». Formaciones pierde «Ver la membresía». Ver **Las cartas
+>   de los cursos**. ⚠️ **Dos cosas esperan a Emi o a Adrián:** la foto del
+>   mar para el vibrato (tiene marca de agua) y el final del inglés de «Todo
+>   el diapasón», que llegó cortado y se tradujo acá.
 >
 > **Lo que viene, en el orden en que lo pidieron Adrián y Emi:**
 >
@@ -177,7 +183,9 @@ pagando sin recibir acceso.
 
 Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/` · `/productos/` ·
 `/en/products/` · `/productos/estudiemos-juntos/` ·
-`/en/products/estudiemos-juntos/` · `/aulavirtual/entrar/` ·
+`/en/products/estudiemos-juntos/` · `/productos/todo-el-diapason/` ·
+`/en/products/todo-el-diapason/` · `/productos/contrabajo-desde-cero/` ·
+`/en/products/contrabajo-desde-cero/` · `/aulavirtual/entrar/` ·
 `/en/classroom/signin/`. **`/aulavirtual/` y `/en/classroom/` ya no son
 páginas** desde el 23 sep 2026: redirigen a la pantalla de acceso.
 
@@ -438,6 +446,86 @@ no tenía salida a `vercel.app`:
 
 ---
 
+## Las cartas de los cursos
+
+**23 de septiembre de 2026, por la noche.** Adrián pasó el copy de Emi de dos
+cartas de venta, en español y en inglés, y pidió «mantenemos el formato de la
+membresía». Van en «Próximamente»: tienen página, precio y botón, pero no se
+venden todavía.
+
+| | Todo el diapasón | Contrabajo desde cero |
+|---|---|---|
+| Dirección | `/productos/todo-el-diapason/` | `/productos/contrabajo-desde-cero/` |
+| En inglés | «Fingerboard» | «Double bass from scratch» |
+| Precio | 240 € —son dos formaciones: esta y «Todas las escalas (sin aburrirte)»— | 140 € |
+| Botón | «Nos vemos dentro», **en gris y sin enlace**, con «Avísame cuando abra» debajo | «Avísame cuando abra», **al alta del newsletter** |
+| Además | | La posdata de El Sistema |
+
+**Cómo están hechas.** Con la misma ropa que la carta de la membresía, y no
+una copia: esa carta se partió en piezas que ahora comparten las tres, en
+`src/components/carta/` —`Estilos.astro` (la hoja entera, en línea),
+`Scripts.astro` (fundidos, botones con notas, cambio de idioma que conserva el
+sitio), `Bloques.astro` (el cuerpo) y `AntesDePintar.astro`—. **La membresía
+sale idéntica**: se comparó su HTML antes y después de partirla, y la única
+diferencia son las reglas nuevas que se añadieron al final de la hoja. La
+carta de un curso es `carta/CartaCurso.astro`, y los textos, `src/data/cartas.ts`.
+
+Cada curso tiene sus dos ficheros de página sueltos —`src/pages/productos/` y
+`src/pages/en/products/`—, igual que la membresía, y por lo mismo: la carta
+imprime su documento entero y no puede pasar por `[producto].astro`, que
+importa `Base.astro` y le colaría la hoja del sitio. Un curso nuevo con carta
+son dos ficheros de tres líneas más su entrada en `cartas.ts`.
+
+**Lo que es nuestro y no de Emi**, para que lo mire:
+
+- **La ropa del texto**: qué frase va en negrita, cuál centrada en cursiva,
+  «HER·MO·SO.» en grande. El copy llegó en texto plano.
+- **La lista de la tarjeta de precio** («Te cuento qué incluye»). Sale de su
+  propio copy —las preguntas frecuentes, la lista de lo que trae—, no se
+  inventó nada, pero la selección es nuestra.
+- ⚠️ **El final del inglés de «Todo el diapasón» llegó cortado** en el mensaje
+  de Adrián: faltaba desde «All you need is consistency…» hasta la última
+  pregunta, incluidas las preguntas 1 a 6. **Se tradujo acá desde el
+  español**, con el tono de la carta de «Double bass from scratch», que sí
+  llegó entera. Está marcado con «TRADUCIDO» en `cartas.ts`.
+
+**En Formaciones**, dos cambios que van con esto:
+
+- **Sale «Ver la membresía»** de debajo de su ficha. Lo pidió Adrián: pinchar
+  la foto ya es lo intuitivo, y menos opciones es más. Ninguna ficha lleva
+  llamada ya.
+- **Las fichas con carta son enlace aunque no se vendan** (`tienePagina` en
+  `aula.ts`), y dejan de verse apagadas. La del vibrato, sin carta todavía,
+  sigue igual.
+
+**Los slugs se leen.** Hasta esa noche eran `curso-01`, `02` y `03`. Con
+carta, son la dirección que Emi va a compartir, así que pasaron a
+`todo-el-diapason`, `contrabajo-desde-cero` y `tu-vibrato-como-un-cantante`.
+`curso-01` era también el curso de muestra del aula (`cursos.ts`), que se
+cambió con él: la maqueta del escritorio ahora vive en
+`/aulavirtual/curso/todo-el-diapason/`.
+
+**Para venderlos de verdad** falta lo mismo que faltaba: su precio en Stripe,
+un `/api/checkout` que sepa de cursos —hoy solo sabe de la membresía— y que el
+webhook dé acceso al curso. Entonces `boton.href` pasa a apuntar al cobro y el
+curso a `venta`.
+
+### La foto del mar, que no se puso
+
+Adrián subió `public/img/course_4.jpg` —el mar, «es el concepto»— para «Tu
+vibrato como un cantante». **No se usó, y a propósito:** tiene una marca de
+agua de *pngtree* repetida por toda la imagen, que se ve al aclararla y en
+color. Es la vista previa de un banco de imágenes, sin licencia, y a 960 px.
+Publicarla en la web de Emi es usar una foto que no es suya, y además se
+nota. La ficha del vibrato sigue con la foto de la puerta.
+
+Para ponerla hace falta **la versión sin marca**: comprando la licencia en
+pngtree y bajando el fichero limpio, o cualquier foto de mar con licencia
+libre (Unsplash, Pexels). Con el fichero, es cambiarlo en
+`src/assets/img/curso-vibrato.jpg`. **`course_4.jpg` sigue en `public/img/`**
+hasta que se decida: no está enlazado desde ninguna página, pero todo lo que
+hay en `public/` se publica, así que conviene borrarlo si no se va a usar.
+
 ## Siete cambios de la tarde del 23 de septiembre
 
 Los pidió Adrián de una vez, después del #47, y van en un solo PR. Todos se
@@ -512,9 +600,10 @@ Sobre los cursos:
   «Próximamente». En el #47 era solo en las que son enlace; con las tres
   fotos nuevas, eso dejaba quietas tres de cuatro. En esas la flecha sigue
   siendo la normal y no hay nada que invite a pulsar.
-- **Los slugs siguen siendo `curso-01`, `curso-02`, `curso-03`.** No se ven en
-  ninguna dirección todavía, y `curso-01` es el que usa el curso de muestra
-  del aula. Cuando salgan a la venta es el momento de ponerles uno que se lea.
+- **Los slugs eran `curso-01`, `curso-02`, `curso-03`**, y esa misma noche
+  pasaron a leerse —`todo-el-diapason`, `contrabajo-desde-cero`,
+  `tu-vibrato-como-un-cantante`— al llegar las cartas. Ver **Las cartas de
+  los cursos**.
 - Con cuatro fichas en tres columnas, la cuarta queda sola en su fila. Es lo
   esperado; con el siguiente curso se completa.
 
@@ -2909,8 +2998,11 @@ src/
   components/
     Header.astro                   Cabecera: la firma centrada y el menú
     CabeceraSuelta.astro           La misma cabecera, para las páginas que
-                                   no van en Base.astro: la carta de la
-                                   membresía y el acceso al aula
+                                   no van en Base.astro: las cartas de venta
+                                   y el acceso al aula
+    carta/CartaCurso.astro         La carta de venta de un curso
+    carta/Estilos · Scripts ·      Lo que comparten las tres cartas: la hoja,
+      Bloques · AntesDePintar      los scripts y el cuerpo en bloques
     Footer · LangSwitch            Pie y conmutador ES/EN
     Logo.astro                     La firma de Emi, como máscara
     Intro.astro                    Animación de entrada (solo Home)
@@ -2943,6 +3035,7 @@ src/
                          varias líneas—, formulario y testimonios. El de
                          testimonios está montado y sin usar: espera los de Emi
   data/aula.ts           El catálogo: los productos y sus cartas (es / en)
+  data/cartas.ts         Las cartas de venta de los cursos (es / en)
                          — la FACHADA, lo que se vende
   data/cursos.ts         Unidades, clases y videos de Bunny — lo que se COMPRA.
                          Se ata a data/aula.ts por el slug

@@ -1,0 +1,28 @@
+---
+/**
+ * El script de `<head>` de las cartas de venta: si se llega cambiando de
+ * idioma, esconde la carta antes de pintar para recolocar el scroll sin
+ * parpadeo. Lo termina `Scripts.astro`, al final del `<body>`.
+ *
+ * Sacado de `membresia/Carta.astro` el 23 sep 2026, tal cual, para que las
+ * cartas de los cursos (`CartaCurso.astro`) usen el mismo.
+ */
+---
+<script is:inline>
+  // El rescate del enlace mágico de Supabase se quedó en la academia: allí esta
+  // carta vive en la raíz, que es el Site URL adonde Supabase reenvía los tokens,
+  // y había que empujarlos a /entrar/ o a /nueva-clave/. Acá no existe ninguna de
+  // las dos páginas —la sesión sigue siendo la de la academia—, así que traerlo
+  // solo serviría para mandar a alguien a un 404.
+
+  // Cambio de idioma sin saltar al inicio: si venimos de un toggle EN/ES,
+  // pre-ocultamos el contenido antes de pintar para reposicionar sin parpadeo.
+  // Red de seguridad: se revela igual a los 1.5s por si algo falla.
+  try {
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    if (sessionStorage.getItem('langSwitch')) {
+      document.documentElement.classList.add('lang-enter');
+      setTimeout(function () { document.documentElement.classList.remove('lang-enter'); }, 1500);
+    }
+  } catch (e) {}
+</script>

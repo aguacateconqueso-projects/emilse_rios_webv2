@@ -4,6 +4,7 @@ import membresiaFoto from '../assets/img/emilse-membresia.jpg';
 import diapasonFoto from '../assets/img/curso-diapason.jpg';
 import desdeCeroFoto from '../assets/img/curso-desde-cero.jpg';
 import vibratoFoto from '../assets/img/curso-vibrato.jpg';
+import { tieneCarta } from './cartas';
 
 /**
  * El catálogo de la tienda —`/productos/`— y las cartas de venta de cada uno,
@@ -194,17 +195,22 @@ type Ficha = { nombre: string; resumen: string; fotoAlt: string };
  * **Desde el 23 sep 2026 tienen nombre, texto y foto de verdad.** Hasta ese día
  * había uno solo, «Curso 1», con un marco vacío: un hueco anunciado. Emi mandó
  * los tres primeros —el nombre y el texto salen de sus portadas, en los dos
- * idiomas— y Adrián las fotos. Siguen en `proximamente`, así que la ficha no
- * es un enlace y no tienen página: falta su carta de ventas y su precio. El
- * día que los tengan, se pasan a `venta` y se les escribe `pagina` y `compra`.
+ * idiomas— y Adrián las fotos. Siguen en `proximamente`: no se venden.
+ *
+ * **Pero dos ya tienen carta de ventas**, desde la tarde del mismo día —«Todo
+ * el diapasón» y «Contrabajo desde cero»—, en el formato de la de la
+ * membresía, con su botón en gris o de aviso. Viven en `src/data/cartas.ts`,
+ * y un curso con carta tiene página y su ficha es un enlace aunque todavía no
+ * se venda (`tienePagina`, abajo).
  *
  * El número es el de la ficha: la membresía es el `01`, así que el curso 1
- * lleva el `02`. **El slug sigue siendo `curso-0n`**: `curso-01` es el que usa
- * el curso de muestra del aula (`cursos.ts`), y ninguno tiene dirección
- * todavía. Cuando salgan a la venta es el momento de ponerles uno que se lea.
+ * lleva el `02`. **El slug se lee** —`todo-el-diapason`—, porque desde que hay
+ * cartas es la dirección que Emi va a compartir. Hasta el 23 sep 2026 eran
+ * `curso-01`, `curso-02`, `curso-03`; `curso-01` era además el slug del curso
+ * de muestra del aula, y `cursos.ts` se cambió con él.
  */
-const proximo = (n: number, foto: ImageMetadata, es: Ficha, en: Ficha): Product => ({
-  slug: `curso-0${n}`,
+const proximo = (n: number, slug: string, foto: ImageMetadata, es: Ficha, en: Ficha): Product => ({
+  slug,
   tipo: 'curso',
   estado: 'proximamente',
   num: `0${n + 1}`,
@@ -220,6 +226,7 @@ const proximo = (n: number, foto: ImageMetadata, es: Ficha, en: Ficha): Product 
 /** Curso 1. En la portada de Emi: «todo el diapasón: de posición 1 al pulgar sin miedo». */
 const diapason = proximo(
   1,
+  'todo-el-diapason',
   diapasonFoto,
   {
     nombre: 'Todo el diapasón',
@@ -238,6 +245,7 @@ const diapason = proximo(
 /** Curso 2. «Contrabajo desde cero: una guía clara y práctica para comenzar». */
 const desdeCero = proximo(
   2,
+  'contrabajo-desde-cero',
   desdeCeroFoto,
   {
     nombre: 'Contrabajo desde cero',
@@ -246,7 +254,7 @@ const desdeCero = proximo(
     fotoAlt: 'Un contrabajo tumbado en una escalinata de piedra',
   },
   {
-    nombre: 'Double Bass from Scratch',
+    nombre: 'Double bass from scratch',
     resumen:
       'A clear and practical guide to begin. How many months of technical exercises do you have to sit through before your first piece? None! In this program, we learn by making music, the way it should be.',
     fotoAlt: 'A double bass lying on stone steps',
@@ -262,6 +270,7 @@ const desdeCero = proximo(
  */
 const vibrato = proximo(
   3,
+  'tu-vibrato-como-un-cantante',
   vibratoFoto,
   {
     nombre: 'Tu vibrato como un cantante',
@@ -270,7 +279,7 @@ const vibrato = proximo(
     fotoAlt: 'Una mano en el tirador dorado de una puerta de madera roja',
   },
   {
-    nombre: 'Your Vibrato Like a Singer',
+    nombre: 'Your vibrato like a singer',
     resumen:
       "Vibrato is the most powerful tool you have to express yourself through the double bass. Find your own voice. I'll show you how.",
     fotoAlt: 'A hand on the gold handle of a red wooden door',
@@ -737,13 +746,19 @@ const membresia: Product = {
  * estaba vacía. Los que falten vuelven igual que estos: cuando tengan nombre,
  * texto y foto, con `proximo()`.
  *
- * ⚠️ `curso-01` no es decorado: es el slug que `cursos.ts` usa para el curso
- * de muestra del aula, y el que lleva la alumna de prueba en su escritorio.
- * Quitarlo de acá deja ese escritorio sin nada que enseñar.
+ * ⚠️ `todo-el-diapason` no es solo una ficha: es el slug que `cursos.ts` usa
+ * para el curso de muestra del aula, y el que lleva la alumna de prueba en su
+ * escritorio. Quitarlo de acá deja ese escritorio sin nada que enseñar.
  */
 export const catalogo: Product[] = [membresia, diapason, desdeCero, vibrato];
 
-/** Los que tienen página propia: hoy, solo la membresía. */
+/**
+ * Si la ficha de un producto lleva a una página: los que se venden y los que
+ * todavía no pero ya tienen su carta escrita (`cartas.ts`).
+ */
+export const tienePagina = (p: Product): boolean => p.estado === 'venta' || tieneCarta(p.slug);
+
+/** Los que tienen página en el sistema del sitio (`Producto.astro`): hoy, ninguno. */
 export const conPagina = (): Product[] =>
   catalogo.filter((p) => p.estado === 'venta' && p.copia.es.pagina && p.copia.en.pagina);
 
