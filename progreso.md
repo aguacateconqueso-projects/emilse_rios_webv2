@@ -55,12 +55,16 @@ de cero debería poder seguir trabajando sin preguntar nada.
 >   correo y contraseña, *Sobre mí* cambia otra vez de retrato —ahora
 >   horizontal— y Formaciones estrena tres cursos con nombre, texto y foto.
 >   Ver **Siete cambios de la tarde del 23 de septiembre**.
-> - **Y por la noche, las dos primeras cartas de cursos:** «Todo el
->   diapasón» y «Contrabajo desde cero», en el formato de la membresía, en
->   «Próximamente». Formaciones pierde «Ver la membresía». Ver **Las cartas
->   de los cursos**. ⚠️ **Dos cosas esperan a Emi o a Adrián:** la foto del
->   mar para el vibrato (tiene marca de agua) y el final del inglés de «Todo
->   el diapasón», que llegó cortado y se tradujo acá.
+> - **#48 · Por la noche, las dos primeras cartas de cursos**, y Formaciones
+>   pierde «Ver la membresía». Ver **Las cartas de los cursos**.
+> - **Y al final, las cuatro cartas pasan al sistema del sitio**: la de la
+>   membresía deja la ropa de la academia y todas se leen como la Home y
+>   *Sobre mí*, con su menú y su pie. Llega la tercera carta —«Tu vibrato
+>   como un cantante», con la foto del mar, ya con licencia— y los tres
+>   cursos tienen el mismo botón: «Avísame cuando abra». Ver **Las cartas,
+>   en el sistema del sitio**. ⚠️ **Esperan a Emi:** el final del inglés de
+>   «Todo el diapasón» y los testimonios del vibrato en inglés, traducidos
+>   acá.
 >
 > **Lo que viene, en el orden en que lo pidieron Adrián y Emi:**
 >
@@ -185,7 +189,9 @@ Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/` · `/productos/` ·
 `/en/products/` · `/productos/estudiemos-juntos/` ·
 `/en/products/estudiemos-juntos/` · `/productos/todo-el-diapason/` ·
 `/en/products/todo-el-diapason/` · `/productos/contrabajo-desde-cero/` ·
-`/en/products/contrabajo-desde-cero/` · `/aulavirtual/entrar/` ·
+`/en/products/contrabajo-desde-cero/` ·
+`/productos/tu-vibrato-como-un-cantante/` ·
+`/en/products/tu-vibrato-como-un-cantante/` · `/aulavirtual/entrar/` ·
 `/en/classroom/signin/`. **`/aulavirtual/` y `/en/classroom/` ya no son
 páginas** desde el 23 sep 2026: redirigen a la pantalla de acceso.
 
@@ -446,7 +452,85 @@ no tenía salida a `vercel.app`:
 
 ---
 
+## Las cartas, en el sistema del sitio
+
+**23 de septiembre de 2026, al final del día.** Adrián: «cambiemos el estilo
+de letra y formato de las cartas de ventas (incluyendo la membresía) al que
+manejamos en home y about me, tenemos que unificar estilo». Así que las
+cuatro —la membresía, «Todo el diapasón», «Contrabajo desde cero» y «Tu
+vibrato como un cantante»— **dejan la ropa de la academia** y se leen como el
+resto del sitio: Instrument Serif, Newsreader e IBM Plex Mono, papel y tinta,
+reglas de 1 px, la columna de lectura, el botón macizo, y **el menú y el pie
+de siempre**. Salen el crema, Hanken Grotesk, el cursor de clave de fa, las
+notas musicales de los botones y el relleno que nacía bajo el cursor. Deshace
+la enmienda del 9 de septiembre: ver **Enmiendas, con fecha**.
+
+**Cómo quedó.**
+
+- **Una sola pieza para las cuatro:** `src/components/CartaVenta.astro`, dentro
+  de `Base.astro`, con su botón en `BotonVenta.astro`. Una sola ruta por
+  idioma: `src/pages/productos/[producto].astro` y su gemela inglesa, que hacen
+  una página por cada producto con carta.
+- **Los textos, todos en `src/data/cartas.ts`**, también los de la membresía,
+  traídos tal cual de su componente. Un tipo, `Carta`, con lo que solo tiene
+  la membresía —las puertas, el mensaje final, el pie del newsletter— y lo que
+  solo tiene el vibrato —los testimonios en su sección— como opcionales.
+- **Se borró lo de antes:** `membresia/Carta.astro` —la carta trasplantada de
+  la academia—, las piezas que se habían sacado de ella para los cursos
+  (`carta/`), las páginas sueltas de cada carta, y `Producto.astro` y
+  `Compra.astro`, la versión de la carta de la membresía en el sistema del
+  sitio que se había dejado dormida el 9 sep —con el copy viejo, anterior al
+  del 23— junto con sus datos en `aula.ts` (`pagina`, `compra`,
+  `cartaPropia`, `comprarHref`). De `public/img/` salieron lo que solo usaba
+  la carta de la academia: `foto.jpg` (la misma foto que
+  `emilse-membresia.jpg`), `logo_emi_alpha.png` y los dos cursores de clave de
+  fa. Todo sigue en el historial.
+
+**Lo que se conservó, porque funciona:**
+
+- **Las puertas de la membresía**, igual que antes: cuenta atrás bajo cada
+  botón, botón muerto y «Avísame cuando abran» con las puertas cerradas, el
+  pase de invitación (`?pase=`), y el corte en el segundo exacto, en el
+  navegador. Probado con las puertas cerradas —que es como están hasta el
+  1 oct— y abiertas con un cierre falso en diciembre: la cuenta atrás corre.
+- **El cambio de idioma que te deja donde estabas leyendo.** Cada pieza de la
+  carta lleva `data-bloque`, y ES y EN tienen que tener las mismas; al pulsar
+  ES/EN —en el menú o en el pie— se abre la otra en el mismo bloque. Probado:
+  del bloque 14 al 14.
+- **La imagen al compartir y los datos para Google** (las preguntas
+  frecuentes). `Base.astro` tiene desde ese día un hueco en el `<head>`
+  —`<slot name="head" />`— para esto.
+
+**Tres cosas más del mismo día:**
+
+- **La carta del vibrato**, con el copy de Emi, sus testimonios en su propia
+  sección y la foto del mar, `course_4ok`, **ya con licencia y sin marca de
+  agua** (la de antes, `course_4`, era una vista previa de pngtree; ver **La
+  foto del mar, que no se puso**). ⚠️ **Los testimonios llegaron solo en
+  español**: los del inglés están traducidos acá, con el rótulo «What
+  students say (translated from Spanish)», como hacía la membresía. Y **salen
+  los emojis** del de Sergio («♥️♥️🙌🏼»): el sistema no los usa.
+- **Los tres cursos, el mismo botón: «Avísame cuando abra»**, al alta del
+  newsletter. Adrián: «me gustó y lo prefiero al coming soon». Salen el botón
+  gris de «Todo el diapasón» y la línea de «Próximamente» bajo los botones.
+  La del vibrato traía «Acá entras» y «Avísame cuando esté disponible este
+  curso»; se unifica igual.
+- **Las cuatro fichas de Formaciones son enlace.**
+
+**Lo que queda abierto, y conviene decidirlo:** **el aula** —el acceso, el
+escritorio, el reproductor— **sigue con la ropa de la academia**. Se vistió
+así el 11 sep para que la alumna no notara la costura al pasar de la carta al
+aula; ahora la carta ya no la lleva, así que la costura está en otro sitio.
+Unificarla también es la continuación natural, pero es un cambio grande y
+nadie lo ha pedido todavía.
+
 ## Las cartas de los cursos
+
+⚠️ **Cómo están hechas cambió esa misma noche**, horas después: las cuatro
+cartas pasaron al sistema del sitio, y lo que se cuenta abajo de
+`carta/CartaCurso.astro`, de las piezas compartidas y de los botones en gris
+ya no existe. Ver **Las cartas, en el sistema del sitio**. El copy, las
+direcciones y lo que es nuestro y no de Emi siguen valiendo.
 
 **23 de septiembre de 2026, por la noche.** Adrián pasó el copy de Emi de dos
 cartas de venta, en español y en inglés, y pidió «mantenemos el formato de la
@@ -511,6 +595,9 @@ webhook dé acceso al curso. Entonces `boton.href` pasa a apuntar al cobro y el
 curso a `venta`.
 
 ### La foto del mar, que no se puso
+
+**Resuelto horas después:** Adrián subió `course_4ok`, con licencia y sin
+marca de agua, y es la foto del vibrato. Lo de abajo queda como constancia.
 
 Adrián subió `public/img/course_4.jpg` —el mar, «es el concepto»— para «Tu
 vibrato como un cantante». **No se usó, y a propósito:** tiene una marca de
@@ -2791,7 +2878,27 @@ componentes**: si hace falta uno nuevo, se añade como token.
 
 El sistema es de Emi y se puede cambiar. Lo que no se puede es cambiarlo sin
 dejar constancia, porque si no la tabla de arriba deja de ser fiable. Hasta hoy
-se ha tocado doce veces:
+se ha tocado trece veces:
+
+- **23 sep 2026 · Las cartas de venta vuelven al sistema, las cuatro.**
+  Deshace la del 9 de septiembre, más abajo. Lo pidió Adrián: «tenemos que
+  unificar estilo». La carta de la membresía deja el crema, Hanken Grotesk,
+  el cursor de clave de fa y las notas musicales, y se lee con las tres
+  familias del sitio, en papel y tinta, dentro de `Base.astro`; las de los
+  cursos, igual. Con esto **el sitio público vuelve a cumplir la tabla
+  entera**: sin cursores propios, sin radios ni sombras —salvo la cápsula del
+  menú—, y en las cartas dos animaciones, el revelado y el fundido de la
+  foto al pasar el cursor, que no cuenta (enmienda del 20 de agosto).
+
+  **Lo único que se queda de aquella carta y la tabla no prevé es la cuenta
+  atrás** de las puertas de la membresía, que la tabla prohíbe
+  («contadores»). Se queda porque no es decoración: es el cierre del cobro,
+  y el cobro lo corta a esa misma hora. Va en mono y en tinta secundaria,
+  sin color de rebaja, bajo el botón, y solo mientras falta para un cierre.
+
+  **El aula no entra en esta enmienda**: la del 11 de septiembre sigue en
+  pie y el aula sigue con la ropa de la academia. Ver **Las cartas, en el
+  sistema del sitio → Lo que queda abierto**.
 
 - **23 sep 2026 · La entrada de la Home tiene dos formas, y las fotos de
   Formaciones responden al cursor.** Lo pidió Adrián.
@@ -2898,7 +3005,9 @@ se ha tocado doce veces:
   `colors_and_type.css` sin depender del orden de carga. Fuera de esas rutas no
   se aplica nada de esto.
 
-- **9 sep 2026 · La carta de la membresía queda FUERA del sistema, entera.** Es
+- **9 sep 2026 · La carta de la membresía queda FUERA del sistema, entera.**
+  ⚠️ **DESHECHA el 23 sep 2026**: las cartas volvieron al sistema, ver arriba.
+  Queda como constancia de por qué estuvo fuera. Es
   la enmienda más grande que se ha hecho, así que conviene decirla sin rodeos:
   `/productos/estudiemos-juntos/` y su gemela inglesa **no siguen la tabla de
   arriba**. Traen la crema `#faf7f1` en vez del papel `#FAFAF8`, Hanken Grotesk
@@ -2998,27 +3107,19 @@ src/
   components/
     Header.astro                   Cabecera: la firma centrada y el menú
     CabeceraSuelta.astro           La misma cabecera, para las páginas que
-                                   no van en Base.astro: las cartas de venta
-                                   y el acceso al aula
-    carta/CartaCurso.astro         La carta de venta de un curso
-    carta/Estilos · Scripts ·      Lo que comparten las tres cartas: la hoja,
-      Bloques · AntesDePintar      los scripts y el cuerpo en bloques
+                                   no van en Base.astro: el acceso al aula
+    CartaVenta.astro               Las cartas de venta: la membresía y los
+                                   cursos, con el sistema del sitio
+    BotonVenta.astro               Su botón, con las puertas de la membresía
     Footer · LangSwitch            Pie y conmutador ES/EN
     Logo.astro                     La firma de Emi, como máscara
     Intro.astro                    Animación de entrada (solo Home)
     Backdrop.astro                 El contrabajo tras el cristal (solo Home)
     Home.astro · About.astro       Los bloques de cada página
     Catalogo.astro                 La rejilla de productos de la tienda
-    Producto.astro                 La carta de venta de un producto, con el
-                                   sistema del sitio. Hoy sin ruta: la única
-                                   carta escrita es la de la membresía, y esa
-                                   va trasplantada
-    membresia/Carta.astro          La carta de la membresía, traída entera de
-                                   la academia. Imprime el documento completo
     aula/Escritorio.astro          El escritorio: retomar, membresía, mis cursos
     aula/Curso.astro               El reproductor: índice, clase, hilo de dudas
     aula/Boton.astro               El botón de la carta (relleno + flecha + notas)
-    Compra.astro                   El bloque de precio y el botón de comprar
     EmailArchive.astro             Fichas del newsletter + <dialog>. Desde el
                                    21 sep 2026 NO SE USA en ninguna página:
                                    el copy nuevo de la Home se lleva por
@@ -3035,7 +3136,7 @@ src/
                          varias líneas—, formulario y testimonios. El de
                          testimonios está montado y sin usar: espera los de Emi
   data/aula.ts           El catálogo: los productos y sus cartas (es / en)
-  data/cartas.ts         Las cartas de venta de los cursos (es / en)
+  data/cartas.ts         Las cartas de venta: membresía y cursos (es / en)
                          — la FACHADA, lo que se vende
   data/cursos.ts         Unidades, clases y videos de Bunny — lo que se COMPRA.
                          Se ata a data/aula.ts por el slug

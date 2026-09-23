@@ -2,35 +2,38 @@ import type { Lang } from '../i18n/ui';
 import { NEWSLETTER_URL } from '../lib/membership';
 
 /**
- * Las cartas de venta de los cursos, en el formato de la de la membresía.
+ * Las cartas de venta: la de la membresía y las de los cursos.
  *
- * Existen desde el 23 sep 2026. Adrián pasó el copy de Emi de dos cursos —«Todo
- * el diapasón» y «Contrabajo desde cero»— y pidió «mantenemos el formato de la
- * membresía». Así que se pintan con la misma ropa y los mismos bloques que la
- * carta de la membresía (`membresia/Carta.astro`), con `CartaCurso.astro`, y
- * los textos viven acá: cambiar una frase es tocar este fichero, nunca
- * maquetación.
+ * **Desde el 23 sep 2026, por la noche, las cuatro se pintan con el sistema
+ * del sitio** —Instrument Serif, Newsreader, IBM Plex Mono, papel y tinta,
+ * reglas de 1 px—, dentro de `Base.astro`, con el mismo menú y el mismo pie
+ * que la Home y *Sobre mí*. Lo pidió Adrián: «tenemos que unificar estilo».
+ * Hasta ese día la de la membresía era un documento aparte con la ropa de la
+ * academia —crema, Hanken Grotesk, cursor de clave de fa, notas musicales—, y
+ * las de los cursos la copiaban. El componente es `CartaVenta.astro`, y la
+ * página, `src/pages/productos/[producto].astro`.
  *
- * **Las dos están en «Próximamente».** Tienen página y precio escrito, pero no
- * se venden todavía: el botón de «Todo el diapasón» sale en gris, sin enlace,
- * con un «Avísame cuando abra» debajo; el de «Contrabajo desde cero» es ese
- * mismo aviso, y lleva al alta del newsletter. Cuando abran, el botón pasa a
- * llevar al cobro — y eso pide su precio en Stripe y un `/api/checkout` que
- * sepa de cursos, que hoy solo sabe de la membresía.
+ * Los textos viven acá: cambiar una frase es tocar este fichero, nunca
+ * maquetación. Los de la membresía son los del copy nuevo de Emi del 23 sep,
+ * traídos tal cual desde `membresia/Carta.astro`, que se borró.
+ *
+ * **Los cursos todavía no se venden.** Su botón es el alta al newsletter,
+ * «Avísame cuando abra», en los tres: Adrián lo prefirió al «Próximamente» y
+ * al botón en gris. Cuando abran, `boton` pasa a llevar al cobro — y eso pide
+ * su precio en Stripe y un `/api/checkout` que sepa de cursos, que hoy solo
+ * sabe de la membresía.
  */
 
 /**
  * Un bloque del cuerpo de una carta. Un texto suelto es un párrafo; el resto
  * dice qué es:
- *   · fuerte     → párrafo en negrita.
- *   · grito      → frase centrada, en cursiva y negrita.
+ *   · fuerte     → párrafo destacado, en la tipografía de titulares.
+ *   · grito      → frase centrada, en cursiva, en la de titulares.
  *   · acento     → la frase más grande de la carta, centrada («El arco.»).
- *   · testimonio → la cita de una alumna, en su recuadro, con su nombre.
+ *   · testimonio → la cita de una alumna, con su nombre.
  *                  La presentación va en el párrafo de antes, NUNCA dentro.
- *   · lista      → el recuadro de «para ti» (tono 'si', ✓) o «no es para ti»
- *                  (tono 'no', –).
- *   · puntos     → una lista corrida con flechas, sin recuadro: lo que trae el
- *                  curso. Nació con las cartas de los cursos.
+ *   · lista      → «para ti» (tono 'si') o «no es para ti» (tono 'no').
+ *   · puntos     → lo que trae el curso, en filas.
  *
  * ⚠️ En cada carta, **ES y EN tienen que tener los mismos bloques en el mismo
  * orden**: el cambio de idioma se ancla al bloque por su posición.
@@ -42,53 +45,74 @@ export type Bloque =
   | { k: 'lista'; tono: 'si' | 'no'; titulo: string; items: string[] }
   | { k: 'puntos'; titulo?: string; items: string[] };
 
-export type CartaCurso = {
+/** Los textos de las puertas de la membresía. Solo ella las tiene. */
+export type Puertas = {
+  /** Plantillas: {time} = 23:59, {tz} = CEST/CET, {date} = 2 de septiembre. */
+  closeLeadToday: string;
+  closeLeadDay: string;
+  payClosed: string;
+  closedNote: string;
+  closedNoteNoDate: string;
+  closedLink: string;
+};
+
+export type Carta = {
   metaTitle: string;
   metaDesc: string;
   title: string;
   subtitle: string;
-  /** La apertura grande, en cursiva: dos renglones. */
+  /** La apertura grande: dos renglones. */
   ledeA: string;
   ledeB: string;
   photoAlt: string;
   carta: Bloque[];
 
-  /* --- La tarjeta de precio ---------------------------------------------- */
+  /* --- La ficha de precio ------------------------------------------------- */
   includesH: string;
-  /** El nombre en el otro idioma, en pequeño al lado del nombre. */
+  /** El nombre en el otro idioma, en cursiva al lado del nombre. */
   titleEcho: string;
   priceLabel: string;
   price: string;
-  priceNote: string;
+  /** «/mes» en la membresía. Los cursos no llevan. */
+  pricePer?: string;
+  /** Lo que se lee bajo el precio, destacado. */
+  priceNote?: string;
+  priceNoteRest?: string;
   /** Lo que incluye. Sale del propio copy de Emi, no se inventa. */
   priceFeatures: string[];
+  /** La letra pequeña bajo la ficha. */
+  priceFoot?: string;
 
-  /**
-   * El botón. **Sin `href` sale en gris y no lleva a ninguna parte**: es lo que
-   * pidió Adrián para los cursos que todavía no se venden. Con `href`, es un
-   * botón normal.
-   */
-  boton: { texto: string; href?: string; fuera?: boolean };
-  /** La línea bajo el botón mientras no se vende. */
-  pronto: string;
-  /** El enlace al alta del newsletter bajo un botón gris. Sin él, no se pinta. */
-  avisame?: string;
-  /** La posdata, entre la tarjeta de precio y las preguntas. */
+  /** El botón. `fuera`: abre en otra pestaña (el alta del newsletter). */
+  boton: { texto: string; href: string; fuera?: boolean };
+
+  /** La frase grande de cierre, antes del último botón (membresía). */
+  final?: string;
+  /** Testimonios en su propia sección, tras la ficha de precio (vibrato). */
+  testimonios?: { titulo: string; items: { text: string; autor: string }[] };
+  /** La posdata, entre la ficha de precio y las preguntas. */
   pd?: { rotulo: string; text: string };
 
   faqH: string;
-  faq: { q: string; a: string }[];
-
-  footBack: string;
-  footHome: string;
-  footLegal: string;
+  /** `correo` y `a2`: la respuesta sigue con un enlace de correo y remata. */
+  faq: { q: string; a: string; correo?: string; a2?: string }[];
+  /** El pie del newsletter, al final (membresía). */
+  news?: { pre: string; link: string };
+  /** Las puertas y la cuenta atrás (membresía). */
+  puertas?: Puertas;
 };
 
 /**
- * El alta al newsletter: la página alojada de Klaviyo, la misma a la que lleva
- * el «Avísame cuando abran» de la membresía.
+ * El alta al newsletter: la página alojada de Klaviyo. Es el botón de los
+ * cursos que todavía no se venden y el pie de la membresía.
  */
 export const NEWSLETTER = NEWSLETTER_URL;
+
+/** El botón de los cursos que todavía no se venden, en los dos idiomas. */
+const AVISAME = {
+  es: { texto: 'Avísame cuando abra', href: NEWSLETTER, fuera: true },
+  en: { texto: 'Let me know when it opens', href: NEWSLETTER, fuera: true },
+};
 
 /* ==========================================================================
    Todo el diapasón — curso 1, ficha 02
@@ -105,7 +129,7 @@ export const NEWSLETTER = NEWSLETTER_URL;
    carta de «Double bass from scratch», que sí llegó entera. Conviene que Emi
    los mire. Van marcados con «TRADUCIDO» en el comentario de cada uno. */
 
-const diapasonEs: CartaCurso = {
+const diapasonEs: Carta = {
   metaTitle: 'Todo el diapasón — Formación de Emilse Rios',
   metaDesc:
     'De posición 1 al pulgar, ¡sin miedo! Dos formaciones: «Todo el diapasón» y «Todas las escalas (sin aburrirte)», con obras y acompañamiento de piano desde el nivel uno.',
@@ -204,9 +228,7 @@ const diapasonEs: CartaCurso = {
     'Foro de preguntas: las respondo yo.',
     'El acceso es tuyo, sin fecha de caducidad, 24/7.',
   ],
-  boton: { texto: 'Nos vemos dentro' },
-  pronto: 'Próximamente.',
-  avisame: 'Avísame cuando abra',
+  boton: AVISAME.es,
 
   faqH: 'Preguntas frecuentes',
   faq: [
@@ -240,12 +262,9 @@ const diapasonEs: CartaCurso = {
     },
   ],
 
-  footBack: 'Volver a Formaciones',
-  footHome: 'Inicio',
-  footLegal: '© 2026 Emilse Rios',
 };
 
-const diapasonEn: CartaCurso = {
+const diapasonEn: Carta = {
   metaTitle: 'Fingerboard — A program by Emilse Rios',
   metaDesc:
     'From position 1 to thumb, no fear! Two programs: “Fingerboard” and “All the scales (without getting bored)”, with pieces and piano accompaniment from level one.',
@@ -347,10 +366,7 @@ const diapasonEn: CartaCurso = {
     'A forum for your questions: I answer them myself.',
     'The access is yours, no expiration, 24/7.',
   ],
-  /* TRADUCIDO: «Nos vemos dentro». */
-  boton: { texto: 'See you inside' },
-  pronto: 'Coming soon.',
-  avisame: 'Let me know when it opens',
+  boton: AVISAME.en,
 
   faqH: 'Frequently asked questions',
   faq: [
@@ -386,9 +402,6 @@ const diapasonEn: CartaCurso = {
     },
   ],
 
-  footBack: 'Back to Courses',
-  footHome: 'Home',
-  footLegal: '© 2026 Emilse Rios',
 };
 
 /* ==========================================================================
@@ -398,7 +411,7 @@ const diapasonEn: CartaCurso = {
    El copy es de Emi, el del 23 sep 2026, entero en los dos idiomas. El botón
    es el alta al newsletter —«Avísame cuando abra»—, que es lo que pidió. */
 
-const desdeCeroEs: CartaCurso = {
+const desdeCeroEs: Carta = {
   metaTitle: 'Contrabajo desde cero — Formación de Emilse Rios',
   metaDesc:
     'Una guía clara y práctica para comenzar: empiezas de cero y haces música en semanas, no en años. Dos obras con acompañamiento de piano, tus primeras escalas y un foro donde te respondo yo.',
@@ -481,8 +494,7 @@ const desdeCeroEs: CartaCurso = {
     'Foro de preguntas: te respondo yo, y reviso tus videos.',
     'El acceso es tuyo, sin caducidad, 24/7.',
   ],
-  boton: { texto: 'Avísame cuando abra', href: NEWSLETTER, fuera: true },
-  pronto: 'Próximamente.',
+  boton: AVISAME.es,
   pd: {
     rotulo: 'PD',
     text: 'En la semana uno de El Sistema, los niños tocan en una orquesta solo con cuerdas al aire. Nadie les dice que no están listos, ni que deben terminar un método antes de entrar. Yo a ti tampoco te lo voy a decir.',
@@ -520,12 +532,9 @@ const desdeCeroEs: CartaCurso = {
     },
   ],
 
-  footBack: 'Volver a Formaciones',
-  footHome: 'Inicio',
-  footLegal: '© 2026 Emilse Rios',
 };
 
-const desdeCeroEn: CartaCurso = {
+const desdeCeroEn: Carta = {
   metaTitle: 'Double bass from scratch — A program by Emilse Rios',
   metaDesc:
     'A clear, practical guide to getting started: you begin from scratch and make music in weeks, not years. Two pieces with piano accompaniment, your first scales, and a forum where I answer you myself.',
@@ -608,8 +617,7 @@ const desdeCeroEn: CartaCurso = {
     'A forum for your questions: I answer them myself, and I review your videos.',
     'The access is yours, no expiration, 24/7.',
   ],
-  boton: { texto: 'Let me know when it opens', href: NEWSLETTER, fuera: true },
-  pronto: 'Coming soon.',
+  boton: AVISAME.en,
   pd: {
     rotulo: 'PS',
     text: 'In week one of El Sistema, kids play in an orchestra with nothing but open strings. Nobody tells them they’re not ready, or that they have to finish a method book before joining. I won’t tell you that either.',
@@ -647,19 +655,499 @@ const desdeCeroEn: CartaCurso = {
     },
   ],
 
-  footBack: 'Back to Courses',
-  footHome: 'Home',
-  footLegal: '© 2026 Emilse Rios',
+};
+
+/* ==========================================================================
+   Tu vibrato como un cantante — curso 3, ficha 04
+   ==========================================================================
+
+   El copy es de Emi, el del 23 sep 2026, en los dos idiomas. Dos cosas son
+   nuestras:
+
+   · **Los testimonios en inglés están traducidos por nosotros**: llegaron
+     solo en español. Van marcados con «TRADUCIDO». Es lo mismo que hace la
+     carta de la membresía («translated from Spanish»).
+   · **Los emojis del testimonio de Sergio salieron** —«♥️♥️🙌🏼»—: el sistema
+     del sitio no los usa. El texto está entero.
+
+   Y el botón es «Avísame cuando abra», como en los otros dos cursos, aunque
+   el copy traía «Acá entras» y «Avísame cuando esté disponible este curso»:
+   lo pidió Adrián, para unificar. */
+
+const vibratoEs: Carta = {
+  metaTitle: 'Tu vibrato como un cantante — Formación de Emilse Rios',
+  metaDesc:
+    'Encuentra tu propia voz a través del contrabajo. Tu vibrato es la herramienta más poderosa que tienes para expresarte: aprende a dominarlo y a usarlo como un cantante.',
+  title: 'Tu vibrato como un cantante',
+  subtitle: 'Encuentra tu propia voz a través del contrabajo',
+  ledeA:
+    'Tu vibrato es la herramienta más poderosa que tienes para expresarte a través del contrabajo.',
+  ledeB: 'Te voy a contar una historia de uno de mis contrabajistas favoritos:',
+  photoAlt: 'El mar visto desde arriba, con la espuma de las olas',
+  carta: [
+    'Janne Saksala, en una masterclass, paró a un estudiante justo al llegar al clímax de la «Elegía» de Bottesini y le preguntó: «¿Por qué haces ese A con tercer dedo? ¿Cuál es el mejor dedo que tienes para vibrar?». Y el chico dijo: «El 1», y tocó con uno.',
+    'Saksala lo volvió a parar y le dijo: «Prueba con el 2». Y allí estuvo un poco mejor.',
+    'Luego le dijo: «Yo, en mi partitura, anoto en las notas que quiero destacar en expresión la letra B, de best vibrato finger».',
+    'Es decir, a él no le importa qué digitación es más cómoda para tocar el pasaje: simplemente la construye en base a llegar con dedo 2 al clímax, que es su best vibrato finger (o por lo menos lo era en ese momento), y poder dar su mejor vibrato.',
+    {
+      k: 'fuerte',
+      text: 'Escucharlo decir eso me hizo entender por qué me gusta tanto como contrabajista, lo que lo hace tan musical: está pensando siempre en lo que quiere decir con cada frase. No en qué es lo técnicamente apropiado.',
+    },
+    'Por eso, cuando escuchamos diferentes versiones de la misma obra por grandes solistas, parecen totalmente diferentes. Puedes buscar en YouTube uno de los conciertos de Bottesini, escoger a 3 de tus solistas favoritos y verás cómo cada uno tiene una forma diferente de cantarlo. Y el tipo de vibrato que deciden usar en cada parte tiene mucho que ver con ello.',
+    'Te cuento mi historia con el vibrato. Si sientes que estás estancado con este tema, que tu mano se pone rígida cada vez que lo intentas, tal vez te interese.',
+    'Cuando yo comencé a estudiar contrabajo, vibraba como todos al inicio, porque hay que hacerlo: era un «adorno». El único problema que veía era lo difícil que era mantenerlo. Si eran notas muy largas, a la mitad ya mi mano se ponía muy tensa y rígida, y el vibrato era muy nervioso.',
+    { k: 'grito', text: 'Para qué te voy a mentir: sonaba como una cabra, jajaja.' },
+    'Como todos mis compañeros, intentaba imitar a los grandes: escuchaba las grabaciones y me anotaba en la partitura golpes de arco y sitios donde vibrar.',
+    'Pero obviamente no sonaba igual. Mi vibrato de cabra no aportaba nada a la obra.',
+    'Un día, en una clase con Félix Petit, recuerdo que me dijo: «Mi niña, ¿por qué decidiste vibrar desde el inicio de la frase?». Yo le dije: «Porque así lo hace Gary Karr». Y bueno… obviamente Gary no tiene vibrato de cabra, así que era desastroso.',
+    {
+      k: 'fuerte',
+      text: 'Pero recuerdo que ese día Félix me dijo: «No puedes copiar el vibrato de otro. Tu vibrato debe ser único. Vamos a trabajarlo».',
+    },
+    'Y a partir de esa clase comencé a entender que el vibrato no es solo un movimiento repetitivo, que no es un adorno que se aplica a las notas largas. Y que hay infinitas formas de producirlo, como infinitas personalidades en el mundo.',
+    'Y como ya sabrás, no puedes copiar la personalidad de alguien más. Se ve, se escucha y se siente falso. Con el vibrato pasa igual.',
+    { k: 'acento', text: 'Por eso hice esta formación.' },
+    'Está diseñada para que no solo domines la técnica, sino que puedas preguntarte: ¿cómo lo haría si fuese un cantante?',
+    'Un cantante tiene algo que decir. Frasea, respira, construye ideas musicales con intención. No repite el texto sin pensar: un buen cantante usa y controla cada nota intencionalmente para contar una historia.',
+    'Eso es lo que vamos a hacer con el contrabajo. Que cante. Que tenga tu firma. Que cuando alguien te escuche, no escuche a Gary Karr ni a Saksala ni a tu profesor.',
+    { k: 'fuerte', text: 'Te escuche a ti. Lo que tú intencionalmente quieres expresar con cada frase.' },
+    { k: 'grito', text: 'La técnica acá está al servicio de la música, no al revés.' },
+    {
+      k: 'puntos',
+      titulo: '¿Qué vas a encontrar dentro del aula virtual?',
+      items: [
+        '¿Sabías que hay dos tipos de afinación? Una la usas a diario y la otra va a cambiar tu manera de escuchar para siempre.',
+        'Te explico por qué tu contrabajista favorito es tu contrabajista favorito: qué lo hace diferente y cómo escuchar la diferencia. Y, por supuesto, cómo usar eso a tu favor.',
+        'De dónde viene el movimiento: esto, en un video de 2:00. Fácil.',
+        '¿Qué tiene que ver el mar con el vibrato? Mucho. Te lo explico.',
+        'Te voy a enseñar el ejercicio más aburrido que existe (es lo que hay). Tan aburrido que vas a querer apagar la compu, pero si tienes paciencia, vas a mejorar en tiempo récord.',
+        'En un video de 3:00 te muestro un ejercicio inclusive más aburrido que el anterior. ¿Me vas a odiar? No creo, porque es tan efectivo que luego vas a poder dominar el movimiento. Imposible sonar como una cabra después de esto.',
+        'Vibrato continuo: no solo es para los músicos de instrumentos de viento. A nosotros nos hace ganar conexión entre las notas, como un cantante. Esa es la finalidad.',
+        '¿Los dedos se separan de la cuerda o no? Siempre me hacen esta pregunta, y acá te lo explico en 2 min. Rápido y sin vueltas: me encanta ir al grano.',
+        '¿Una escala puede contar una historia? Es decir, ¿puede tener sentido musical? Acá te muestro cómo — como lo haría un cantante.',
+      ],
+    },
+    {
+      k: 'lista',
+      tono: 'si',
+      titulo: 'Los contrabajistas que más se han beneficiado con este curso son:',
+      items: [
+        'Estudiantes de conservatorio que quieren avanzar rápido y entender los principios del vibrato.',
+        'Contrabajistas de jazz que quieren incluir solos de alto nivel en su performance.',
+        'Contrabajistas de orquestas juveniles que necesitan mejorar su vibrato de cabra, jajaja (lo siento, pero es lo que hay).',
+        'Contrabajistas profesionales que quieren tener una guía clara para entender el movimiento y explicarlo a sus alumnos.',
+      ],
+    },
+  ],
+
+  includesH: 'Te cuento qué incluye',
+  titleEcho: 'Your vibrato, like a singer',
+  priceLabel: 'Precio',
+  price: '240 €',
+  priceFeatures: [
+    'Los dos tipos de afinación, y por qué tu contrabajista favorito es tu favorito.',
+    'De dónde viene el movimiento, y los ejercicios para dominarlo.',
+    'Vibrato continuo, y cómo hacer que una escala cuente una historia.',
+    'Foro de preguntas: las respondo yo.',
+    'Acceso al aula 24/7, ilimitado, para ver los videos las veces que quieras.',
+  ],
+  boton: AVISAME.es,
+
+  testimonios: {
+    titulo: 'Testimonios',
+    items: [
+      {
+        autor: 'Mat H.',
+        text: 'Siento que lo estoy trabajando bien, estoy encontrando mi sonido, mi vibrato. Además esta buenísimo el paso a paso. Cuando tengo tiempo lo escucho y estudio a conciencia y siento que voy progresando.',
+      },
+      {
+        autor: 'Sergio I.',
+        text: 'El curso está buenísimo!!! Nunca pensé que iba a poder resolver el karma del vibrato, y eso que todavía no llegué hasta el final!!! Estoy mejorando muchísimo, Gracias a ti',
+      },
+      {
+        autor: 'Josue M.',
+        text: 'Me gusta tocar con el video el ejercicio, encima de lo que suena, y una vez que lo tengo ya puedo ir por mi cuenta, me he dado cuenta de los errores que cometía y de la tensión que le ponía al intentar vibrar.',
+      },
+      {
+        autor: 'Mat F.',
+        text: 'He mejorado mucho mi vibrato, ahora puedo diferenciar varios tipos de vibrato, aun estoy practicando cuando usar cada uno.',
+      },
+    ],
+  },
+
+  faqH: 'Preguntas frecuentes',
+  faq: [
+    {
+      q: '¿Puedo hacerte preguntas?',
+      a: 'Sí, hay un foro dentro del aula virtual: puedes hacer tus preguntas y las respondo personalmente.',
+    },
+    {
+      q: '¿Voy a aprender a cantar en este curso?',
+      a: 'Vas a poder usar los recursos expresivos de un cantante y aplicarlos al contrabajo. El instrumento es tu medio para cantar en este curso, no tu voz. Yo no puedo enseñarte a cantar: canto muy, muy feo, por cierto.',
+    },
+    { q: '¿Cómo es el material?', a: 'Son videos que puedes reproducir solo en el aula virtual.' },
+    {
+      q: '¿Cuándo puedo ingresar al aula virtual?',
+      a: 'Tienes acceso al aula virtual 24/7, de manera ilimitada: allí puedes ver los videos de la formación las veces que quieras.',
+    },
+    {
+      q: '¿Es para principiantes?',
+      a: 'No, debes por lo menos conocer el diapasón hasta la región media del instrumento. Si ya la conoces, eres bienvenido. Puedes guardar la parte de vibrato en la posición del pulgar para el futuro: recuerda que el acceso al curso estará allí para ti.',
+    },
+  ],
+};
+
+const vibratoEn: Carta = {
+  metaTitle: 'Your vibrato, like a singer — A program by Emilse Rios',
+  metaDesc:
+    'Find your own voice through the double bass. Your vibrato is the most powerful tool you have to express yourself: learn to master it and use it like a singer.',
+  title: 'Your vibrato, like a singer',
+  subtitle: 'Find your own voice through the double bass',
+  ledeA:
+    'Your vibrato is the most powerful tool you have to express yourself through the double bass.',
+  ledeB: 'Let me tell you a story about one of my favorite bassists:',
+  photoAlt: 'The sea seen from above, with the foam of the waves',
+  carta: [
+    'Janne Saksala, in a masterclass, stopped a student right as he reached the climax of Bottesini’s “Elegy” and asked him: “Why are you playing that A with your third finger? What’s your best finger for vibrato?” The student said, “My first,” and played it with his first.',
+    'Saksala stopped him again and said, “Try your second.” And it got a little better.',
+    'Then he told him: “In my part, on the notes I want to bring out expressively, I write the letter B — for best vibrato finger.”',
+    'In other words, he doesn’t care which fingering is most comfortable for the passage: he simply builds it around arriving at the climax on finger 2, his best vibrato finger (or at least it was at the time), so he can give his best vibrato.',
+    {
+      k: 'fuerte',
+      text: 'Hearing him say that made me understand why I love him so much as a bassist, what makes him so musical: he’s always thinking about what he wants to say with each phrase. Not about what’s technically appropriate.',
+    },
+    'That’s why, when we listen to different versions of the same piece by great soloists, they sound completely different. You can look up one of the Bottesini concertos on YouTube, pick 3 of your favorite soloists, and you’ll see how each one has a different way of singing it. And the kind of vibrato they choose for each section has a lot to do with it.',
+    'Let me tell you my story with vibrato. If you feel stuck with it, if your hand goes stiff every time you try, you might find it interesting.',
+    'When I started playing the double bass, I vibrated like everyone does at the beginning, because you’re supposed to: it was an “ornament.” The only problem I saw was how hard it was to sustain. On very long notes, halfway through, my hand would get tense and stiff, and the vibrato was very nervous.',
+    { k: 'grito', text: 'Why lie to you: I sounded like a goat, hahaha.' },
+    'Like all my classmates, I tried to imitate the greats: I listened to recordings and marked bowings and places to vibrate in my part.',
+    'But obviously it didn’t sound the same. My goat vibrato added nothing to the piece.',
+    'One day, in a lesson with Félix Petit, I remember he asked me: “Mi niña, why did you decide to vibrate from the start of the phrase?” I told him: “Because that’s how Gary Karr does it.” And well… obviously Gary doesn’t have a goat vibrato, so it was a disaster.',
+    {
+      k: 'fuerte',
+      text: 'But I remember that day Félix told me: “You can’t copy someone else’s vibrato. Your vibrato has to be your own. Let’s work on it.”',
+    },
+    'And from that lesson on, I started to understand that vibrato isn’t just a repetitive movement, that it isn’t an ornament you add to long notes. And that there are infinite ways to produce it, just like there are infinite personalities in the world.',
+    'And as you probably know, you can’t copy someone else’s personality. It looks, sounds, and feels fake. Vibrato is the same.',
+    { k: 'acento', text: 'That’s why I made this program.' },
+    'It’s designed so you don’t just master the technique, but can also ask yourself: how would I do this if I were a singer?',
+    'A singer has something to say. They phrase, they breathe, they build musical ideas with intention. They don’t repeat the lyrics without thinking: a good singer uses and controls every note on purpose to tell a story.',
+    'That’s what we’re going to do with the double bass. Make it sing. Give it your signature. So that when someone hears you, they don’t hear Gary Karr, or Saksala, or your teacher.',
+    { k: 'fuerte', text: 'They hear you. What you intentionally want to express with each phrase.' },
+    { k: 'grito', text: 'Here, technique serves the music, not the other way around.' },
+    {
+      k: 'puntos',
+      titulo: 'What will you find inside the virtual classroom?',
+      items: [
+        'Did you know there are two kinds of intonation? You use one every day, and the other will change the way you listen forever.',
+        'I explain why your favorite bassist is your favorite bassist: what makes them different and how to hear the difference. And, of course, how to use that to your advantage.',
+        'Where the movement comes from: all in a 2:00 video. Easy.',
+        'What does the sea have to do with vibrato? A lot. I’ll explain.',
+        'I’m going to teach you the most boring exercise in existence (it is what it is). So boring you’ll want to shut your laptop, but if you’re patient, you’ll improve in record time.',
+        'In a 3:00 video, I show you an exercise even more boring than the last one. Will you hate me? I don’t think so, because it’s so effective that afterwards you’ll be able to master the movement. Impossible to sound like a goat after this.',
+        'Continuous vibrato: it’s not just for wind players. For us, it builds connection between the notes, like a singer. That’s the goal.',
+        'Do your fingers leave the string or not? I get asked this all the time, and here I explain it in 2 minutes. Quick, no detours: I love getting straight to the point.',
+        'Can a scale tell a story? In other words, can it make musical sense? Here I show you how — the way a singer would.',
+      ],
+    },
+    {
+      k: 'lista',
+      tono: 'si',
+      titulo: 'The bassists who’ve benefited most from this course are:',
+      items: [
+        'Conservatory students who want to progress fast and understand the principles of vibrato.',
+        'Jazz bassists who want to add high-level solos to their performances.',
+        'Youth orchestra bassists who need to fix their goat vibrato, hahaha (sorry, but it is what it is).',
+        'Professional bassists who want a clear guide to understand the movement and explain it to their students.',
+      ],
+    },
+  ],
+
+  includesH: 'What’s included',
+  titleEcho: 'Tu vibrato como un cantante',
+  priceLabel: 'Price',
+  price: '€240',
+  priceFeatures: [
+    'The two kinds of intonation, and why your favorite bassist is your favorite.',
+    'Where the movement comes from, and the exercises to master it.',
+    'Continuous vibrato, and how to make a scale tell a story.',
+    'A forum for your questions: I answer them myself.',
+    'Unlimited 24/7 access to the classroom, to watch the videos as many times as you like.',
+  ],
+  boton: AVISAME.en,
+
+  /* TRADUCIDOS los cuatro: llegaron solo en español. */
+  testimonios: {
+    titulo: 'What students say (translated from Spanish)',
+    items: [
+      {
+        autor: 'Mat H.',
+        text: 'I feel like I’m working on it the right way — I’m finding my sound, my vibrato. And the step-by-step is great. When I have time I listen to it and practice mindfully, and I feel I’m making progress.',
+      },
+      {
+        autor: 'Sergio I.',
+        text: 'The course is amazing!!! I never thought I’d be able to solve the curse of vibrato, and I haven’t even reached the end yet!!! I’m improving so much. Thank you',
+      },
+      {
+        autor: 'Josue M.',
+        text: 'I like playing the exercise along with the video, on top of what’s playing, and once I’ve got it I can go on my own. I’ve noticed the mistakes I was making and the tension I put in when trying to vibrate.',
+      },
+      {
+        autor: 'Mat F.',
+        text: 'My vibrato has improved a lot. Now I can tell several kinds of vibrato apart; I’m still practicing when to use each one.',
+      },
+    ],
+  },
+
+  faqH: 'Frequently asked questions',
+  faq: [
+    {
+      q: 'Can I ask you questions?',
+      a: 'Yes, there’s a forum inside the virtual classroom: you can ask your questions and I answer them personally.',
+    },
+    {
+      q: 'Will I learn to sing in this course?',
+      a: 'You’ll be able to use a singer’s expressive tools and apply them to the double bass. In this course, the instrument is your way of singing, not your voice. I can’t teach you to sing: I sing really, really badly, by the way.',
+    },
+    { q: 'What’s the material like?', a: 'Videos you can play only inside the virtual classroom.' },
+    {
+      q: 'When can I access the virtual classroom?',
+      a: 'You have unlimited 24/7 access: you can watch the program videos as many times as you like.',
+    },
+    {
+      q: 'Is it for beginners?',
+      a: 'No. You should at least know the fingerboard up to the middle register of the instrument. If you do, you’re welcome: you can save the thumb-position vibrato section for later — remember, your access to the course will be there for you.',
+    },
+  ],
+};
+
+/* ==========================================================================
+   Estudiemos juntos — la membresía, ficha 01
+   ==========================================================================
+
+   El copy nuevo de Emi del 23 sep 2026, traído tal cual desde
+   `membresia/Carta.astro` cuando la carta pasó al sistema del sitio. Lo único
+   que cambió de forma es la pregunta del correo, que allí iba partida en
+   `a1`/`email`/`a2`. Es la única carta con puertas: ver `src/lib/membership.ts`. */
+
+const membresiaEs: Carta = {
+  metaTitle: 'Estudiemos Juntos — Membresía de Emilse Rios',
+  metaDesc: 'Estudiemos Juntos es una membresía de ejercicios para contrabajistas. El 90% de lo que trabajamos es el arco: un ejercicio nuevo cada jueves y un concepto técnico explicado cada mes.',
+  title: 'Estudiemos juntos',
+  subtitle: 'La membresía',
+  ledeA: 'Siete tomos de un método no te preparan para resolver problemas en el escenario.',
+  ledeB: 'Te cuento por qué.',
+  photoAlt: 'Emilse Rios',
+  carta: [
+    'Llegas al ensayo. Repartieron la obra hace dos semanas y hay un pasaje que no te sale. Lo estudiaste. Lo estudiaste bastante, de hecho.',
+    'Pero no puedes resolverlo. Y tus compañeros sí: tienen más experiencia, y pueden decirte «si usas más arco cuando vayas a la posición de pulgar la cuerda no se ahoga», «el truco para que se entienda el pasaje rápido es pensar que la cuerda tiene dos lados diferentes», «si anticipas la posición el pasaje te suena más conectado».',
+    'Les tomó unos 20 años descubrir esos detalles, pero te los pueden decir en un momento.',
+    'Te cuento que traje esta membresía al mundo para ser tu compañera de atril, y esos detalles te los explico en videos de 4 minutos, o 5 dependiendo de lo que estemos trabajando.',
+    { k: 'fuerte', text: 'Estudiemos Juntos es una membresía de ejercicios. El 90% de lo que trabajamos es el arco.' },
+    '¿Por qué?',
+    'Porque es lo que menos te enseñan los métodos.',
+    'Porque no importa si estás estudiando por tu cuenta o estás en el conservatorio, la realidad que me encuentro es siempre la misma: métodos progresivos que se basan en la mano izquierda.',
+    'Por cierto, te dejo el comentario de una suscriptora. Lo corté y pegué tal cual:',
+    { k: 'testimonio', autor: 'Magdalena', text: 'Antes del curso veía solo un método, escalas y todo enfocado a la mano izquierda, y sinceramente lo quería mejorar porque creo que tengo una deficiencia en el arco. Me ayudó a ser más consciente en la manera de producir sonido. Antes tocaba con mucha presión y eso me hizo lesionarme; ahora entiendo mejor cómo funciona todo. Lo uso como calentamiento cada día, y luego me pongo a estudiar lo que tengo que estudiar del conservatorio' },
+    { k: 'grito', text: 'Volvamos, ya basta de que el arco sea algo secundario.' },
+    'Entre 2012 y 2014 estuve recibiendo master class con Klaus Stoll, ex solista de la Filarmónica de Berlín.',
+    'Un comentario suyo me marcó. Me lo dijo mientras yo tocaba el Dittersdorf, obsesionada con encontrar la digitación perfecta. Todo mal, jaja.',
+    { k: 'grito', text: '«El arco es nuestra boca, dientes y lengua.»' },
+    'Es nuestra más grande herramienta de comunicación.',
+    { k: 'fuerte', text: 'Yo buscaba la respuesta en la mano izquierda. Estaba en la derecha.' },
+    'Y da igual si tu meta es tocar en orquesta, eres jazzista, músico popular, o simplemente disfrutas tocar todas las suites de Bach en la sala de tu casa.',
+    'Las notas las tocan todos —si estudian, claro está, jaja—, pero cómo las tocan, qué tipo de sonido tienen, cómo interpretan el pasaje: eso es 100% trabajo del arco.',
+    '¿Lo has notado? Te estudias las notas una y otra vez, lo practicas, y al momento de tocar hay pitos, vibraciones que no sabes por qué pasan, el sonido es nasal, suena plano, no expresivo.',
+    'No sabes cómo hacer para que suene como en la grabación que has escuchado 650 veces. Aunque las notas estén, el problema es que dejas a un lado tu principal herramienta de comunicación.',
+    { k: 'acento', text: 'El arco.' },
+    { k: 'grito', text: 'Por eso existe Estudiemos Juntos.' },
+    'Cada jueves te dejo un ejercicio en la plataforma. Uno. Basado en un concepto técnico que te explico una vez al mes: de dónde vienen los movimientos, la coordinación, el sonido. De dónde vienen las cosas, no cómo repetirlas.',
+    'Te dejo lo que me escribió Mario, un exalumno del mundo del jazz que ahora está en la membresía:',
+    { k: 'testimonio', autor: 'Mario', text: 'La plataforma es muy intuitiva, me gustan mucho los ejercicios. No siempre tengo tiempo de verlos, pero por lo menos me mantengo activo. El trabajo del arco está muy, muy bueno' },
+    'Te sigo contando, cada jueves, cuando entra el ejercicio nuevo, el anterior desaparece.',
+    'Sí, leíste bien. Yo borro el contenido anterior.',
+    '¿Por qué haría eso?',
+    'Porque las bibliotecas abruman. Cincuenta ejercicios archivados “para después” terminan en no hacer ninguno — y encima con la culpa de no estar haciendo nada.',
+    'Si quieres una biblioteca infinita de ejercicios que nunca vas a hacer ni a terminar de comprender, puedes ir a YouTube. Es gratis, y podrás entretenerte todo el día, pasar horas simplemente buscando ejercicios específicos para ti. Suerte con eso.',
+    { k: 'fuerte', text: 'Acá hay un ejercicio esta semana. Si lo haces, avanzas. Si no lo haces, se va y viene otro. Sin culpas. Simple.' },
+    '¿Te parece poco un ejercicio por semana? Mira lo que me escribió Laura:',
+    { k: 'testimonio', autor: 'Laura', text: 'Siento que me ayudó a organizar un poco más el estudio. Como son pequeñas tareas, las puedo hacer aunque tenga poco tiempo, e igual trabajar algún objetivo' },
+    'Volvamos, tienes un canal directo para escribirme. Respondo yo, no una inteligencia artificial. Esta es una membresía con acompañamiento continuo.',
+    { k: 'lista', tono: 'si', titulo: 'Las personas que más se han beneficiado de esta membresía son:', items: [
+      'Alumnos de conservatorio enfocados en libros de métodos (el típico programa de conservatorio), donde el arco juega un papel secundario.',
+      'Jazzistas que quieren incluir el arco en su repertorio, hacer solos y presentar una propuesta única para diferenciarse del resto.',
+      'Músicos populares que quieren aprender a tocar con arco para incluir solos y partes melódicas en su repertorio.',
+      'Contrabajistas que se sienten estancados con la técnica francesa y quieren cambiarse a arco alemán y dominarlo en poco tiempo.',
+      'Personas que estudian por su cuenta y quieren una meta clara semanal para avanzar técnicamente.',
+    ] },
+    'Y este me llegó de un papá:',
+    { k: 'testimonio', autor: 'Sergio', text: 'Esta buenisimo esto, se la di a mi hijo para que vaya trabajando técnica por su cuenta, y me dijo que se entiende muy bien, que entendió por qué no hay que apretar con el pulgar, y le gustan los ejercicios' },
+    'Creo fielmente que el arco alemán es la manera más natural de tomar el arco, y gracias a eso es muchísimo más fácil dominar los golpes de arco en menos tiempo. Por eso, esta es una membresía especializada en arco alemán.',
+    { k: 'lista', tono: 'no', titulo: 'Esta membresía NO es para ti si:', items: [
+      'Buscas una biblioteca infinita de ejercicios para guardar y ver algún día. Acá no hay biblioteca, no hay archivo, no hay “lo veo después”.',
+      'Necesitas preparar una meta específica: entrar a un conservatorio, ganar una audición. Para eso hacen falta clases particulares. Esto te mantiene en forma técnicamente y te da bases; no resuelve repertorio puntual.',
+      'No tienes un par de horas a la semana. No hace falta que sea todos los días, pero sí un par de días cada semana. Los ejercicios no son mágicos, aunque sí son muy buenos. Debes dedicarles tiempo.',
+    ] },
+    'Y uno más, de Paloma, antes de contarte qué incluye:',
+    { k: 'testimonio', autor: 'Paloma', text: 'Al entrar encontré un video extra que está muy bueno. Son cosas que a lo mejor ya sabía, pero uno va olvidando ponerlas en práctica. Me gusta también que los ejercicios sean cortos: los veo cuando tengo tiempo y siento que me activa la técnica' },
+  ],
+
+  includesH: 'Te cuento qué incluye',
+  titleEcho: 'Let’s study together',
+  priceLabel: 'Precio',
+  price: '65 €',
+  pricePer: '/mes',
+  priceNote: '65 € al mes.',
+  priceNoteRest: 'Ese precio se congela para ti. Aunque suba.',
+  priceFeatures: [
+    'Cada jueves, un ejercicio nuevo en la plataforma basado en un concepto base.',
+    'Cada mes, un concepto técnico explicado. Uno solo. Simple.',
+    'Acceso a la plataforma 24/7, estés donde estés.',
+    'Canal directo de preguntas. Las respondo personalmente.',
+  ],
+  priceFoot: 'Pagas cada mes el día que entraste: si entras un 20, tu mes va del 20 al 20. Nunca pierdes días. Te puedes dar de baja cuando quieras, sin explicaciones. Eso sí: si te vas y luego vuelves, entras con el precio vigente en ese momento.',
+  boton: { texto: 'Acá te unes', href: '/api/checkout?lang=es' },
+  final: '¡Estudiemos juntos!',
+
+  faqH: 'Preguntas frecuentes',
+  faq: [
+    { q: '¿Sirve si toco arco francés?', a: 'Los conceptos sí: el sonido, la distribución, de dónde viene el movimiento. Pero no te lo recomiendo, está pensada para arco alemán. Tampoco te recomiendo el arco francés, pero esa es mi opinión no solicitada de hoy.' },
+    { q: '¿Debo tener un nivel avanzado?', a: 'No, pero sí debes manejar al menos las primeras posiciones y sostener el arco con cierta soltura. Cada ejercicio lo dejo adaptado a nivel inicial-intermedio y avanzado.' },
+    { q: '¿Qué pasa si entro a mitad de mes?', a: 'Tienes el ejercicio de esa semana hasta que lo reemplace el jueves siguiente. El concepto del mes sí queda disponible durante todo el mes.' },
+    { q: '¿Cuánto tiempo necesito?', a: 'Un par de días a la semana, media hora cada uno. No hace falta más.' },
+    { q: '¿Cómo funciona el pago?', a: 'Suscripción mensual automática, como Netflix. Pagas el día que entras y ese es tu día de cobro cada mes.' },
+    { q: '¿Puedo cancelar cuando quiera?', a: 'Sí, desde tu cuenta, sin explicar nada. Mantienes el acceso hasta el final del período pagado. Si vuelves después, entras con el precio vigente en ese momento.' },
+    { q: '¿Cómo hago mis preguntas?', a: 'Me escribes por el aula. Las respondo yo.' },
+    { q: '¿En qué idioma es?', a: 'Inglés y español. Te registras en el que prefieras.' },
+    { q: '¿Cuesta menos que una clase?', a: 'Sí. Una clase particular cuesta más que un mes entero de membresía (un concepto muy bien explicado y 4 ejercicios para practicarlo).' },
+    { q: '¿En qué horarios puedo entrar?', a: '24/7.' },
+    { q: 'Tengo una pregunta que no está acá.', a: 'Escríbeme a ', correo: 'info@emilserios.com', a2: ' y te contesto personalmente.' },
+  ],
+  news: { pre: '¿Aún no estás suscrito al newsletter?', link: 'Acá te suscribes' },
+  puertas: {
+    closeLeadToday: 'Cierra hoy a las {time} {tz}',
+    closeLeadDay: 'Cierra el {date} a las {time} {tz}',
+    payClosed: 'Puertas cerradas',
+    closedNote: 'Las puertas están cerradas. Abren el {date}.',
+    closedNoteNoDate: 'Las puertas están cerradas por ahora.',
+    closedLink: 'Avísame cuando abran',
+  },
+};
+
+const membresiaEn: Carta = {
+  metaTitle: "Let's Study Together — Emilse Rios Membership",
+  metaDesc: 'Let’s Study Together is an exercise membership for double bassists. 90% of what we work on is the bow: a new exercise every Thursday and one technical concept explained each month.',
+  title: "Let's study together",
+  subtitle: 'The membership',
+  ledeA: 'Seven volumes of a method won’t prepare you to solve problems on stage.',
+  ledeB: 'Let me tell you why.',
+  photoAlt: 'Emilse Rios',
+  carta: [
+    'You show up to rehearsal. They handed out the piece two weeks ago and there’s a passage you can’t get. You practiced it. Practiced it a lot, actually.',
+    'But you can’t crack it. And the people next to you can: they’ve got more experience, and they’ll tell you things like “use more bow going into thumb position and the string won’t choke,” “the trick for making that fast passage speak is to think of the string as having two different sides,” “if you anticipate the shift the passage sounds more connected.”',
+    'It took them about 20 years to figure those details out. They can hand them to you in a second.',
+    'That’s why I brought this membership into the world — to be your stand partner. And those details, I explain them in 4-minute videos, or 5 depending on what we’re working on.',
+    { k: 'fuerte', text: 'Let’s Study Together is an exercise membership. 90% of what we work on is the bow.' },
+    'Why?',
+    'Because it’s what methods teach you least.',
+    'Because it doesn’t matter whether you’re practicing on your own or sitting in a conservatory, what I run into is always the same: progressive methods built around the left hand.',
+    'By the way, here’s a comment from a subscriber. I copied it as-is (translated from Spanish):',
+    { k: 'testimonio', autor: 'Magdalena', text: 'Before this membership, I only ever saw one method, scales, everything focused on the left hand, and honestly I wanted to improve that because I think my bow is a weak spot. It helped me become more aware of how I produce sound. I used to play with a lot of pressure and that got me injured; now I understand much better how everything works. I use it as my warm-up every day, and then I get on with whatever I have to practice for the conservatory.' },
+    { k: 'grito', text: 'Enough with the bow being an afterthought.' },
+    'Between 2012 and 2014 I took master classes with Klaus Stoll, former solo bassist of the Berlin Philharmonic.',
+    'One thing he said stuck with me. He said it while I was playing the Dittersdorf, obsessed with finding the perfect fingering. All wrong, ha!',
+    { k: 'grito', text: '“The bow is our mouth, our teeth and our tongue.”' },
+    'It’s our single greatest tool for communicating.',
+    { k: 'fuerte', text: 'I was looking for the answer in my left hand. It was in my right.' },
+    'And it makes no difference whether your goal is orchestra, whether you play jazz, pop music, or you just enjoy playing all the Bach suites in your living room.',
+    'Everyone plays the notes — if they practice, obviously, ha — but how they play them, what kind of sound they get, how they shape the passage: that’s 100% the bow’s work.',
+    'Have you noticed? You practice the notes over and over, you drill them, and then when you play there are whistles, vibrations you can’t explain, the sound is nasal, it’s flat, there’s nothing expressive about it.',
+    'You can’t figure out how to make it sound like the recording you’ve listened to 650 times. The notes are there — the problem is you’ve set aside your main tool for communicating.',
+    { k: 'acento', text: 'The bow.' },
+    { k: 'grito', text: 'That’s why Let’s Study Together exists.' },
+    'Every Thursday I leave you one exercise on the platform. One. Built on a technical concept I explain once a month: where the movements come from, the coordination, the sound. Where things come from, not how to repeat them.',
+    'Here’s what Mario wrote me — a former student from the jazz world who’s now in the membership:',
+    { k: 'testimonio', autor: 'Mario', text: 'The platform is really intuitive and I love the exercises. I don’t always have time to watch them, but at least I stay active. The bow work is really, really good.' },
+    'So, every Thursday, when the new exercise goes up, the old one disappears.',
+    'Yes, you read that right. I delete the previous content.',
+    'Why would I do that?',
+    'Because libraries overwhelm you. Fifty exercises filed away “for later” end with you doing none of them — and carrying the guilt of doing nothing on top of it.',
+    'If what you want is an infinite library of exercises you’ll never do or fully understand, you can go to YouTube. It’s free, and you can keep yourself busy all day, spending hours just hunting for the exercises that are right for you. Good luck with that.',
+    { k: 'fuerte', text: 'Here there’s one exercise this week. Do it and you move forward. Don’t do it and it’s gone, and another one comes. No guilt. Simple.' },
+    'Think one exercise a week isn’t enough? Here’s what Laura wrote me:',
+    { k: 'testimonio', autor: 'Laura', text: 'I feel it helped me organize my practice a bit more. Since they’re small tasks, I can do them even when I’m short on time and still work toward a goal.' },
+    'And guess what? You get a direct line to write to me. I answer, not an AI. This is a membership with real support behind it.',
+    { k: 'lista', tono: 'si', titulo: 'The people who’ve gotten the most out of this membership:', items: [
+      'Conservatory students buried in method books (the standard conservatory program), where the bow plays second fiddle.',
+      'Jazz players who want to bring the bow into their playing, take bow solos, and offer something nobody else in the room is doing.',
+      'Popular musicians who want to learn bow so they can add solos and melodic lines to their repertoire.',
+      'Bass players who feel stuck with French bow and want to switch to German and get comfortable with it fast.',
+      'People practicing on their own who want one clear weekly goal to keep moving technically.',
+    ] },
+    'And this one came from a dad:',
+    { k: 'testimonio', autor: 'Sergio', text: 'I got it for my son so he could work on technique on his own. He told me it’s very easy to understand, that he understood why you shouldn’t squeeze with your thumb, and he likes the exercises.' },
+    'I genuinely believe German bow is the most natural way to hold a bow, and because of that the bow strokes come far faster. That’s why this membership is built around German bow.',
+    { k: 'lista', tono: 'no', titulo: 'This membership is NOT for you if:', items: [
+      'You’re after an infinite library of exercises to save and watch someday. There’s no library here, no archive, no “I’ll get to it later.”',
+      'You need to prepare something specific: a conservatory entrance, an audition. That calls for private lessons. This keeps you technically in shape and builds your foundation; it won’t solve a particular piece of repertoire.',
+      'You don’t have a couple of hours a week. It doesn’t have to be every day, but it does have to be a couple of days each week. The exercises aren’t magic — they are very good, but you have to put the time in.',
+    ] },
+    'One last one, from Paloma, before I tell you what’s included:',
+    { k: 'testimonio', autor: 'Paloma', text: 'When I joined, I found a bonus video that’s really good — things I maybe already knew but you forget to put into practice. I also like that the exercises are short. I watch them when I have time, and I feel they get my technique going.' },
+  ],
+
+  includesH: 'What’s included',
+  titleEcho: 'Estudiemos juntos',
+  priceLabel: 'Price',
+  price: '€65',
+  pricePer: '/mo',
+  priceNote: '€65 a month.',
+  priceNoteRest: 'That price locks in for you: whenever you join, that’s what you pay for as long as you stay.',
+  priceFeatures: [
+    'Every Thursday, a new exercise on the platform built on a core concept.',
+    'Every month, one technical concept is explained — the core concept. Just one. Simple.',
+    'Access to the platform 24/7, wherever you are.',
+    'A direct chat for your questions. I answer them personally.',
+  ],
+  priceFoot: 'You’re billed monthly on the day you joined: join on the 20th and your month runs the 20th to the 20th. You never lose days. You can cancel whenever you want, no explanations. One thing though: if you leave and come back later, you come back at whatever the price is then.',
+  boton: { texto: 'Join here', href: '/api/checkout?lang=en' },
+  final: 'Let’s Study Together!',
+
+  faqH: 'Frequently asked questions',
+  faq: [
+    { q: 'Does it work if I play French bow?', a: 'The concepts, yes: the sound, the distribution, where the movement comes from. But I wouldn’t recommend it — this is built for German bow. I wouldn’t recommend French bow either, but that’s my unsolicited opinion for the day.' },
+    { q: 'Do I need to be advanced?', a: 'No, but you do need at least the first positions and some ease holding the bow. I adapt every exercise for beginner-intermediate and advanced.' },
+    { q: 'What if I join mid-month?', a: 'You get that week’s exercise until the next Thursday replaces it. The concept of the month stays up all month.' },
+    { q: 'How much time do I need?', a: 'A couple of days a week, half an hour each. No more than that.' },
+    { q: 'How does payment work?', a: 'Automatic monthly subscription, like Netflix. You’re charged on the day you join and that’s your billing day every month.' },
+    { q: 'Can I cancel anytime?', a: 'Yes, from your account, without explaining anything. You keep access until the end of the period you’ve paid for. If you come back later, you come back at whatever the price is then.' },
+    { q: 'How do I ask my questions?', a: 'There’s a message box inside the classroom. You write, I answer.' },
+    { q: 'What language is it in?', a: 'English and Spanish. Sign up in whichever you prefer.' },
+    { q: 'Is it less than a lesson?', a: 'Yes. One private lesson costs more than a full month of the membership (one concept explained properly and 4 exercises to work on it).' },
+    { q: 'When can I log in?', a: '24/7.' },
+    { q: 'I have a question that isn’t here.', a: 'Write to me at ', correo: 'info@emilserios.com', a2: ' and I’ll answer personally.' },
+  ],
+  news: { pre: 'Not subscribed to the newsletter yet?', link: 'Subscribe here' },
+  puertas: {
+    closeLeadToday: 'Doors close today at {time} {tz}',
+    closeLeadDay: 'Doors close on {date} at {time} {tz}',
+    payClosed: 'Doors closed',
+    closedNote: 'The doors are closed. They open on {date}.',
+    closedNoteNoDate: 'The doors are closed for now.',
+    closedLink: 'Tell me when they open',
+  },
 };
 
 /**
- * Las cartas escritas, por el slug del producto. Un curso con carta tiene
+ * Las cartas escritas, por el slug del producto. Un producto con carta tiene
  * página —`/productos/<slug>/`— y su ficha en Formaciones es un enlace, aunque
  * todavía no se venda. Uno sin carta sigue siendo solo su ficha.
  */
-export const cartas: Record<string, Record<Lang, CartaCurso>> = {
+export const cartas: Record<string, Record<Lang, Carta>> = {
+  'estudiemos-juntos': { es: membresiaEs, en: membresiaEn },
   'todo-el-diapason': { es: diapasonEs, en: diapasonEn },
   'contrabajo-desde-cero': { es: desdeCeroEs, en: desdeCeroEn },
+  'tu-vibrato-como-un-cantante': { es: vibratoEs, en: vibratoEn },
 };
 
 export const tieneCarta = (slug: string): boolean => slug in cartas;

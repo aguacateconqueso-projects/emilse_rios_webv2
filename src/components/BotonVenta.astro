@@ -1,0 +1,163 @@
+---
+/**
+ * El botón de una carta de venta, con lo que va debajo.
+ *
+ * Es el botón macizo del sitio —tinta llena, letra mono—, el mismo de la ficha
+ * de compra: el final del recorrido, y no hay color de acento con el que
+ * destacarlo de otra manera. Sale dos o tres veces por carta.
+ *
+ * **Con puertas (la membresía)** es el botón de pagar y lleva debajo la cuenta
+ * atrás o el aviso de puertas cerradas. Con las puertas cerradas deja de ser
+ * un enlace: sin `href`, ni con el teclado se llega al cobro. El estado lo
+ * manda `data-doors` en la carta, y el script de `CartaVenta.astro` lo mueve
+ * en vivo —ver allí—.
+ *
+ * **Sin puertas (los cursos)** es el alta al newsletter, «Avísame cuando
+ * abra», en otra pestaña.
+ */
+import type { Carta } from '../data/cartas';
+import { NEWSLETTER } from '../data/cartas';
+
+interface Props {
+  c: Carta;
+  /** Las puertas, ya resueltas para el HTML del build. Solo la membresía. */
+  puertas?: { cerrado: boolean; lead: string; nota: string };
+}
+const { c, puertas } = Astro.props;
+const fuera = c.boton.fuera ? { target: '_blank', rel: 'noopener' } : {};
+---
+
+{
+  puertas ? (
+    <a
+      class="mono venta__btn venta__btn--pay"
+      href={puertas.cerrado ? undefined : c.boton.href}
+      aria-disabled={puertas.cerrado ? 'true' : undefined}
+      tabindex={puertas.cerrado ? '-1' : undefined}
+    >
+      <span class="venta__btn-open">{c.boton.texto}</span>
+      <span class="venta__btn-closed">{c.puertas?.payClosed}</span>
+    </a>
+  ) : (
+    <a class="mono venta__btn" href={c.boton.href} {...fuera}>
+      {c.boton.texto}
+    </a>
+  )
+}
+{
+  puertas && c.puertas && (
+    <p class="mono soft venta__timer">
+      <span class="venta__timer-lead">{puertas.lead}</span>
+      <span class="venta__clock" aria-hidden="true">
+        <span class="venta__u" data-cd-dbox hidden>
+          <b data-cd-d>0</b>d
+        </span>
+        <span class="venta__u">
+          <b data-cd-h>00</b>h
+        </span>
+        <span class="venta__u">
+          <b data-cd-m>00</b>m
+        </span>
+        <span class="venta__u">
+          <b data-cd-s>00</b>s
+        </span>
+      </span>
+      <span class="venta__closed">
+        {puertas.nota}{' '}
+        <a href={NEWSLETTER} target="_blank" rel="noopener">
+          {c.puertas.closedLink}
+        </a>
+      </span>
+    </p>
+  )
+}
+
+<style>
+  /* El único botón macizo del sitio, el mismo de la ficha de compra. */
+  .venta__btn {
+    display: inline-block;
+    padding: var(--space-2) var(--space-4);
+    background: var(--ink);
+    color: var(--paper);
+    border: 1px solid var(--ink);
+  }
+
+  .venta__btn:hover {
+    background: var(--ink-soft);
+    border-color: transparent;
+  }
+
+  .venta__btn-closed {
+    display: none;
+  }
+
+  /* --- Las puertas de la membresía ------------------------------------------
+     El estado lo manda `data-doors` en la carta: `soon` = falta para el
+     cierre, `closed` = puertas cerradas, `open` = no hay cierre a la vista y
+     el renglón de debajo no sale. */
+  .venta__timer {
+    display: none;
+    margin-top: var(--space-2);
+  }
+
+  :global([data-doors='soon']) .venta__timer,
+  :global([data-doors='closed']) .venta__timer {
+    display: block;
+  }
+
+  .venta__timer-lead {
+    display: block;
+  }
+
+  /* Los números van en cifras tabulares para que el contador no baile de
+     ancho a cada segundo. La urgencia la ponen ellos, no un color. */
+  .venta__clock {
+    display: inline-flex;
+    gap: var(--space-2);
+    margin-top: var(--space-1);
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .venta__u[hidden] {
+    display: none;
+  }
+
+  .venta__u b {
+    font-weight: 500;
+  }
+
+  .venta__closed {
+    display: none;
+  }
+
+  .venta__closed a {
+    color: var(--ink);
+  }
+
+  :global([data-doors='closed']) .venta__timer-lead,
+  :global([data-doors='closed']) .venta__clock {
+    display: none;
+  }
+
+  :global([data-doors='closed']) .venta__closed {
+    display: block;
+  }
+
+  /* Puertas cerradas: el botón sigue ahí —la carta se lee igual— pero deja de
+     ser un botón: sin relleno, en tinta secundaria, y sin enlace. */
+  :global([data-doors='closed']) .venta__btn--pay {
+    background: transparent;
+    color: var(--ink-soft);
+    border-color: var(--rule);
+    pointer-events: none;
+  }
+
+  :global([data-doors='closed']) .venta__btn-open {
+    display: none;
+  }
+
+  :global([data-doors='closed']) .venta__btn-closed {
+    display: inline;
+  }
+</style>

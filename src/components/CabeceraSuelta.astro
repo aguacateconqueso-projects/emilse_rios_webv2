@@ -2,20 +2,20 @@
 /**
  * La cápsula del menú, para las páginas que no van dentro de `Base.astro`.
  *
- * Son dos, y las dos traen su propia ropa —la crema, Hanken Grotesk, el
- * cursor de clave de fa—: **la carta de la membresía** (`membresia/Carta.astro`)
- * y **las pantallas de acceso al aula** (`layouts/Acceso.astro`). Hasta el
- * 23 sep 2026 no tenían el menú del sitio, y quien entraba a la membresía
- * desde Formaciones «entraba en la nada misma», en palabras de Adrián: la
- * única salida era la píldora de «Entrar». El menú tiene que estar siempre.
+ * Hoy es una: **las pantallas de acceso al aula** (`layouts/Acceso.astro`),
+ * que traen la ropa del aula —la crema, Hanken Grotesk—. Nació el 23 sep 2026
+ * para la carta de la membresía, que entonces era un documento aparte con esa
+ * misma ropa: quien entraba desde Formaciones «entraba en la nada misma», en
+ * palabras de Adrián. Esa noche las cartas pasaron a `Base.astro` y llevan la
+ * cabecera de siempre. El menú tiene que estar siempre.
  *
  * **Por qué no basta con poner `<Header>`.** El menú se pinta con los tokens
  * del sitio —`--space-2`, `--menu-veil`, `--ink-soft`…— y con dos clases de
  * `base.css`, `.mono` y `.visually-hidden`. Estas páginas no cargan ni
  * `tokens.css` ni `base.css`, y **no pueden cargarlos**: Astro sube el CSS de
- * todo lo que una página importa, y esas dos hojas le pisarían a la carta el
- * fondo, la tipografía y la medida. Peor aún, `colors_and_type.css` —la base de
- * la academia, que cargan las dos— define su propio `--space-2` (8 px, no 16)
+ * todo lo que una página importa, y esas dos hojas le pisarían a la pantalla
+ * el fondo, la tipografía y la medida. Peor aún, `colors_and_type.css` —la base de
+ * la academia, que carga— define su propio `--space-2` (8 px, no 16)
  * y un `a:hover` que subraya.
  *
  * Así que esto envuelve la cabecera y le da, **solo dentro del envoltorio**, lo
@@ -24,7 +24,7 @@
  *
  * Lo que **no** se redefine, a propósito: `--paper` y `--ink`. Se heredan de la
  * página, que los tiene cálidos —crema `#faf7f1`, tinta `#17140f`—, y así el
- * cristal de la cápsula es de la misma crema que la carta y no del blanco frío
+ * cristal de la cápsula es de la misma crema que la pantalla y no del blanco frío
  * del sitio. Por lo mismo, la tinta secundaria y la regla de acá son las del
  * sitio pero sobre esa tinta cálida.
  *

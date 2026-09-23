@@ -47,8 +47,9 @@ const t = useTranslations(lang);
 /*
  * La ruta de casa por defecto. Se escribe relativa a propósito: así vale igual
  * en producción, en las previsualizaciones de Vercel y en `astro dev`, sin una
- * variable más — la misma razón por la que `comprarHref` de la membresía es
- * relativo desde que el cobro se mudó acá.
+ * variable más — la misma razón por la que el botón de pagar de la membresía
+ * (`boton.href` en `src/data/cartas.ts`) es relativo desde que el cobro se
+ * mudó acá.
  *
  * ⚠️ `hayProveedor` solo decide si se simula en desarrollo, y viaja al
  * navegador como un booleano y **solo como un booleano**. `klaviyo.ts` es de

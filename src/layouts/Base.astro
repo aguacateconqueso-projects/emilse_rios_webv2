@@ -101,6 +101,10 @@ const altEn = new URL(hrefEn, Astro.site);
         document.documentElement.dataset.intro = seen ? 'seen' : 'play';
       }
     </script>
+
+    {/* Lo que una página quiera añadir al <head>: las cartas de venta ponen
+        acá su imagen para compartir y sus datos para Google. */}
+    <slot name="head" />
   </head>
 
   <body>
