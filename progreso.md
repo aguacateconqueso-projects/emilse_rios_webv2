@@ -2271,6 +2271,66 @@ antes, no después.
 
 ---
 
+## Las direcciones viejas
+
+**Arregladas el 23 de septiembre de 2026**, con la cortina bajada. Son cuatro
+—la carta de la membresía cuando vivía en el aula y el escritorio cuando se
+llamaba panel, en los dos idiomas— y hasta ese día **tres de cada cuatro
+maneras de pedirlas acababan en 404**:
+
+| Se pedía | Pasaba | Ahora |
+|---|---|---|
+| `/aulavirtual/estudiemos-juntos` | 301 a la carta | 301 a la carta |
+| `/aulavirtual/estudiemos-juntos/` | **404** | 301 a la carta |
+| `/aulavirtual/panel` | 301 a `/aulavirtual/escritorio`, y de ahí **a `/productos/escritorio`, 404** | 301 al escritorio |
+| `/aulavirtual/entrar` (sin barra) | **301 a `/productos/entrar`, 404** | la página |
+
+Y lo mismo con sus gemelas inglesas y con todas las páginas del aula pedidas
+sin barra: `escritorio`, `nueva-clave`, `salir`, `pasar`, `signin`, `desk`…
+
+**Las dos causas estaban en cómo el adaptador de Vercel escribe las
+redirecciones de `astro.config.mjs`** en `.vercel/output/config.json`:
+
+1. **Sin barra final.** Cada redirección es una expresión que acaba justo
+   después del nombre —`^/aulavirtual/estudiemos-juntos$`—, así que la misma
+   dirección con barra, que es como el sitio escribe todas las suyas y como
+   Emi las copia de la barra del navegador, no la encontraba nadie.
+2. **Los patrones dinámicos se comían páginas reales.**
+   `/aulavirtual/[producto]` se convierte en «cualquier cosa bajo
+   `/aulavirtual/`», y va antes que los ficheros. Se llevaba `/aulavirtual/entrar`
+   a la tienda, y también `/aulavirtual/escritorio`, que es justo el destino de
+   la redirección del panel.
+
+**Lo que se hizo:**
+
+- **Fuera los patrones dinámicos.** No cubrían nada: la única carta que vivió
+  en `/aulavirtual/<slug>/` fue la de la membresía —del 31 ago al 9 sep 2026,
+  se ve en el historial de `src/data/aula.ts`—, que ya tenía su línea escrita a
+  mano. Los productos nuevos nacen en `/productos/` y no tienen dirección vieja.
+- **`redireccionesConBarra()`**, en `astro.config.mjs`: una integración que,
+  cuando el adaptador ya escribió `config.json`, les acepta la barra final a
+  las redirecciones (`/?$`) y se la pone al destino. Astro no deja pedir
+  ninguna de las dos cosas desde `redirects`. El build lo dice en voz alta:
+  «4 redirecciones aceptan ahora la barra final».
+- **`npm run audit:redirecciones`** (`scripts/redirecciones.mjs`): recorre las
+  direcciones viejas y las páginas del aula contra la salida del build, como
+  lo haría Vercel, y falla si alguna no aterriza donde debe. Antes del arreglo
+  fallaban 18 de 28; después, ninguna.
+
+⚠️ **Lo que no se pudo hacer: comprobarlo en vivo.** La sesión no tenía salida
+a `emilserios.com` (el proxy contestaba 403). Después del merge, con
+`curl -sI https://www.emilserios.com/aulavirtual/estudiemos-juntos/` tiene que
+salir un `301` con `location: /productos/estudiemos-juntos/`. El script da por
+hecho algo que no se pudo mirar: que Vercel sirve `…/entrar/index.html` también
+a quien pide `…/entrar` sin barra. Lo que sí es seguro es que ninguna
+redirección se la lleva ya a otra parte.
+
+**Si se añade una redirección**, va en `redirects` como siempre y la
+integración la arregla sola. **Nunca un patrón dinámico bajo una sección que
+tenga páginas propias**: en Vercel se come esas páginas.
+
+---
+
 ## Arrancar
 
 ```bash
@@ -2280,6 +2340,7 @@ npm run build    # build de producción en ./dist
 npm run preview  # sirve el build
 npm run audit    # auditoría del diseño (necesita preview en marcha)
 npm run audit:menu # contraste del menú de cristal (idem)
+npm run audit:redirecciones # las direcciones viejas (necesita un build hecho)
 ```
 
 Astro 7, estático, sin framework de UI. No hace falta adaptador para Vercel.
@@ -2614,6 +2675,8 @@ supabase/set_admin.sql   Quién es admin. NO crea nada: el esquema ya existe en
                          cada admin haya entrado una vez
 scripts/audit.mjs        Auditoría de contraste y rejilla
 scripts/audit-menu.mjs   Contraste del menú de cristal, con el panel abierto
+scripts/redirecciones.mjs  Recorre las direcciones viejas contra la salida de
+                         Vercel, como lo haría Vercel. Sin servidor ni red
 ```
 
 **Los textos no viven en los componentes.** Cambiar una frase es tocar

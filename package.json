@@ -10,7 +10,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "audit": "node scripts/audit.mjs",
-    "audit:menu": "node scripts/audit-menu.mjs"
+    "audit:menu": "node scripts/audit-menu.mjs",
+    "audit:redirecciones": "node scripts/redirecciones.mjs"
   },
   "dependencies": {
     "@astrojs/vercel": "^11.0.10",

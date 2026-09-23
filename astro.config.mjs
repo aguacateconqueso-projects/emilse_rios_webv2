@@ -1,4 +1,5 @@
 // @ts-check
+import { readFile, writeFile } from 'node:fs/promises';
 import { defineConfig, fontProviders } from 'astro/config';
 import vercel from '@astrojs/vercel';
 
@@ -33,6 +34,67 @@ function cut(slug, weight, style) {
   }));
 }
 
+/**
+ * Las redirecciones de `redirects`, con y sin barra final.
+ *
+ * El adaptador de Vercel convierte cada redirección en una ruta cuya expresión
+ * acaba justo después del nombre —`^/aulavirtual/estudiemos-juntos$`— y el
+ * destino lo escribe sin barra, porque así lo pide Astro. Resultado, hasta el
+ * 23 sep 2026: `/aulavirtual/estudiemos-juntos` redirigía y
+ * `/aulavirtual/estudiemos-juntos/` —con barra, que es como el sitio escribe
+ * todas sus direcciones y como Emi las copia de la barra del navegador— daba
+ * 404. Astro no deja pedir otra cosa desde `redirects`.
+ *
+ * Así que esto retoca la salida cuando el adaptador ya la escribió: a cada
+ * redirección le acepta la barra final en el origen y se la pone al destino,
+ * que es la dirección canónica de la página. Corre después del adaptador
+ * porque Astro pone el adaptador el primero de la lista de integraciones.
+ *
+ * Solo toca rutas con `Location` y un `status` 3xx: el resto de
+ * `config.json` —los ficheros, las funciones, el 404— queda como estaba.
+ * `npm run audit:redirecciones` comprueba el resultado.
+ *
+ * @returns {import('astro').AstroIntegration}
+ */
+function redireccionesConBarra() {
+  /** @type {URL | undefined} */
+  let raiz;
+  return {
+    name: 'redirecciones-con-barra',
+    hooks: {
+      'astro:config:done': ({ config }) => {
+        raiz = config.root;
+      },
+      'astro:build:done': async ({ logger }) => {
+        if (!raiz) return;
+        const fichero = new URL('.vercel/output/config.json', raiz);
+        let salida;
+        try {
+          salida = JSON.parse(await readFile(fichero, 'utf8'));
+        } catch {
+          logger.warn('No hay .vercel/output/config.json: las redirecciones quedan sin barra final.');
+          return;
+        }
+        let tocadas = 0;
+        for (const ruta of salida.routes ?? []) {
+          if (ruta.handle === 'filesystem') break;
+          const destino = ruta.headers?.Location;
+          if (!destino || !(ruta.status >= 300 && ruta.status < 400)) continue;
+          if (typeof ruta.src === 'string' && ruta.src.endsWith('$') && !ruta.src.endsWith('/?$')) {
+            ruta.src = `${ruta.src.slice(0, -1)}/?$`;
+          }
+          if (destino.startsWith('/') && !destino.endsWith('/') && !/\.[a-z0-9]+$/i.test(destino)) {
+            ruta.headers.Location = `${destino}/`;
+          }
+          tocadas++;
+        }
+        await writeFile(fichero, JSON.stringify(salida, null, 2));
+        logger.info(`${tocadas} redirecciones aceptan ahora la barra final.`);
+      },
+    },
+  };
+}
+
 // https://astro.build/config
 export default defineConfig({
   /**
@@ -61,6 +123,7 @@ export default defineConfig({
    */
   output: 'static',
   adapter: vercel(),
+  integrations: [redireccionesConBarra()],
 
   i18n: {
     locales: ['es', 'en'],
@@ -72,31 +135,30 @@ export default defineConfig({
   },
 
   /**
-   * Las cartas de venta vivían bajo el aula —`/aulavirtual/<slug>/`— hasta que
-   * el aula pasó a pedir sesión y la tienda se mudó a `/productos/`. Esas
-   * direcciones ya están publicadas y Emi las pega en sus correos, así que no
-   * se rompen: Astro genera una página de redirección por cada producto con
-   * carta, tomando los caminos del propio catálogo.
+   * Las direcciones viejas, que no se rompen: Emi las pegó en sus correos.
    *
-   * Desde que el proyecto lleva el adaptador de Vercel, estas redirecciones se
-   * resuelven **en el servidor**, que es lo que aquí se pedía cuando eran
-   * páginas con `<meta refresh>`.
+   * Son cuatro y están escritas a mano. Hasta el 23 sep 2026 había además dos
+   * patrones dinámicos —`/aulavirtual/[producto]` → `/productos/[producto]` y
+   * su gemelo inglés— y **se quitaron porque hacían daño**: en Vercel se
+   * convierten en «cualquier cosa bajo /aulavirtual/», así que se comían las
+   * páginas reales del aula pedidas sin barra —`/aulavirtual/entrar` acababa
+   * en `/productos/entrar`, un 404— y rompían la redirección del panel de aquí
+   * abajo, cuyo destino es una de esas páginas. No cubrían nada que no
+   * cubrieran ya estas líneas: la única carta que vivió en
+   * `/aulavirtual/<slug>/` fue la de la membresía (del 31 ago al 9 sep 2026,
+   * se ve en el historial de `src/data/aula.ts`), y los productos nuevos nacen
+   * ya en `/productos/`, sin dirección vieja que redirigir.
    *
-   * El destino va **sin barra final**, aunque el resto del sitio la lleve:
-   * Astro valida el destino contra sus rutas y con la barra falla el build con
-   * `InvalidRedirectDestination`. No es un descuido, no hace falta arreglarlo.
+   * Se resuelven **en Vercel**, antes de mirar ningún fichero. Van con y sin
+   * barra final gracias a `redireccionesConBarra()`, más arriba: Astro no deja
+   * pedirlo desde acá. El destino se escribe **sin barra**, aunque el resto
+   * del sitio la lleve —con ella el build falla con
+   * `InvalidRedirectDestination`—, y es esa misma integración la que se la
+   * pone al publicar.
    */
   redirects: {
-    '/aulavirtual/[producto]': '/productos/[producto]',
-    '/en/classroom/[producto]': '/en/products/[producto]',
-
     /*
-     * La membresía va aparte, y escrita a mano, porque su carta no la genera la
-     * ruta dinámica: se trasplantó entera desde la academia y tiene página
-     * propia —ver `src/pages/productos/estudiemos-juntos.astro`—. Los dos
-     * patrones de arriba sacan sus direcciones de los productos que SÍ genera
-     * `[producto].astro`, así que sin estas dos líneas la carta perdería sus
-     * direcciones viejas, que son las que Emi ya pegó en sus correos.
+     * La carta de la membresía vivió en el aula del 31 ago al 9 sep 2026.
      */
     '/aulavirtual/estudiemos-juntos': '/productos/estudiemos-juntos',
     '/en/classroom/estudiemos-juntos': '/en/products/estudiemos-juntos',
@@ -106,12 +168,6 @@ export default defineConfig({
      * 20 sep 2026: en la academia `/panel/` es la CONSOLA DE EMI, y que las dos
      * pantallas compartieran nombre era una confusión esperando a pasar. La
      * palabra queda reservada para la consola.
-     *
-     * Estas dos líneas no son opcionales aunque las direcciones viejas fueran
-     * de una maqueta con `noindex`: sin ellas, `/aulavirtual/panel` cae en el
-     * patrón `[producto]` de aquí arriba y acaba en `/productos/panel`, que no
-     * existe. Una ruta estática gana a una dinámica, así que puestas acá
-     * mandan ellas.
      */
     '/aulavirtual/panel': '/aulavirtual/escritorio',
     '/en/classroom/panel': '/en/classroom/desk',
