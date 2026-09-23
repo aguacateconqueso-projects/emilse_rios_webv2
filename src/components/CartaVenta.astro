@@ -1,0 +1,878 @@
+---
+/**
+ * Una carta de venta, con el sistema del sitio: la de la membresía y las de
+ * los cursos. Va dentro de `Base.astro`, con el menú y el pie de siempre.
+ *
+ * **Desde el 23 sep 2026, por la noche.** Hasta entonces la de la membresía
+ * era un documento aparte, trasplantado de la academia con su propia ropa
+ * —crema, Hanken Grotesk, cursor de clave de fa, notas musicales al pasar
+ * por los botones—, y las de los cursos la copiaban. Adrián pidió unificar:
+ * «cambiemos el estilo de letra y formato de las cartas de ventas (incluyendo
+ * la membresía) al que manejamos en home y about me». Así que es la Home y
+ * *Sobre mí*: Instrument Serif, Newsreader, IBM Plex Mono, papel y tinta,
+ * reglas de 1 px, la columna de lectura y el botón macizo. La enmienda que
+ * deshace, en `progreso.md`.
+ *
+ * Lo que se conserva de la carta de antes, porque funciona:
+ *
+ * - **El orden y los bloques.** El texto es el mismo, en `src/data/cartas.ts`.
+ * - **Las puertas de la membresía**: cuenta atrás bajo el botón y botón muerto
+ *   con las puertas cerradas, calculado en el build y otra vez en el navegador,
+ *   para que el corte ocurra en el segundo exacto. El cobro no depende de
+ *   esto: `/api/checkout` comprueba las mismas fechas.
+ * - **El cambio de idioma que no te devuelve arriba**: te deja en el mismo
+ *   bloque de la carta en el otro idioma. Por eso cada pieza lleva
+ *   `data-bloque`, y por eso ES y EN tienen que tener los mismos bloques.
+ */
+import { type Lang, useTranslations, routePath } from '../i18n/ui';
+import type { Product } from '../data/aula';
+import { type Carta, type Bloque, NEWSLETTER } from '../data/cartas';
+import { CLOSES_AT, REOPENS_AT, INVITE_PARAM, doorsClosed } from '../lib/membership';
+import MediaSlot from './MediaSlot.astro';
+import BotonVenta from './BotonVenta.astro';
+
+interface Props {
+  lang: Lang;
+  producto: Product;
+  c: Carta;
+}
+const { lang, producto, c } = Astro.props;
+const t = useTranslations(lang);
+const copia = producto.copia[lang];
+
+/* ---------------------------------------------------------------------------
+   Las puertas (solo la membresía). Tres estados, calculados acá para el HTML
+   del build —lo que ve quien llega sin JavaScript— y otra vez en el navegador
+   con la hora real, en el script de abajo:
+     · `soon`   → falta para el cierre: botones vivos + cuenta atrás.
+     · `open`   → no hay cierre a la vista: botones vivos, sin cuenta atrás.
+     · `closed` → puertas cerradas: botones muertos + aviso del newsletter.
+   Todo el texto va en la hora de MADRID, que es en la que está escrita la
+   promesa («23:59 CEST»).
+   --------------------------------------------------------------------------- */
+const MADRID = 'Europe/Madrid';
+const locale = lang === 'en' ? 'en-US' : 'es-ES';
+const closesMs = Date.parse(CLOSES_AT);
+const reopensMs = Date.parse(REOPENS_AT);
+const cerrado = doorsClosed();
+const cuenta = !cerrado && !Number.isNaN(closesMs) && Date.now() < closesMs;
+const estado = cerrado ? 'closed' : cuenta ? 'soon' : 'open';
+
+const hora = (ms: number) =>
+  new Intl.DateTimeFormat(locale, { timeZone: MADRID, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(ms);
+const fecha = (ms: number) =>
+  new Intl.DateTimeFormat(locale, { timeZone: MADRID, day: 'numeric', month: 'long' }).format(ms);
+const dia = (ms: number) =>
+  new Intl.DateTimeFormat('en-CA', { timeZone: MADRID, year: 'numeric', month: '2-digit', day: '2-digit' }).format(ms);
+/* CEST en verano, CET en invierno: se deduce del desfase real de ese día. */
+const huso = (ms: number) => {
+  const partes = new Intl.DateTimeFormat('en-US', { timeZone: MADRID, timeZoneName: 'longOffset' }).formatToParts(ms);
+  return partes.find((x) => x.type === 'timeZoneName')?.value === 'GMT+01:00' ? 'CET' : 'CEST';
+};
+
+const p = c.puertas;
+const puertas = p
+  ? {
+      cerrado,
+      lead: Number.isNaN(closesMs)
+        ? ''
+        : (dia(closesMs) === dia(Date.now()) ? p.closeLeadToday : p.closeLeadDay)
+            .replace('{date}', fecha(closesMs))
+            .replace('{time}', hora(closesMs))
+            .replace('{tz}', huso(closesMs)),
+      nota: Number.isNaN(reopensMs) ? p.closedNoteNoDate : p.closedNote.replace('{date}', fecha(reopensMs)),
+    }
+  : undefined;
+
+/** Cada bloque del cuerpo, con su clase. */
+const clase = (b: Bloque) => (typeof b === 'string' ? '' : `venta__${b.k}`);
+---
+
+{/*
+  Si se llega cambiando de idioma, la carta se esconde antes de pintarse para
+  recolocar el scroll sin parpadeo; la vuelve a enseñar el script del final.
+  Red de seguridad a 1,5 s.
+*/}
+<script is:inline>
+  try {
+    if (sessionStorage.getItem('langSwitch')) {
+      document.documentElement.classList.add('lang-enter');
+      setTimeout(function () {
+        document.documentElement.classList.remove('lang-enter');
+      }, 1500);
+    }
+  } catch (e) {}
+</script>
+
+<article
+  class="venta"
+  data-doors={p ? estado : undefined}
+  data-closes={p ? CLOSES_AT : undefined}
+  data-reopens={p ? REOPENS_AT : undefined}
+  data-locale={p ? locale : undefined}
+  data-pay={p ? c.boton.href : undefined}
+  data-pase={p ? INVITE_PARAM : undefined}
+  data-lead-today={p?.closeLeadToday}
+  data-lead-day={p?.closeLeadDay}
+>
+  {/* --- La entrada, a dos columnas, como *Sobre mí* ------------------------ */}
+  <header class="venta__hero" data-bloque>
+    <div class="venta__intro">
+      <div class="venta__introInner">
+        <a class="mono soft venta__back" href={routePath('products', lang)}>{t('products.back')}</a>
+        <h1 class="venta__title">{c.title}</h1>
+        <p class="venta__sub">{c.subtitle}</p>
+      </div>
+    </div>
+    <div class="venta__media">
+      <MediaSlot src={producto.foto} alt={c.photoAlt} placeholder={copia.fotoPie} width={900} />
+    </div>
+  </header>
+
+  <div class="anchor reveal" data-bloque>
+    <p class="anchor__text venta__lede">
+      <span>{c.ledeA}</span>
+      <span>{c.ledeB}</span>
+    </p>
+  </div>
+
+  {/* --- El cuerpo, en la columna de lectura -------------------------------- */}
+  <div class="row row--flush block">
+    <div class="row__body venta__cuerpo">
+      {
+        c.carta.map((b) => {
+          if (typeof b === 'string') return <p class="reveal" data-bloque>{b}</p>;
+          if (b.k === 'fuerte' || b.k === 'grito' || b.k === 'acento')
+            return (
+              <p class:list={[clase(b), 'reveal']} data-bloque>
+                {b.text}
+              </p>
+            );
+          if (b.k === 'testimonio')
+            return (
+              <figure class="venta__testimonio reveal" data-bloque>
+                <blockquote class="venta__cita">«{b.text}»</blockquote>
+                <figcaption class="mono soft venta__quien">{b.autor}</figcaption>
+              </figure>
+            );
+          if (b.k === 'puntos')
+            return (
+              <div class="venta__puntos reveal" data-bloque>
+                {b.titulo && <p class="venta__h">{b.titulo}</p>}
+                <ul class="venta__filas" role="list">
+                  {b.items.map((li) => (
+                    <li>{li}</li>
+                  ))}
+                </ul>
+              </div>
+            );
+          return (
+            <div class:list={['venta__lista', b.tono === 'no' && 'venta__lista--no', 'reveal']} data-bloque>
+              <p class="venta__h">{b.titulo}</p>
+              <ul class="venta__filas" role="list">
+                {b.items.map((li) => (
+                  <li>{li}</li>
+                ))}
+              </ul>
+            </div>
+          );
+        })
+      }
+    </div>
+  </div>
+
+  {/* --- La ficha de precio ------------------------------------------------- */}
+  <h2 class="section-title venta__incluye reveal" data-bloque>{c.includesH}</h2>
+
+  <section class="row row--wide row--flush reveal" data-bloque>
+    <div class="row__body venta__ancho">
+      <div class="venta__ficha">
+        <div class="venta__cols">
+          <div class="venta__col">
+            <p class="venta__nombre">
+              {c.title} <span class="venta__eco">{c.titleEcho}</span>
+            </p>
+            <p class="mono soft venta__etiqueta">{c.priceLabel}</p>
+            <p class="venta__precio">
+              {c.price}
+              {c.pricePer && <span class="mono soft venta__per">{c.pricePer}</span>}
+            </p>
+            {
+              c.priceNote && (
+                <p class="venta__nota">
+                  <strong>{c.priceNote}</strong> {c.priceNoteRest}
+                </p>
+              )
+            }
+          </div>
+          <div class="venta__col">
+            <ul class="venta__filas venta__incluidos" role="list">
+              {c.priceFeatures.map((f) => (
+                <li>{f}</li>
+              ))}
+            </ul>
+            <div class="venta__accion">
+              <BotonVenta c={c} puertas={puertas} />
+            </div>
+          </div>
+        </div>
+        {c.priceFoot && <p class="venta__letra">{c.priceFoot}</p>}
+      </div>
+    </div>
+  </section>
+
+  {
+    c.final && (
+      <div class="anchor reveal" data-bloque>
+        <p class="anchor__text">{c.final}</p>
+      </div>
+    )
+  }
+
+  {
+    c.final && (
+      <div class="venta__cta reveal" data-bloque>
+        <BotonVenta c={c} puertas={puertas} />
+      </div>
+    )
+  }
+
+  {/* --- Testimonios en su sección (vibrato) -------------------------------- */}
+  {
+    c.testimonios && (
+      <section class="row row--flush block reveal" data-bloque>
+        <div class="row__body">
+          <h2 class="mono soft venta__rotulo">{c.testimonios.titulo}</h2>
+          <ul class="venta__testis" role="list">
+            {c.testimonios.items.map((it) => (
+              <li class="venta__testi">
+                <blockquote class="venta__cita">«{it.text}»</blockquote>
+                <p class="mono soft venta__quien">{it.autor}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    c.pd && (
+      <section class="row row--flush block reveal" data-bloque>
+        <div class="row__body venta__pd">
+          <p class="mono soft">{c.pd.rotulo}</p>
+          <p class="venta__pd-text">{c.pd.text}</p>
+        </div>
+      </section>
+    )
+  }
+
+  {/* --- Preguntas ------------------------------------------------------------ */}
+  <section class="row row--flush block reveal" data-bloque>
+    <div class="row__body">
+      <h2 class="section-title">{c.faqH}</h2>
+      <div class="venta__faq">
+        {
+          c.faq.map((f, i) => (
+            <details class="venta__qa">
+              <summary class="venta__q">
+                <span class="mono-plain soft venta__n" aria-hidden="true">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span>{f.q}</span>
+              </summary>
+              <p class="venta__a">
+                {f.a}
+                {f.correo && <a href={`mailto:${f.correo}`}>{f.correo}</a>}
+                {f.a2}
+              </p>
+            </details>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <div class="venta__cta reveal" data-bloque>
+    <BotonVenta c={c} puertas={puertas} />
+  </div>
+
+  {
+    c.news && (
+      <section class="row row--flush block reveal" data-bloque>
+        <div class="row__body venta__news">
+          <p class="venta__news-pre">{c.news.pre}</p>
+          <a class="mono venta__news-link" href={NEWSLETTER} target="_blank" rel="noopener">
+            {c.news.link}
+          </a>
+        </div>
+      </section>
+    )
+  }
+</article>
+
+{/*
+  Las puertas en el navegador: cuenta atrás y cierre en vivo. Si el estado se
+  quedara en el del build, la carta seguiría diciendo «entra» hasta el
+  siguiente despliegue; así el corte ocurre en el segundo exacto, delante de
+  quien tenga la página abierta. Lee todo de los `data-` de la carta, y sin
+  ellos —los cursos— no hace nada.
+
+  El pase de invitación (`?pase=…`) enseña la carta abierta y lleva el código
+  al cobro. Acá NO se comprueba —eso publicaría el secreto—: decide
+  `/api/checkout`, en el servidor.
+*/}
+<script is:inline>
+  (function () {
+    var carta = document.querySelector('.venta[data-doors]');
+    if (!carta) return;
+    var d = carta.dataset;
+    var closes = Date.parse(d.closes);
+    var reopens = Date.parse(d.reopens);
+    var pase = '';
+    try { pase = new URLSearchParams(location.search).get(d.pase) || ''; } catch (e) {}
+    var payHref = pase ? d.pay + '&' + d.pase + '=' + encodeURIComponent(pase) : d.pay;
+    var MADRID = 'Europe/Madrid';
+
+    function part(ms, opts, loc) {
+      try { return new Intl.DateTimeFormat(loc || d.locale, opts).format(new Date(ms)); }
+      catch (e) { return ''; }
+    }
+    function tz(ms) {
+      try {
+        var ps = new Intl.DateTimeFormat('en-US', { timeZone: MADRID, timeZoneName: 'longOffset' }).formatToParts(new Date(ms));
+        for (var i = 0; i < ps.length; i++) if (ps[i].type === 'timeZoneName') return ps[i].value === 'GMT+01:00' ? 'CET' : 'CEST';
+      } catch (e) {}
+      return 'CEST';
+    }
+    var dayOpts = { timeZone: MADRID, year: 'numeric', month: '2-digit', day: '2-digit' };
+    function lead(now) {
+      var date = part(closes, { timeZone: MADRID, day: 'numeric', month: 'long' });
+      var time = part(closes, { timeZone: MADRID, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+      if (!date || !time) return '';
+      var hoy = part(closes, dayOpts, 'en-CA') === part(now, dayOpts, 'en-CA');
+      return (hoy ? d.leadToday : d.leadDay).replace('{date}', date).replace('{time}', time).replace('{tz}', tz(closes));
+    }
+    function estado(now) {
+      if (isNaN(closes)) return 'open';
+      if (now <= closes) return 'soon';
+      if (!isNaN(reopens) && now >= reopens) return 'open';
+      return pase ? 'open' : 'closed';
+    }
+    function all(sel) { return carta.querySelectorAll(sel); }
+    function each(list, fn) { for (var i = 0; i < list.length; i++) fn(list[i]); }
+    function text(list, t) { each(list, function (el) { if (el.textContent !== t) el.textContent = t; }); }
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+    var ultimo = '';
+    var ultimoLead = '';
+    function tick() {
+      var now = Date.now();
+      var st = estado(now);
+      if (st !== ultimo) {
+        ultimo = st;
+        carta.setAttribute('data-doors', st);
+        /* No basta con apagarlo en CSS: cerrado, el botón pierde el enlace, y
+           así tampoco se llega con el teclado ni copiándolo. */
+        each(all('.venta__btn--pay'), function (b) {
+          if (st === 'closed') {
+            b.removeAttribute('href');
+            b.setAttribute('aria-disabled', 'true');
+            b.setAttribute('tabindex', '-1');
+          } else {
+            b.setAttribute('href', payHref);
+            b.removeAttribute('aria-disabled');
+            b.removeAttribute('tabindex');
+          }
+        });
+      }
+      if (st !== 'soon') return;
+      var l = lead(now);
+      if (l && l !== ultimoLead) { ultimoLead = l; text(all('.venta__timer-lead'), l); }
+      var left = Math.max(0, Math.floor((closes - now) / 1000));
+      var dias = Math.floor(left / 86400);
+      text(all('[data-cd-d]'), String(dias));
+      each(all('[data-cd-dbox]'), function (el) { el.hidden = dias === 0; });
+      text(all('[data-cd-h]'), pad(Math.floor((left % 86400) / 3600)));
+      text(all('[data-cd-m]'), pad(Math.floor((left % 3600) / 60)));
+      text(all('[data-cd-s]'), pad(left % 60));
+    }
+    tick();
+    setInterval(tick, 1000);
+  })();
+</script>
+
+{/*
+  El cambio de idioma sin volver arriba. Al pulsar ES/EN —en el menú o en el
+  pie— se guarda en qué bloque de la carta se está y a cuánto de su borde, y
+  la carta del otro idioma se abre en ese mismo bloque. Anclado al bloque y no
+  a los píxeles, porque el texto mide distinto en cada idioma.
+*/}
+<script is:inline>
+  (function () {
+    var html = document.documentElement;
+    function bloques() { return Array.prototype.slice.call(document.querySelectorAll('[data-bloque]')); }
+    function top(el) { return el.getBoundingClientRect().top + (window.scrollY || 0); }
+
+    try {
+      var guardado = sessionStorage.getItem('langSwitch');
+      if (guardado) {
+        sessionStorage.removeItem('langSwitch');
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+        var g = JSON.parse(guardado);
+        var ancla = bloques()[g.i];
+        window.scrollTo(0, Math.max(0, ancla ? top(ancla) + g.d : g.y));
+        requestAnimationFrame(function () { html.classList.remove('lang-enter'); });
+      } else {
+        html.classList.remove('lang-enter');
+      }
+    } catch (e) { html.classList.remove('lang-enter'); }
+
+    /* Escucha en el documento y no en cada enlace: este script corre antes
+       de que exista el pie de la página, y su ES/EN se quedaba fuera. */
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[hreflang]');
+      if (!a || a.getAttribute('aria-current') === 'true') return;
+      var bs = bloques();
+      var y = window.scrollY || 0;
+      var i = 0;
+      for (var k = 0; k < bs.length; k++) { if (top(bs[k]) <= y + 2) i = k; else break; }
+      try {
+        sessionStorage.setItem('langSwitch', JSON.stringify({ i: i, d: bs[i] ? y - top(bs[i]) : 0, y: y }));
+      } catch (err) {}
+    });
+  })();
+</script>
+
+<style>
+  /* Mientras se recoloca el scroll tras cambiar de idioma. */
+  :global(html.lang-enter) .venta {
+    opacity: 0;
+  }
+
+  /* --- La entrada, a dos columnas ------------------------------------------
+     El mismo reparto que *Sobre mí*: el texto a un lado, la foto al otro, con
+     una regla entre los dos; apilados en el teléfono, la foto arriba. */
+  .venta__hero {
+    display: flex;
+    flex-wrap: wrap-reverse;
+    align-items: stretch;
+    min-height: 32rem; /* 512 px */
+  }
+
+  .venta__intro {
+    flex: 1 1 27.5rem;
+    display: flex;
+    align-items: center;
+    padding: var(--space-12) var(--space-6) var(--space-12) max(var(--space-3), 8vw);
+  }
+
+  .venta__introInner {
+    width: 100%;
+    max-width: 37.5rem; /* 600 px */
+    margin-left: auto;
+  }
+
+  .venta__back {
+    display: inline-block;
+    border-bottom-color: transparent;
+  }
+
+  .venta__back:hover {
+    color: var(--ink);
+    border-bottom-color: currentColor;
+  }
+
+  .venta__title {
+    margin-top: var(--space-3);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(3rem, 7vw, 5.5rem); /* 48 → 88 px */
+    line-height: 1;
+    letter-spacing: var(--tracking-hero);
+    text-wrap: balance;
+  }
+
+  .venta__sub {
+    margin-top: var(--space-3);
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--text-section);
+    line-height: var(--leading-section);
+    text-wrap: balance;
+  }
+
+  .venta__media {
+    flex: 1 1 27.5rem;
+    position: relative;
+    min-height: 27.5rem; /* 440 px */
+    border-left: 1px solid var(--rule);
+  }
+
+  /* La foto llena el marco sin estirarlo, como en *Sobre mí*. */
+  .venta__media :global(.slot) {
+    position: absolute;
+    inset: 0;
+  }
+
+  @media (max-width: 55rem) {
+    .venta__intro {
+      padding: var(--space-6) var(--space-3) var(--space-12);
+    }
+
+    .venta__media {
+      min-height: 21rem;
+      border-left: 0;
+      border-bottom: 1px solid var(--rule);
+    }
+  }
+
+  /* Toma color al pasarle el cursor, como el retrato de *Sobre mí* y las
+     fotos de Formaciones. Sin el salto: acá la foto es media pantalla. */
+  @media (hover: hover) {
+    .venta__media :global(.slot__img) {
+      transition: filter 0.5s var(--ease-reveal);
+    }
+
+    .venta__media:hover :global(.slot__img) {
+      filter: grayscale(0);
+    }
+  }
+
+  /* La apertura son dos frases, y la segunda va debajo de la primera. */
+  .venta__lede span {
+    display: block;
+  }
+
+  /* --- El cuerpo ------------------------------------------------------------ */
+  .venta__cuerpo > p {
+    margin-bottom: var(--space-3);
+    text-wrap: pretty;
+  }
+
+  /* La negrita de la carta se resuelve con la tipografía de titulares, que es
+     como este sistema destaca: no se sube el peso de la de cuerpo. */
+  .venta__cuerpo > .venta__fuerte {
+    font-family: var(--font-display);
+    font-size: 1.375rem; /* 22 px */
+    line-height: 1.35;
+  }
+
+  .venta__cuerpo > .venta__grito {
+    margin-block: var(--space-6);
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--text-section);
+    line-height: var(--leading-section);
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  .venta__cuerpo > .venta__acento {
+    margin-block: var(--space-8);
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--text-anchor);
+    line-height: var(--leading-anchor);
+    text-align: center;
+    text-wrap: balance;
+  }
+
+  /* La cita de una alumna: en cursiva de titulares, entre dos reglas, y su
+     nombre en mono. Como los testimonios de *Sobre mí*. */
+  .venta__testimonio {
+    margin: var(--space-4) 0 var(--space-6);
+    padding: var(--space-3) 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .venta__cita {
+    margin: 0;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.25rem; /* 20 px */
+    line-height: 1.4;
+    text-wrap: pretty;
+  }
+
+  .venta__quien {
+    margin-top: var(--space-2);
+  }
+
+  /* Listas —«para ti», «no es para ti», lo que trae—: filas separadas por
+     reglas, como la ficha de compra. Sin viñetas ni iconos. */
+  .venta__puntos,
+  .venta__lista {
+    margin: var(--space-6) 0;
+  }
+
+  .venta__h {
+    font-family: var(--font-display);
+    font-size: 1.375rem; /* 22 px */
+    line-height: 1.35;
+    text-wrap: balance;
+  }
+
+  .venta__filas {
+    margin: var(--space-3) 0 0;
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .venta__filas li {
+    border-top: 1px solid var(--rule);
+    padding: var(--space-2) 0;
+    font-size: var(--text-small);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  /* Lo que no es va en tinta secundaria: dice que no, y decirlo con el mismo
+     peso que el sí desequilibra la página. */
+  .venta__lista--no li {
+    color: var(--ink-soft);
+  }
+
+  /* --- La ficha de precio ----------------------------------------------------
+     Un recuadro de tinta a escuadra que **se invierte al pasarle el cursor**:
+     fondo de tinta, letra de papel, reglas de papel. Es el gesto de la ficha
+     de la carta de la academia, que Adrián quiso de vuelta el 23 sep 2026 —«que
+     todo el cuadro cambie a negro y las letras blancas»—, con la ropa del
+     sitio: sin radio, sin sombra, con los papeles sobre tinta de `tokens.css`
+     (`--paper-soft`, `--paper-rule`), que se guardaban justo para esto. El
+     botón de dentro se invierte con ella: ver `BotonVenta.astro`. */
+  .venta__incluye {
+    margin-top: var(--space-12);
+    padding-inline: var(--space-3);
+    text-align: center;
+  }
+
+  .venta__ancho {
+    max-width: none;
+    margin-top: var(--space-4);
+  }
+
+  .venta__ficha {
+    border: 1px solid var(--ink);
+    padding: var(--space-6);
+    background: var(--paper);
+    transition:
+      background 0.45s ease,
+      color 0.45s ease;
+  }
+
+  @media (max-width: 38rem) {
+    .venta__ficha {
+      padding: var(--space-3);
+    }
+  }
+
+  .venta__eco,
+  .venta__etiqueta,
+  .venta__per,
+  .venta__letra,
+  .venta__filas,
+  .venta__filas li {
+    transition:
+      color 0.45s ease,
+      border-color 0.45s ease;
+  }
+
+  @media (hover: hover) {
+    .venta__ficha:hover {
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .venta__ficha:hover .venta__eco,
+    .venta__ficha:hover .venta__etiqueta,
+    .venta__ficha:hover .venta__per,
+    .venta__ficha:hover .venta__letra {
+      color: var(--paper-soft);
+    }
+
+    .venta__ficha:hover .venta__filas,
+    .venta__ficha:hover .venta__filas li {
+      border-color: var(--paper-rule);
+    }
+  }
+
+  .venta__cols {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-6) var(--col-gap);
+  }
+
+  .venta__col {
+    flex: 1 1 18rem;
+    min-width: 0;
+  }
+
+  .venta__nombre {
+    font-family: var(--font-display);
+    font-size: var(--text-section);
+    line-height: var(--leading-section);
+    letter-spacing: var(--tracking-section);
+  }
+
+  .venta__eco {
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+
+  .venta__etiqueta {
+    margin-top: var(--space-3);
+  }
+
+  .venta__precio {
+    font-family: var(--font-display);
+    font-size: var(--text-anchor);
+    line-height: 1;
+  }
+
+  .venta__per {
+    margin-left: var(--space-1);
+    vertical-align: middle;
+  }
+
+  .venta__nota {
+    margin-top: var(--space-2);
+    max-width: 26rem; /* 416 px */
+    font-size: var(--text-small);
+    line-height: var(--leading-body);
+    text-wrap: pretty;
+  }
+
+  .venta__nota strong {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.125rem; /* 18 px */
+  }
+
+  .venta__incluidos {
+    margin-top: 0;
+  }
+
+  .venta__accion {
+    margin-top: var(--space-4);
+  }
+
+  .venta__letra {
+    margin-top: var(--space-4);
+    font-size: var(--text-small);
+    line-height: 1.5;
+    color: var(--ink-soft);
+    text-wrap: pretty;
+  }
+
+  /* El botón suelto, centrado bajo el mensaje final y tras las preguntas. */
+  .venta__cta {
+    margin-top: var(--space-8);
+    padding-inline: var(--space-3);
+    text-align: center;
+  }
+
+  /* --- Testimonios (vibrato) ------------------------------------------------ */
+  .venta__rotulo {
+    margin-bottom: var(--space-4);
+    font-weight: 400;
+  }
+
+  .venta__testis {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .venta__testi {
+    border-top: 1px solid var(--rule);
+    padding: var(--space-4) 0;
+  }
+
+  /* --- La posdata ------------------------------------------------------------ */
+  .venta__pd {
+    border-top: 1px solid var(--rule);
+    padding-top: var(--space-4);
+  }
+
+  .venta__pd-text {
+    margin-top: var(--space-2);
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.25rem; /* 20 px */
+    line-height: 1.4;
+    text-wrap: pretty;
+  }
+
+  /* --- Preguntas ---------------------------------------------------------------
+     Desplegables, con el número en mono. `<details>` lo hace sin una línea de
+     script y con el teclado ya resuelto. */
+  .venta__faq {
+    margin-top: var(--space-4);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .venta__qa {
+    border-top: 1px solid var(--rule);
+  }
+
+  .venta__q {
+    display: flex;
+    align-items: baseline;
+    gap: var(--col-gap);
+    padding: var(--space-3) 0;
+    cursor: pointer;
+    list-style: none;
+    font-family: var(--font-display);
+    font-size: 1.25rem; /* 20 px */
+    line-height: 1.3;
+    text-wrap: pretty;
+  }
+
+  .venta__q::-webkit-details-marker {
+    display: none;
+  }
+
+  .venta__n {
+    flex: 0 0 1.5rem; /* 24 px */
+  }
+
+  .venta__qa[open] .venta__n,
+  .venta__q:hover .venta__n {
+    color: var(--ink);
+  }
+
+  .venta__q:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: -2px;
+  }
+
+  .venta__a {
+    margin: 0 0 var(--space-3) calc(1.5rem + var(--col-gap));
+    font-size: var(--text-small);
+    line-height: var(--leading-body);
+    color: var(--ink-soft);
+    text-wrap: pretty;
+  }
+
+  /* --- El pie del newsletter (membresía) ------------------------------------ */
+  .venta__news {
+    border-top: 1px solid var(--rule);
+    padding-top: var(--space-4);
+  }
+
+  .venta__news-pre {
+    font-family: var(--font-display);
+    font-size: var(--text-section);
+    line-height: var(--leading-section);
+    letter-spacing: var(--tracking-section);
+  }
+
+  .venta__news-link {
+    display: inline-block;
+    margin-top: var(--space-3);
+  }
+</style>

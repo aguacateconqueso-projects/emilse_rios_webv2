@@ -1,9 +1,17 @@
 ---
 import { type Lang, useTranslations } from '../i18n/ui';
 import { hayProveedor } from '../lib/klaviyo';
+import Boton from './Boton.astro';
 
 /**
  * Campo de suscripción — una regla, nunca una caja.
+ *
+ * **El campo sigue siendo una regla; el botón, desde el 23 sep 2026, es el
+ * botón del sitio** (`Boton.astro`): relleno bajo el cursor, flecha, imán y
+ * notas musicales. Hasta ese día era una palabra en mono al final de la
+ * regla. Adrián quiso ese botón en todas partes, y este es el que más se ve.
+ * Por eso la regla pasó del formulario entero al campo: debajo del botón, que
+ * ya tiene su propio borde, sobraba.
  *
  * **Desde el 22 sep 2026 da de alta de verdad.** Manda el correo a
  * `/api/suscribir`, que habla con Klaviyo desde el servidor con la clave
@@ -47,8 +55,9 @@ const t = useTranslations(lang);
 /*
  * La ruta de casa por defecto. Se escribe relativa a propósito: así vale igual
  * en producción, en las previsualizaciones de Vercel y en `astro dev`, sin una
- * variable más — la misma razón por la que `comprarHref` de la membresía es
- * relativo desde que el cobro se mudó acá.
+ * variable más — la misma razón por la que el botón de pagar de la membresía
+ * (`boton.href` en `src/data/cartas.ts`) es relativo desde que el cobro se
+ * mudó acá.
  *
  * ⚠️ `hayProveedor` solo decide si se simula en desarrollo, y viaja al
  * navegador como un booleano y **solo como un booleano**. `klaviyo.ts` es de
@@ -88,7 +97,7 @@ const statusId = `${id}-status`;
         placeholder={t('form.placeholder')}
         aria-describedby={statusId}
       />
-      <button class="subscribe__cta mono" type="submit">{t('form.cta')}</button>
+      <Boton class="subscribe__cta" type="submit">{t('form.cta')}</Boton>
     </form>
 
     <p class="subscribe__status mono" id={statusId} role="status" data-status hidden></p>
@@ -104,12 +113,13 @@ const statusId = `${id}-status`;
     margin-bottom: var(--space-2);
   }
 
+  /* El campo y el botón en una fila. Cuando no caben —en el teléfono— el
+     botón baja a la suya, alineado a la izquierda como el resto. */
   .subscribe__form {
     display: flex;
+    flex-wrap: wrap;
     align-items: flex-end;
     gap: var(--space-3);
-    border-bottom: 1px solid var(--ink);
-    padding-bottom: var(--space-1);
   }
 
   .subscribe__form[hidden] {
@@ -129,11 +139,13 @@ const statusId = `${id}-status`;
   }
 
   .subscribe__input {
-    flex: 1 1 auto;
+    flex: 1 1 15rem;
     min-width: 0;
     border: 0;
+    border-bottom: 1px solid var(--ink);
+    border-radius: 0;
     background: transparent;
-    padding: 0;
+    padding: 0 0 var(--space-1);
     font-family: var(--font-body);
     font-size: 1.25rem; /* 20 px */
     line-height: var(--leading-body);
@@ -145,31 +157,17 @@ const statusId = `${id}-status`;
     opacity: 1;
   }
 
-  .subscribe__input:focus-visible {
-    outline: 0;
-  }
-
   /* Con el campo enfocado la regla engorda: el foco se ve sin romper la
      promesa de «una regla, nunca una caja». */
-  .subscribe__form:focus-within {
+  .subscribe__input:focus-visible {
+    outline: 0;
     box-shadow: 0 1px 0 0 var(--ink);
   }
 
-  .subscribe__cta {
-    border: 0;
-    background: transparent;
-    padding: 0;
-    cursor: pointer;
-    color: var(--ink);
+  /* El botón, en `base.css`. Acá solo que no se parta el rótulo. */
+  :global(.subscribe__cta) {
+    flex: 0 0 auto;
     white-space: nowrap;
-    font-family: var(--font-mono);
-    font-size: var(--text-mono);
-    letter-spacing: var(--tracking-mono);
-    text-transform: uppercase;
-  }
-
-  .subscribe__cta:hover {
-    color: var(--ink-soft);
   }
 
   .subscribe__status {

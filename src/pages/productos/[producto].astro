@@ -1,28 +1,26 @@
 ---
 /**
- * La carta de venta de cada producto, en español.
+ * Las cartas de venta, en español: la membresía y los cursos.
  *
- * `getStaticPaths` solo genera las de los productos **a la venta y con carta
- * escrita**. Los que están por llegar no tienen página: si la tuvieran, habría
- * una URL indexable prometiendo algo que todavía no se puede comprar.
+ * Desde el 23 sep 2026, por la noche, **todas pasan por acá y todas van
+ * dentro de `Base.astro`**, con el menú y el pie del sitio. Hasta ese día
+ * cada carta tenía su fichero suelto y su propio documento, porque se vestía
+ * con la ropa de la academia y la hoja del sitio no podía colarse; al pasar
+ * al sistema del sitio, esa razón desapareció.
  *
- * **La membresía no pasa por acá.** Su carta se trasplantó entera desde la
- * academia —`src/components/membresia/Carta.astro`, ver
- * `docs/PORTAR-CARTA-DE-VENTAS.md`— y es un documento completo, con su `<html>`
- * y su propio diseño. Tiene página propia en `src/pages/productos/estudiemos-juntos.astro` por una razón
- * concreta: Astro recoge el CSS de **todo lo que una página importa**, aunque no
- * lo pinte, así que basta con nombrar `Base.astro` acá arriba para que la hoja
- * del sistema del sitio se cuele en la carta y le pise el fondo crema. Aisladas,
- * cada una lleva lo suyo.
+ * Una página por cada producto que tenga carta escrita en
+ * `src/data/cartas.ts`, se venda o no todavía. La carta es
+ * `CartaVenta.astro`.
  */
 import Base from '../../layouts/Base.astro';
-import Producto from '../../components/Producto.astro';
+import CartaVenta from '../../components/CartaVenta.astro';
 import { useTranslations, productPath } from '../../i18n/ui';
-import { conPagina, type Product } from '../../data/aula';
+import { catalogo, type Product } from '../../data/aula';
+import { cartas, tieneCarta } from '../../data/cartas';
 
 export function getStaticPaths() {
-  return conPagina()
-    .filter((producto) => !producto.cartaPropia)
+  return catalogo
+    .filter((producto) => tieneCarta(producto.slug))
     .map((producto) => ({
       params: { producto: producto.slug },
       props: { producto },
@@ -35,16 +33,64 @@ interface Props {
 const { producto } = Astro.props;
 const lang = 'es' as const;
 const t = useTranslations(lang);
-const copia = producto.copia[lang];
+const c = cartas[producto.slug][lang];
+
+const SITE = Astro.site?.origin ?? 'https://www.emilserios.com';
+const canonical = `${SITE}${productPath(producto.slug, lang)}`;
+/* La imagen al compartir es la foto del producto: `foto.src` es la original,
+   que Astro publica en cuanto alguien la nombra. */
+const ogImage = producto.foto ? new URL(producto.foto.src, SITE).href : undefined;
+
+/* Lo que Google necesita para entender la página: qué es, de quién, y las
+   preguntas frecuentes con el mismo texto que se ve —si no coincide, Google
+   las descarta—. A propósito sin precio (Product/Offer): un importe horneado
+   acá se desfasa el día que cambie en Stripe. */
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebPage',
+      '@id': `${canonical}#webpage`,
+      url: canonical,
+      name: c.metaTitle,
+      description: c.metaDesc,
+      inLanguage: lang,
+      publisher: { '@id': `${SITE}/#emilse` },
+    },
+    {
+      '@type': 'Person',
+      '@id': `${SITE}/#emilse`,
+      name: 'Emilse Rios',
+      jobTitle: lang === 'en' ? 'Double bassist and teacher' : 'Contrabajista y profesora',
+      url: 'https://emilserios.com',
+      sameAs: ['https://emilserios.com'],
+    },
+    {
+      '@type': 'FAQPage',
+      '@id': `${canonical}#faq`,
+      inLanguage: lang,
+      mainEntity: c.faq.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: [f.a, f.correo, f.a2].filter(Boolean).join('') },
+      })),
+    },
+  ],
+};
 ---
 
 <Base
   lang={lang}
-  title={`${copia.nombre} · ${t('products.title')}`}
-  description={copia.resumen}
+  title={`${c.metaTitle}`}
+  description={c.metaDesc}
   route="products"
   pathEs={productPath(producto.slug, 'es')}
   pathEn={productPath(producto.slug, 'en')}
 >
-  <Producto lang={lang} producto={producto} />
+  <Fragment slot="head">
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    {ogImage && <meta property="og:image:alt" content={c.photoAlt} />}
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
+  </Fragment>
+  <CartaVenta lang={lang} producto={producto} c={c} />
 </Base>
