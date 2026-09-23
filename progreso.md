@@ -6,6 +6,14 @@ de cero debería poder seguir trabajando sin preguntar nada.
 
 **Última actualización:** 23 de septiembre de 2026.
 
+> **🚧 LA CORTINA ESTÁ BAJADA desde el 23 sep 2026.** Quien entra a
+> `www.emilserios.com` —a cualquier dirección— ve solo la firma de Emi sobre
+> negro y «Estamos trabajando en la web», y no puede hacer nada: las APIs
+> contestan 503. **Las vistas previas de los PRs y `npm run dev` siguen
+> enseñando la web de verdad**, que es donde se trabaja. Para reabrir,
+> `CORTINA_BAJADA = false` en `src/lib/cortina.ts`, en un PR. Todo en **La
+> cortina**, justo debajo de **Dónde estamos**.
+
 > **Para quien retome en una sesión nueva.** Lo último —las correcciones de
 > Klaviyo— está en la rama **`claude/compassionate-gates-is7e15`** y **todavía
 > no está en `main`**: falta abrir el PR y mergearlo. Hasta ese merge, lo que
@@ -80,7 +88,7 @@ pagando sin recibir acceso.
 
 | | |
 |---|---|
-| **Publicado** | Sí, en Vercel, y desde el 21 sep 2026 **en `www.emilserios.com`**. Despliega solo en cada merge a `main`. |
+| **Publicado** | Sí, en Vercel, y desde el 21 sep 2026 **en `www.emilserios.com`**. Despliega solo en cada merge a `main`. **Desde el 23 sep, tapado por la cortina** — ver **La cortina**. |
 | **Dominio** | **Resuelto a medias.** El sitio ya vive en `www.emilserios.com` y el DNS lo sirve Cloudflare. **Falta el push del registro** a una cuenta de Namecheap de Emi: hoy el dominio sigue siendo de Edu. Ver **El dominio, y Edu → Cómo quedó**. |
 | **Páginas** | Home, Sobre mí, Productos, el Aula Virtual —puerta y aula por dentro— y sus pantallas de acceso, en español e inglés. Más `/panel/`, la consola de Emi, solo en español. |
 | **Identidad** | El logo de Emi, vectorizado, en cabecera, pie, entrada y favicon. |
@@ -240,6 +248,63 @@ aprobado; si se retoma, es solo para mover los mandos de `tokens.css` — ver la
 receta más abajo. **Lo siguiente sin dueño, del sitio, es el cierre para
 producción**, en «Próximos PRs»; de la plataforma, traer el repo de la
 membresía.
+
+---
+
+## La cortina
+
+**Bajada el 23 de septiembre de 2026**, a pedido de Adrián: «tenemos que
+desconectar la web». Emi está cambiando muchas cosas a la vez —todos los
+copies, y la bienvenida del newsletter, que ahora quiere que sean **siete
+correos a cada persona que se suscribe**—, el alta al newsletter todavía no
+funciona, y una web en la que se pulsa «suscribirme» y no pasa nada es peor que
+una que dice honestamente que está en obras. Se baja para pasar el día
+terminando el resto.
+
+**Qué ve la gente.** En cualquier dirección de `www.emilserios.com` —la Home,
+*Sobre mí*, la tienda, la carta de la membresía, el aula, `/gracias/`,
+`/panel/`— la misma pantalla: la entrada de la Home que no se levanta. La firma
+de Emi se escribe en papel sobre tinta, y debajo «Estamos trabajando en la
+web.», «Volvemos muy pronto». Sale en los dos idiomas: el de la dirección en
+grande (`/en/…` en inglés) y el otro debajo, pequeño, porque no hay conmutador.
+**No hay nada que pulsar**: ni menú, ni pie, ni enlaces. Las tres rutas de
+servidor —`/api/suscribir`, `/api/checkout`, `/api/claim-account`— contestan
+**503** sin tocar Klaviyo, Stripe ni Supabase.
+
+**Solo en producción.** La cortina baja cuando `VERCEL_ENV === 'production'`,
+así que **las vistas previas de cada PR enseñan la web de verdad**: se sigue
+trabajando y revisando como siempre, y lo que se mergea a `main` queda detrás
+de la cortina hasta que se suba. En local, `npm run dev` también enseña la web;
+para ver la cortina, `CORTINA=1 npm run dev`.
+
+**Cómo está hecha, en corto.** El sitio es estático: Vercel sirve cada página
+como un fichero y no pasa por el servidor. Por eso la cortina se pone **en el
+build**: `src/middleware.ts` corre una vez por página al generarla y le escribe
+dentro la cortina (`next('/cortina')`, una reescritura: la dirección se queda,
+el contenido cambia). La página es `src/pages/cortina.astro` y lee el idioma de
+`Astro.originPathname`, la dirección de antes de reescribir. Los textos, en
+`src/data/cortina.ts`.
+
+**Para subirla:** `CORTINA_BAJADA = false` en `src/lib/cortina.ts`, en un PR, y
+mergear. Hay además una salida de emergencia sin código —`CORTINA=0` en las
+variables de Vercel y redesplegar—, pero la manera normal es el PR, para que el
+código diga la verdad sobre lo que está en el aire.
+
+Tres cosas que conviene saber:
+
+- **Tapando la Home no lleva `noindex`**, a propósito: eso le pediría a Google
+  que olvide la Home, y la cortina es cosa de días. Las páginas contestan 200
+  —son ficheros, no pueden contestar 503—, así que si Google pasa estos días
+  puede guardar «Estamos trabajando» como texto de la Home; se corrige solo en
+  la siguiente visita después de subirla. `/cortina/`, en su propia dirección,
+  sí lleva `noindex`.
+- **Lo que cobra no se entera.** La membresía sigue viva en
+  `emilseriosacademy.com`, y el webhook de Stripe vive allí. Lo único que pasa
+  por esta casa y queda tapado es el cobro nuevo —con las puertas cerradas
+  hasta el 1 oct, el botón ya estaba apagado— y el puente `/aulavirtual/pasar/`,
+  que todavía no tiene su mitad pegada en la academia.
+- **Las redirecciones viejas siguen funcionando**, y llevan a la cortina:
+  `.vercel/output/config.json` sale idéntico con la cortina bajada y subida.
 
 ---
 
@@ -2431,6 +2496,10 @@ src/
                          — la FACHADA, lo que se vende
   data/cursos.ts         Unidades, clases y videos de Bunny — lo que se COMPRA.
                          Se ata a data/aula.ts por el slug
+  data/cortina.ts        Los textos de la cortina (es / en)
+  lib/cortina.ts         La llave de la cortina: CORTINA_BAJADA, y cuándo baja
+  middleware.ts          Pone la cortina: reescribe cada página en el build y
+                         cierra /api/ con 503. Con la cortina subida, no hace nada
   lib/klaviyo.ts         El alta al newsletter. Solo servidor: la clave
                          privada de Klaviyo no sale de acá
   lib/membership.ts      Las fechas de las puertas y el alta al newsletter,
@@ -2450,6 +2519,7 @@ src/
   layouts/Aula.astro     El marco del aula: barra, pie, y `window.Aula` —el
                          almacén del progreso, maqueta de la base de datos
   pages/                 index · sobre-mi · en/index · en/about
+                         cortina (lo que tapa todo mientras está bajada)
                          productos/index · productos/[producto]
                          productos/estudiemos-juntos (la carta trasplantada,
                            suelta y sin layout — ver más arriba el porqué)
