@@ -25,6 +25,16 @@ de cero debería poder seguir trabajando sin preguntar nada.
 > - **#44 · Las direcciones viejas**, que con barra final daban 404. Ver **Las
 >   direcciones viejas**.
 >
+> Y por la tarde, dos más:
+>
+> - **#46 · El newsletter deja de fallar en silencio.** Ver **El newsletter,
+>   conectado → La primera prueba**.
+> - **Cinco retoques que pidió Adrián**, en un PR aparte: la Home entra con
+>   la escalera de *Sobre mí* al volver, «Te cuento otra cosa» baja a abrir la
+>   historia, Formaciones pierde el `00` y sus fotos se acercan y toman color
+>   con el cursor, y *Sobre mí* estrena retrato vertical. Ver **Cinco
+>   retoques del 23 de septiembre**.
+>
 > **Lo que viene, en el orden en que lo pidieron Adrián y Emi:**
 >
 > 1. **El newsletter todavía no da de alta** («suscribirse no funciona»). El
@@ -396,6 +406,49 @@ no tenía salida a `vercel.app`:
   builds ni confundir variables.
 
 ---
+
+## Cinco retoques del 23 de septiembre
+
+Los pidió Adrián de una vez, con la cortina bajada, y van en un solo PR. Se
+ven en su vista previa.
+
+1. **La Home entra al volver.** La firma sobre negro sale una vez por sesión;
+   las demás veces la portada aparecía de golpe. Ahora entra con la escalera
+   de *Sobre mí*: el titular, el rótulo, la entradilla, el párrafo del video y
+   el primer formulario, uno detrás de otro. Está en `Home.astro`, y lo decide
+   `data-intro='seen'`, que pone el script de `<head>` de `Base.astro`. Por qué
+   no cuenta como quinta animación: en **Enmiendas, con fecha**.
+2. **«Te cuento otra cosa» baja.** Cerraba la entrada de *Sobre mí*, al lado
+   del retrato, y ahora abre la historia, encima de «En mi primer día…». En
+   los dos idiomas —en inglés, «Let me tell you something else»—. Es
+   `src/data/about.ts`. Deshace a medias lo del 21 sep, que había subido las
+   tres frases a la entrada: «No puedo» y «No es mi caso» se quedan arriba.
+3. **Formaciones pierde el `00`** de encima del titular. En su lugar, 16 px de
+   aire, para que el titular no suba a pegarse a la píldora del menú: se queda
+   exactamente donde estaba. Los números de las fichas —`01`, `02`— siguen.
+4. **Las fotos de Formaciones responden al cursor:** toman color y se acercan
+   un 4 % dentro de su marco. Solo en las fichas que son enlace. El detalle,
+   en la enmienda del mismo día.
+5. **Retrato nuevo en *Sobre mí*.** Emi en la calle, abrazada al contrabajo y
+   lanzando un beso. Es **vertical**, y el marco sigue siendo el de siempre:
+   lo llena a lo ancho y se recorta arriba y abajo, anclado al 35 % de alto
+   para que la cara y la mano salgan en los tres tamaños.
+
+   Dos cosas que conviene saber:
+
+   - **El marco ya no lo puede estirar la foto.** Con la horizontal no pasaba
+     nada, pero la vertical, a su alto natural, llevaba el marco a 720 × 1080
+     en el escritorio y a 390 × 586 en el teléfono. Ahora la foto va colgada
+     del marco (`position: absolute`), y el marco mide lo que medía: el alto
+     del texto de al lado en el escritorio, 336 px de alto en el teléfono.
+   - **El fichero.** Adrián la subió a `public/img/about_me2.jpg`: 3993 ×
+     6002 y 8,3 MB, que Vercel habría servido tal cual a quien pidiera la
+     dirección. Se redujo a 1800 de ancho —lo que pide el sitio a doble
+     densidad— y reemplaza a `src/assets/img/about-me.jpg`, que es de donde
+     Astro saca los tamaños: 96 kB y 218 kB en WebP. El original se borró de
+     `public/`; sigue en el historial de git, en el commit `7984abd`, y la
+     foto horizontal de antes, en cualquier commit anterior. El texto
+     alternativo se reescribió para la foto nueva.
 
 ## Formaciones, y la carta nueva
 
@@ -2534,7 +2587,33 @@ componentes**: si hace falta uno nuevo, se añade como token.
 
 El sistema es de Emi y se puede cambiar. Lo que no se puede es cambiarlo sin
 dejar constancia, porque si no la tabla de arriba deja de ser fiable. Hasta hoy
-se ha tocado once veces:
+se ha tocado doce veces:
+
+- **23 sep 2026 · La entrada de la Home tiene dos formas, y las fotos de
+  Formaciones responden al cursor.** Lo pidió Adrián.
+
+  **La entrada.** La firma sobre negro sale una vez por sesión, y las demás
+  veces la Home aparecía de golpe: se iba a *Sobre mí*, se volvía, y la
+  portada ya estaba puesta. Ahora, cuando la firma ya salió, la portada entra
+  con **la escalera de *Sobre mí*** —cada renglón sube 16 px y se funde, 0,7 s,
+  60 ms entre uno y otro—, y con ella el párrafo del video y el primer
+  formulario, que es todo lo que se ve antes de la lámina. **No es una quinta
+  animación**: es la misma entrada en su segunda forma, y nunca salen las dos
+  en la misma carga. Las cuatro de la Home siguen siendo la entrada, las
+  frases-ancla, el fondo del contrabajo y la lámina. Tampoco arranca sola en
+  el sentido de la enmienda del 12 de agosto: la dispara la carga, igual que
+  la firma.
+
+  **Las fotos de Formaciones.** Al pasar el cursor por una ficha, su foto
+  **toma color y se acerca un 4 % dentro de su marco**, con la curva y el medio
+  segundo del retrato de *Sobre mí*. No cuenta contra el tope, por la enmienda
+  del 20 de agosto: es respuesta a una acción. **Se acerca y no se levanta**,
+  a diferencia del retrato: lo que se levantaría acá es la ficha entera, y
+  eso es una tarjeta que se levanta, que el sistema prohíbe. Y **no es el
+  «zoom automático» prohibido**: no arranca solo, lo dispara el cursor, y el
+  marco no se mueve. Solo en las fichas que son enlace, solo con cursor de
+  verdad o foco de teclado, y sin movimiento para quien lo pide, que se queda
+  con el color.
 
 - **21 sep 2026 · *Sobre mí* sube a dos animaciones, y su retrato responde al
   cursor.** Lo pidió Emi: «entra sin más, ease in, agrega animaciones, que se
@@ -4081,8 +4160,12 @@ enseñárselo.
   las mismas cajas sin ajustar nada.
 - Sin JavaScript no se pierde contenido: las frases-ancla quedan visibles y el
   panel negro de la entrada no llega a aparecer.
-- La entrada se reproduce **una vez por sesión** (`sessionStorage`). Para
-  volver a verla, abrir una ventana nueva o borrar la clave `cec_intro`.
+- La firma de la entrada sale **una vez por sesión** (`sessionStorage`). Para
+  volver a verla, abrir una ventana nueva o borrar la clave `cec_intro`. Las
+  demás veces, desde el 23 sep 2026, la Home entra con la escalera de *Sobre
+  mí*. Lo decide `data-intro` en `<html>`: `play` la firma, `seen` la
+  escalera, y `done` cuando la firma termina — que no dispara la escalera, a
+  propósito.
 - El fondo del contrabajo **solo está en la Home**, y se enciende con la prop
   `backdrop` del layout `Base`. En *Sobre mí* no va: ahí manda el retrato.
 - La lámina **se queda quieta y en blanco y negro** si el navegador no soporta

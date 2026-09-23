@@ -40,7 +40,7 @@ export const ui = {
 
     'media.portrait': 'Retrato de Emi con el contrabajo — blanco y negro',
     'media.portraitAlt':
-      'Emilse Ríos sonriendo en una calle, con la voluta de su contrabajo apoyada en el hombro',
+      'Emilse Ríos en una calle, abrazada a su contrabajo, lanzando un beso con una pierna en alto',
     'about.description':
       'Le dijeron que el contrabajo no era para ella. Esta es la historia de por qué se equivocaron: veinte años tocando y formando contrabajistas, de El Sistema a Madrid.',
 
@@ -115,7 +115,7 @@ export const ui = {
 
     'media.portrait': 'Portrait of Emi with the double bass — black and white',
     'media.portraitAlt':
-      'Emilse Ríos smiling on a street, the scroll of her double bass resting on her shoulder',
+      'Emilse Ríos on a street, hugging her double bass and blowing a kiss, one leg kicked up behind her',
     'about.description':
       'They told her the double bass wasn\'t for her. This is the story of why they were wrong: twenty years playing and training bassists, from El Sistema to Madrid.',
 
