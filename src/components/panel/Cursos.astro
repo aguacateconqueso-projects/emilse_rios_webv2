@@ -1,0 +1,871 @@
+---
+/**
+ * Pestaña Cursos — donde Emi arma sus cursos enteros, sola.
+ *
+ * Pedido de Adrián el 23 sep 2026: «Emi tiene que poder meter ahí sus cursos
+ * completos y armar como ella quiera todo; es un Tutor LMS hecho por nosotros,
+ * mejorado». Lo que hace:
+ *
+ *   · crear un curso (atado a su ficha de Formaciones por el slug) y dejarlo
+ *     en borrador hasta que quiera publicarlo
+ *   · bloques y clases, con el nombre que Emi quiera («Nivel 1», «Antes de
+ *     tocar una nota»…), reordenados arrastrando o con las flechas, y clases
+ *     que se mueven de un bloque a otro
+ *   · cada clase: título y texto en ES y EN lado a lado, un video de Bunny por
+ *     idioma, duración, materiales (PDF, partituras, audios o enlaces) y su
+ *     propio borrador
+ *   · **elegir los videos de la biblioteca de Bunny** en vez de pegarlos, y
+ *     crear las clases de un bloque de golpe a partir de sus videos
+ *   · probar el video sin salir, ver el curso como lo ve una alumna, duplicar
+ *     una clase, dar y quitar acceso a mano
+ *
+ * **Emi rellena plantillas; no maqueta.** Los textos son texto: sin HTML y
+ * sin formato libre. El aula los pinta con la ropa del sitio, siempre igual.
+ *
+ * La lógica está en `src/scripts/panel-cursos.ts`; esto es el marcado.
+ */
+import { catalogo } from '../../data/aula';
+
+const deCatalogo = catalogo
+  .filter((p) => p.tipo === 'curso')
+  .map((p) => ({ slug: p.slug, es: p.copia.es.nombre, en: p.copia.en.nombre }));
+---
+
+<script type="application/json" id="cursos-catalogo" set:html={JSON.stringify(deCatalogo)} />
+
+<div class="app-wrap cursos" data-cursos-raiz>
+  {/* ==================================================================
+      LA LISTA
+      ================================================================== */}
+  <div data-vista="lista">
+    <header class="cursos__cab">
+      <div>
+        <p class="eyebrow">Cursos</p>
+        <h1 class="app-h1 cursos__h">Tus cursos, clase a clase.</h1>
+      </div>
+      <span data-hueco-nuevo></span>
+    </header>
+
+    <p class="aviso cursos__aviso" data-sin-tablas hidden>
+      <b>Falta un paso</b> — La base de datos todavía no tiene las tablas de los cursos. Hay que pegar
+      <code>supabase/migrations/0009_cursos.sql</code> en Supabase → SQL Editor, una vez. Es solo aditiva:
+      no toca nada de la membresía.
+    </p>
+
+    <form class="ficha-form cursos__nuevo" data-nuevo-form hidden novalidate>
+      <h2 class="app-h2">Nuevo curso</h2>
+      <label class="campo">
+        <span class="campo__t">¿Qué curso de Formaciones es?</span>
+        <select data-n="ficha"></select>
+        <span class="campo__ayuda">
+          Atarlo a su ficha le da la dirección bonita en el aula y el nombre y la foto del escritorio.
+        </span>
+      </label>
+      <div class="dos">
+        <label class="campo">
+          <span class="campo__t">Nombre · ES</span>
+          <input type="text" data-n="title_es" placeholder="Ej. Todo el diapasón" />
+        </label>
+        <label class="campo">
+          <span class="campo__t">Nombre · EN</span>
+          <input type="text" data-n="title_en" placeholder="E.g. Fingerboard" />
+        </label>
+      </div>
+      <label class="campo">
+        <span class="campo__t">Nombre corto (dirección)</span>
+        <input type="text" data-n="slug" placeholder="todo-el-diapason" spellcheck="false" autocomplete="off" />
+        <span class="campo__ayuda">
+          Minúsculas, números y guiones. Es la dirección del curso en el aula:
+          <span class="mono" data-n-ejemplo>/aulavirtual/curso/…/</span>
+        </span>
+      </label>
+      <p class="error" data-n-error hidden></p>
+      <div class="ficha-form__actos" data-n-actos></div>
+    </form>
+
+    <ul class="filas" role="list" data-lista>
+      <li class="filas__vacio soft">Cargando…</li>
+    </ul>
+  </div>
+
+  {/* ==================================================================
+      EL EDITOR DE UN CURSO
+      ================================================================== */}
+  <div data-vista="editor" hidden>
+    <p class="ed-volver"><a class="mono" href="#cursos">← Todos los cursos</a></p>
+
+    <header class="ed-cab">
+      <div class="ed-cab__txt">
+        <p class="eyebrow" data-ed-slug></p>
+        <h1 class="app-h1 ed-cab__h" data-ed-titulo></h1>
+      </div>
+      <div class="ed-cab__actos">
+        <div class="segmento" role="group" aria-label="Estado del curso" data-ed-estado>
+          <button class="mono segmento__b" type="button" data-valor="false">Borrador</button>
+          <button class="mono segmento__b" type="button" data-valor="true">Publicado</button>
+        </div>
+        <a class="mono ed-cab__ver" data-ed-ver target="_blank" rel="noopener">Ver en el aula ↗</a>
+      </div>
+      <p class="ed-cab__nota soft" data-ed-nota></p>
+    </header>
+
+    <nav class="segmento ed-secciones" aria-label="Partes del curso" data-ed-secciones>
+      <button class="mono segmento__b" type="button" data-seccion="clases" aria-pressed="true">Clases</button>
+      <button class="mono segmento__b" type="button" data-seccion="datos" aria-pressed="false">Datos del curso</button>
+      <button class="mono segmento__b" type="button" data-seccion="alumnas" aria-pressed="false">Alumnas</button>
+    </nav>
+
+    {/* --- Clases: el índice y la clase ------------------------------------ */}
+    <div class="ed-grid" data-ed-seccion="clases">
+      <aside class="esquema" aria-label="Índice del curso">
+        <div class="esquema__cab">
+          <p class="eyebrow">Índice</p>
+          <p class="mono soft esquema__ayuda">Arrastra para ordenar</p>
+        </div>
+        <div data-esquema></div>
+        <div class="esquema__pie" data-esquema-pie></div>
+      </aside>
+
+      <section class="clase-ed" aria-label="La clase">
+        <div class="clase-ed__vacia soft" data-clase-vacia>
+          Elige una clase del índice, o añade la primera con «Clase» debajo de un bloque.
+        </div>
+
+        <form class="clase-form" data-clase-form hidden novalidate>
+          <div class="clase-form__cab">
+            <p class="eyebrow" data-clase-donde></p>
+            <div class="segmento" role="group" aria-label="Estado de la clase" data-clase-estado>
+              <button class="mono segmento__b" type="button" data-valor="false">Borrador</button>
+              <button class="mono segmento__b" type="button" data-valor="true">Publicada</button>
+            </div>
+          </div>
+
+          <div class="dos">
+            {
+              (['es', 'en'] as const).map((l) => (
+                <fieldset class="idioma">
+                  <legend class="mono idioma__tag">{l === 'es' ? 'Español' : 'English'}</legend>
+                  <label class="campo">
+                    <span class="campo__t">{l === 'es' ? 'Título' : 'Title'}</span>
+                    <input
+                      type="text"
+                      data-c={`title_${l}`}
+                      placeholder={l === 'en' ? 'Vacío: en inglés se lee el título en español' : undefined}
+                    />
+                  </label>
+                  <label class="campo">
+                    <span class="campo__t">{l === 'es' ? 'Texto de la clase' : 'Class text'}</span>
+                    <textarea data-c={`summary_${l}`} rows="6" />
+                    <span class="campo__ayuda">
+                      {l === 'es'
+                        ? 'Lo que se lee debajo del video. Una línea en blanco separa los párrafos.'
+                        : 'Lo que se lee debajo del video, en inglés.'}
+                    </span>
+                  </label>
+                  <div class="campo">
+                    <span class="campo__t">{l === 'es' ? 'Video' : 'Video · EN'}</span>
+                    <input
+                      type="text"
+                      data-c={`video_${l}`}
+                      placeholder="Enlace, GUID o código <iframe> de Bunny"
+                      spellcheck="false"
+                    />
+                    <div class="video-actos">
+                      <button class="btn-text" type="button" data-elegir={l}>Elegir de Bunny</button>
+                      <button class="btn-text" type="button" data-probar={l}>Probar el video</button>
+                    </div>
+                    <p class="campo__ayuda" data-video-estado={l}></p>
+                    <div class="video-prueba" data-video-prueba={l} hidden></div>
+                  </div>
+                </fieldset>
+              ))
+            }
+          </div>
+
+          <label class="campo clase-form__dur">
+            <span class="campo__t">Duración</span>
+            <input type="text" data-c="duracion" placeholder="12:34" inputmode="numeric" />
+            <span class="campo__ayuda">Minutos y segundos. Si eliges el video de Bunny, se pone sola.</span>
+          </label>
+
+          <div class="materiales">
+            <p class="campo__t">Material de la clase</p>
+            <ul class="materiales__lista" role="list" data-materiales></ul>
+            <div class="materiales__actos">
+              <label class="btn-text materiales__subir">
+                Añadir archivo
+                <input type="file" multiple data-material-archivo hidden />
+              </label>
+              <button class="btn-text" type="button" data-material-enlace>Añadir enlace</button>
+            </div>
+            <p class="campo__ayuda">
+              PDF, partituras, audios… Solo los ve quien tiene el curso: el enlace que reciben caduca en una hora.
+            </p>
+          </div>
+
+          <p class="error" data-clase-error hidden></p>
+
+          <div class="clase-form__pie">
+            <div class="clase-form__actos" data-clase-actos></div>
+            <p class="mono soft" data-clase-sucio role="status"></p>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    {/* --- Datos del curso ------------------------------------------------ */}
+    <form class="ficha-form" data-ed-seccion="datos" data-datos-form hidden novalidate>
+      <div class="dos">
+        <label class="campo">
+          <span class="campo__t">Nombre · ES</span>
+          <input type="text" data-d="title_es" />
+        </label>
+        <label class="campo">
+          <span class="campo__t">Nombre · EN</span>
+          <input type="text" data-d="title_en" />
+        </label>
+      </div>
+      <div class="dos">
+        <label class="campo">
+          <span class="campo__t">De qué va · ES</span>
+          <textarea data-d="summary_es" rows="3"></textarea>
+          <span class="campo__ayuda">La línea de la ficha del escritorio. Para quien ya lo compró: de qué va, no por qué comprarlo.</span>
+        </label>
+        <label class="campo">
+          <span class="campo__t">De qué va · EN</span>
+          <textarea data-d="summary_en" rows="3"></textarea>
+        </label>
+      </div>
+      <label class="campo">
+        <span class="campo__t">Nombre corto (dirección)</span>
+        <input type="text" data-d="slug" spellcheck="false" autocomplete="off" />
+        <span class="campo__ayuda">
+          Cambiarlo cambia la dirección del curso en el aula: los enlaces que ya hayas mandado dejan de llevar a él.
+        </span>
+      </label>
+      <p class="error" data-datos-error hidden></p>
+      <div class="ficha-form__actos" data-datos-actos></div>
+
+      <div class="peligro">
+        <p class="campo__t">Borrar el curso</p>
+        <p class="soft">
+          Se borran sus bloques, sus clases, sus materiales, el avance de todas las alumnas y quién lo tiene. No se
+          puede deshacer. Si solo quieres esconderlo, déjalo en borrador.
+        </p>
+        <button class="btn-text" type="button" data-borrar-curso>Borrar este curso para siempre</button>
+      </div>
+    </form>
+
+    {/* --- Alumnas ---------------------------------------------------------- */}
+    <section class="alumnas" data-ed-seccion="alumnas" hidden>
+      <form class="alumnas__form" data-acceso-form novalidate>
+        <label class="campo">
+          <span class="campo__t">Dar acceso a mano</span>
+          <input type="email" data-acceso-email placeholder="correo@ejemplo.com" autocomplete="off" />
+          <span class="campo__ayuda">
+            Para alumnas de antes, regalos o pruebas. La persona tiene que tener cuenta: si nunca entró, que
+            entre una vez por la pantalla de acceso (o créasela cuando esté la pestaña Personas).
+          </span>
+        </label>
+        <div data-acceso-actos></div>
+      </form>
+      <p class="error" data-acceso-error hidden></p>
+      <ul class="filas" role="list" data-alumnas></ul>
+    </section>
+  </div>
+
+  {/* ==================================================================
+      EL SELECTOR DE BUNNY
+      ================================================================== */}
+  <dialog class="dialogo bunny" data-bunny aria-labelledby="bunny-h">
+    <div class="dialogo__cuerpo">
+      <p class="eyebrow" data-bunny-para></p>
+      <h2 class="app-h2" id="bunny-h">Tu biblioteca de Bunny</h2>
+      <div class="bunny__filtros">
+        <label class="campo">
+          <span class="campo__t">Colección</span>
+          <select data-bunny-coleccion>
+            <option value="">Todas</option>
+          </select>
+        </label>
+        <label class="campo">
+          <span class="campo__t">Buscar</span>
+          <input type="search" data-bunny-buscar placeholder="Título del video" />
+        </label>
+      </div>
+      <p class="soft bunny__estado" data-bunny-estado role="status"></p>
+      <ul class="bunny__lista" role="list" data-bunny-lista></ul>
+      <div class="dialogo__pie">
+        <button class="btn-text" type="button" data-bunny-cerrar>Cerrar</button>
+        <span data-bunny-hueco></span>
+      </div>
+    </div>
+  </dialog>
+</div>
+
+<script>
+  import '../../scripts/panel-cursos';
+</script>
+
+<style>
+  .cursos {
+    padding-top: var(--space-6);
+  }
+
+  .cursos__cab,
+  .ed-cab {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .cursos__h {
+    margin-top: var(--space-2);
+    max-width: 14ch;
+  }
+
+  .cursos__aviso {
+    margin-top: var(--space-4);
+    border-left: 2px solid var(--ink);
+  }
+
+  .cursos__nuevo {
+    margin-top: var(--space-4);
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+  }
+
+  /* --- La cabecera del editor ------------------------------------------- */
+  .ed-volver a {
+    border-bottom: 0;
+    color: var(--ink-soft);
+  }
+
+  .ed-volver a:hover {
+    color: var(--ink);
+  }
+
+  .ed-cab {
+    margin-top: var(--space-3);
+  }
+
+  .ed-cab__txt {
+    min-width: 0;
+    flex: 1 1 28rem;
+  }
+
+  .ed-cab__h {
+    margin-top: var(--space-1);
+    font-size: var(--text-anchor);
+    line-height: var(--leading-anchor);
+  }
+
+  .ed-cab__actos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .ed-cab__ver {
+    border-bottom: 0;
+  }
+
+  .ed-cab__nota {
+    flex: 1 0 100%;
+    font-size: var(--text-small);
+  }
+
+  .ed-secciones {
+    margin-top: var(--space-4);
+  }
+
+  /* --- El índice y la clase ----------------------------------------------- */
+  .ed-grid {
+    display: grid;
+    grid-template-columns: minmax(18rem, 24rem) minmax(0, 1fr);
+    gap: var(--space-6);
+    align-items: start;
+    margin-top: var(--space-4);
+  }
+
+  @media (max-width: 62rem) {
+    .ed-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .esquema {
+    position: sticky;
+    top: 5rem;
+    max-height: calc(100vh - 6rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: var(--space-1);
+  }
+
+  @media (max-width: 62rem) {
+    .esquema {
+      position: static;
+      max-height: none;
+    }
+  }
+
+  .esquema__cab {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding-bottom: var(--space-1);
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .esquema__ayuda {
+    font-size: 0.6875rem;
+  }
+
+  .esquema__pie {
+    margin-top: var(--space-3);
+  }
+
+  /* Un bloque del índice. */
+  .esquema :global(.esq-u) {
+    margin-top: var(--space-3);
+  }
+
+  .esquema :global(.esq-u.is-arrastrando),
+  .esquema :global(.esq-l.is-arrastrando) {
+    opacity: 0.4;
+  }
+
+  .esquema :global(.esq-u__cab) {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: var(--space-1);
+    cursor: grab;
+  }
+
+  .esquema :global(.esq-u__t) {
+    font-family: var(--font-display);
+    font-size: 1.375rem;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+
+  .esquema :global(.esq-actos) {
+    display: inline-flex;
+    gap: 0.25rem;
+    white-space: nowrap;
+  }
+
+  /* Los botones pequeños del índice: flechas y acciones, en mono. */
+  .esquema :global(.esq-b) {
+    min-width: 1.75rem;
+    min-height: 1.75rem;
+    padding: 0 0.25rem;
+    background: transparent;
+    border: 1px solid transparent;
+    font-family: var(--font-mono);
+    font-size: var(--text-mono);
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+
+  .esquema :global(.esq-b:hover) {
+    border-color: var(--rule);
+    color: var(--ink);
+  }
+
+  .esquema :global(.esq-b:disabled) {
+    visibility: hidden;
+  }
+
+  .esquema :global(.esq-renombrar) {
+    display: grid;
+    gap: var(--space-1);
+    margin-top: var(--space-1);
+    padding: var(--space-2);
+    border: 1px solid var(--rule);
+  }
+
+  .esquema :global(.esq-renombrar input) {
+    width: 100%;
+    padding: 0.5rem var(--space-1);
+    font: inherit;
+    font-size: var(--text-small);
+    border: 1px solid var(--rule);
+    background: var(--paper);
+  }
+
+  .esquema :global(.esq-renombrar__actos) {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .esquema :global(.esq-lista) {
+    min-height: var(--space-4);
+    margin: var(--space-1) 0 0;
+    padding: 0;
+    list-style: none;
+    border-left: 1px solid var(--rule);
+  }
+
+  .esquema :global(.esq-lista.is-destino) {
+    border-left-color: var(--ink);
+  }
+
+  .esquema :global(.esq-l) {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-1);
+    padding-left: var(--space-1);
+    border-left: 2px solid transparent;
+    margin-left: -1px;
+    cursor: grab;
+  }
+
+  .esquema :global(.esq-l.is-aqui) {
+    border-left-color: var(--ink);
+  }
+
+  .esquema :global(.esq-l.is-antes)::before,
+  .esquema :global(.esq-l.is-despues)::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--ink);
+  }
+
+  .esquema :global(.esq-l.is-antes)::before {
+    top: -1px;
+  }
+
+  .esquema :global(.esq-l.is-despues)::after {
+    bottom: -1px;
+  }
+
+  .esquema :global(.esq-l__b) {
+    display: grid;
+    gap: 0.125rem;
+    padding: var(--space-1) 0;
+    background: none;
+    border: 0;
+    font: inherit;
+    font-size: var(--text-small);
+    line-height: 1.35;
+    text-align: left;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .esquema :global(.esq-l__meta) {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+  }
+
+  .esquema :global(.esq-l.is-borrador .esq-l__t) {
+    color: var(--ink-soft);
+  }
+
+  .esquema :global(.esq-u__pie) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    margin: var(--space-1) 0 0 var(--space-2);
+  }
+
+  /* --- La clase ------------------------------------------------------------ */
+  .clase-ed__vacia {
+    padding: var(--space-6) var(--space-3);
+    border: 1px dashed var(--rule);
+    text-align: center;
+  }
+
+  .clase-form {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .clase-form__cab {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+
+  .clase-form__dur {
+    max-width: 12rem;
+  }
+
+  .video-actos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+  }
+
+  .video-prueba {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border: 1px solid var(--rule);
+  }
+
+  .video-prueba :global(iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .materiales {
+    display: grid;
+    gap: var(--space-1);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--rule);
+  }
+
+  .materiales__lista {
+    display: grid;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .materiales :global(.mat) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1);
+    border: 1px solid var(--rule);
+  }
+
+  .materiales :global(.mat input),
+  .materiales :global(.mat select) {
+    width: 100%;
+    min-width: 0;
+    padding: 0.4rem 0.5rem;
+    font: inherit;
+    font-size: 0.9375rem;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+  }
+
+  .materiales :global(.mat__fuente) {
+    grid-column: 1 / -1;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 40rem) {
+    .materiales :global(.mat) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .materiales__actos {
+    display: flex;
+    gap: var(--space-3);
+  }
+
+  .materiales__subir {
+    display: inline-block;
+  }
+
+  .clase-form__pie {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--ink);
+  }
+
+  .clase-form__actos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  /* --- Datos y alumnas ----------------------------------------------------- */
+  [data-datos-form] {
+    margin-top: var(--space-4);
+  }
+
+  .peligro {
+    display: grid;
+    gap: var(--space-1);
+    justify-items: start;
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--rule);
+  }
+
+  .peligro p {
+    max-width: var(--measure);
+    font-size: var(--text-small);
+  }
+
+  .alumnas {
+    margin-top: var(--space-4);
+  }
+
+  .alumnas__form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  .alumnas__form .campo {
+    flex: 1 1 22rem;
+  }
+
+  /* --- La lista de cursos -------------------------------------------------- */
+  .filas {
+    margin: var(--space-4) 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--ink);
+  }
+
+  .filas :global(.fila) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .filas :global(.fila__t) {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    line-height: 1.25;
+    border-bottom: 0;
+  }
+
+  .filas :global(.fila__txt .mono) {
+    margin-top: 0.25rem;
+  }
+
+  .filas :global(.fila__actos) {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .filas :global(.filas__vacio) {
+    padding: var(--space-3) 0;
+  }
+
+  @media (max-width: 40rem) {
+    .filas :global(.fila) {
+      grid-template-columns: 1fr;
+      justify-items: start;
+    }
+  }
+
+  /* --- El formulario de «nuevo» (mismo que Membresía) --------------------- */
+  .ficha-form {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border: 1px solid var(--ink);
+  }
+
+  .ficha-form__actos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  @media (max-width: 48rem) {
+    .ficha-form {
+      padding: var(--space-3);
+    }
+  }
+
+  /* --- Bunny ----------------------------------------------------------------- */
+  .bunny {
+    width: min(48rem, calc(100vw - 2 * var(--space-3)));
+  }
+
+  .bunny__filtros {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
+
+  @media (max-width: 36rem) {
+    .bunny__filtros {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .bunny__estado {
+    margin-top: var(--space-2);
+    font-size: var(--text-small);
+  }
+
+  .bunny__lista {
+    max-height: min(26rem, 50vh);
+    margin: var(--space-2) 0 0;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+    border-top: 1px solid var(--rule);
+  }
+
+  .bunny__lista :global(.bv) {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) 0;
+    border-bottom: 1px solid var(--rule);
+    cursor: pointer;
+  }
+
+  .bunny__lista :global(.bv:hover) {
+    background: rgba(13, 13, 13, 0.03);
+  }
+
+  .bunny__lista :global(.bv img) {
+    width: 5rem;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    filter: grayscale(1);
+  }
+
+  .bunny__lista :global(.bv__t) {
+    font-size: var(--text-small);
+    line-height: 1.35;
+  }
+
+  .bunny__lista :global(.bv input) {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--ink);
+  }
+</style>

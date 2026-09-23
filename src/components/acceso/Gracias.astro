@@ -31,6 +31,7 @@
 import type { Lang } from '../../i18n/ui';
 import { useAula, clavePath, escritorioPath, entrarPath } from '../../i18n/aula';
 import { isSupabaseConfigured } from '../../lib/supabase';
+import Boton from '../Boton.astro';
 
 interface Props {
   lang: Lang;
@@ -57,7 +58,7 @@ const a = useAula(lang);
   data-t-noemail={a('signin.noEmail')}
 >
   <p class="eyebrow">{a('thanks.eyebrow')}</p>
-  <h1 class="gracias__h">{a('thanks.title')}</h1>
+  <h1 class="puerta__h">{a('thanks.title')}</h1>
 
   {
     !isSupabaseConfigured && (
@@ -84,10 +85,7 @@ const a = useAula(lang);
 
       <p class="error" data-error-clave hidden></p>
 
-      <button class="btn btn--solid" type="submit" data-enviar-clave>
-        <span class="btn__fill" aria-hidden="true"></span>
-        <span class="btn__label">{a('thanks.go')}</span>
-      </button>
+      <Boton class="boton--solid" type="submit" data-enviar-clave>{a('thanks.go')}</Boton>
     </form>
 
     <p class="gracias__alt">
@@ -111,10 +109,7 @@ const a = useAula(lang);
       <p class="error" data-error-correo hidden></p>
       <p class="ok" data-ok-correo hidden>{a('thanks.sent')}</p>
 
-      <button class="btn btn--solid" type="submit" data-enviar-correo>
-        <span class="btn__fill" aria-hidden="true"></span>
-        <span class="btn__label">{a('thanks.send')}</span>
-      </button>
+      <Boton class="boton--solid" type="submit" data-enviar-correo>{a('thanks.send')}</Boton>
     </form>
 
     <p class="soft gracias__spam">{a('thanks.spam')}</p>
@@ -194,7 +189,7 @@ const a = useAula(lang);
       const c2 = ($('[data-clave2]') as HTMLInputElement).value;
       const err = $('[data-error-clave]')!;
       const btn = $('[data-enviar-clave]') as HTMLButtonElement;
-      const rotulo = btn.querySelector('.btn__label')!;
+      const rotulo = btn.querySelector('.boton__label')!;
 
       err.hidden = true;
       if (c1.length < 8) {
@@ -261,7 +256,7 @@ const a = useAula(lang);
       const err = $('[data-error-correo]')!;
       const ok = $('[data-ok-correo]')!;
       const btn = $('[data-enviar-correo]') as HTMLButtonElement;
-      const rotulo = btn.querySelector('.btn__label')!;
+      const rotulo = btn.querySelector('.boton__label')!;
 
       err.hidden = true;
       ok.hidden = true;
@@ -295,104 +290,47 @@ const a = useAula(lang);
 </script>
 
 <style>
-  .gracias__h {
-    font-size: clamp(1.9rem, 4.4vw, 2.6rem);
-    letter-spacing: -0.025em;
-    line-height: 1.05;
-    margin: 0.4rem 0 0.5rem;
-  }
-
+  /* Los campos, el aviso y los errores son del marco (`styles/app.css`); acá
+     solo lo que es de esta pantalla. */
   .gracias__h2 {
-    font-size: 1.15rem;
-    font-weight: 600;
-    margin: 0 0 0.4rem;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--text-section);
+    line-height: var(--leading-section);
+    margin: var(--space-3) 0 0;
   }
 
   .gracias__lead {
-    margin: 0 0 clamp(24px, 4vh, 36px);
+    margin: var(--space-2) 0 var(--space-4);
+    color: var(--ink-soft);
   }
 
   .gracias__alt {
-    margin: clamp(20px, 3vh, 28px) 0 0;
-    font-size: 0.92rem;
+    margin: var(--space-4) 0 0;
   }
 
   .gracias__spam {
-    margin: clamp(20px, 3vh, 28px) 0 0;
-    font-size: 0.88rem;
+    margin: var(--space-4) 0 0;
+    font-size: var(--text-small);
     line-height: 1.5;
   }
 
   /* Un `<button>` que se lee como enlace: cambia esta pantalla, no navega, así
      que tiene que ser un botón para el teclado y el lector de pantalla — pero
-     para el ojo es lo mismo que el resto de los enlaces del marco. */
+     para el ojo es un enlace del sitio, con su regla de 1 px. */
   .enlace {
     appearance: none;
     padding: 0;
     border: 0;
+    border-bottom: 1px solid var(--ink-soft);
     background: none;
     font: inherit;
+    font-size: var(--text-small);
     color: inherit;
-    text-decoration: underline;
-    text-underline-offset: 3px;
     cursor: pointer;
   }
 
-  .aviso {
-    border: 1px solid var(--rule);
-    background: var(--surface);
-    padding: 14px 16px;
-    font-size: 0.92rem;
-    margin: 0 0 clamp(24px, 4vh, 36px);
-  }
-
-  .campos {
-    display: grid;
-    gap: 18px;
-    justify-items: stretch;
-  }
-
-  .campo {
-    display: grid;
-    gap: 7px;
-  }
-
-  .campo__t {
-    font-size: 0.92rem;
-    font-weight: 600;
-  }
-
-  /* Los mismos campos que la pantalla de acceso. Se repiten y no se sacan a
-     `aula.css` porque el estilo de Astro va por componente: mientras solo sean
-     dos pantallas, duplicar seis reglas cuesta menos que abrir una clase
-     global que cualquiera pueda tocar sin saber quién la usa. */
-  .campo input {
-    font: inherit;
-    color: var(--ink);
-    background: var(--paper);
-    border: 1px solid var(--rule);
-    padding: 12px 14px;
-    width: 100%;
-    transition: border-color var(--fast) var(--ease);
-  }
-
-  .campo input:focus {
-    outline: none;
-    border-color: var(--ink);
-  }
-
-  .error,
-  .ok {
-    margin: 0;
-    font-size: 0.92rem;
-    font-weight: 600;
-  }
-
-  .error {
-    color: var(--accent-strong);
-  }
-
-  .campos .btn {
-    justify-self: start;
+  .enlace:hover {
+    border-bottom-color: currentColor;
   }
 </style>

@@ -1,37 +1,28 @@
 ---
 /**
- * El marco del Aula Virtual — lo que rodea a todas las pantallas de adentro.
+ * El marco del Aula Virtual — lo que rodea al escritorio y a los cursos.
  *
- * **No usa `Base.astro`, y es a propósito.** `Base.astro` es el marco del sitio
- * público: la cápsula de cristal del menú, el pie con el newsletter, el fondo
- * del contrabajo, la entrada animada. Todo eso existe para que alguien que
- * llega de fuera se quede. Acá dentro ya se quedó: pagó, entró y viene a
- * estudiar, y lo que necesita es saber en qué curso está, cuánto le falta y
- * cómo llegar a la clase siguiente. Son dos trabajos distintos, así que son dos
- * marcos distintos — lo mismo que hace la carta trasplantada, que tampoco cabe
- * dentro de `Base.astro`.
+ * **Desde el 23 sep 2026 va dentro de `Base.astro`**, con el menú de cápsula,
+ * el pie, la letra y el papel de todo el sitio. Lo pidió Adrián —«pásalo al
+ * estilo nuevo de la web, todo»— cuando las cartas ya se habían pasado. Hasta
+ * ese día el aula era un documento aparte con la ropa de la academia (crema,
+ * Hanken Grotesk, su propia barra), y la costura se notaba al entrar desde
+ * Formaciones.
  *
- * De la carta de la membresía sí hereda **la ropa entera**: la crema, la tinta
- * cálida, Hanken Grotesk y los botones con su relleno y sus notas musicales.
- * La alumna que entra acá acaba de leer esa carta; el aula es su continuación,
- * no otro sitio. Lo único que se dejó fuera es el cursor de clave de fa, por
- * pedido de Emi: en una carta es una gracia, en un sitio donde se arrastran
- * barras y se marcan casillas estorba.
- *
- * Lo que este fichero pone y ninguna pantalla repite:
- *   · el documento, con `noindex` — esto está detrás de una sesión
- *   · la barra superior y el pie
- *   · el almacén del progreso (`window.Aula`), que es la maqueta de la futura
- *     base de datos
- *   · los tres gestos compartidos: el fundido al entrar en pantalla, el
- *     relleno de los botones y las notas musicales
+ * Lo que pone este marco y ninguna pantalla repite:
+ *   · `noindex` — esto está detrás de una sesión
+ *   · la barra del aula: dónde estás y a dónde puedes ir (escritorio,
+ *     membresía, Formaciones, el panel si eres Emi, salir)
+ *   · el portón, que tapa la pantalla mientras se pregunta quién entra
+ *   · el aviso de maqueta cuando no hay base de datos
  */
-import { type Lang, routePath, productPath } from '../i18n/ui';
+import Base from './Base.astro';
+import Boton from '../components/Boton.astro';
+import { type Lang, routePath, productPath, useTranslations } from '../i18n/ui';
 import { useAula, escritorioPath, entrarPath, salirPath, panelPath } from '../i18n/aula';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { ACADEMIA } from '../data/aula';
-import { ALUMNA_DEMO } from '../data/cursos';
-import '../styles/aula.css';
+import '../styles/app.css';
 
 interface Props {
   lang: Lang;
@@ -42,956 +33,237 @@ interface Props {
   /** La dirección de ESTA pantalla en cada idioma, para el conmutador. */
   pathEs: string;
   pathEn: string;
-  /** Una migaja a la izquierda del título en la barra (el nombre del curso). */
+  /** Dónde estás, después de «Aula Virtual» (el nombre del curso). */
   migaja?: string;
-  /** El ancho de trabajo: el reproductor va a lo ancho, el escritorio no. */
-  ancho?: 'normal' | 'full';
 }
 
-const {
-  lang,
-  title,
-  seccion = 'escritorio',
-  pathEs,
-  pathEn,
-  migaja,
-  ancho = 'normal',
-} = Astro.props;
-
+const { lang, title, seccion = 'escritorio', pathEs, pathEn, migaja } = Astro.props;
 const a = useAula(lang);
-const otro: Lang = lang === 'es' ? 'en' : 'es';
-const otroHref = lang === 'es' ? pathEn : pathEs;
+const t = useTranslations(lang);
 
 /**
- * A dónde va «Membresía».
- *
- * Hoy, fuera del sitio: la membresía sigue cobrando y sirviendo sus clases en
- * `emilseriosacademy.com`, con miembros reales dentro, y no se toca hasta
- * después del cambio de dominio. El escritorio lo dice en vez de dejar que la
- * alumna descubra sola el salto de dominio. El día que se mude, esto pasa a ser
- * una ruta interna y ni la barra ni el escritorio se enteran.
+ * La membresía sigue viviendo en `emilseriosacademy.com`, con miembros reales
+ * dentro, y se muda la última, con el cambio de dominio. Mientras tanto el
+ * enlace sale del sitio y lo dice con su flecha.
  */
 const membresiaHref = `${ACADEMIA}/aula/`;
-const fuera = membresiaHref.startsWith('http');
-
-/**
- * A dónde manda «Salir».
- *
- * Hasta la capa A esto iba a la portada, porque no había sesión que cerrar.
- * Ya la hay: ahora va a la pantalla que la cierra de verdad —limpia los dos
- * almacenes y avisa a Supabase— y desde ahí devuelve a la puerta.
- */
 const salirHref = salirPath(lang);
 ---
 
-<!doctype html>
-<html lang={lang} class="aula no-js">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title} · {a('app.title')}</title>
-    {/*
-      El aula vive detrás de una sesión: no tiene nada que hacer en un buscador,
-      y una URL indexada que siempre devuelve la puerta es ruido para todo el
-      mundo. La tienda —que es la que sí tiene que encontrarse— está afuera.
-    */}
-    <meta name="robots" content="noindex, nofollow" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    {/*
-      La base de la academia: es de donde salen Hanken Grotesk y Space Grotesk,
-      las mismas dos familias con las que está escrita la carta de la membresía.
-      Va enlazada desde `public/`, igual que en la carta, y no importada: el
-      fichero es el original de la academia y se deja intacto para que la
-      próxima vez que lo actualicen allá se pueda volver a copiar tal cual.
-
-      Las reglas del aula viven en `src/styles/aula.css`, empaquetadas por
-      Astro, y ganan a estas por especificidad —cuelgan de `html.aula`—, así
-      que no dependen de cuál de las dos hojas llegue primero.
-    */}
-    <link rel="stylesheet" href="/colors_and_type.css" />
-
-    <script is:inline>
-      document.documentElement.classList.remove('no-js');
-    </script>
-
-    {/*
-      El almacén va en el <head>, y no al final del <body> como el resto de los
-      scripts, por una razón que costó un rato encontrar: el contenido de cada
-      pantalla se imprime en el <slot>, que va ANTES de los scripts finales del
-      marco. Un reproductor que arranque buscando `window.Aula` en el cuerpo se
-      lo encuentra sin definir y se calla. Acá arriba está listo antes de que
-      exista el primer nodo, que es lo que necesita cualquier pantalla.
-      No toca el DOM, así que no retrasa nada.
-    */}
-    {/*
-      ------------------------------------------------------------------------
-      EL ALMACÉN — `window.Aula`
-      ------------------------------------------------------------------------
-      Es la maqueta de la base de datos que todavía no existe, y está escrito
-      para que el día que exista **solo cambie este bloque**: las pantallas
-      llaman a `Aula.ver()`, `Aula.marcar()` o `Aula.preguntar()` sin saber si
-      detrás hay `localStorage` o un `fetch`.
-
-      Las formas guardadas son ya las filas que tendrán las tablas:
-
-        progreso[claseId] = { s, d, hecho, ts }
-            s      segundo en el que se quedó       → lesson_progress.position
-            d      duración conocida del video      → lessons.duration
-            hecho  marcada como vista               → lesson_progress.completed
-            ts     cuándo se tocó por última vez    → updated_at
-
-        ultima[cursoSlug] = claseId               → enrollments.last_lesson
-
-        preguntas[] = { id, curso, clase, minuto, texto, ts, estado }
-            todo lo que Emi necesita ver en su panel: quién, en qué curso, en
-            qué clase y en qué minuto. El «quién» no está porque no hay sesión;
-            lo pone el servidor, nunca el navegador.
-
-      ⚠️ `localStorage` es **de este navegador**. No viaja entre dispositivos, y
-      quien borre los datos del sitio pierde el avance. Es aceptable en una
-      maqueta y no lo es el día del estreno: el progreso tiene que vivir en el
-      servidor, atado al usuario.
-    */}
-    <script is:inline>
-      (function () {
-        var KEY = 'aula:v1:';
-        var VACIO = { progreso: {}, ultima: {}, preguntas: [] };
-
-        function leer(caja) {
-          try {
-            var crudo = localStorage.getItem(KEY + caja);
-            return crudo ? JSON.parse(crudo) : structuredClone(VACIO[caja]);
-          } catch (e) {
-            /* Modo privado, almacenamiento lleno o JSON corrupto: el aula se
-               usa igual, solo que sin memoria. Nunca se rompe por esto. */
-            return structuredClone(VACIO[caja]);
-          }
-        }
-
-        function escribir(caja, valor) {
-          try {
-            localStorage.setItem(KEY + caja, JSON.stringify(valor));
-          } catch (e) {}
-          document.dispatchEvent(new CustomEvent('aula:cambio', { detail: { caja: caja } }));
-        }
-
-        var Aula = {
-          /**
-           * `mm:ss` o `h:mm:ss`. Gemelo del `reloj()` de `src/data/cursos.ts`,
-           * que hace lo mismo en el servidor: el listado de clases se pinta en
-           * el build y los minutos que cambian solos se pintan acá, y los dos
-           * tienen que escribir la hora igual o la ficha baila al actualizarse.
-           */
-          reloj: function (s) {
-            /* Cero no es «no se sabe»: sin dato, nada; en el segundo cero,
-               `0:00`. Igual que el `reloj()` del servidor. */
-            if (s == null || isNaN(s) || s < 0) return '';
-            var seg = Math.floor(s % 60);
-            var min = Math.floor((s / 60) % 60);
-            var hor = Math.floor(s / 3600);
-            var dos = function (n) { return String(n).padStart(2, '0'); };
-            return hor > 0 ? hor + ':' + dos(min) + ':' + dos(seg) : min + ':' + dos(seg);
-          },
-
-          progreso: function () {
-            return leer('progreso');
-          },
-
-          /** El avance de una clase, siempre con la misma forma. */
-          de: function (id) {
-            var p = leer('progreso')[id];
-            return p || { s: 0, d: 0, hecho: false, ts: 0 };
-          },
-
-          /**
-           * Guarda el segundo en el que va. Se llama muy seguido —el
-           * reproductor avisa varias veces por segundo—, así que quien llame
-           * decide cada cuánto; acá no se hace de portero para no esconder el
-           * coste.
-           *
-           * Pasado el 92 % la clase se da por vista sola: los últimos segundos
-           * son los créditos y nadie los mira, y obligar a marcar a mano lo que
-           * ya se vio es de las cosas que más se odian de las plataformas de
-           * cursos.
-           */
-          ver: function (id, s, d) {
-            var todo = leer('progreso');
-            var antes = todo[id] || { s: 0, d: 0, hecho: false, ts: 0 };
-            var hecho = antes.hecho || (d > 0 && s / d >= 0.92);
-            todo[id] = { s: Math.max(0, Math.floor(s)), d: Math.floor(d || antes.d), hecho: hecho, ts: Date.now() };
-            escribir('progreso', todo);
-          },
-
-          marcar: function (id, hecho) {
-            var todo = leer('progreso');
-            var antes = todo[id] || { s: 0, d: 0, hecho: false, ts: 0 };
-            antes.hecho = !!hecho;
-            antes.ts = Date.now();
-            todo[id] = antes;
-            escribir('progreso', todo);
-          },
-
-          ultima: function (curso, id) {
-            var todo = leer('ultima');
-            if (id === undefined) return todo[curso] || null;
-            todo[curso] = id;
-            escribir('ultima', todo);
-          },
-
-          preguntas: function (curso) {
-            var todas = leer('preguntas');
-            return curso ? todas.filter(function (p) { return p.curso === curso; }) : todas;
-          },
-
-          preguntar: function (p) {
-            var todas = leer('preguntas');
-            p.id = 'q' + Date.now().toString(36);
-            p.ts = Date.now();
-            p.estado = 'esperando';
-            todas.unshift(p);
-            escribir('preguntas', todas);
-            return p;
-          },
-
-          borrarPregunta: function (id) {
-            escribir(
-              'preguntas',
-              leer('preguntas').filter(function (p) { return p.id !== id; }),
-            );
-          },
-
-          limpiar: function () {
-            try {
-              ['progreso', 'ultima', 'preguntas'].forEach(function (c) {
-                localStorage.removeItem(KEY + c);
-              });
-            } catch (e) {}
-            location.reload();
-          },
-        };
-
-        window.Aula = Aula;
-      })();
-    </script>
-
-  </head>
-
-  <body
-    class="aula__body"
+<Base
+  lang={lang}
+  title={`${title} · ${a('app.title')}`}
+  description={a('app.title')}
+  route="aula"
+  pathEs={pathEs}
+  pathEn={pathEn}
+  noindex
+>
+  <div
+    class="aula"
     data-aula
-    data-entrar={entrarPath(lang)}
     data-gate-needed={a('gate.needed')}
     data-gate-needed-lead={a('gate.neededLead')}
     data-gate-nosub={a('gate.noSub')}
     data-gate-nosub-lead={a('gate.noSubLead')}
-    data-membresia={productPath('estudiemos-juntos', lang)}
-    data-salir={salirHref}
   >
-    <a class="skip" href="#aula">{a('app.skip')}</a>
-
     {/*
-      El portero del aula.
+      El portón. Nace visible cuando hay base de datos y se quita al confirmar
+      el acceso, no al revés: así nadie ve el aula un instante antes de que le
+      digan que no puede.
 
-      Desde el 22 sep 2026 hace **dos** preguntas, no una: ¿hay sesión?, y
-      ¿tiene la suscripción al día? Antes bastaba con la primera, y eso dejaba
-      entrar a quien canceló hace seis meses. El candado es `has_active_sub()`,
-      que ya existía en la base de datos desde la primera migración de la
-      academia — acá solo se le pregunta.
-
-      ⚠️ **No es la seguridad, es la puerta de la casa.** Lo que esconde es la
-      pantalla, no los datos: hoy el contenido de las clases va escrito en el
-      HTML porque es de muestra, así que alguien con la consola abierta lo ve
-      igual, tenga suscripción o no. No importa mientras sea de muestra — y
-      **deja de no importar el día que entre el curso de verdad**. Ese día las
-      clases tienen que llegar por consulta a Supabase, con la RLS decidiendo, y
-      no venir horneadas en la página. Está anotado en `progreso.md` como lo que
-      cierra la capa B.
-
-      Nace visible en el HTML y se quita al confirmar el acceso, no al revés:
-      así nadie ve el aula un instante antes de que le digan que no puede.
+      ⚠️ **No es la seguridad, es la puerta de la casa.** Desde el 23 sep 2026
+      el contenido de los cursos no va escrito en el HTML: llega por consulta,
+      y la base de datos solo se lo da a quien lo tiene. Forzar este portón
+      desde la consola enseña un escritorio vacío.
     */}
     <div class="porton" data-porton hidden={!isSupabaseConfigured}>
       <div class="porton__caja">
         <img class="porton__logo" src="/logo.svg" alt="Emilse Ríos" width="1631" height="487" />
         <p class="eyebrow">{a('app.title')}</p>
         <h1 class="porton__h" data-porton-h>{a('gate.checking')}</h1>
-        <p class="soft" data-porton-p>{a('gate.wait')}</p>
+        <p class="porton__p" data-porton-p>{a('gate.wait')}</p>
+
         {/* Para quien no ha iniciado sesión. */}
         <div class="porton__actos" data-porton-actos hidden>
-          <a class="btn btn--solid" href={entrarPath(lang)}>
-            <span class="btn__fill" aria-hidden="true"></span>
-            <span class="btn__label">{a('gate.signin')}</span>
-          </a>
-          <a class="btn" href={routePath('products', lang)}>
-            <span class="btn__fill" aria-hidden="true"></span>
-            <span class="btn__label">{a('app.store')}</span>
-          </a>
+          <Boton class="boton--solid" href={entrarPath(lang)}>{a('gate.signin')}</Boton>
+          <Boton href={routePath('products', lang)}>{t('nav.products')}</Boton>
         </div>
 
         {/*
-          Para quien SÍ tiene sesión pero no suscripción al día. Son botones
-          distintos porque el problema es otro: acá «iniciar sesión» no
-          arregla nada —ya está dentro de su cuenta— y lo que necesita es o
-          bien ponerse al día, o bien darse cuenta de que entró con la cuenta
-          equivocada, que pasa más de lo que parece cuando alguien tiene dos
-          correos.
+          Para quien SÍ tiene sesión pero nada a su nombre. Botones distintos
+          porque el problema es otro: «iniciar sesión» no arregla nada —ya está
+          dentro de su cuenta— y lo que necesita es ponerse al día o darse
+          cuenta de que entró con la cuenta equivocada.
         */}
         <div class="porton__actos" data-porton-actos-sub hidden>
-          <a class="btn btn--solid" data-ir-membresia href={routePath('products', lang)}>
-            <span class="btn__fill" aria-hidden="true"></span>
-            <span class="btn__label">{a('gate.seeMembership')}</span>
-          </a>
-          <a class="btn" data-ir-salir href={salirHref}>
-            <span class="btn__fill" aria-hidden="true"></span>
-            <span class="btn__label">{a('gate.otherAccount')}</span>
-          </a>
+          <Boton class="boton--solid" href={productPath('estudiemos-juntos', lang)}>
+            {a('gate.seeMembership')}
+          </Boton>
+          <Boton href={salirHref}>{a('gate.otherAccount')}</Boton>
         </div>
       </div>
     </div>
 
-    <header class="bar">
-      <div class="bar__in">
-        <a class="bar__logo" href={escritorioPath(lang)} aria-label={a('app.backDesk')}>
-          <img src="/logo.svg" alt="Emilse Ríos" width="1631" height="487" />
-        </a>
+    <nav class="aula-bar app-wrap" aria-label={a('app.menu')}>
+      <p class="aula-bar__donde eyebrow">
+        <a href={escritorioPath(lang)}>{a('app.title')}</a>
+        {
+          migaja && (
+            <>
+              <span aria-hidden="true"> / </span>
+              <span class="aula-bar__migaja">{migaja}</span>
+            </>
+          )
+        }
+      </p>
 
-        <p class="bar__where">
-          <span class="eyebrow">{a('app.title')}</span>
-          {migaja && <span class="bar__crumb">{migaja}</span>}
-        </p>
-
-        <nav class="bar__nav" aria-label={a('app.menu')}>
+      <ul class="aula-bar__nav" role="list">
+        <li>
           <a
-            class="bar__link"
+            class="mono"
             href={escritorioPath(lang)}
             aria-current={seccion === 'escritorio' ? 'page' : undefined}>{a('app.desk')}</a
           >
-          <a class="bar__link" href={membresiaHref} rel={fuera ? 'noopener' : undefined}
-            >{a('app.membership')}{fuera && <span class="bar__out" aria-hidden="true">↗</span>}</a
+        </li>
+        <li>
+          <a class="mono" href={membresiaHref} rel="noopener"
+            >{a('app.membership')}<span aria-hidden="true"> ↗</span></a
           >
-          <a class="bar__link" href={routePath('products', lang)}>{a('app.store')}</a>
-        </nav>
-
-        <div class="bar__end">
-          {/*
-            El enlace que Emi ya conoce de la academia, en el mismo sitio y con
-            el mismo texto. Nace OCULTO y lo enseña el script solo si el perfil
-            dice `admin`. Al revés —dibujarlo y esconderlo después— una alumna
-            vería parpadear un enlace al panel de Emi cada vez que entra.
-          */}
-          <a class="bar__link bar__admin" href={panelPath()} data-admin hidden
-            >{a('panel.back')}</a
-          >
-          <a class="bar__lang" href={otroHref} hreflang={otro} lang={otro}
-            >{otro === 'en' ? 'EN' : 'ES'}</a
-          >
-          <span class="bar__who" title={ALUMNA_DEMO.nombre}>
-            <span aria-hidden="true">{ALUMNA_DEMO.nombre.slice(0, 1)}</span>
-            <span class="visually-hidden">{ALUMNA_DEMO.nombre}</span>
-          </span>
-          <a class="bar__link bar__leave" href={salirHref}>{a('app.leave')}</a>
-        </div>
-
+        </li>
+        <li>
+          <a class="mono" href={routePath('products', lang)}>{t('nav.products')}</a>
+        </li>
         {/*
-          En móvil la barra se queda con el logo y el resto se pliega acá. Va en
-          <details> y no en un panel con script: el teclado, el foco y el estado
-          abierto/cerrado ya vienen hechos por el navegador, y lo único que hay
-          que añadirle es cerrarse al tocar fuera.
+          El enlace que Emi ya conoce de la academia. Nace OCULTO y lo enseña el
+          script solo si el perfil dice `admin`: al revés, una alumna vería
+          parpadear un enlace al panel cada vez que entra.
         */}
-        <details class="bar__more">
-          <summary aria-label={a('app.menu')}>
-            <span class="bar__burger" aria-hidden="true"></span>
-          </summary>
-          <div class="bar__drawer">
-            <a href={escritorioPath(lang)}>{a('app.desk')}</a>
-            <a href={membresiaHref} rel={fuera ? 'noopener' : undefined}>{a('app.membership')}</a>
-            <a href={routePath('products', lang)}>{a('app.store')}</a>
-            <a href={otroHref} hreflang={otro} lang={otro}>{otro === 'en' ? 'English' : 'Español'}</a>
-            <a href={panelPath()} data-admin hidden>{a('panel.back')}</a>
-            <a href={salirHref}>{a('app.leave')}</a>
-          </div>
-        </details>
-      </div>
-    </header>
+        <li data-admin hidden>
+          <a class="mono" href={panelPath()}>{a('panel.back')}</a>
+        </li>
+        <li>
+          <a class="mono" href={salirHref}>{a('app.leave')}</a>
+        </li>
+      </ul>
+    </nav>
 
-    <main id="aula" class:list={['aula__main', ancho === 'full' && 'aula__main--full']}>
-      <slot />
-    </main>
-
-    <footer class="foot">
-      <div class="wrap foot__in">
-        <p class="foot__note">
-          <span class="foot__badge">{a('demo.badge')}</span>
-          {a('demo.lead')}
-        </p>
-        <div class="foot__acts">
-          <button class="btn-text" type="button" data-aula-reset>{a('demo.reset')}</button>
-          <a class="foot__site" href={routePath('home', lang)}>{a('app.site')}</a>
+    {
+      !isSupabaseConfigured && (
+        <div class="app-wrap aula__maqueta">
+          <p class="aviso">
+            <b>{a('demo.badge')}</b> — {a('demo.lead')}
+          </p>
         </div>
-      </div>
-    </footer>
+      )
+    }
 
-    {/*
-      Los tres gestos compartidos: el fundido al entrar en pantalla, el relleno
-      de los botones y las notas musicales. Vienen de la carta de la membresía
-      tal cual —mismos tiempos, mismos colores— porque es la firma de la casa y
-      la alumna la reconoce.
-    */}
-    <script is:inline define:vars={{ preguntaReset: a('demo.resetAsk') }}>
-      (function () {
-        var quieto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        var fino = window.matchMedia('(pointer: fine)').matches;
+    <slot />
+  </div>
+</Base>
 
-        /* --- Fundido al entrar en pantalla --------------------------------- */
-        var revs = document.querySelectorAll('.reveal');
-        if (quieto || !('IntersectionObserver' in window)) {
-          revs.forEach(function (el) { el.classList.add('is-visible'); });
-        } else {
-          var io = new IntersectionObserver(
-            function (entradas) {
-              entradas.forEach(function (en) {
-                if (en.isIntersecting) {
-                  en.target.classList.add('is-visible');
-                  io.unobserve(en.target);
-                }
-              });
-            },
-            { rootMargin: '0px 0px -8% 0px', threshold: 0.06 },
-          );
-          revs.forEach(function (el) { io.observe(el); });
+<script>
+  import { isSupabaseConfigured } from '../lib/supabase';
+  import { acceso, puedePasar } from '../lib/aula-acceso';
+
+  const caja = document.querySelector<HTMLElement>('[data-aula]');
+
+  if (caja && isSupabaseConfigured) {
+    const porton = caja.querySelector<HTMLElement>('[data-porton]')!;
+
+    /** Deja el portón puesto con un mensaje y su juego de botones. */
+    const cerrar = (titulo: string, texto: string, actos: string) => {
+      porton.querySelector<HTMLElement>('[data-porton-h]')!.textContent = titulo;
+      porton.querySelector<HTMLElement>('[data-porton-p]')!.textContent = texto;
+      porton.querySelector<HTMLElement>(actos)!.hidden = false;
+    };
+
+    acceso()
+      .then((a) => {
+        if (!a.sesion) {
+          cerrar(caja.dataset.gateNeeded!, caja.dataset.gateNeededLead!, '[data-porton-actos]');
+          return;
         }
-
-        /* La red de seguridad de la carta, y no es teórica: todo `.reveal`
-           arranca invisible, así que si el observador falla —o si un error de
-           otro script corta la ejecución antes— la pantalla se queda EN BLANCO.
-           A 1,4 s aparece todo, pase lo que pase. */
-        setTimeout(function () {
-          document.querySelectorAll('.reveal').forEach(function (el) {
-            el.classList.add('is-visible');
-          });
-        }, 1400);
-
-        /* --- Botones: el relleno nace bajo el cursor, y el imán ------------ */
-        function armar(btn) {
-          if (btn.dataset.armado) return;
-          btn.dataset.armado = '1';
-          btn.addEventListener('pointermove', function (e) {
-            var r = btn.getBoundingClientRect();
-            var x = e.clientX - r.left;
-            var y = e.clientY - r.top;
-            btn.style.setProperty('--mx', x + 'px');
-            btn.style.setProperty('--my', y + 'px');
-            if (fino && !quieto) {
-              var dx = (x - r.width / 2) / r.width;
-              var dy = (y - r.height / 2) / r.height;
-              btn.style.transform =
-                'translate(' + (dx * 6).toFixed(1) + 'px,' + (dy * 5).toFixed(1) + 'px)';
-            }
-          });
-          btn.addEventListener('pointerleave', function () {
-            btn.style.transform = '';
-          });
-
-          /* --- Notas musicales ------------------------------------------- */
-          if (quieto || !fino) return;
-          var reloj = null;
-          btn.addEventListener('pointerenter', function () {
-            notas(btn);
-            reloj = setInterval(function () { notas(btn); }, 460);
-          });
-          btn.addEventListener('pointerleave', function () {
-            if (reloj) { clearInterval(reloj); reloj = null; }
-          });
+        if (!puedePasar(a)) {
+          cerrar(caja.dataset.gateNosub!, caja.dataset.gateNosubLead!, '[data-porton-actos-sub]');
+          return;
         }
-
-        var GLIFOS = ['♪', '♫', '♩', '♬'];
-        var COLORES = ['#a94f2b', '#6b3f2a', '#c9a24a', '#7a8b5a', '#4a6d8c', '#b5504a'];
-        function notas(btn) {
-          var r = btn.getBoundingClientRect();
-          var cuantas = 2 + Math.floor(Math.random() * 2);
-          for (var i = 0; i < cuantas; i++) {
-            var s = document.createElement('span');
-            s.className = 'note-pop';
-            s.textContent = GLIFOS[Math.floor(Math.random() * GLIFOS.length)];
-            s.style.left = r.left + 12 + Math.random() * Math.max(1, r.width - 24) + 'px';
-            s.style.top = r.top + r.height * 0.3 + 'px';
-            s.style.color = COLORES[Math.floor(Math.random() * COLORES.length)];
-            s.style.fontSize = 15 + Math.random() * 13 + 'px';
-            s.style.setProperty('--dx', ((Math.random() * 2 - 1) * 46).toFixed(0) + 'px');
-            s.style.setProperty('--rot', ((Math.random() * 2 - 1) * 40).toFixed(0) + 'deg');
-            document.body.appendChild(s);
-            s.addEventListener('animationend', function () { this.remove(); });
-          }
+        porton.hidden = true;
+        /* El enlace de vuelta al panel: solo para Emi, y después de
+           preguntarle a la base de datos, nunca antes. */
+        if (a.admin) {
+          caja.querySelectorAll<HTMLElement>('[data-admin]').forEach((el) => (el.hidden = false));
         }
-
-        document.querySelectorAll('.btn').forEach(armar);
-        /* El hilo de preguntas y el índice se repintan en caliente, así que los
-           botones que nacen después también tienen que quedar armados. */
-        document.addEventListener('aula:pintado', function () {
-          document.querySelectorAll('.btn').forEach(armar);
-        });
-
-        /* --- El menú plegado de móvil: cerrarlo al tocar fuera o con Esc --- */
-        var more = document.querySelector('.bar__more');
-        if (more) {
-          document.addEventListener('click', function (e) {
-            if (more.open && !more.contains(e.target)) more.open = false;
-          });
-          document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape' && more.open) {
-              more.open = false;
-              more.querySelector('summary').focus();
-            }
-          });
-        }
-
-        /* --- Borrar el avance de prueba ------------------------------------ */
-        var reset = document.querySelector('[data-aula-reset]');
-        if (reset) {
-          reset.addEventListener('click', function () {
-            if (confirm(preguntaReset)) window.Aula.limpiar();
-          });
-        }
-      })();
-    </script>
-
-    <style is:global>
-      /* ======================================================================
-         El marco: barra superior, cuerpo y pie.
-
-         ⚠️ Las reglas que pintan un ENLACE van prefijadas con `.aula`, igual
-         que en `styles/aula.css` y por el mismo motivo: ahí vive
-         `.aula a { color: inherit }`, que pesa (0,1,1). Una regla de una sola
-         clase —`.skip`, `.bar__link`— pesa (0,1,0) y pierde, así que el enlace
-         se pinta del color heredado y no del suyo. Pasó con «Saltar al
-         contenido», que se quedó en tinta sobre tinta: invisible justo para
-         quien más lo necesita. Enlace nuevo acá, prefijo puesto.
-         Vive acá y no en `aula.css` porque es de este fichero y de nadie más;
-         en la hoja global están las piezas que usan todas las pantallas.
-         ====================================================================== */
-
-      .aula .skip {
-        position: absolute;
-        left: var(--edge);
-        top: 12px;
-        z-index: 300;
-        padding: 8px 16px;
-        background: var(--ink);
-        color: var(--paper);
-        font-size: 0.8rem;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        transform: translateY(-200%);
-        transition: transform var(--fast) var(--ease);
-      }
-
-      .aula .skip:focus-visible {
-        transform: translateY(0);
-      }
-
-      /* --- La barra ------------------------------------------------------- */
-      .bar {
-        position: sticky;
-        top: 0;
-        z-index: 50;
-        background: var(--bar-veil);
-        -webkit-backdrop-filter: blur(18px) saturate(1.3);
-        backdrop-filter: blur(18px) saturate(1.3);
-        border-bottom: 1px solid var(--rule);
-      }
-
-      .bar__in {
-        display: flex;
-        align-items: center;
-        gap: clamp(12px, 2.4vw, 24px);
-        height: var(--bar-h);
-        max-width: var(--wrap);
-        margin-inline: auto;
-        padding-inline: var(--edge);
-      }
-
-      .bar__logo {
-        flex: 0 0 auto;
-        line-height: 0;
-      }
-
-      .bar__logo img {
-        width: auto;
-        height: 22px;
-      }
-
-      /* Dónde estoy. En móvil se queda solo la migaja, que es lo que cambia. */
-      .bar__where {
-        flex: 1 1 auto;
-        min-width: 0;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 1px;
-        padding-left: clamp(12px, 2.4vw, 24px);
-        border-left: 1px solid var(--rule);
-      }
-
-      .bar__crumb {
-        font-size: 0.9rem;
-        font-weight: 500;
-        line-height: 1.3;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .bar__nav,
-      .bar__end {
-        display: flex;
-        align-items: center;
-        gap: clamp(16px, 2vw, 24px);
-      }
-
-      .aula .bar__link {
-        font-size: 0.82rem;
-        font-weight: 500;
-        letter-spacing: 0.02em;
-        color: var(--soft);
-        white-space: nowrap;
-        padding-block: 4px;
-        border-bottom: 1px solid transparent;
-        transition:
-          color var(--fast) var(--ease),
-          border-color var(--fast) var(--ease);
-      }
-
-      .aula .bar__link:hover {
-        color: var(--ink);
-        border-bottom-color: var(--ink);
-      }
-
-      .aula .bar__link[aria-current='page'] {
-        color: var(--ink);
-        border-bottom-color: var(--ink);
-      }
-
-      .bar__out {
-        font-size: 0.72em;
-        margin-left: 4px;
-        vertical-align: 1px;
-      }
-
-      .bar__end {
-        flex: 0 0 auto;
-        padding-left: clamp(16px, 2vw, 24px);
-        border-left: 1px solid var(--rule);
-      }
-
-      .aula .bar__lang {
-        font-size: 0.7rem;
-        font-weight: 600;
-        letter-spacing: 0.12em;
-        color: var(--soft);
-      }
-
-      .aula .bar__lang:hover {
-        color: var(--ink);
-      }
-
-      /* La inicial de quien está dentro. No es un avatar: no hay fotos de las
-         alumnas y no vamos a pedirlas para decorar una barra. */
-      .bar__who {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 30px;
-        height: 30px;
-        border: 1px solid var(--rule);
-        border-radius: 50%;
-        font-size: 0.8rem;
-        font-weight: 600;
-      }
-
-      /* --- El plegado de móvil -------------------------------------------- */
-      .bar__more {
-        display: none;
-        position: relative;
-        flex: 0 0 auto;
-      }
-
-      .bar__more summary {
-        list-style: none;
-        cursor: pointer;
-        padding: 8px 4px;
-      }
-
-      .bar__more summary::-webkit-details-marker {
-        display: none;
-      }
-
-      .bar__burger,
-      .bar__burger::before,
-      .bar__burger::after {
-        display: block;
-        width: 22px;
-        height: 1.5px;
-        background: var(--ink);
-        transition: transform var(--fast) var(--ease);
-      }
-
-      .bar__burger::before,
-      .bar__burger::after {
-        content: '';
-        position: relative;
-      }
-
-      .bar__burger::before {
-        top: -7px;
-      }
-
-      .bar__burger::after {
-        top: 5.5px;
-      }
-
-      .bar__more[open] .bar__burger {
-        background: transparent;
-      }
-
-      .bar__more[open] .bar__burger::before {
-        transform: translateY(7px) rotate(45deg);
-      }
-
-      .bar__more[open] .bar__burger::after {
-        transform: translateY(-5.5px) rotate(-45deg);
-      }
-
-      .bar__drawer {
-        position: absolute;
-        top: calc(100% + 14px);
-        right: 0;
-        min-width: 13rem;
-        display: flex;
-        flex-direction: column;
-        background: var(--paper);
-        border: 1px solid var(--rule);
-        box-shadow: 0 12px 40px rgba(23, 20, 15, 0.1);
-      }
-
-      .aula .bar__drawer a {
-        padding: 16px 20px;
-        font-size: 0.92rem;
-        border-bottom: 1px solid var(--rule-soft);
-      }
-
-      .aula .bar__drawer a:last-child {
-        border-bottom: 0;
-        color: var(--soft);
-      }
-
-      .aula .bar__drawer a:hover {
-        background: var(--surface);
-        color: var(--ink);
-      }
-
-      @media (max-width: 60rem) {
-        .bar__nav,
-        .bar__end {
-          display: none;
-        }
-
-        .bar__more {
-          display: block;
-        }
-      }
-
-      /* --- El cuerpo ------------------------------------------------------- */
-      .aula__main {
-        min-height: 60vh;
-        padding-block: clamp(28px, 5vw, 52px) clamp(56px, 9vw, 96px);
-      }
-
-      /* --- El pie ---------------------------------------------------------- */
-      .foot {
-        border-top: 1px solid var(--rule);
-        padding-block: clamp(24px, 4vw, 36px);
-      }
-
-      .foot__in {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: baseline;
-        justify-content: space-between;
-        gap: 16px 32px;
-      }
-
-      .foot__note {
-        max-width: 46rem;
-        margin: 0;
-        font-size: 0.82rem;
-        line-height: 1.6;
-        color: var(--soft);
-        text-wrap: pretty;
-      }
-
-      /* El aviso de que esto es una maqueta va marcado, no escondido en gris:
-         quien la prueba tiene que saber por qué su avance no lo ve Emi. */
-      .foot__badge {
-        display: inline-block;
-        margin-right: 8px;
-        padding: 4px 8px;
-        background: var(--ink);
-        color: var(--paper);
-        font-size: 0.64rem;
-        font-weight: 600;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        vertical-align: 1px;
-      }
-
-      .foot__acts {
-        display: flex;
-        align-items: baseline;
-        gap: 20px;
-      }
-
-      .aula .foot__site {
-        font-size: 0.82rem;
-        color: var(--soft);
-      }
-
-      .aula .foot__site:hover {
-        color: var(--ink);
-      }
-
-      /* --- El portero ---------------------------------------------------- */
-      .porton {
-        position: fixed;
-        inset: 0;
-        z-index: 200;
-        display: grid;
-        place-items: center;
-        background: var(--paper);
-        padding: var(--edge);
-      }
-
-      .porton[hidden] {
-        display: none;
-      }
-
-      .porton__caja {
-        max-width: 30rem;
-        text-align: center;
-      }
-
-      .porton__logo {
-        width: 132px;
-        height: auto;
-        margin: 0 auto 1.6rem;
-      }
-
-      .porton__h {
-        font-size: clamp(1.5rem, 3.4vw, 2rem);
-        letter-spacing: -0.02em;
-        line-height: 1.12;
-        margin: 0.4rem 0 0.6rem;
-      }
-
-      .porton__actos {
-        display: flex;
-        gap: 12px;
-        justify-content: center;
-        flex-wrap: wrap;
-        margin-top: 1.8rem;
-      }
-
-      .aula .bar__admin[hidden] {
-        display: none;
-      }
-    </style>
-
-    <script>
-      import { supabase, isSupabaseConfigured } from '../lib/supabase';
-
-      const cuerpo = document.querySelector('[data-aula]') as HTMLElement | null;
-
-      if (cuerpo && isSupabaseConfigured) {
-        const porton = cuerpo.querySelector('[data-porton]') as HTMLElement;
-
-        /** Deja el portón puesto con un mensaje y su juego de botones. */
-        const cerrar = (titulo: string, texto: string, actos: string) => {
-          (porton.querySelector('[data-porton-h]') as HTMLElement).textContent = titulo;
-          (porton.querySelector('[data-porton-p]') as HTMLElement).textContent = texto;
-          (porton.querySelector(actos) as HTMLElement).hidden = false;
-        };
-
-        (async () => {
-          const {
-            data: { session },
-          } = await supabase.auth.getSession();
-
-          if (!session) {
-            cerrar(
-              cuerpo.dataset.gateNeeded!,
-              cuerpo.dataset.gateNeededLead!,
-              '[data-porton-actos]',
-            );
-            return;
-          }
-
-          /* Las dos preguntas a la vez: quién es y si tiene acceso. En serie
-             son dos viajes de ida y vuelta con el portón puesto delante, y eso
-             se nota en una conexión lenta. */
-          const [perfilRes, subRes] = await Promise.all([
-            supabase.from('profiles').select('role').eq('id', session.user.id).maybeSingle(),
-            supabase.rpc('has_active_sub'),
-          ]);
-
-          const esAdmin = perfilRes.data?.role === 'admin';
-
-          /* Emi entra siempre. No tiene suscripción —no se paga a sí misma— y
-             sin esta línea el candado la dejaría fuera de su propia aula. */
-          if (!esAdmin) {
-            if (subRes.error) {
-              /* La comprobación no se pudo hacer: la función no está expuesta,
-                 la red falló, Supabase tuvo un mal minuto.
-
-                 **Se deja pasar, y es una decisión, no un descuido.** Este
-                 portón decide QUÉ SE DIBUJA, no qué se puede leer — la barrera
-                 de verdad es la RLS, y hoy además el contenido de las clases es
-                 de muestra y va escrito en el HTML, así que cerrar acá no
-                 protege nada que no esté ya a la vista. Entre dejar entrar a
-                 alguien de más un minuto y dejar fuera a TODA la membresía por
-                 un fallo de configuración, lo segundo es mucho peor.
-
-                 ⚠️ **Esto se invierte el día que entre el curso de verdad.** Ese
-                 día las clases llegan por consulta con la RLS decidiendo —es lo
-                 que cierra la capa B, ver `progreso.md`— y entonces un fallo acá
-                 tiene que cerrar, no abrir. */
-              console.error('[aula] no se pudo comprobar la suscripción', subRes.error);
-            } else if (subRes.data !== true) {
-              cerrar(
-                cuerpo.dataset.gateNosub!,
-                cuerpo.dataset.gateNosubLead!,
-                '[data-porton-actos-sub]',
-              );
-              /* Los dos botones se apuntan acá y no en el marcado: la carta de
-                 la membresía tiene ruta propia por idioma, y salir tiene que
-                 volver a la puerta y no a donde estaba. */
-              const irM = porton.querySelector('[data-ir-membresia]') as HTMLAnchorElement | null;
-              const irS = porton.querySelector('[data-ir-salir]') as HTMLAnchorElement | null;
-              if (irM && cuerpo.dataset.membresia) irM.href = cuerpo.dataset.membresia;
-              if (irS && cuerpo.dataset.salir) irS.href = cuerpo.dataset.salir;
-              return;
-            }
-          }
-
-          porton.hidden = true;
-
-          /* El enlace de vuelta al panel: solo para Emi, y después de
-             preguntarle a la base de datos, nunca antes. */
-          if (esAdmin) {
-            cuerpo
-              .querySelectorAll('[data-admin]')
-              .forEach((el) => ((el as HTMLElement).hidden = false));
-          }
-        })();
-      }
-    </script>
-  </body>
-</html>
+      })
+      .catch((e) => {
+        /* Sin red o sin Supabase: se abre. Lo de dentro llega por consulta y,
+           si la consulta tampoco puede, la pantalla lo dice. */
+        console.error('[aula] no se pudo comprobar el acceso', e);
+        porton.hidden = true;
+      });
+  }
+</script>
+
+<style>
+  /* --- La barra del aula -----------------------------------------------------
+     No flota: la cápsula del menú ya flota arriba, y dos cosas fijas se pisan.
+     Es una fila con su regla debajo, como la línea de datos de las fichas de
+     Formaciones. */
+  .aula-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-1) var(--space-4);
+    padding-top: var(--space-2);
+    padding-bottom: var(--space-2);
+  }
+
+  .aula-bar::after {
+    content: '';
+    flex: 1 0 100%;
+    height: 1px;
+    margin-top: var(--space-1);
+    background: var(--rule);
+  }
+
+  .aula-bar__donde {
+    min-width: 0;
+  }
+
+  .aula-bar__donde a {
+    border-bottom: 0;
+  }
+
+  .aula-bar__donde a:hover {
+    color: var(--ink);
+  }
+
+  .aula-bar__migaja {
+    color: var(--ink);
+  }
+
+  .aula-bar__nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .aula-bar__nav a {
+    border-bottom: 1px solid transparent;
+    color: var(--ink-soft);
+  }
+
+  .aula-bar__nav a:hover,
+  .aula-bar__nav a[aria-current='page'] {
+    color: var(--ink);
+    border-bottom-color: currentColor;
+  }
+
+  .aula__maqueta {
+    margin-top: var(--space-3);
+  }
+</style>

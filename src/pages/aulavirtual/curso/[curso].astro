@@ -5,9 +5,10 @@
  * Hay **una página por curso, no una por clase**: dentro se cambia de clase con
  * el `#hash`, sin recargar. Ver el porqué en `src/components/aula/Curso.astro`.
  *
- * Se generan los seis cursos del catálogo, no solo los que tienen clases
- * cargadas: un curso comprado que todavía no tiene videos subidos tiene que
- * abrirse y decirlo, no devolver un 404 que parece un error del sitio.
+ * Se genera una por cada curso del catálogo de Formaciones. **El contenido no
+ * va en la página**: llega por consulta a Supabase, con la RLS decidiendo. Un
+ * curso que Emi cree en el panel con un slug que el catálogo todavía no tiene
+ * se abre en `/aulavirtual/curso/?c=<slug>` (`curso/index.astro`).
  */
 import AulaLayout from '../../../layouts/Aula.astro';
 import Curso from '../../../components/aula/Curso.astro';

@@ -1,0 +1,756 @@
+---
+/**
+ * Pestaña Membresía — lo que Emi hace cada jueves.
+ *
+ * **Es la pestaña Ejercicios del panel de la academia, tal cual**, con la ropa
+ * del sitio (23 sep 2026, pedido de Adrián: «membresía va al panel de
+ * membresía que ya tenemos, tal cual, solo que con el nuevo look & feel»).
+ * Mismo comportamiento, mismas reglas, mismas tablas:
+ *
+ *   · tres destinos —ejercicio de la semana, concepto base, bonus—, que son las
+ *     tres pestañas del aula de la membresía (`exercises.kind`)
+ *   · formulario en dos columnas, **ES y EN lado a lado**
+ *   · el normalizador de video de siempre (`src/lib/video.ts`): acepta la URL,
+ *     el «Embed», el GUID o el `<iframe>` entero
+ *   · PDF de apoyo al bucket público «pdfs»
+ *   · por defecto, la semana va de jueves 00:01 a jueves 00:00; el concepto
+ *     base, un mes; el bonus se publica al guardar y no caduca
+ *   · «Publicar ahora» se salta la espera del jueves
+ *
+ * **Escribe en la misma tabla que lee el aula de la academia.** Lo que Emi
+ * publique desde acá lo ven las miembros en `emilseriosacademy.com/aula/` en
+ * el acto, sin mudar nada: es la misma base de datos. Por eso esta pestaña se
+ * puede usar ya, con la membresía todavía viviendo allá.
+ */
+---
+
+<div class="app-wrap memb" data-memb>
+  <header class="memb__cab">
+    <div>
+      <p class="eyebrow">Membresía</p>
+      <h1 class="app-h1 memb__h">Tu membresía, semana a semana.</h1>
+    </div>
+  </header>
+
+  {/* --- En vivo y lo próximo ------------------------------------------- */}
+  <div class="semana" data-semana hidden></div>
+
+  <div class="memb__barra">
+    <div class="segmento" role="tablist" aria-label="Qué contenido estás mirando" data-filtro>
+      <button class="mono segmento__b" type="button" role="tab" aria-selected="true" data-kind="semana">
+        Ejercicio de la semana
+      </button>
+      <button class="mono segmento__b" type="button" role="tab" aria-selected="false" data-kind="base">
+        Concepto base
+      </button>
+      <button class="mono segmento__b" type="button" role="tab" aria-selected="false" data-kind="bonus">
+        Bonus
+      </button>
+    </div>
+    <span data-nuevo-hueco></span>
+  </div>
+
+  {/* --- El formulario ---------------------------------------------------- */}
+  <form class="ficha-form" data-form hidden novalidate>
+    <h2 class="app-h2" data-form-titulo>Nuevo ejercicio de la semana</h2>
+    <input type="hidden" data-f="id" />
+
+    <div class="campo ficha-form__destino">
+      <span class="campo__t">Destino</span>
+      <div class="segmento" role="radiogroup" aria-label="Destino del contenido" data-destino>
+        <button class="mono segmento__b" type="button" role="radio" aria-checked="true" data-kind="semana">
+          Ejercicio de la semana
+        </button>
+        <button class="mono segmento__b" type="button" role="radio" aria-checked="false" data-kind="base">
+          Concepto base
+        </button>
+        <button class="mono segmento__b" type="button" role="radio" aria-checked="false" data-kind="bonus">
+          Bonus
+        </button>
+      </div>
+      <span class="campo__ayuda">La pestaña del aula de la membresía donde aparece al publicarse.</span>
+    </div>
+
+    <div class="dos">
+      <label class="campo">
+        <span class="campo__t" data-l-etiqueta-es>Etiqueta de semana · ES</span>
+        <input type="text" data-f="week_label" placeholder="Ej. Semana 24" />
+        <span class="campo__ayuda" data-l-etiqueta-ayuda>Texto corto que la miembro ve junto al título.</span>
+      </label>
+      <label class="campo">
+        <span class="campo__t" data-l-etiqueta-en>Etiqueta de semana · EN</span>
+        <input type="text" data-f="week_label_en" placeholder="Ej. Week 24" />
+        <span class="campo__ayuda">La del aula en inglés. Si la dejas vacía, se usa la española.</span>
+      </label>
+    </div>
+
+    <p class="ficha-form__nota">Se publica en <b>los dos idiomas</b>: completa la columna en español y la columna en inglés.</p>
+
+    <div class="dos">
+      <fieldset class="idioma">
+        <legend class="mono idioma__tag">Español</legend>
+        <label class="campo">
+          <span class="campo__t">Título</span>
+          <input type="text" data-f="title_es" placeholder="Ej. Détaché controlado: peso y punto de contacto" />
+        </label>
+        <label class="campo">
+          <span class="campo__t">Descripción</span>
+          <textarea data-f="desc_es" placeholder="Qué se trabaja, a qué tempo, en qué fijarse…"></textarea>
+        </label>
+        <label class="campo">
+          <span class="campo__t">Video de Bunny</span>
+          <input type="text" data-f="vimeo_url_es" placeholder="Enlace o código <iframe> de Bunny Stream" />
+          <span class="campo__ayuda">En Bunny, botón <b>Embed</b> del video: pega el enlace o el código entero.</span>
+        </label>
+        <label class="campo">
+          <span class="campo__t">PDF de apoyo (opcional)</span>
+          <input type="file" accept="application/pdf" data-pdf="es" />
+          <span class="campo__ayuda" data-pdf-actual="es" hidden></span>
+        </label>
+      </fieldset>
+
+      <fieldset class="idioma">
+        <legend class="mono idioma__tag">English</legend>
+        <label class="campo">
+          <span class="campo__t">Title</span>
+          <input type="text" data-f="title_en" placeholder="E.g. Controlled détaché: weight and contact point" />
+        </label>
+        <label class="campo">
+          <span class="campo__t">Description</span>
+          <textarea data-f="desc_en" placeholder="What it works, at what tempo, what to watch for…"></textarea>
+        </label>
+        <label class="campo">
+          <span class="campo__t">Video de Bunny · EN</span>
+          <input type="text" data-f="vimeo_url_en" placeholder="Enlace o código <iframe> de Bunny Stream" />
+          <span class="campo__ayuda">El mismo procedimiento, con el video en inglés.</span>
+        </label>
+        <label class="campo">
+          <span class="campo__t">Support PDF (optional)</span>
+          <input type="file" accept="application/pdf" data-pdf="en" />
+          <span class="campo__ayuda" data-pdf-actual="en" hidden></span>
+        </label>
+      </fieldset>
+    </div>
+
+    <div class="dos" data-fechas>
+      <label class="campo">
+        <span class="campo__t">Se publica</span>
+        <input type="datetime-local" data-f="publish_at" />
+        <span class="campo__ayuda" data-l-publica>Por defecto: el próximo jueves a las 00:01.</span>
+      </label>
+      <label class="campo">
+        <span class="campo__t">Se cierra</span>
+        <input type="datetime-local" data-f="unpublish_at" />
+        <span class="campo__ayuda" data-l-cierra>Por defecto: el jueves siguiente a las 00:00.</span>
+      </label>
+    </div>
+    <p class="ficha-form__nota" data-nota-bonus hidden>
+      El bonus se publica al guardar y se queda en el aula, sin fecha de cierre.
+    </p>
+
+    <p class="error" data-form-error hidden></p>
+    <div class="ficha-form__actos" data-form-actos></div>
+  </form>
+
+  {/* --- La lista ------------------------------------------------------------ */}
+  <ul class="filas" role="list" data-filas>
+    <li class="filas__vacio soft">Cargando…</li>
+  </ul>
+</div>
+
+<script>
+  import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+  import { normalizeVideoUrl } from '../../lib/video';
+  import {
+    alAbrir,
+    avisar,
+    aInput,
+    armarBotones,
+    boton,
+    el,
+    fecha,
+    fechaHora,
+    ocupado,
+    rango,
+  } from '../../lib/panel';
+
+  type Kind = 'semana' | 'base' | 'bonus';
+  type Ejercicio = {
+    id: string;
+    kind: Kind | null;
+    week_label: string | null;
+    week_label_en: string | null;
+    title_es: string;
+    title_en: string;
+    desc_es: string | null;
+    desc_en: string | null;
+    vimeo_url_es: string | null;
+    vimeo_url_en: string | null;
+    pdf_path_es: string | null;
+    pdf_path_en: string | null;
+    publish_at: string;
+    unpublish_at: string;
+  };
+
+  const raiz = document.querySelector<HTMLElement>('[data-memb]')!;
+  const $ = <T extends HTMLElement = HTMLElement>(s: string) => raiz.querySelector<T>(s)!;
+  const $$ = <T extends HTMLElement = HTMLElement>(s: string) => raiz.querySelectorAll<T>(s);
+  const campo = <T extends HTMLInputElement | HTMLTextAreaElement = HTMLInputElement>(n: string) =>
+    raiz.querySelector<T>(`[data-f="${n}"]`)!;
+
+  /** Los textos que cambian con el destino. Los de la academia, tal cual. */
+  const META: Record<
+    Kind,
+    { etiqueta: string; ayuda: string; ph: string; phEn: string; publica: string; cierra: string; nuevo: string; editar: string; vacio: string }
+  > = {
+    semana: {
+      etiqueta: 'Etiqueta de semana',
+      ayuda: 'Texto corto que la miembro ve junto al título.',
+      ph: 'Ej. Semana 24',
+      phEn: 'Ej. Week 24',
+      publica: 'Por defecto: el próximo jueves a las 00:01. O «Publicar ahora» para no esperar.',
+      cierra: 'Por defecto: el jueves siguiente a las 00:00.',
+      nuevo: 'Nuevo ejercicio de la semana',
+      editar: 'Editar ejercicio de la semana',
+      vacio: 'Todavía no hay ejercicios. Crea el primero con «Nuevo».',
+    },
+    base: {
+      etiqueta: 'Etiqueta del mes',
+      ayuda: 'Texto corto que la miembro ve junto al título (el mes, por ejemplo).',
+      ph: 'Ej. Julio',
+      phEn: 'Ej. July',
+      publica: 'Por defecto: ahora.',
+      cierra: 'Por defecto: dentro de un mes.',
+      nuevo: 'Nuevo concepto base',
+      editar: 'Editar concepto base',
+      vacio: 'Todavía no hay ningún concepto base. Crea el primero con «Nuevo».',
+    },
+    bonus: {
+      etiqueta: 'Etiqueta',
+      ayuda: 'Texto corto sobre la ficha («Bienvenida», «Montaje»…).',
+      ph: 'Ej. Bienvenida',
+      phEn: 'Ej. Welcome',
+      publica: '',
+      cierra: '',
+      nuevo: 'Nuevo bonus',
+      editar: 'Editar bonus',
+      vacio: 'Todavía no hay material bonus. Añade el primero con «Nuevo».',
+    },
+  };
+
+  let lista: Ejercicio[] = [];
+  let filtro: Kind = 'semana';
+  const form = $<HTMLFormElement>('[data-form]');
+
+  /* --- Fechas por defecto --------------------------------------------------- */
+
+  /** El próximo jueves estricto (no hoy), en la hora del navegador de Emi. */
+  function proximoJueves(desde: Date) {
+    const d = new Date(desde);
+    let suma = (4 - d.getDay() + 7) % 7;
+    if (suma === 0) suma = 7;
+    d.setDate(d.getDate() + suma);
+    return d;
+  }
+
+  function fechasPorDefecto(kind: Kind) {
+    if (kind === 'base') {
+      const pub = new Date();
+      pub.setSeconds(0, 0);
+      const unp = new Date(pub);
+      unp.setMonth(unp.getMonth() + 1);
+      return { pub, unp };
+    }
+    if (kind === 'bonus') {
+      const pub = new Date();
+      pub.setSeconds(0, 0);
+      const unp = new Date(pub);
+      unp.setFullYear(unp.getFullYear() + 100);
+      return { pub, unp };
+    }
+    const pub = proximoJueves(new Date());
+    pub.setHours(0, 1, 0, 0);
+    const unp = new Date(pub);
+    unp.setDate(unp.getDate() + 7);
+    unp.setHours(0, 0, 0, 0);
+    return { pub, unp };
+  }
+
+  function estado(e: Ejercicio) {
+    const ahora = Date.now();
+    if (ahora < Date.parse(e.publish_at)) return { k: 'prog', t: 'Programado', cls: 'estado estado--tinta' };
+    if (e.kind !== 'bonus' && ahora >= Date.parse(e.unpublish_at)) return { k: 'cerr', t: 'Cerrado', cls: 'estado' };
+    return { k: 'vivo', t: 'En vivo', cls: 'estado estado--vivo' };
+  }
+
+  /* --- En vivo y lo próximo ------------------------------------------------- */
+
+  function pintarSemana() {
+    const caja = $('[data-semana]');
+    caja.textContent = '';
+    const semanales = lista.filter((e) => (e.kind ?? 'semana') === 'semana');
+    const vivos = semanales.filter((e) => estado(e).k === 'vivo');
+    const proximo = semanales
+      .filter((e) => estado(e).k === 'prog')
+      .sort((a, b) => Date.parse(a.publish_at) - Date.parse(b.publish_at))[0];
+    if (!vivos.length && !proximo) {
+      caja.hidden = true;
+      return;
+    }
+    caja.hidden = false;
+    vivos.forEach((e) =>
+      caja.append(
+        el(
+          'div',
+          { class: 'semana__caja semana__caja--vivo' },
+          el('p', { class: 'mono', text: 'En vivo' }),
+          el('p', { class: 'semana__t', text: e.title_es || '(sin título)' }),
+          el('p', { class: 'semana__m', text: `Se cierra el ${fechaHora(e.unpublish_at)}` }),
+        ),
+      ),
+    );
+    if (proximo)
+      caja.append(
+        el(
+          'div',
+          { class: 'semana__caja' },
+          el('p', { class: 'mono soft', text: 'Próximo' }),
+          el('p', { class: 'semana__t', text: proximo.title_es || '(sin título)' }),
+          el('p', { class: 'semana__m soft', text: `Se publica el ${fechaHora(proximo.publish_at)}` }),
+        ),
+      );
+  }
+
+  /* --- La lista ---------------------------------------------------------- */
+
+  function pintarFilas() {
+    const ul = $('[data-filas]');
+    ul.textContent = '';
+    const filas = lista.filter((e) => (e.kind ?? 'semana') === filtro);
+    if (!filas.length) {
+      ul.append(el('li', { class: 'filas__vacio soft', text: META[filtro].vacio }));
+      return;
+    }
+    filas.forEach((e) => {
+      const st = estado(e);
+      const editar = boton('Editar', { chico: true, flecha: false });
+      editar.addEventListener('click', () => abrir(e));
+      const borrar = el('button', { class: 'btn-text', type: 'button', text: 'Borrar' });
+      borrar.addEventListener('click', () => borrarEjercicio(e, borrar));
+      ul.append(
+        el(
+          'li',
+          { class: 'fila' },
+          el(
+            'div',
+            { class: 'fila__txt' },
+            el('p', { class: 'fila__t', text: e.title_es || '(sin título)' }),
+            el(
+              'p',
+              { class: 'mono soft' },
+              [e.week_label, e.kind === 'bonus' ? `Publicado el ${fecha(e.publish_at)}` : rango(e.publish_at, e.unpublish_at)]
+                .filter(Boolean)
+                .join(' · '),
+            ),
+          ),
+          el('span', { class: st.cls, text: st.t }),
+          el('div', { class: 'fila__actos' }, editar, borrar),
+        ),
+      );
+    });
+    armarBotones();
+  }
+
+  async function cargar() {
+    const { data, error } = await supabase
+      .from('exercises')
+      .select('*')
+      .order('publish_at', { ascending: false });
+    if (error) {
+      const ul = $('[data-filas]');
+      ul.textContent = '';
+      ul.append(el('li', { class: 'filas__vacio', text: `No se pudo cargar: ${error.message}` }));
+      return;
+    }
+    lista = (data ?? []) as Ejercicio[];
+    pintarSemana();
+    pintarFilas();
+  }
+
+  async function borrarEjercicio(e: Ejercicio, b: HTMLButtonElement) {
+    const ok = window.confirm(
+      `¿Borrar «${e.title_es || '(sin título)'}» para siempre?\n\nTambién se borran las preguntas y respuestas del foro asociadas. No se puede deshacer.`,
+    );
+    if (!ok) return;
+    b.disabled = true;
+    const { error } = await supabase.from('exercises').delete().eq('id', e.id);
+    b.disabled = false;
+    if (error) return avisar(`No se pudo borrar: ${error.message}`);
+    await cargar();
+    avisar('Borrado');
+  }
+
+  /* --- El filtro ---------------------------------------------------------- */
+
+  function marcarFiltro(k: Kind) {
+    filtro = k;
+    $$('[data-filtro] [data-kind]').forEach((b) =>
+      b.setAttribute('aria-selected', b.dataset.kind === k ? 'true' : 'false'),
+    );
+  }
+
+  $$('[data-filtro] [data-kind]').forEach((b) =>
+    b.addEventListener('click', () => {
+      marcarFiltro(b.dataset.kind as Kind);
+      cerrar();
+      pintarFilas();
+    }),
+  );
+
+  /* --- El formulario ------------------------------------------------------- */
+
+  function aplicarDestino(k: Kind) {
+    const m = META[k];
+    $('[data-l-etiqueta-es]').textContent = `${m.etiqueta} · ES`;
+    $('[data-l-etiqueta-en]').textContent = `${m.etiqueta} · EN`;
+    $('[data-l-etiqueta-ayuda]').textContent = m.ayuda;
+    campo('week_label').placeholder = m.ph;
+    campo('week_label_en').placeholder = m.phEn;
+    $('[data-l-publica]').textContent = m.publica;
+    $('[data-l-cierra]').textContent = m.cierra;
+    $('[data-fechas]').hidden = k === 'bonus';
+    $('[data-nota-bonus]').hidden = k !== 'bonus';
+    publicarYa.hidden = k === 'bonus';
+    $$('[data-destino] [data-kind]').forEach((b) =>
+      b.setAttribute('aria-checked', b.dataset.kind === k ? 'true' : 'false'),
+    );
+    form.dataset.kind = k;
+    $('[data-form-titulo]').textContent = campo('id').value ? m.editar : m.nuevo;
+  }
+
+  $$('[data-destino] [data-kind]').forEach((b) =>
+    b.addEventListener('click', () => {
+      const k = b.dataset.kind as Kind;
+      aplicarDestino(k);
+      if (!campo('id').value) {
+        const { pub, unp } = fechasPorDefecto(k);
+        campo('publish_at').value = aInput(pub);
+        campo('unpublish_at').value = aInput(unp);
+      }
+    }),
+  );
+
+  function limpiar() {
+    form.reset();
+    campo('id').value = '';
+    $('[data-form-error]').hidden = true;
+    $$('[data-pdf-actual]').forEach((x) => (x.hidden = true));
+  }
+
+  function cerrar() {
+    form.hidden = true;
+    limpiar();
+  }
+
+  function abrir(e?: Ejercicio) {
+    limpiar();
+    const k: Kind = e ? (e.kind ?? 'semana') : filtro;
+    if (e) {
+      campo('id').value = e.id;
+      (['week_label', 'week_label_en', 'title_es', 'title_en', 'desc_es', 'desc_en', 'vimeo_url_es', 'vimeo_url_en'] as const).forEach(
+        (n) => (campo(n).value = (e[n] as string | null) ?? ''),
+      );
+      campo('publish_at').value = aInput(new Date(e.publish_at));
+      campo('unpublish_at').value = aInput(new Date(e.unpublish_at));
+      (['es', 'en'] as const).forEach((l) => {
+        const ruta = l === 'es' ? e.pdf_path_es : e.pdf_path_en;
+        const aviso = $(`[data-pdf-actual="${l}"]`);
+        if (!ruta) return;
+        const url = supabase.storage.from('pdfs').getPublicUrl(ruta).data.publicUrl;
+        aviso.textContent = '';
+        aviso.append('Ya tiene uno: ', el('a', { href: url, target: '_blank', rel: 'noopener', text: 'ver el PDF' }), '. Si eliges otro, lo reemplaza.');
+        aviso.hidden = false;
+      });
+    } else {
+      const { pub, unp } = fechasPorDefecto(k);
+      campo('publish_at').value = aInput(pub);
+      campo('unpublish_at').value = aInput(unp);
+    }
+    aplicarDestino(k);
+    form.hidden = false;
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    campo('title_es').focus({ preventScroll: true });
+  }
+
+  /** Sube un PDF al bucket «pdfs». `undefined` si no se eligió ninguno. */
+  async function subirPdf(l: 'es' | 'en'): Promise<string | undefined> {
+    const f = raiz.querySelector<HTMLInputElement>(`[data-pdf="${l}"]`)!.files?.[0];
+    if (!f) return undefined;
+    const ruta = `exercises/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.pdf`;
+    const { error } = await supabase.storage
+      .from('pdfs')
+      .upload(ruta, f, { contentType: 'application/pdf', upsert: false });
+    if (error) throw new Error(`PDF: ${error.message}`);
+    return ruta;
+  }
+
+  /**
+   * Guarda. `ahora` viene de «Publicar ahora»: salta la fecha programada y usa
+   * este momento. El cierre, si Emi lo dejó puesto, se respeta; si no, la
+   * duración de siempre contada desde ahora.
+   */
+  async function guardar(ahora: boolean) {
+    const err = $('[data-form-error]');
+    err.hidden = true;
+    const falla = (t: string) => {
+      err.textContent = t;
+      err.hidden = false;
+    };
+    const kind = (form.dataset.kind as Kind) || 'semana';
+    const title_es = campo('title_es').value.trim();
+    const title_en = campo('title_en').value.trim();
+    if (!title_es || !title_en) return falla('Faltan los títulos, en español y en inglés.');
+
+    const id = campo('id').value || null;
+    const original = id ? lista.find((e) => e.id === id) : undefined;
+    let pub: string;
+    let unp: string;
+
+    if (kind === 'bonus') {
+      /* Si ya era bonus se conserva su fecha real: corregir el texto no lo
+         vuelve a publicar. */
+      if (original && original.kind === 'bonus') {
+        pub = original.publish_at;
+        unp = original.unpublish_at;
+      } else {
+        const d = fechasPorDefecto('bonus');
+        pub = d.pub.toISOString();
+        unp = d.unp.toISOString();
+      }
+    } else if (ahora) {
+      const ya = new Date();
+      const cierre = campo('unpublish_at').value;
+      let u: Date;
+      if (cierre) u = new Date(cierre);
+      else {
+        u = new Date(ya);
+        if (kind === 'base') u.setMonth(u.getMonth() + 1);
+        else u.setDate(u.getDate() + 7);
+      }
+      if (u <= ya) return falla('La fecha de cierre tiene que ser posterior a ahora.');
+      pub = ya.toISOString();
+      unp = u.toISOString();
+    } else {
+      const a = campo('publish_at').value;
+      const b = campo('unpublish_at').value;
+      if (!a || !b) return falla('Faltan las fechas de publicación y de cierre.');
+      if (new Date(b) <= new Date(a)) return falla('La fecha de cierre tiene que ser posterior a la de publicación.');
+      pub = new Date(a).toISOString();
+      unp = new Date(b).toISOString();
+    }
+
+    const b = ahora ? publicarYa : guardarBtn;
+    try {
+      await ocupado(b, ahora ? 'Publicando…' : 'Guardando…', async () => {
+        const [pdfEs, pdfEn] = [await subirPdf('es'), await subirPdf('en')];
+        const fila: Record<string, unknown> = {
+          kind,
+          // `week_label` es la etiqueta ESPAÑOLA (nombre histórico, ver la 0008).
+          week_label: campo('week_label').value.trim() || null,
+          week_label_en: campo('week_label_en').value.trim() || null,
+          title_es,
+          title_en,
+          desc_es: campo('desc_es').value.trim() || null,
+          desc_en: campo('desc_en').value.trim() || null,
+          // Columnas con nombre histórico: hoy guardan el enlace de Bunny.
+          vimeo_url_es: normalizeVideoUrl(campo('vimeo_url_es').value),
+          vimeo_url_en: normalizeVideoUrl(campo('vimeo_url_en').value),
+          publish_at: pub,
+          unpublish_at: unp,
+        };
+        if (pdfEs !== undefined) fila.pdf_path_es = pdfEs;
+        if (pdfEn !== undefined) fila.pdf_path_en = pdfEn;
+        const r = id
+          ? await supabase.from('exercises').update(fila).eq('id', id)
+          : await supabase.from('exercises').insert(fila);
+        if (r.error) throw new Error(r.error.message);
+      });
+      cerrar();
+      marcarFiltro(kind);
+      await cargar();
+      avisar(ahora ? 'Publicado ahora' : id ? 'Guardado' : 'Creado');
+    } catch (e) {
+      falla(`No se pudo guardar: ${(e as Error).message}`);
+    }
+  }
+
+  /* Los botones del formulario y el de «Nuevo», hechos con la pieza del sitio. */
+  const guardarBtn = boton('Guardar y programar', { solido: true, tipo: 'submit' });
+  const publicarYa = boton('Publicar ahora');
+  const cancelar = el('button', { class: 'btn-text', type: 'button', text: 'Cancelar' });
+  publicarYa.addEventListener('click', () => guardar(true));
+  cancelar.addEventListener('click', cerrar);
+  $('[data-form-actos]').append(guardarBtn, publicarYa, cancelar);
+  form.addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    void guardar(false);
+  });
+
+  const nuevo = boton('Nuevo', { solido: true });
+  nuevo.addEventListener('click', () => (form.hidden ? abrir() : cerrar()));
+  $('[data-nuevo-hueco]').replaceWith(nuevo);
+  armarBotones();
+
+  alAbrir('membresia', async () => {
+    if (!isSupabaseConfigured) {
+      const ul = $('[data-filas]');
+      ul.textContent = '';
+      ul.append(el('li', { class: 'filas__vacio soft', text: 'Sin conectar: no hay de dónde leer los ejercicios.' }));
+      nuevo.disabled = true;
+      return;
+    }
+    await cargar();
+  });
+
+  /* Desde «Hoy»: `#membresia/nuevo` abre el formulario directamente. */
+  document.addEventListener('panel:pestana', (e) => {
+    if ((e as CustomEvent).detail === 'membresia' && location.hash === '#membresia/nuevo' && isSupabaseConfigured) {
+      marcarFiltro('semana');
+      abrir();
+      history.replaceState(null, '', '#membresia');
+    }
+  });
+</script>
+
+<style>
+  .memb {
+    padding-top: var(--space-6);
+  }
+
+  .memb__h {
+    margin-top: var(--space-2);
+    max-width: 16ch;
+  }
+
+  /* --- En vivo y lo próximo ------------------------------------------------ */
+  .semana {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    gap: var(--space-2);
+    margin-top: var(--space-6);
+  }
+
+  .semana :global(.semana__caja) {
+    padding: var(--space-3);
+    border: 1px solid var(--rule);
+  }
+
+  .semana :global(.semana__caja--vivo) {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+
+  .semana :global(.semana__t) {
+    margin-top: var(--space-1);
+    font-family: var(--font-display);
+    font-size: var(--text-section);
+    line-height: var(--leading-section);
+  }
+
+  .semana :global(.semana__m) {
+    margin-top: var(--space-1);
+    font-size: var(--text-small);
+  }
+
+  .semana :global(.semana__caja--vivo .semana__m) {
+    color: var(--paper-soft);
+  }
+
+  /* --- La barra: el filtro y «Nuevo» --------------------------------------- */
+  .memb__barra {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    margin-top: var(--space-6);
+  }
+
+  /* --- El formulario ------------------------------------------------------- */
+  .ficha-form {
+    display: grid;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+    padding: var(--space-4);
+    border: 1px solid var(--ink);
+  }
+
+  .ficha-form__destino {
+    justify-items: start;
+  }
+
+  .ficha-form__nota {
+    padding: var(--space-1) var(--space-2);
+    border-left: 2px solid var(--ink);
+    font-size: var(--text-small);
+    line-height: 1.5;
+  }
+
+  .ficha-form__actos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  @media (max-width: 48rem) {
+    .ficha-form {
+      padding: var(--space-3);
+    }
+  }
+
+  /* --- La lista ------------------------------------------------------------- */
+  .filas {
+    margin: var(--space-4) 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--ink);
+  }
+
+  .filas :global(.fila) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .filas :global(.fila__t) {
+    font-family: var(--font-display);
+    font-size: 1.375rem;
+    line-height: 1.25;
+  }
+
+  .filas :global(.fila__txt .mono) {
+    margin-top: 0.25rem;
+  }
+
+  .filas :global(.fila__actos) {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .filas :global(.filas__vacio) {
+    padding: var(--space-3) 0;
+  }
+
+  @media (max-width: 40rem) {
+    .filas :global(.fila) {
+      grid-template-columns: 1fr;
+      justify-items: start;
+    }
+  }
+</style>

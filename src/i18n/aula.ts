@@ -31,14 +31,19 @@ export const aulaUi = {
     'app.backDesk': 'Volver al escritorio',
     'app.site': 'Ir al sitio público',
 
-    /* --- Escritorio ------------------------------------------------------ */
-    'desk.hello': 'Hola',
-    'desk.lead': 'Esto es lo que tienes abierto ahora mismo.',
+    /* --- Escritorio ------------------------------------------------------
+       Sin saludo con nombre desde el 23 sep 2026: el nombre no se puede sacar
+       del correo y un «Hola, Ana» inventado dice cualquier cosa. Ni la frase
+       de debajo, «esto es lo que tienes abierto ahora mismo», que no sumaba. */
     'desk.resume': 'Sigue por donde ibas',
     'desk.resumeCta': 'Continuar',
     'desk.resumeNone': 'Todavía no has empezado ningún curso.',
     'desk.startCta': 'Empezar el primero',
     'desk.mine': 'Mis cursos',
+    'desk.mineEmpty': 'Todavía no tienes ningún curso.',
+    'desk.loading': 'Cargando tus cursos…',
+    'desk.error': 'No pudimos cargar tus cursos. Recarga la página en un momento.',
+    'desk.draft': 'Borrador · solo lo ves tú',
     'desk.membershipTitle': 'Estudiemos Juntos',
     'desk.membershipLead':
       'El ejercicio de esta semana, el concepto del mes y el foro donde Emi responde.',
@@ -61,7 +66,13 @@ export const aulaUi = {
     'course.soon': 'Emi lo está preparando',
     'course.empty': 'Las clases de este curso todavía no están cargadas.',
     'course.emptyLead':
-      'Emi está pasando los videos a su nuevo hogar. Cuando terminen de subirse, aparecen acá solas.',
+      'Emi está preparando las clases. Cuando estén publicadas, aparecen acá solas.',
+    'course.loading': 'Cargando el curso…',
+    'course.notFound': 'Este curso no está en tu escritorio',
+    'course.notFoundLead':
+      'Puede que todavía no esté publicado, o que no esté a tu nombre. Si crees que es un error, escríbeme a info@emilserios.com.',
+    'course.draft': 'Este curso está en borrador: solo lo ves tú. Las alumnas lo verán cuando lo publiques desde el panel.',
+    'course.editInPanel': 'Editar en el panel',
 
     /* --- Reproductor ------------------------------------------------------ */
     'player.contents': 'Contenido del curso',
@@ -78,12 +89,15 @@ export const aulaUi = {
       'Este es el marco donde irá. Puedes arrastrar la barra para probar cómo se guarda tu avance.',
     'player.demoBar': 'Barra de prueba — simula el minuto en el que vas',
     'player.saved': 'Tu avance se guarda solo',
+    'player.otherLang': 'Este video está en inglés.',
+    'player.draftLesson': 'Borrador — las alumnas todavía no ven esta clase.',
+    'player.nojs': 'Esta pantalla necesita JavaScript para reproducir las clases y guardar tu avance.',
 
     /* --- Preguntas -------------------------------------------------------- */
     'ask.open': 'Tengo una duda',
     'ask.title': 'Pregúntale a Emi',
     'ask.lead':
-      'Tu pregunta llega con el curso, la clase y el minuto en el que estás. Emi te responde por acá y te avisa por correo.',
+      'Tu pregunta llega con el curso, la clase y el minuto en el que estás. Emi te responde por acá, en este mismo hilo.',
     'ask.at': 'En el minuto',
     'ask.atOff': 'No mandar el minuto',
     'ask.label': '¿Qué se te trabó?',
@@ -96,14 +110,16 @@ export const aulaUi = {
     'ask.threadEmpty': 'Todavía no has preguntado nada en este curso.',
     'ask.waiting': 'Esperando a Emi',
     'ask.answered': 'Respondida',
-    'ask.deleteOne': 'Borrar',
+    'ask.deleteOne': 'Retirar',
+    'ask.emi': 'Emi',
+    'ask.failed': 'No se pudo enviar. Vuelve a intentarlo en un momento.',
     'ask.local':
       'Maqueta: por ahora tus preguntas se guardan en este navegador. Cuando el aula esté enchufada, salen hacia Emi.',
 
     /* --- Avisos de la maqueta --------------------------------------------- */
     'demo.badge': 'Maqueta',
     'demo.lead':
-      'Esto es el aula en construcción, con contenido de muestra. Tu avance y tus preguntas se guardan en este navegador para que puedas probarla; nada sale de tu equipo todavía.',
+      'El aula no está conectada a su base de datos, así que enseña un curso de muestra. Tu avance y tus preguntas se guardan en este navegador para que puedas probarla; nada sale de tu equipo.',
     'demo.reset': 'Borrar mi avance de prueba',
     'demo.resetAsk': '¿Borramos el avance y las preguntas de prueba de este navegador?',
 
@@ -117,9 +133,9 @@ export const aulaUi = {
     /* El candado de pago, desde el 22 sep 2026. El texto no acusa a nadie de
        no haber pagado: quien llega acá suele ser alguien que SÍ pagó y cuyo
        cobro se retrasó, o que acaba de pagar y el webhook no ha llegado. */
-    'gate.noSub': 'Tu suscripción no está al día',
+    'gate.noSub': 'No encontramos nada a tu nombre',
     'gate.noSubLead':
-      'Entramos con tu cuenta, pero no encontramos una suscripción activa. Si acabas de pagar, dale un minuto y recarga — a veces tarda un poco en llegar. Y si crees que hay un error, escríbeme a info@emilserios.com y lo miramos.',
+      'Entramos con tu cuenta, pero no tiene una suscripción activa ni ningún curso. Si acabas de pagar, dale un minuto y recarga — a veces tarda un poco en llegar. Y si crees que hay un error, escríbeme a info@emilserios.com y lo miramos.',
     'gate.seeMembership': 'Ver la membresía',
     'gate.otherAccount': 'Entrar con otra cuenta',
     'gate.adminOnly': 'Esta parte es solo de Emi',
@@ -228,13 +244,15 @@ export const aulaUi = {
     'app.site': 'Go to the public site',
 
     /* --- Escritorio ------------------------------------------------------ */
-    'desk.hello': 'Hello',
-    'desk.lead': "Here's what you have open right now.",
     'desk.resume': 'Pick up where you left off',
     'desk.resumeCta': 'Continue',
     'desk.resumeNone': "You haven't started a course yet.",
     'desk.startCta': 'Start the first one',
     'desk.mine': 'My courses',
+    'desk.mineEmpty': "You don't have any courses yet.",
+    'desk.loading': 'Loading your courses…',
+    'desk.error': "We couldn't load your courses. Reload the page in a moment.",
+    'desk.draft': 'Draft · only you can see it',
     'desk.membershipTitle': "Let's study together",
     'desk.membershipLead':
       "This week's exercise, the month's concept and the forum where Emi answers.",
@@ -257,7 +275,13 @@ export const aulaUi = {
     'course.soon': 'Emi is preparing it',
     'course.empty': "This course's classes aren't loaded yet.",
     'course.emptyLead':
-      'Emi is moving the videos to their new home. Once they finish uploading, they show up here on their own.',
+      'Emi is preparing the classes. Once they are published, they show up here on their own.',
+    'course.loading': 'Loading the course…',
+    'course.notFound': "This course isn't on your desk",
+    'course.notFoundLead':
+      "It may not be published yet, or it may not be in your name. If you think this is a mistake, write to info@emilserios.com.",
+    'course.draft': "This course is a draft: only you can see it. Students will see it once you publish it from the panel.",
+    'course.editInPanel': 'Edit in the panel',
 
     /* --- Reproductor ------------------------------------------------------ */
     'player.contents': 'Course contents',
@@ -274,12 +298,15 @@ export const aulaUi = {
       'This is the frame it will live in. Drag the bar to try out how your progress is saved.',
     'player.demoBar': 'Test bar — stands in for the minute you are on',
     'player.saved': 'Your progress saves itself',
+    'player.otherLang': 'This video is in Spanish.',
+    'player.draftLesson': "Draft — students can't see this class yet.",
+    'player.nojs': 'This screen needs JavaScript to play the classes and save your progress.',
 
     /* --- Preguntas -------------------------------------------------------- */
     'ask.open': 'I have a question',
     'ask.title': 'Ask Emi',
     'ask.lead':
-      "Your question arrives with the course, the class and the minute you're on. Emi answers here and emails you.",
+      "Your question arrives with the course, the class and the minute you're on. Emi answers here, in this same thread.",
     'ask.at': 'At minute',
     'ask.atOff': "Don't send the minute",
     'ask.label': 'What got you stuck?',
@@ -292,14 +319,16 @@ export const aulaUi = {
     'ask.threadEmpty': "You haven't asked anything on this course yet.",
     'ask.waiting': 'Waiting on Emi',
     'ask.answered': 'Answered',
-    'ask.deleteOne': 'Delete',
+    'ask.deleteOne': 'Withdraw',
+    'ask.emi': 'Emi',
+    'ask.failed': "Couldn't send it. Try again in a moment.",
     'ask.local':
       "Mock-up: for now your questions are stored in this browser. Once the classroom is wired up, they go out to Emi.",
 
     /* --- Avisos de la maqueta --------------------------------------------- */
     'demo.badge': 'Mock-up',
     'demo.lead':
-      'This is the classroom under construction, with sample content. Your progress and questions are saved in this browser so you can try it out; nothing leaves your machine yet.',
+      "The classroom isn't connected to its database, so it shows a sample course. Your progress and questions are saved in this browser so you can try it out; nothing leaves your machine.",
     'demo.reset': 'Clear my test progress',
     'demo.resetAsk': 'Clear the test progress and questions from this browser?',
 
@@ -310,9 +339,9 @@ export const aulaUi = {
     'gate.neededLead':
       'Sign in with the email you bought with. If you have nothing yet, the store is right next door.',
     'gate.signin': 'Sign in',
-    'gate.noSub': "Your subscription isn't current",
+    'gate.noSub': "We couldn't find anything in your name",
     'gate.noSubLead':
-      "We're in with your account, but we couldn't find an active subscription. If you've just paid, give it a minute and reload — it sometimes takes a moment to come through. And if you think this is a mistake, write to info@emilserios.com and we'll look into it.",
+      "We're in with your account, but it has no active subscription and no courses. If you've just paid, give it a minute and reload — it sometimes takes a moment to come through. And if you think this is a mistake, write to info@emilserios.com and we'll look into it.",
     'gate.seeMembership': 'See the membership',
     'gate.otherAccount': 'Sign in with another account',
     'gate.adminOnly': "This part is Emi's only",
@@ -479,6 +508,23 @@ export const escritorioPath = (lang: Lang): string =>
 /** El reproductor de un curso. */
 export const cursoPath = (slug: string, lang: Lang): string =>
   `${raiz[lang]}/${segmentoCurso[lang]}/${slug}/`;
+
+/**
+ * El reproductor de un curso que **no tiene página propia**: uno que Emi creó
+ * en el panel con un slug que todavía no está en el catálogo de Formaciones.
+ *
+ * Las páginas de curso se generan en el build, una por cada curso del catálogo
+ * (`src/data/aula.ts`), porque el sitio es estático. Un curso nuevo existe en
+ * la base de datos desde el momento en que Emi lo crea, pero su página no
+ * existe hasta el siguiente despliegue con su ficha. Mientras tanto se abre en
+ * esta dirección, que es la misma pantalla leyendo el slug de `?c=`.
+ */
+export const cursoLibrePath = (slug: string, lang: Lang): string =>
+  `${raiz[lang]}/${segmentoCurso[lang]}/?c=${encodeURIComponent(slug)}`;
+
+/** La que toque: la bonita si el curso tiene página, la de `?c=` si no. */
+export const cursoHref = (slug: string, lang: Lang, conPagina: readonly string[]): string =>
+  conPagina.includes(slug) ? cursoPath(slug, lang) : cursoLibrePath(slug, lang);
 
 /** La pantalla de acceso. Cuelga del aula, como todo lo de esta parte. */
 export const entrarPath = (lang: Lang): string => `${raiz[lang]}/${segmentoEntrar[lang]}/`;

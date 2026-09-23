@@ -77,8 +77,8 @@ const a = useAula(lang);
   data-t-failtitle={a('pass.bridgeFailTitle')}
 >
   <p class="eyebrow">{a('app.title')}</p>
-  <h1 class="pasar__h" data-titulo>{a('pass.bridgeTitle')}</h1>
-  <p class="soft pasar__lead" data-lead>{a('pass.bridgeLead')}</p>
+  <h1 class="puerta__h" data-titulo>{a('pass.bridgeTitle')}</h1>
+  <p class="puerta__lead" data-lead>{a('pass.bridgeLead')}</p>
 
   {
     !isSupabaseConfigured && (
@@ -161,34 +161,13 @@ const a = useAula(lang);
 </script>
 
 <style>
-  .pasar__h {
-    font-size: clamp(1.9rem, 4.4vw, 2.6rem);
-    letter-spacing: -0.025em;
-    line-height: 1.05;
-    margin: 0.4rem 0 0.5rem;
-  }
-
-  .pasar__lead {
-    margin: 0 0 clamp(24px, 4vh, 36px);
-  }
-
+  /* El aviso y el error son del marco (`styles/app.css`). */
   .pasar__salida {
-    margin-top: clamp(24px, 4vh, 36px);
-    font-size: 0.94rem;
+    margin-top: var(--space-4);
+    font-size: var(--text-small);
   }
 
-  .aviso {
-    border: 1px solid var(--rule);
-    background: var(--surface);
-    padding: 14px 16px;
-    font-size: 0.92rem;
-    margin: 0 0 clamp(24px, 4vh, 36px);
-  }
-
-  .error {
-    margin: 0 0 clamp(24px, 4vh, 36px);
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--accent-strong);
+  .pasar .error {
+    margin-bottom: var(--space-4);
   }
 </style>

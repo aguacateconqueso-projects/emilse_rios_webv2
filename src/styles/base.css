@@ -389,6 +389,49 @@ a:hover {
   outline-offset: 2px;
 }
 
+/* Macizo: nace lleno de tinta y el relleno lo vacía a papel. Para **la única
+   acción principal** de una pantalla del aula o del panel —entrar, guardar,
+   continuar—; dos en la misma pantalla se pelean. Llegó con el aula, el 23 sep
+   2026: las cartas no lo usan. */
+.boton--solid {
+  --fill: var(--paper);
+  --fg: var(--paper);
+  --fg-hover: var(--ink);
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.boton--solid:hover {
+  border-color: var(--ink);
+}
+
+/* Pequeño: dentro de una fila o de una ficha, donde el de tamaño normal manda
+   más que el contenido. Mismo alto de letra; menos aire. */
+.boton--sm {
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+}
+
+/* Apagado: mientras guarda, o cuando no hay nada que hacer. Sin relleno, sin
+   flecha que se mueva y sin notas (el script lo mira antes de soltarlas). */
+.boton[disabled],
+.boton[aria-disabled='true'] {
+  cursor: default;
+  color: var(--ink-soft);
+  background: transparent;
+  border-color: var(--rule);
+}
+
+.boton[disabled] .boton__fill,
+.boton[aria-disabled='true'] .boton__fill {
+  display: none;
+}
+
+.boton[disabled] .boton__ar,
+.boton[aria-disabled='true'] .boton__ar {
+  transform: none;
+}
+
 /* Las notas que suelta al pasar el cursor. Van fijas a la ventana, y el
    script las quita cuando terminan de subir. Son el único color de la
    interfaz, y duran un segundo: ver la enmienda del 23 sep 2026. */

@@ -1,0 +1,19 @@
+---
+/** Un curso sin página propia todavía, en inglés: `/en/classroom/course/?c=<slug>`. Gemelo de `/aulavirtual/curso/index.astro`. */
+import AulaLayout from '../../../../layouts/Aula.astro';
+import Curso from '../../../../components/aula/Curso.astro';
+import { useAula } from '../../../../i18n/aula';
+
+const lang = 'en' as const;
+const a = useAula(lang);
+---
+
+<AulaLayout
+  lang={lang}
+  title={a('app.courses')}
+  seccion="curso"
+  pathEs="/aulavirtual/curso/"
+  pathEn="/en/classroom/course/"
+>
+  <Curso lang={lang} />
+</AulaLayout>

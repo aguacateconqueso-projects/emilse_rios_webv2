@@ -1,0 +1,28 @@
+---
+/**
+ * El reproductor de un curso que todavía no tiene página propia, en español:
+ * `/aulavirtual/curso/?c=<slug>`.
+ *
+ * Es la misma pantalla que `[curso].astro`, leyendo el slug de la dirección en
+ * vez de traerlo del build. Existe para los cursos que Emi crea en el panel con
+ * un slug que el catálogo de Formaciones (`src/data/aula.ts`) aún no tiene: el
+ * sitio es estático y esas páginas no existen hasta el siguiente despliegue.
+ * Ver `cursoLibrePath()` en `src/i18n/aula.ts`.
+ */
+import AulaLayout from '../../../layouts/Aula.astro';
+import Curso from '../../../components/aula/Curso.astro';
+import { useAula } from '../../../i18n/aula';
+
+const lang = 'es' as const;
+const a = useAula(lang);
+---
+
+<AulaLayout
+  lang={lang}
+  title={a('app.courses')}
+  seccion="curso"
+  pathEs="/aulavirtual/curso/"
+  pathEn="/en/classroom/course/"
+>
+  <Curso lang={lang} />
+</AulaLayout>

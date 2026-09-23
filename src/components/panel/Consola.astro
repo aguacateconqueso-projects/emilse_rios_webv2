@@ -1,39 +1,41 @@
 ---
 /**
- * La consola de Emi — el armazón, con su portero y sus pestañas.
+ * La consola de Emi — el portero, la barra de pestañas y las pestañas.
  *
- * Esto es la capa A: el marco, quién entra y la ida y vuelta al aula. Las
- * pestañas de verdad —Membresía, Cursos, Tienda, Cartas, Personas, Mensajes—
- * llegan después, y **cada una será su propio componente**. El panel de la
- * academia es un solo fichero de 1.059 líneas: con tres pestañas ya está en el
- * límite y con ocho no se sostiene.
+ * Cada pestaña es **su propio componente** (`Hoy`, `Membresia`, `Cursos`…) y
+ * se habla con las demás solo por `src/lib/panel.ts`. El panel de la academia
+ * era un fichero de 1.059 líneas con tres pestañas; con ocho no se sostiene.
  *
  * **Solo en español.** Lo usan dos personas y las dos hablan español. El
  * contenido que se escribe desde acá sí es bilingüe; la herramienta no.
  *
  * ⚠️ **El portero de esta pantalla NO es la seguridad.** Decide qué se dibuja.
- * Quien de verdad protege los datos es la RLS de la base de datos, con
- * `is_admin()`: alguien que fuerce este gate desde la consola del navegador
- * verá una pantalla vacía, porque las consultas se las rechaza Supabase. El
- * mismo criterio vale para las rutas de API que vengan: todas empiezan por
- * `adminDeLaPeticion()`, que sí corre en el servidor.
+ * Quien protege los datos es la RLS con `is_admin()`: alguien que fuerce este
+ * gate desde la consola del navegador verá pestañas vacías, porque las
+ * consultas se las rechaza Supabase. Y las rutas de API empiezan todas por
+ * comprobar el rol en el servidor.
  */
 import { useAula, escritorioPath, entrarPath, salirPath } from '../../i18n/aula';
 import { isSupabaseConfigured } from '../../lib/supabase';
+import Boton from '../Boton.astro';
+import Hoy from './Hoy.astro';
+import Membresia from './Membresia.astro';
+import Cursos from './Cursos.astro';
+import Proximamente from './Proximamente.astro';
 
 const lang = 'es' as const;
 const a = useAula(lang);
 
-/** Lo que va a vivir acá. Se dibuja apagado: se anuncia, no se finge. */
+/** Las pestañas, en el orden de la barra. Las que no están hechas se ven y se dicen. */
 const pestanas = [
-  { t: 'Hoy', d: 'Activas, ventas del mes, preguntas sin responder, qué está en vivo.' },
-  { t: 'Membresía', d: 'El ejercicio de la semana, el concepto base y el bonus. Como hoy.' },
-  { t: 'Cursos', d: 'Crear, unidades y clases, reordenar, abrir y cerrar.' },
-  { t: 'Tienda', d: 'Lo que se ve en Formaciones: orden, precio, estado, foto.' },
-  { t: 'Cartas', d: 'El editor por bloques de cada carta de venta, en los dos idiomas.' },
-  { t: 'Personas', d: 'Miembros y quién compró qué. Dar y quitar acceso a mano.' },
-  { t: 'Mensajes', d: 'El foro de la membresía y los hilos privados de los cursos.' },
-];
+  { id: 'hoy', t: 'Hoy' },
+  { id: 'membresia', t: 'Membresía' },
+  { id: 'cursos', t: 'Cursos' },
+  { id: 'tienda', t: 'Tienda', pronto: true },
+  { id: 'cartas', t: 'Cartas', pronto: true },
+  { id: 'personas', t: 'Personas', pronto: true },
+  { id: 'mensajes', t: 'Mensajes', pronto: true },
+] as const;
 ---
 
 <div
@@ -50,16 +52,12 @@ const pestanas = [
       <img class="porton__logo" src="/logo.svg" alt="Emilse Ríos" width="1631" height="487" />
       <p class="eyebrow">{a('panel.title')}</p>
       <h1 class="porton__h" data-porton-h>{a('gate.checking')}</h1>
-      <p class="soft" data-porton-p>{a('gate.wait')}</p>
+      <p class="porton__p" data-porton-p>{a('gate.wait')}</p>
       <div class="porton__actos" data-porton-actos hidden>
-        <a class="btn btn--solid" href={entrarPath(lang)} data-porton-entrar>
-          <span class="btn__fill" aria-hidden="true"></span>
-          <span class="btn__label">{a('gate.signin')}</span>
-        </a>
-        <a class="btn" href={escritorioPath(lang)}>
-          <span class="btn__fill" aria-hidden="true"></span>
-          <span class="btn__label">{a('app.desk')}</span>
-        </a>
+        <span data-porton-entrar>
+          <Boton class="boton--solid" href={entrarPath(lang)}>{a('gate.signin')}</Boton>
+        </span>
+        <Boton href={escritorioPath(lang)}>{a('app.desk')}</Boton>
       </div>
     </div>
   </div>
@@ -68,73 +66,88 @@ const pestanas = [
   <div class="consola__cuerpo" data-cuerpo hidden>
     <header class="pbar">
       <div class="pbar__in">
-        <a class="pbar__logo" href="/panel/" aria-label={a('panel.title')}>
+        <a class="pbar__logo" href="/panel/#hoy" aria-label="Panel · Hoy">
           <img src="/logo.svg" alt="Emilse Ríos" width="1631" height="487" />
-          <small>{a('panel.title')}</small>
+          <span class="mono">{a('panel.title')}</span>
         </a>
-        <div class="pbar__end">
-          <span class="chip"><span class="chip__dot" aria-hidden="true"></span>{a('panel.who')}</span>
+
+        <nav class="pbar__tabs" aria-label="Secciones del panel">
+          {
+            pestanas.map((p) => (
+              <a
+                class:list={['mono', 'pbar__tab', 'pronto' in p && 'pbar__tab--pronto']}
+                href={`#${p.id}`}
+                data-ir-pestana={p.id}
+              >
+                {p.t}
+              </a>
+            ))
+          }
+        </nav>
+
+        <div class="pbar__fin">
           {/* El enlace que Emi ya conoce, en el mismo sitio que en la academia. */}
-          <a class="pbar__link" href={escritorioPath(lang)}>{a('panel.seeAula')}</a>
-          <a class="pbar__link" href={salirPath(lang)}>{a('app.leave')}</a>
+          <a class="mono" href={escritorioPath(lang)}>{a('panel.seeAula')}</a>
+          <a class="mono" href={salirPath(lang)}>{a('app.leave')}</a>
         </div>
       </div>
     </header>
 
-    <main class="wrap consola__main">
-      <p class="eyebrow">{a('panel.title')}</p>
-      <h1 class="consola__h">Tu plataforma, de punta a punta.</h1>
-
-      {
-        !isSupabaseConfigured && (
+    {
+      !isSupabaseConfigured && (
+        <div class="app-wrap consola__aviso">
           <p class="aviso">
-            <b>{a('off.badge')}</b> — {a('off.lead')}
+            <b>{a('off.badge')}</b> — El panel no está conectado a la base de datos, así que no
+            tiene nada que enseñar ni dónde guardar. Faltan las variables de Supabase en este
+            despliegue.
           </p>
-        )
-      }
+        </div>
+      )
+    }
 
-      <p class="soft consola__lead">{a('panel.soon')}:</p>
-      <ul class="lista" role="list">
-        {
-          pestanas.map((p) => (
-            <li class="card lista__i">
-              <p class="card__title">{p.t}</p>
-              <p class="soft lista__d">{p.d}</p>
-            </li>
-          ))
-        }
-      </ul>
+    <main class="consola__main" id="contenido">
+      <section data-pestana="hoy" hidden><Hoy /></section>
+      <section data-pestana="membresia" hidden><Membresia /></section>
+      <section data-pestana="cursos" hidden><Cursos /></section>
+      <section data-pestana="tienda" hidden><Proximamente cual="tienda" /></section>
+      <section data-pestana="cartas" hidden><Proximamente cual="cartas" /></section>
+      <section data-pestana="personas" hidden><Proximamente cual="personas" /></section>
+      <section data-pestana="mensajes" hidden><Proximamente cual="mensajes" /></section>
     </main>
   </div>
 </div>
 
 <script>
   import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+  import { arrancar, mostrar, leerHash } from '../../lib/panel';
 
   const caja = document.querySelector<HTMLElement>('[data-consola]');
   if (caja) {
-    const $ = (s: string) => caja.querySelector(s) as HTMLElement | null;
-    const porton = $('[data-porton]')!;
-    const cuerpo = $('[data-cuerpo]')!;
+    const $ = (s: string) => caja.querySelector<HTMLElement>(s)!;
+    const porton = $('[data-porton]');
+    const cuerpo = $('[data-cuerpo]');
 
-    function abrir() {
+    const abrir = () => {
       porton.hidden = true;
       cuerpo.hidden = false;
-    }
+      mostrar(leerHash()[0]);
+    };
 
-    function cerrar(titulo: string, texto: string, ofrecerEntrar: boolean) {
-      $('[data-porton-h]')!.textContent = titulo;
-      $('[data-porton-p]')!.textContent = texto;
-      $('[data-porton-actos]')!.hidden = false;
-      ($('[data-porton-entrar]') as HTMLElement).hidden = !ofrecerEntrar;
-    }
+    const cerrar = (titulo: string, texto: string, ofrecerEntrar: boolean) => {
+      $('[data-porton-h]').textContent = titulo;
+      $('[data-porton-p]').textContent = texto;
+      $('[data-porton-actos]').hidden = false;
+      $('[data-porton-entrar]').hidden = !ofrecerEntrar;
+    };
+
+    window.addEventListener('hashchange', () => mostrar(leerHash()[0]));
 
     (async () => {
-      // Sin backend no hay a quién preguntarle el rol. Se abre y se avisa dentro
-      // de que esto no está enchufado: es una maqueta y no esconde nada, porque
-      // todavía no hay nada que esconder.
+      /* Sin backend no hay a quién preguntarle el rol: se abre, y cada pestaña
+         dice que no tiene de dónde leer. */
       if (!isSupabaseConfigured) {
         abrir();
+        arrancar(null);
         return;
       }
 
@@ -143,178 +156,142 @@ const pestanas = [
       } = await supabase.auth.getSession();
 
       if (!session) {
-        cerrar(caja.getAttribute('data-gate-needed')!, caja.getAttribute('data-gate-needed-lead')!, true);
+        cerrar(caja.dataset.gateNeeded!, caja.dataset.gateNeededLead!, true);
         return;
       }
 
-      const { data: perfil } = await supabase
+      const { data: perfil, error } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', session.user.id)
         .maybeSingle();
 
+      if (error) console.error('[panel] no se pudo leer el perfil', error);
       if (perfil?.role !== 'admin') {
-        cerrar(caja.getAttribute('data-gate-admin')!, caja.getAttribute('data-gate-admin-lead')!, false);
+        cerrar(caja.dataset.gateAdmin!, caja.dataset.gateAdminLead!, false);
         return;
       }
 
       abrir();
+      arrancar(session);
     })();
   }
 </script>
 
 <style>
-  .porton {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    display: grid;
-    place-items: center;
-    background: var(--paper);
-    padding: var(--edge);
-  }
-
-  .porton__caja {
-    max-width: 30rem;
-    text-align: center;
-  }
-
-  .porton__logo {
-    width: 132px;
-    height: auto;
-    margin: 0 auto 1.6rem;
-  }
-
-  .porton__h {
-    font-size: clamp(1.5rem, 3.4vw, 2rem);
-    letter-spacing: -0.02em;
-    line-height: 1.12;
-    margin: 0.4rem 0 0.6rem;
-  }
-
-  .porton__actos {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 1.8rem;
-  }
-
-  /* --- La barra del panel ------------------------------------------------ */
+  /* --- La barra -------------------------------------------------------------
+     Pegada arriba, sobre papel —sin cristal: el cristal es de la cápsula del
+     menú del sitio, y acá no hay cápsula—. El logo, las pestañas en mono y los
+     dos enlaces de siempre. En el teléfono las pestañas se deslizan de lado. */
   .pbar {
     position: sticky;
     top: 0;
     z-index: 50;
-    background: var(--bar-veil);
-    backdrop-filter: saturate(140%) blur(12px);
-    -webkit-backdrop-filter: saturate(140%) blur(12px);
+    background: var(--paper);
     border-bottom: 1px solid var(--rule);
   }
 
   .pbar__in {
-    max-width: var(--wrap);
-    margin-inline: auto;
-    padding: 0.9rem var(--edge);
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
+    gap: var(--space-4);
+    max-width: var(--width-full);
+    min-height: 4rem;
+    margin-inline: auto;
+    padding-inline: var(--space-3);
   }
 
   .pbar__logo {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 0.6em;
-    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    flex: 0 0 auto;
+    border-bottom: 0;
   }
 
   .pbar__logo img {
-    width: 104px;
-    height: auto;
+    width: auto;
+    height: 1.5rem;
   }
 
-  .pbar__logo small {
-    font-size: 0.78rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--soft);
-  }
-
-  .pbar__end {
+  .pbar__tabs {
     display: flex;
-    align-items: center;
-    gap: clamp(12px, 2vw, 20px);
-    flex-wrap: wrap;
+    gap: var(--space-3);
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
   }
 
-  .pbar__link {
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-decoration: none;
+  .pbar__tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pbar__tab {
+    flex: 0 0 auto;
+    padding-block: 1.3rem;
+    border-bottom: 1px solid transparent;
+    color: var(--ink-soft);
     white-space: nowrap;
   }
 
-  .chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 5px 12px;
-    border: 1px solid var(--rule);
-    background: var(--surface);
-    font-size: 0.82rem;
-    font-weight: 600;
-    white-space: nowrap;
+  .pbar__tab:hover {
+    color: var(--ink);
   }
 
-  .chip__dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--ink);
+  .pbar__tab[aria-current='page'] {
+    color: var(--ink);
+    border-bottom-color: var(--ink);
   }
 
-  /* --- El cuerpo ---------------------------------------------------------- */
+  /* Las que todavía no están hechas llevan un punto al lado. No van más
+     claras: por debajo de la tinta secundaria el texto no llega a AA, y se
+     pueden abrir —dicen qué van a hacer—. */
+  .pbar__tab--pronto::after {
+    content: ' ·';
+  }
+
+  .pbar__fin {
+    display: flex;
+    gap: var(--space-3);
+    flex: 0 0 auto;
+  }
+
+  .pbar__fin a {
+    border-bottom: 0;
+    color: var(--ink-soft);
+  }
+
+  .pbar__fin a:hover {
+    color: var(--ink);
+  }
+
+  @media (max-width: 56rem) {
+    .pbar__in {
+      flex-wrap: wrap;
+      gap: 0 var(--space-3);
+      padding-top: var(--space-2);
+    }
+
+    .pbar__logo {
+      flex: 1 1 auto;
+    }
+
+    .pbar__tabs {
+      order: 3;
+      flex-basis: 100%;
+    }
+
+    .pbar__tab {
+      padding-block: var(--space-2);
+    }
+  }
+
+  .consola__aviso {
+    margin-top: var(--space-3);
+  }
+
   .consola__main {
-    padding-block: clamp(32px, 6vh, 56px) clamp(48px, 10vh, 96px);
-  }
-
-  .consola__h {
-    font-size: clamp(1.9rem, 4.6vw, 2.8rem);
-    letter-spacing: -0.03em;
-    line-height: 1.04;
-    margin: 0.4rem 0 1.4rem;
-  }
-
-  .aviso {
-    border: 1px solid var(--rule);
-    background: var(--surface);
-    padding: 14px 16px;
-    font-size: 0.92rem;
-    margin: 0 0 1.6rem;
-  }
-
-  .consola__lead {
-    margin: 0 0 1rem;
-  }
-
-  .lista {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 12px;
-    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
-  }
-
-  .lista__i {
-    /* Apagadas a propósito: se anuncia lo que viene, no se finge que ya está. */
-    opacity: 0.55;
-  }
-
-  .lista__d {
-    margin: 0.35rem 0 0;
-    font-size: 0.92rem;
-    line-height: 1.5;
+    padding-bottom: var(--space-16);
   }
 </style>

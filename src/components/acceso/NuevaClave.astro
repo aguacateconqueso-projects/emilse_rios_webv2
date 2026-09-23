@@ -15,6 +15,7 @@
 import type { Lang } from '../../i18n/ui';
 import { useAula, entrarPath, escritorioPath } from '../../i18n/aula';
 import { isSupabaseConfigured } from '../../lib/supabase';
+import Boton from '../Boton.astro';
 
 interface Props {
   lang: Lang;
@@ -32,8 +33,8 @@ const a = useAula(lang);
   data-t-mismatch={a('pass.mismatch')}
 >
   <p class="eyebrow">{a('pass.eyebrow')}</p>
-  <h1 class="clave__h">{a('pass.title')}</h1>
-  <p class="soft clave__lead">{a('pass.lead')}</p>
+  <h1 class="puerta__h">{a('pass.title')}</h1>
+  <p class="puerta__lead">{a('pass.lead')}</p>
 
   {
     !isSupabaseConfigured && (
@@ -55,18 +56,12 @@ const a = useAula(lang);
       <input type="password" autocomplete="new-password" required data-c2 />
     </label>
     <p class="error" data-error hidden></p>
-    <button class="btn btn--solid" type="submit" data-guardar>
-      <span class="btn__fill" aria-hidden="true"></span>
-      <span class="btn__label">{a('pass.save')}</span>
-    </button>
+    <Boton class="boton--solid" type="submit" data-guardar>{a('pass.save')}</Boton>
   </form>
 
   <div class="sinlink" data-sinlink hidden>
     <p>{a('pass.noLink')}</p>
-    <a class="btn" href={entrarPath(lang)}>
-      <span class="btn__fill" aria-hidden="true"></span>
-      <span class="btn__label">{a('pass.askAgain')}</span>
-    </a>
+    <Boton href={entrarPath(lang)}>{a('pass.askAgain')}</Boton>
   </div>
 </section>
 
@@ -143,68 +138,8 @@ const a = useAula(lang);
 </script>
 
 <style>
-  .clave__h {
-    font-size: clamp(1.9rem, 4.4vw, 2.6rem);
-    letter-spacing: -0.025em;
-    line-height: 1.05;
-    margin: 0.4rem 0 0.5rem;
-  }
-
-  .clave__lead {
-    margin: 0 0 clamp(24px, 4vh, 36px);
-  }
-
-  .aviso {
-    border: 1px solid var(--rule);
-    background: var(--surface);
-    padding: 14px 16px;
-    font-size: 0.92rem;
-    margin: 0 0 clamp(24px, 4vh, 36px);
-  }
-
-  .campos {
-    display: grid;
-    gap: 18px;
-  }
-
-  .campo {
-    display: grid;
-    gap: 7px;
-  }
-
-  .campo__t {
-    font-size: 0.92rem;
-    font-weight: 600;
-  }
-
-  .campo input {
-    font: inherit;
-    color: var(--ink);
-    background: var(--paper);
-    border: 1px solid var(--rule);
-    padding: 12px 14px;
-    width: 100%;
-    transition: border-color var(--fast) var(--ease);
-  }
-
-  .campo input:focus {
-    outline: none;
-    border-color: var(--ink);
-  }
-
-  .error {
-    margin: 0;
-    font-size: 0.92rem;
-    font-weight: 600;
-    color: var(--accent-strong);
-  }
-
-  .campos .btn,
-  .sinlink .btn {
-    justify-self: start;
-  }
-
+  /* Los campos, el aviso y los errores son del marco (`styles/app.css`). */
   .sinlink p {
-    margin: 0 0 18px;
+    margin: 0 0 var(--space-3);
   }
 </style>
