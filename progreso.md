@@ -14,31 +14,56 @@ de cero debería poder seguir trabajando sin preguntar nada.
 > `CORTINA_BAJADA = false` en `src/lib/cortina.ts`, en un PR. Todo en **La
 > cortina**, justo debajo de **Dónde estamos**.
 
-> **Para quien retome en una sesión nueva.** Lo último —las correcciones de
-> Klaviyo— está en la rama **`claude/compassionate-gates-is7e15`** y **todavía
-> no está en `main`**: falta abrir el PR y mergearlo. Hasta ese merge, lo que
-> está en el aire sigue usando la versión `2024-10-15` de la API de Klaviyo, que
-> se retira el **15 oct 2026**. Después del merge, lo que queda del newsletter es
-> todo de paneles, en este orden:
+> **Para quien retome en una sesión nueva (23 sep 2026, por la tarde).** Con
+> la cortina bajada se está terminando la web detrás. Ese día entraron en
+> `main` tres PRs, los tres probados y mergeados:
 >
-> 1. **Klaviyo → Custom Key** con escritura sobre **Lists, Profiles y
->    Subscriptions**. Si ya había una clave hecha con la guía vieja, se edita
->    para añadir *Subscriptions*.
-> 2. **Vercel → `KLAVIYO_API_KEY`** en Production, y **redesplegar**.
-> 3. **Comprobar:** `data-endpoint="/api/suscribir"` en el código fuente de la
->    Home, un alta de prueba, y el correo dentro de la lista `SaE8Px`.
-> 4. **Klaviyo → apagar WooCommerce**, mirando antes los flujos. Y decidir con
->    Emi la doble confirmación (recomendada).
+> - **#42 · La cortina.** Ver **La cortina**.
+> - **#43 · «Productos» pasa a «Formaciones»** (en inglés «Courses»), con su
+>   entrada nueva, y **la carta de la membresía reescrita entera**, con cinco
+>   testimonios. Ver **Formaciones, y la carta nueva**.
+> - **#44 · Las direcciones viejas**, que con barra final daban 404. Ver **Las
+>   direcciones viejas**.
 >
-> **No se sabe todavía si la clave ya está puesta en Vercel:** el entorno de la
-> sesión del 22 sep no tenía salida ni hacia `emilserios.com` ni hacia Klaviyo,
-> así que no se pudo mirar. Es lo primero que hay que comprobar, con el paso 3.
+> **Lo que viene, en el orden en que lo pidieron Adrián y Emi:**
+>
+> 1. **El newsletter todavía no da de alta** («suscribirse no funciona»). El
+>    código está en `main` desde el 22 sep, ya con la API `2026-07-15`; lo que
+>    falta es de paneles, en este orden:
+>    1. **Klaviyo → Custom Key** con escritura sobre **Lists, Profiles y
+>       Subscriptions**. Si ya había una clave hecha con la guía vieja, se
+>       edita para añadir *Subscriptions*.
+>    2. **Vercel → `KLAVIYO_API_KEY`** en Production —y en Preview, si se
+>       quiere probar en las vistas previas—, y **redesplegar**.
+>    3. **Comprobar:** un alta de prueba en una vista previa y el correo dentro
+>       de la lista `SaE8Px`. En producción no se puede mientras la cortina
+>       esté bajada: `/api/suscribir` contesta 503.
+>    4. **Klaviyo → apagar WooCommerce**, mirando antes los flujos. Y decidir
+>       con Emi la doble confirmación (recomendada).
+> 2. **La bienvenida pasa a ser de siete correos** a cada persona que se
+>    suscribe. Es un flujo de Klaviyo —una serie que dispara el alta a la
+>    lista—, no código, y los textos los tiene Emi. Lo que sí es código: la Home
+>    promete «un correo de bienvenida con un video» (`src/data/home.ts`), y eso
+>    hay que alinearlo con la serie nueva.
+> 3. **El resto de copies nuevos de Emi.** Ya entraron Formaciones y la carta;
+>    faltan los demás, que manda ella. Y cuatro decisiones de la carta que
+>    quedaron abiertas: ver **Pendiente → Contenido que falta (de Emi)**.
+> 4. **Subir la cortina:** `CORTINA_BAJADA = false` en `src/lib/cortina.ts`,
+>    en un PR.
+>
+> Y una comprobación que no depende de la cortina y nadie ha hecho todavía:
+> `curl -sI https://www.emilserios.com/aulavirtual/estudiemos-juntos/` tiene
+> que dar `301` hacia `/productos/estudiemos-juntos/` (el arreglo del #44). La
+> sesión del 23 sep no tenía salida a `emilserios.com` y no pudo mirarlo.
+>
+> **Para ver lo que se hace mientras tanto:** la vista previa de Vercel de cada
+> rama. Ver **La cortina → Cómo se sigue viendo la web**.
 >
 > **El correo de Emi funciona**, en las dos direcciones y a la bandeja de
 > entrada (Adrián, 22 sep). Queda solo mirar la línea `DKIM:` en «Mostrar
 > original» para cerrar lo de los CNAME proxied.
 
-**EL AULA ESTÁ CONECTADA Y SE ENTRA.** Adrián entró con su cuenta contra el
+**EL AULA ESTÁ CONECTADA Y SE ENTRA** (22 sep 2026). Adrián entró con su cuenta contra el
 Supabase de siempre: variables, Redirect URLs, sesión y candado de pago
 funcionan de punta a punta. **No hubo que crear ni migrar nada** — el esquema es
 el de la academia, el mismo proyecto.
@@ -305,6 +330,39 @@ Tres cosas que conviene saber:
   que todavía no tiene su mitad pegada en la academia.
 - **Las redirecciones viejas siguen funcionando**, y llevan a la cortina:
   `.vercel/output/config.json` sale idéntico con la cortina bajada y subida.
+
+### Cómo se sigue viendo la web
+
+Hasta la cortina, Emi revisaba en producción: mergeaba, miraba
+`emilserios.com` y pedía ajustes. Con la cortina bajada eso ya no sirve, y lo
+que lo reemplaza son **las vistas previas de Vercel**, que enseñan la web sin
+cortina porque ahí `VERCEL_ENV` vale `preview`:
+
+- **Cada PR tiene la suya**: el bot de Vercel la deja en un comentario del PR
+  («Preview»). Enseña `main` más los cambios de ese PR.
+- **Cada rama tiene además una dirección fija**, que siempre apunta a su
+  último push:
+  `emilse-rios-webv2-git-<rama>-adrians-projects-594b3131.vercel.app` (Vercel
+  acorta los nombres largos con un código). Una sesión que trabaja siempre en
+  la misma rama tiene, por tanto, un solo enlace para todo el día.
+
+Tres cosas que muerden, y ninguna se pudo comprobar desde la sesión, porque
+no tenía salida a `vercel.app`:
+
+- **Si la vista previa pide entrar en Vercel, Emi no puede verla.** Opciones:
+  el botón **Share** de la barra de Vercel sobre la vista previa, que genera un
+  enlace para compartir, o apagar la protección en **Settings → Deployment
+  Protection → Vercel Authentication**. Vercel les pone `noindex` a las vistas
+  previas igual.
+- **Las vistas previas leen las variables de «Preview», no las de
+  «Production».** Si `KLAVIYO_API_KEY` o las de Supabase están solo en
+  Production, en la vista previa el formulario del newsletter avisa de que no
+  está conectado y el aula no deja entrar.
+- **Hay dos proyectos de Vercel construyendo este mismo repo**:
+  `emilse-rios-webv2` y `emilse-rios-webv2_1`, así que cada PR sale con dos
+  vistas previas. No se sabe cuál tiene el dominio; el segundo parece un
+  duplicado y conviene revisarlo —y borrarlo, si sobra— para no pagar dos
+  builds ni confundir variables.
 
 ---
 
@@ -3699,6 +3757,23 @@ enseñárselo.
 
 ### Contenido que falta (de Emi)
 
+- [ ] **Los siete correos de bienvenida** (pedido del 23 sep 2026). Es una
+      serie en Klaviyo, no código; los textos los tiene Emi. Cuando exista, la
+      Home tiene que dejar de prometer «un correo de bienvenida con un video»
+      (`src/data/home.ts`).
+- [ ] **El resto de copies nuevos.** Emi los cambió todos el 23 sep 2026; han
+      entrado los de Formaciones y la carta de la membresía.
+- [ ] **Cuatro decisiones de la carta nueva**, que quedaron abiertas en el
+      PR #43:
+      - **El video de un minuto** salió porque no está en el copy nuevo. Si lo
+        quiere, hay que decir dónde va.
+      - **Dentro del aula, el enlace a la tienda sigue diciendo «Tienda»**
+        (`app.store` y `desk.storeCta` en `src/i18n/aula.ts`). ¿Pasa a
+        «Formaciones»?
+      - **El testimonio de Sergio dice «Esta buenisimo»**, sin tildes: está
+        tal cual lo pegó Emi. Corregirlo es una línea.
+      - **Al de Laura en inglés se le quitó el «Yes,»** del principio para que
+        coincida con el español. Confirmar.
 - [x] **`public/image_hero_2.jpg` (12,9 MB) — resuelta el 21 sep 2026.** Era la
       foto vertical de Emi en la calle, subida sin usar y pesando en `public/`,
       que va tal cual al CDN sin pasar por el optimizador. **Ahora es la lámina
