@@ -26,10 +26,11 @@
  */
 import { type Lang, useTranslations, routePath } from '../i18n/ui';
 import type { Product } from '../data/aula';
-import { type Carta, type Bloque, NEWSLETTER } from '../data/cartas';
+import { type Carta, type Bloque, NEWS_POR_DEFECTO } from '../data/cartas';
 import { CLOSES_AT, REOPENS_AT, INVITE_PARAM, doorsClosed } from '../lib/membership';
 import MediaSlot from './MediaSlot.astro';
 import BotonVenta from './BotonVenta.astro';
+import SubscribeForm from './SubscribeForm.astro';
 
 interface Props {
   lang: Lang;
@@ -86,6 +87,9 @@ const puertas = p
 
 /** Cada bloque del cuerpo, con su clase. */
 const clase = (b: Bloque) => (typeof b === 'string' ? '' : `venta__${b.k}`);
+
+/** El newsletter del final, en todas las cartas (24 sep 2026). */
+const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
 ---
 
 {/*
@@ -142,7 +146,7 @@ const clase = (b: Bloque) => (typeof b === 'string' ? '' : `venta__${b.k}`);
       {
         c.carta.map((b) => {
           if (typeof b === 'string') return <p class="reveal" data-bloque>{b}</p>;
-          if (b.k === 'fuerte' || b.k === 'grito' || b.k === 'acento')
+          if (b.k === 'fuerte' || b.k === 'cursiva' || b.k === 'grito' || b.k === 'acento')
             return (
               <p class:list={[clase(b), 'reveal']} data-bloque>
                 {b.text}
@@ -155,23 +159,38 @@ const clase = (b: Bloque) => (typeof b === 'string' ? '' : `venta__${b.k}`);
                 <figcaption class="mono soft venta__quien">{b.autor}</figcaption>
               </figure>
             );
+          /* Las tarjetas: ver «Las tarjetas» en el CSS. Cada fila lleva su
+             `--i` para entrar en escalera cuando la tarjeta aparece. */
           if (b.k === 'puntos')
             return (
-              <div class="venta__puntos reveal" data-bloque>
+              <div class="venta__card venta__puntos reveal" data-bloque>
                 {b.titulo && <p class="venta__h">{b.titulo}</p>}
-                <ul class="venta__filas" role="list">
-                  {b.items.map((li) => (
-                    <li>{li}</li>
+                <ol class="venta__filas" role="list">
+                  {b.items.map((li: string, i: number) => (
+                    <li style={`--i:${i}`}>
+                      <span class="venta__marca" aria-hidden="true">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <span>{li}</span>
+                    </li>
                   ))}
-                </ul>
+                </ol>
               </div>
             );
           return (
-            <div class:list={['venta__lista', b.tono === 'no' && 'venta__lista--no', 'reveal']} data-bloque>
+            <div
+              class:list={['venta__card venta__lista', b.tono === 'no' ? 'venta__lista--no' : 'venta__lista--si', 'reveal']}
+              data-bloque
+            >
               <p class="venta__h">{b.titulo}</p>
               <ul class="venta__filas" role="list">
-                {b.items.map((li) => (
-                  <li>{li}</li>
+                {b.items.map((li: string, i: number) => (
+                  <li style={`--i:${i}`}>
+                    <span class="venta__marca" aria-hidden="true">
+                      {b.tono === 'no' ? '−' : '+'}
+                    </span>
+                    <span>{li}</span>
+                  </li>
                 ))}
               </ul>
             </div>
@@ -297,18 +316,20 @@ const clase = (b: Bloque) => (typeof b === 'string' ? '' : `venta__${b.k}`);
     <BotonVenta c={c} puertas={puertas} />
   </div>
 
-  {
-    c.news && (
-      <section class="row row--flush block reveal" data-bloque>
-        <div class="row__body venta__news">
-          <p class="venta__news-pre">{c.news.pre}</p>
-          <a class="mono venta__news-link" href={NEWSLETTER} target="_blank" rel="noopener">
-            {c.news.link}
-          </a>
-        </div>
-      </section>
-    )
-  }
+  {/*
+    El newsletter, al final de **todas** las cartas —de la membresía y de los
+    cursos, se vendan o no—: lo pidió Adrián el 24 sep 2026, como norma. Es el
+    campo de la Home, con su regla, y no el enlace a la página de Klaviyo que
+    había antes en la membresía: se suscribe acá mismo, sin salir de la carta.
+  */}
+  <section class="venta__news reveal" data-bloque>
+    <div class="row row--flush">
+      <div class="row__body">
+        <p class="venta__news-pre">{news.pre}</p>
+      </div>
+    </div>
+    <SubscribeForm lang={lang} id="suscribete-carta" flush />
+  </section>
 </article>
 
 {/*
@@ -550,12 +571,21 @@ const clase = (b: Bloque) => (typeof b === 'string' ? '' : `venta__${b.k}`);
     text-wrap: pretty;
   }
 
-  /* La negrita de la carta se resuelve con la tipografía de titulares, que es
-     como este sistema destaca: no se sube el peso de la de cuerpo. */
+  /* La negrita de la carta es **negrita de cuerpo**, del tamaño del párrafo
+     que la sigue. Hasta el 24 sep 2026 se resolvía con la tipografía de
+     titulares a 22 px —«este sistema no sube el peso de la de cuerpo»—, y
+     Adrián la pidió así en las cuatro cartas: la frase se leía como un
+     titulito suelto y no como lo que es, una frase de la carta dicha más
+     fuerte. Es la enmienda del 24 sep en `progreso.md`. El 600 es real: el
+     fichero de Newsreader trae el eje entero (ver `astro.config.mjs`). */
   .venta__cuerpo > .venta__fuerte {
-    font-family: var(--font-display);
-    font-size: 1.375rem; /* 22 px */
-    line-height: 1.35;
+    font-weight: 600;
+  }
+
+  /* Y su gemela en cursiva, para lo que se dice en otro tono sin subirlo
+     («Acá hay un ejercicio esta semana…»). */
+  .venta__cuerpo > .venta__cursiva {
+    font-style: italic;
   }
 
   .venta__cuerpo > .venta__grito {
@@ -600,28 +630,71 @@ const clase = (b: Bloque) => (typeof b === 'string' ? '' : `venta__${b.k}`);
     margin-top: var(--space-2);
   }
 
-  /* Listas —«para ti», «no es para ti», lo que trae—: filas separadas por
-     reglas, como la ficha de compra. Sin viñetas ni iconos. */
-  .venta__puntos,
-  .venta__lista {
-    margin: var(--space-6) 0;
+  /* --- Las tarjetas -----------------------------------------------------------
+     «Lo que encontrarás», «para ti» y «no es para ti» (24 sep 2026). Hasta ese
+     día eran filas sueltas en la columna, con el mismo aire que un párrafo, y
+     Adrián pidió que destacaran: «un card, una animación, algo que destaque».
+
+     Son recuadros a escuadra, como la ficha de precio: reglas de 1 px, sin
+     radio, sin sombra, sin fondo gris. Salen de la columna de lectura hasta el
+     ancho de esa ficha (`--sobra`), así que se ven como piezas y no como un
+     párrafo más; en el teléfono la columna ya es la pantalla y no sobra nada.
+
+       · lo que trae (`puntos`): borde de tinta y filas numeradas en mono;
+       · «para ti» y los que más se beneficiaron (`lista`, sí): en tinta, la
+         letra en papel —lo que la lectora tiene que reconocer como suyo—;
+       · «no es para ti» (`lista`, no): borde de tinta, filas en tinta
+         secundaria. Dice que no, y decirlo con el mismo peso que el sí
+         desequilibra la página.
+
+     Sin iconos: la marca de cada fila es tipografía, «+» y «−» en mono. */
+  .venta__card {
+    --sobra: max(0px, calc((min(100vw - 2 * var(--space-3), var(--width-ficha)) - 100%) / 2));
+    margin: var(--space-8) calc(-1 * var(--sobra));
+    padding: var(--space-6);
+    border: 1px solid var(--ink);
+  }
+
+  /* El sí y el no seguidos son una pareja: juntos, a 24 px. */
+  .venta__card:has(+ .venta__card) {
+    margin-bottom: var(--space-3);
+  }
+
+  .venta__card + .venta__card {
+    margin-top: var(--space-3);
+  }
+
+  @media (max-width: 38rem) {
+    .venta__card {
+      padding: var(--space-4) var(--space-3);
+    }
+
+    /* En el teléfono la marca («+», «01») cabe en 24 px y el texto gana el
+       resto: a 32 + 16 se quedaba en renglones de cuatro palabras. */
+    .venta__card .venta__filas li {
+      grid-template-columns: var(--space-3) minmax(0, 1fr);
+      gap: var(--space-1);
+    }
   }
 
   .venta__h {
     font-family: var(--font-display);
-    font-size: 1.375rem; /* 22 px */
-    line-height: 1.35;
+    font-size: var(--text-section);
+    line-height: var(--leading-section);
+    letter-spacing: var(--tracking-section);
     text-wrap: balance;
   }
 
   .venta__filas {
-    margin: var(--space-3) 0 0;
+    margin: var(--space-4) 0 0;
     padding: 0;
     list-style: none;
-    border-bottom: 1px solid var(--rule);
   }
 
   .venta__filas li {
+    display: grid;
+    grid-template-columns: var(--space-4) minmax(0, 1fr);
+    gap: var(--space-2);
     border-top: 1px solid var(--rule);
     padding: var(--space-2) 0;
     font-size: var(--text-small);
@@ -629,10 +702,58 @@ const clase = (b: Bloque) => (typeof b === 'string' ? '' : `venta__${b.k}`);
     text-wrap: pretty;
   }
 
-  /* Lo que no es va en tinta secundaria: dice que no, y decirlo con el mismo
-     peso que el sí desequilibra la página. */
-  .venta__lista--no li {
+  /* La marca comparte el renglón de 24 px del texto (16 × 1,5), así que se
+     alinea con su primera línea sin empujones fuera de la rejilla. */
+  .venta__marca {
+    line-height: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: var(--text-mono);
+    letter-spacing: var(--tracking-mono);
     color: var(--ink-soft);
+  }
+
+  .venta__lista--si {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .venta__lista--si .venta__filas li {
+    border-top-color: var(--paper-rule);
+  }
+
+  .venta__lista--si .venta__marca {
+    color: var(--paper-soft);
+  }
+
+  .venta__lista--no .venta__filas li {
+    color: var(--ink-soft);
+  }
+
+  /* La entrada en escalera: la tarjeta aparece con el revelado de siempre y
+     sus filas llegan detrás, una a una, cada 60 ms —la escalera de la entrada
+     de *Sobre mí*, con su curva y su duración—. Es **la segunda animación de
+     las cartas**, dentro del tope de dos fuera de la Home: la enmienda del 24
+     sep en `progreso.md`. Sin JavaScript o con menos movimiento, las filas
+     están quietas y visibles desde el principio. */
+  @media (prefers-reduced-motion: no-preference) {
+    .venta__card.reveal .venta__filas li {
+      opacity: 0;
+      transform: translateY(var(--space-1));
+      transition:
+        opacity var(--duration-reveal) var(--ease-reveal),
+        transform var(--duration-reveal) var(--ease-reveal);
+      transition-delay: calc(0.15s + var(--i, 0) * 60ms);
+    }
+
+    .venta__card.reveal.is-visible .venta__filas li {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  :global(.no-js) .venta__card .venta__filas li {
+    opacity: 1;
+    transform: none;
   }
 
   /* --- La ficha de precio ----------------------------------------------------
@@ -858,10 +979,11 @@ const clase = (b: Bloque) => (typeof b === 'string' ? '' : `venta__${b.k}`);
     text-wrap: pretty;
   }
 
-  /* --- El pie del newsletter (membresía) ------------------------------------ */
+  /* --- El newsletter, al final de todas las cartas ------------------------
+     La frase en la letra de los títulos de sección y, debajo, el campo de la
+     Home con su regla y su botón (`SubscribeForm.astro`). */
   .venta__news {
-    border-top: 1px solid var(--rule);
-    padding-top: var(--space-4);
+    margin-top: var(--space-12);
   }
 
   .venta__news-pre {
@@ -869,10 +991,6 @@ const clase = (b: Bloque) => (typeof b === 'string' ? '' : `venta__${b.k}`);
     font-size: var(--text-section);
     line-height: var(--leading-section);
     letter-spacing: var(--tracking-section);
-  }
-
-  .venta__news-link {
-    display: inline-block;
-    margin-top: var(--space-3);
+    text-wrap: balance;
   }
 </style>

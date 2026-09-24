@@ -186,7 +186,7 @@ a:hover {
 }
 
 .row--wide .row__body {
-  max-width: 48.25rem; /* 772 px */
+  max-width: var(--width-ficha); /* 772 px */
 }
 
 /* Párrafo de cuerpo: 24 px entre párrafos, el último sin margen. */

@@ -126,7 +126,7 @@ const paraJs = { cartas, avisame: AVISAME };
      bloques de la carta, los testimonios aparte y las preguntas. Al guardar
      se vuelve a armar la `Carta` de cada idioma. */
 
-  type TipoBloque = 'parrafo' | 'fuerte' | 'grito' | 'acento' | 'testimonio' | 'lista-si' | 'lista-no' | 'puntos';
+  type TipoBloque = 'parrafo' | 'fuerte' | 'cursiva' | 'grito' | 'acento' | 'testimonio' | 'lista-si' | 'lista-no' | 'puntos';
   type TxtBloque = { text: string; autor: string; titulo: string; items: string };
   type Bloq = { tipo: TipoBloque } & Par<TxtBloque>;
   type Testi = Par<{ text: string; autor: string }>;
@@ -141,7 +141,8 @@ const paraJs = { cartas, avisame: AVISAME };
 
   const TIPOS: { v: TipoBloque; t: string }[] = [
     { v: 'parrafo', t: 'Párrafo' },
-    { v: 'fuerte', t: 'Destacado' },
+    { v: 'fuerte', t: 'Negrita' },
+    { v: 'cursiva', t: 'Cursiva' },
     { v: 'grito', t: 'Frase centrada' },
     { v: 'acento', t: 'La frase grande' },
     { v: 'testimonio', t: 'Testimonio' },
@@ -511,6 +512,7 @@ const paraJs = { cartas, avisame: AVISAME };
     switch (b.tipo) {
       case 'parrafo':
       case 'fuerte':
+      case 'cursiva':
         caja.append(texto(true));
         break;
       case 'grito':
@@ -733,9 +735,8 @@ const paraJs = { cartas, avisame: AVISAME };
       ),
       seccion(
         'Al final',
-        'Opcional: una línea con el enlace al newsletter, debajo de todo.',
-        par('news.pre', 'La frase', 'linea', undefined, { es: '¿Todavía no estás en el newsletter?', en: 'Not subscribed to the newsletter yet?' }),
-        par('news.link', 'El enlace', 'linea', undefined, { es: 'Suscríbete acá', en: 'Subscribe here' }),
+        'El newsletter, debajo de todo: esta frase y, debajo, el campo del correo, como en la Home. Sale en todas las páginas; si la dejas vacía, sale la de siempre.',
+        par('news.pre', 'La frase', 'linea', undefined, { es: '¿Aún no estás suscrito al newsletter?', en: 'Not subscribed to the newsletter yet?' }),
       ),
       seccion(
         'Para Google y al compartir',
@@ -1188,10 +1189,18 @@ const paraJs = { cartas, avisame: AVISAME };
     color: var(--ink-soft);
   }
 
-  /* Cada tipo de bloque se insinúa en el editor como se verá: el destacado
-     en la letra de titulares, la frase centrada en cursiva, la grande más
-     grande. Así Emi lee su carta con el ritmo que tendrá. */
-  .ventas :global(.item--fuerte textarea),
+  /* Cada tipo de bloque se insinúa en el editor como se verá: la negrita y
+     la cursiva en la letra del cuerpo, la frase centrada en cursiva de
+     titulares, la grande más grande. Así Emi lee su carta con el ritmo que
+     tendrá. */
+  .ventas :global(.item--fuerte textarea) {
+    font-weight: 600;
+  }
+
+  .ventas :global(.item--cursiva textarea) {
+    font-style: italic;
+  }
+
   .ventas :global(.item--grito textarea),
   .ventas :global(.item--acento textarea) {
     font-family: var(--font-display);

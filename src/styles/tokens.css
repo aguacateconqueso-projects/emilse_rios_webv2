@@ -71,6 +71,7 @@
   --col-gap: var(--space-4); /* 32 px de separación */
   --width-text: 48rem; /* 768 px · columna + gutter */
   --width-wide: 56.25rem; /* 900 px · fichas y testimonios */
+  --width-ficha: 48.25rem; /* 772 px · la ficha de precio y las tarjetas de las cartas */
   --width-full: 77.5rem; /* 1240 px · cabecera, pie, carrusel */
 
   /* --- Fondo del contrabajo · solo en la Home ---------------------------
