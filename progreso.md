@@ -4,13 +4,19 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 24 de septiembre de 2026, mediodía: **Adrián hizo
-los pasos A.1–A.6** de **📋 LO QUE FALTA** —migraciones 0009 y 0010
-aplicadas, Emi admin, variables en Preview, Redirect URL comodín, clave de
-Bunny— y salió que **los cursos viven en otra biblioteca de Bunny** (754051, no
-la 741634 de la membresía); el código ya las separa. Ver **Las dos bibliotecas
-de Bunny**, dentro de **El panel de Emi, completo**. Antes, de madrugada: el
-panel de Emi completo y **una sola lista de lo que falta**, justo abajo.
+**Última actualización:** 24 de septiembre de 2026, tarde: **Formaciones
+cambia de dirección**: `/formaciones/` y `/en/courses/`, y «products» deja de
+salir en los enlaces. Las viejas redirigen con un 301, página por página. Ver
+**Las direcciones viejas → Formaciones deja de llamarse `/productos/`**. Y en
+la misma rama, **los videos de los cursos, en dos idiomas.** Emi sube cada clase en español y en inglés a la
+misma biblioteca de Bunny, y el selector del panel los metía todos en el hueco
+del español. Ahora lee el idioma de cada video por su título (o su colección)
+y **«+ Desde Bunny» hace una clase por pareja ES + EN**. Ver **Los videos de
+los cursos, en dos idiomas**, justo debajo de **La cortina**. Antes, al
+mediodía: **Adrián hizo los pasos A.1–A.6** de **📋 LO QUE FALTA** y salió que
+**los cursos viven en otra biblioteca de Bunny** (754051, no la 741634 de la
+membresía); el código ya las separa (PR #53, mergeado). Ver **Las dos
+bibliotecas de Bunny**, dentro de **El panel de Emi, completo**.
 
 > **🚧 LA CORTINA ESTÁ BAJADA desde el 23 sep 2026.** Quien entra a
 > `www.emilserios.com` —a cualquier dirección— ve solo la firma de Emi sobre
@@ -24,10 +30,11 @@ panel de Emi completo y **una sola lista de lo que falta**, justo abajo.
 > sube un cambio, se le deja el enlace directo para verlo** —a la página
 > exacta que cambió, en la vista previa de la rama, no «mira el PR»—. Adrián
 > no encontraba las vistas previas, y una vez estuvo mirando la de una rama
-> vieja buscando cambios que estaban en otra. **Desde el 24 sep 2026 se
-> trabaja en la rama `claude/amazing-maxwell-jajhom`**; su raíz sale en el
-> comentario de vercel[bot] de su PR (Vercel acorta el nombre con un código
-> que no se puede adivinar). La de la noche del 23 sep,
+> vieja buscando cambios que estaban en otra. **Desde la tarde del 24 sep
+> 2026 se trabaja en la rama `claude/affectionate-faraday-ddgz0m`** (la de
+> antes, `claude/amazing-maxwell-jajhom`, entró en `main` con el PR #53); su
+> raíz sale en el comentario de vercel[bot] de su PR (Vercel acorta el nombre
+> con un código que no se puede adivinar). La de la noche del 23 sep,
 > `claude/epic-bardeen-k6zfn7` (PR #51 y #52, los dos mergeados), era:
 >
 > **https://emilse-rios-webv2-git-claude-e-21eb3e-adrians-projects-594b3131.vercel.app**
@@ -35,7 +42,7 @@ panel de Emi completo y **una sola lista de lo que falta**, justo abajo.
 > La de antes, `claude/youthful-meitner-21x8ys`, era
 > `…-git-claude-y-2c57cd-…`: enseña `main` hasta el #50, sin el aula nueva.
 >
-> y se le añade la ruta: `/sobre-mi/`, `/en/products/`… Con otra rama, la
+> y se le añade la ruta: `/sobre-mi/`, `/en/courses/`… Con otra rama, la
 > raíz cambia: sale en el comentario de **vercel[bot]** del PR, fila
 > `emilse-rios-webv2`, enlace **Preview** (desde la sesión se lee con las
 > herramientas de GitHub, pidiendo los comentarios del PR). Vercel tarda un
@@ -53,8 +60,11 @@ panel de Emi completo y **una sola lista de lo que falta**, justo abajo.
 > Mensajes). Rama `claude/epic-bardeen-k6zfn7`: **PR #51 y PR #52, los dos
 > mergeados**. Todo en **El panel de Emi, completo** y **El aula y el panel
 > de Emi, con la ropa del sitio**. El 24 sep al mediodía Adrián hizo A.1–A.6,
-> y la rama nueva, `claude/amazing-maxwell-jajhom`, separa las dos
-> bibliotecas de Bunny.
+> y la rama `claude/amazing-maxwell-jajhom` separó las dos bibliotecas de
+> Bunny (PR #53, mergeado). Esa tarde, en `claude/affectionate-faraday-ddgz0m`,
+> **el selector de Bunny aprendió los dos idiomas** (ver **Los videos de los
+> cursos, en dos idiomas**) y **Formaciones pasó a `/formaciones/` y
+> `/en/courses/`**, con las viejas redirigidas (ver **Las direcciones viejas**).
 >
 > **A. Para que Emi pueda usar el panel (Adrián, fuera del código; una media
 > hora, en este orden).** Hasta que no esté hecho, el panel se ve pero no
@@ -87,7 +97,11 @@ panel de Emi completo y **una sola lista de lo que falta**, justo abajo.
 >
 > 8. [ ] **Cargar su primer curso completo** en Cursos (los videos ya están en
 >    Bunny) y darse de alta a sí misma o a alguien de prueba en Personas para
->    verlo como alumna.
+>    verlo como alumna. **Antes, que cada video diga su idioma en Bunny**: «ES» o
+>    «EN» al final del título («01 Introducción ES», «01 Introduction EN»), o
+>    una colección por idioma con «ES» / «EN» en el nombre. Con eso, «+ Desde
+>    Bunny» arma el curso entero de una vez, cada video en su hueco. Ver **Los
+>    videos de los cursos, en dos idiomas**.
 > 9. [ ] **Revisar la Tienda y las Págs. de ventas** con sus textos; el resto
 >    de copies que cambió el 23 sep, y **tres traducciones hechas acá** que
 >    tiene que mirar (marcadas `TRADUCIDO` en `src/data/cartas.ts`). Desde el
@@ -104,6 +118,9 @@ panel de Emi completo y **una sola lista de lo que falta**, justo abajo.
 > 12. [ ] **Probar contra el Supabase de verdad** en cuanto estén A.1–A.7: un
 >     recorrido corto por cada pestaña, y **el puente `player.js` con un video
 >     real de Bunny** (guarda el minuto solo; nunca se ha probado contra uno).
+>     Y **el selector de Bunny con los títulos reales de Emi**: que las
+>     etiquetas ES / EN salgan bien y el plan de «+ Desde Bunny» empareje cada
+>     clase con su versión (probado solo con una biblioteca simulada).
 > 13. [ ] **⚠️ El cobro de los cursos, y que pagar dé acceso solo.** Hoy
 >     `/api/checkout` solo cobra la membresía y **el webhook de Stripe vive en
 >     la academia y solo sabe de la membresía**, así que un curso comprado no
@@ -145,8 +162,14 @@ panel de Emi completo y **una sola lista de lo que falta**, justo abajo.
 >   `DKIM:` de un correo para cerrar lo de los CNAME proxied, mudar
 >   `info@emilserios.com` fuera del Hostinger de Edu y decidir
 >   `contrabajoenlaciudad.com`. Ver **Pendiente → Bloquea el lanzamiento**.
-> - [ ] `curl -sI https://www.emilserios.com/aulavirtual/estudiemos-juntos/`
->   tiene que dar `301` hacia `/productos/estudiemos-juntos/`.
+> - [ ] Con la rama de `/formaciones/` ya en `main`:
+>   `curl -sI https://www.emilserios.com/productos/estudiemos-juntos/` y
+>   `curl -sI https://www.emilserios.com/aulavirtual/estudiemos-juntos/` tienen
+>   que dar `301` hacia `/formaciones/estudiemos-juntos/`. Y en los correos
+>   nuevos, Emi pega ya las direcciones de `/formaciones/`.
+> - [ ] **El SEO lo hace Emi, con Claude, cuando todo esté listo** (lo decidió
+>   Adrián el 24 sep 2026: no es suyo). Lo que ya está hecho de base: canonical
+>   y `hreflang` en cada página y direcciones en español y en inglés.
 > - [ ] Hay dos proyectos de Vercel construyendo este repo
 >   (`emilse-rios-webv2` y `emilse-rios-webv2_1`): ver cuál sobra y borrarlo.
 > - [ ] Opcional: la cápsula «Ingresar al aula» del menú no suelta notas.
@@ -311,14 +334,15 @@ pagando sin recibir acceso.
 sep 2026** (un minuto de caché): leen lo que Emi publica desde el panel y, si
 no hay nada, lo del código. Ver **El panel de Emi, completo**.
 
-Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/` · `/productos/` ·
-`/en/products/` · `/productos/estudiemos-juntos/` ·
-`/en/products/estudiemos-juntos/` · `/productos/todo-el-diapason/` ·
-`/en/products/todo-el-diapason/` · `/productos/contrabajo-desde-cero/` ·
-`/en/products/contrabajo-desde-cero/` ·
-`/productos/tu-vibrato-como-un-cantante/` ·
-`/en/products/tu-vibrato-como-un-cantante/` · `/aulavirtual/entrar/` ·
-`/en/classroom/signin/`. **`/aulavirtual/` y `/en/classroom/` ya no son
+Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/` · `/formaciones/` ·
+`/en/courses/` · `/formaciones/estudiemos-juntos/` ·
+`/en/courses/estudiemos-juntos/` · `/formaciones/todo-el-diapason/` ·
+`/en/courses/todo-el-diapason/` · `/formaciones/contrabajo-desde-cero/` ·
+`/en/courses/contrabajo-desde-cero/` ·
+`/formaciones/tu-vibrato-como-un-cantante/` ·
+`/en/courses/tu-vibrato-como-un-cantante/` · `/aulavirtual/entrar/` ·
+`/en/classroom/signin/`. **Hasta el 24 sep 2026 Formaciones vivió en
+`/productos/` y `/en/products/`**, que ahora redirigen. **`/aulavirtual/` y `/en/classroom/` ya no son
 páginas** desde el 23 sep 2026: redirigen a la pantalla de acceso.
 
 Y el aula por dentro: `/aulavirtual/escritorio/` · `/aulavirtual/curso/<slug>/` ·
@@ -583,6 +607,77 @@ no tenía salida a `vercel.app`:
   vistas previas. No se sabe cuál tiene el dominio; el segundo parece un
   duplicado y conviene revisarlo —y borrarlo, si sobra— para no pagar dos
   builds ni confundir variables.
+
+---
+
+## Los videos de los cursos, en dos idiomas
+
+**24 de septiembre de 2026, por la tarde.** Adrián: «los cursos que subirá Emi
+tienen versión EN y ES, tenemos que diferenciarlos para subir los que
+corresponden en donde van».
+
+Cada clase del panel tiene **un hueco de video por idioma** desde el principio,
+pero el selector de Bunny no sabía de idiomas: «Elegir de Bunny» enseñaba la
+biblioteca entera en los dos huecos, y **«+ Desde Bunny» hacía una clase por
+video, siempre en el hueco del español**: un curso de doce clases grabado en
+los dos idiomas salía con veinticuatro, la mitad con el video inglés donde va
+el español. Ahora:
+
+- **Cada video lleva su etiqueta, ES o EN**, que sale de su título en Bunny o,
+  si el título no dice nada, del nombre de su colección
+  (`src/lib/bunny-idioma.ts`). Se entiende «ES» / «EN» al final («01 Intro
+  EN», «01_intro_en.mp4», «01 Intro - English»), al principio en mayúsculas
+  («EN - 01 Intro»), entre corchetes («[EN]», «(es)») y las palabras enteras
+  (Español, Spanish, English, Inglés). **«Qué es el vibrato» o «Tu vibrato
+  en…» no cuentan**: con solo un espacio delante, el código corto tiene que ir
+  en mayúsculas. Un video sin marca sale como **«ES?»** y va como español, que
+  es lo que hacía antes.
+- **Si la etiqueta se equivoca, se pulsa** y cambia de idioma. Vale hasta
+  recargar el panel; lo que dura es arreglar el título en Bunny.
+- **«Elegir de Bunny» abre filtrado por el idioma del hueco** (hay un filtro
+  «Idioma»: los dos, español, inglés o sin marca) y, **si el otro hueco está
+  vacío, pone también la otra versión**: la del mismo título sin la marca, o la
+  del mismo número («5. Escalas ES» → «5. Scales - EN»). Primero la busca en
+  su colección y después en toda la biblioteca, por si Emi tiene una colección
+  por idioma. Nunca por orden, que sería adivinar. Si Emi pone en un hueco un
+  video que parece del otro idioma, el aviso se lo dice.
+- **«+ Desde Bunny» hace una clase por pareja**, no una por video. Emi marca
+  los de los dos idiomas y, antes de crear nada, ve debajo de la lista **el
+  plan**: «24 videos → 12 clases, en este orden», con cada clase y sus dos
+  versiones, y los avisos (videos sin marca, parejas hechas por orden, uno en
+  inglés que no tiene su versión en español). El botón dice cuántas clases
+  salen. Las parejas se buscan así: mismo título sin la marca; si no, mismo
+  número, si no se repite; si no, por orden, **solo si quedan los mismos de
+  cada idioma y ningún par tiene números distintos**. Lo que queda sin pareja
+  sale como clase de un solo idioma.
+- **Los títulos de las clases salen limpios**: sin «ES» / «EN» ni «.mp4».
+  Cuando los dos videos se llaman igual salvo la marca, el título en inglés se
+  deja vacío —el aula en inglés lee el español, y el panel lo pide—.
+- La lista va **en orden natural** («2.» antes que «10.»): Bunny ordena letra
+  a letra, y las clases se crean en el orden de la lista.
+- La cabecera del curso cuenta **cuántas clases no tienen video en inglés**
+  (el índice ya decía «solo ES» en cada una).
+
+**Qué le toca a Emi:** que cada video diga su idioma en Bunny. Lo más simple
+es terminar el nombre del fichero en «ES» o «EN» **antes de subirlo** (Bunny
+toma el nombre del fichero como título), o renombrarlo en Bunny, o una
+colección por idioma («Todo el diapasón · ES» y «Todo el diapasón · EN»). Con
+la numeración igual en los dos idiomas («01 …», «02 …»), el emparejado sale
+solo aunque los títulos estén traducidos.
+
+**Cómo se probó.** Las funciones de `bunny-idioma.ts`, con 26 títulos de
+prueba (los buenos y los que no tienen que marcar: «Qué es el vibrato»,
+«Escalas en Mi», «En el diapasón», un título todo en mayúsculas) y los casos de
+pareja: mismo título, mismo número con títulos traducidos, por orden, sin
+cuadrar y números distintos. Y el panel en Chromium contra un Supabase y un
+Bunny simulados (12 videos en español en una colección, 12 en inglés en otra y
+uno sin marca): el plan dice «24 videos → 12 clases», las doce se crean con
+cada video en su hueco (ninguno cruzado), el sin marca sale «ES?» y se corrige
+a EN con la etiqueta (el foco se queda en ella), «Elegir de Bunny» en el hueco
+español abre filtrado y pone sola la versión inglesa con su título, y el hueco
+inglés abre filtrado en inglés. En el teléfono, sin desbordes. Cero errores en
+la consola; `npm run build` bien. ⚠️ **Falta verlo con los títulos reales de
+Emi** (punto C.12 de la lista).
 
 ---
 
@@ -1442,11 +1537,11 @@ cabra— y «No necesitas un talento innato ni una edad específica. Solo
 constancia.». Está en `src/i18n/ui.ts` (`products.heading`, `products.lead`,
 `products.close`).
 
-**La dirección NO cambió, a propósito:** sigue siendo `/productos/` y
+**La dirección no cambió ese día, a propósito:** siguió siendo `/productos/` y
 `/en/products/`. `/productos/estudiemos-juntos/` está pegada en correos de Emi,
-y renombrar la ruta obliga a redirigir las viejas —y el día que el nombre
-vuelva a cambiar, otra vez—. Si se quiere `/formaciones/`, es una línea en
-`routes` de `src/i18n/ui.ts` más las redirecciones en `astro.config.mjs`.
+y renombrar la ruta obliga a redirigir las viejas. **Cambió al día siguiente,
+el 24 sep 2026**, a `/formaciones/` y `/en/courses/`, con las redirecciones:
+ver **Las direcciones viejas → Formaciones deja de llamarse `/productos/`**.
 
 Ojo con esas redirecciones: hasta el 23 sep 2026 las que genera Astro para
 Vercel no aceptaban la barra final, y `/aulavirtual/estudiemos-juntos/` daba
@@ -3491,7 +3586,8 @@ redirecciones de `astro.config.mjs`** en `.vercel/output/config.json`:
 ⚠️ **Lo que no se pudo hacer: comprobarlo en vivo.** La sesión no tenía salida
 a `emilserios.com` (el proxy contestaba 403). Después del merge, con
 `curl -sI https://www.emilserios.com/aulavirtual/estudiemos-juntos/` tiene que
-salir un `301` con `location: /productos/estudiemos-juntos/`. El script da por
+salir un `301` con `location: /formaciones/estudiemos-juntos/` (hasta el 24
+sep 2026, `/productos/estudiemos-juntos/`). El script da por
 hecho algo que no se pudo mirar: que Vercel sirve `…/entrar/index.html` también
 a quien pide `…/entrar` sin barra. Lo que sí es seguro es que ninguna
 redirección se la lleva ya a otra parte.
@@ -3499,6 +3595,58 @@ redirección se la lleva ya a otra parte.
 **Si se añade una redirección**, va en `redirects` como siempre y la
 integración la arregla sola. **Nunca un patrón dinámico bajo una sección que
 tenga páginas propias**: en Vercel se come esas páginas.
+
+### Formaciones deja de llamarse `/productos/`
+
+**24 de septiembre de 2026.** Adrián: «necesito que /products no aparezca en
+los enlaces, cambiemos a /formaciones y /courses». La sección se llamaba
+Formaciones desde el día anterior, pero la dirección seguía siendo
+`/productos/` y `/en/products/`. Ahora:
+
+| Antes | Ahora |
+|---|---|
+| `/productos/` | `/formaciones/` |
+| `/productos/<slug>/` | `/formaciones/<slug>/` |
+| `/en/products/` | `/en/courses/` |
+| `/en/products/<slug>/` | `/en/courses/<slug>/` |
+
+- **Una línea manda:** `routes.products` en `src/i18n/ui.ts`. El menú, el
+  pie, las fichas, las páginas de ventas, el canonical, los `hreflang`, el
+  conmutador de idioma, el aula, el cobro (`/api/checkout`) y el panel salen
+  de ahí. Las carpetas de `src/pages/` se renombraron a `formaciones/` y
+  `en/courses/`. El panel (Tienda y Págs. de ventas) escribía `/productos/` a
+  mano y ahora usa `productPath()`, así que la próxima vez no hay que tocarlo.
+- **Las viejas redirigen con un 301**, la portada y **cada página de ventas**
+  —también las que Emi cree mañana desde el panel—: `/productos/[producto]` y
+  `/en/products/[producto]` son patrones dinámicos **a propósito**, porque bajo
+  esas carpetas ya no vive ninguna página (la regla de arriba es para las
+  secciones que sí tienen páginas propias). La carta de la membresía del aula
+  (`/aulavirtual/estudiemos-juntos/`) va **directo** a `/formaciones/…`, sin
+  pasar por `/productos/`. Son diez redirecciones y el build dice «10
+  redirecciones aceptan ahora la barra final».
+- **Lo que no cambió:** la clave interna `products` (en `routes` y en los
+  textos `products.*`) y la tabla `products` de la base de datos, que no se
+  ven en ningún enlace; y las fotos que sube la Tienda, que se siguen guardando
+  en `tienda/productos/…` del almacenamiento de Supabase —es la dirección de
+  una imagen, no de una página, y moverlas rompería las ya subidas—.
+- **`npm run audit:redirecciones`** comprueba las viejas y que las nuevas son
+  páginas de verdad: **48 de 48**. Hasta hoy fallaban 4 —las de la carta de la
+  membresía—, pero no por un error de la web: el script esperaba un fichero y
+  desde el 23 sep esas páginas se sirven desde el servidor. Ahora «aterrizar»
+  es llegar a un fichero o a una función.
+- **Probado** en `npm run dev` con Chromium: las veinte páginas públicas y
+  del aula, y el panel, sin un solo enlace con `/productos` ni `/products`; el
+  canonical y los dos `hreflang` de cada página de ventas, en los dos idiomas,
+  apuntan a las nuevas; el conmutador ES→EN de la carta de la membresía lleva
+  a `/en/courses/estudiemos-juntos/`. `astro check`: los mismos 19 avisos de
+  tipos que ya había en `main`, ninguno nuevo.
+
+⚠️ **Lo que queda fuera de este repo:** los enlaces que apuntan a
+`/productos/…` desde otros sitios —los correos de Emi, la academia, Klaviyo,
+Stripe— siguen funcionando por la redirección, pero lo limpio es ir
+cambiándolos a `/formaciones/…` cuando se toquen. Y el SEO en sí (títulos,
+descripciones, el sitemap que todavía no existe) **lo hace Emi con Claude
+cuando todo esté listo**, no Adrián.
 
 ---
 
@@ -3885,15 +4033,17 @@ src/
   lib/aula-acceso.ts     Quién entra, preguntado una vez por página
   lib/panel.ts           Lo que comparten las pestañas del panel
   lib/video.ts           El normalizador de Bunny, traído de la academia
+  lib/bunny-idioma.ts    El idioma de un video de Bunny (ES / EN, por su
+                         título o su colección) y sus parejas
   scripts/botones.ts     El movimiento del botón (relleno, imán, notas)
   scripts/panel-cursos.ts  La lógica del constructor de cursos
   pages/                 index · sobre-mi · en/index · en/about
                          cortina (lo que tapa todo mientras está bajada)
-                         productos/index · productos/[producto]
-                         productos/estudiemos-juntos (la carta trasplantada,
-                           suelta y sin layout — ver más arriba el porqué)
-                         en/products/index · en/products/[producto]
-                         en/products/estudiemos-juntos
+                         formaciones/index · formaciones/[producto]
+                           (hasta el 24 sep 2026, productos/; todas las
+                           cartas, la de la membresía incluida)
+                         en/courses/index · en/courses/[producto]
+                           (hasta el 24 sep 2026, en/products/)
                          aulavirtual/index · en/classroom/index
                          aulavirtual/escritorio · aulavirtual/curso/[curso]
                          aulavirtual/curso/index (?c=, cursos sin ficha)
@@ -4003,7 +4153,7 @@ Todo el catálogo de la tienda sale de `src/data/aula.ts`. Un curso pasa de
 6. `comprarHref` con el enlace de pago de cada idioma.
 
 Con eso, la ficha del catálogo se vuelve un enlace y `getStaticPaths` genera
-`/productos/<slug>/` y `/en/products/<slug>/` sola. **No hay que tocar
+`/formaciones/<slug>/` y `/en/courses/<slug>/` sola. **No hay que tocar
 ninguna página.** Si falta la `pagina`, el producto no se genera aunque esté en
 `'venta'`: es la red que impide publicar un enlace a una carta que no existe.
 
@@ -4364,9 +4514,10 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
   se resuelve primero, siempre.** El orden completo está en **El dominio, y
   Edu**.
 
-- **La tienda vive en `/productos/` y las cartas cuelgan de ella**, en
-  `/productos/<slug>/`. Un solo recorrido: catálogo, producto, comprar. El
-  slug de la sección se traduce —`/en/products/`— pero **el del producto no**:
+- **La tienda vive en `/formaciones/` y las cartas cuelgan de ella**, en
+  `/formaciones/<slug>/` (hasta el 24 sep 2026, `/productos/`). Un solo
+  recorrido: catálogo, producto, comprar. El slug de la sección se traduce
+  —`/en/courses/`— pero **el del producto no**:
   el slug es la identidad del producto, la misma que llevará su fila en la base
   de datos y la que Emi pegue en un correo. Un producto, un slug, dos idiomas.
   La membresía es `estudiemos-juntos`, que es su nombre, no `membresia`.

@@ -5,7 +5,7 @@ import { cartas, AVISAME, type Carta } from '../data/cartas';
 
 /**
  * La tienda y sus páginas de ventas, del lado de la WEB: lo que leen
- * Formaciones (`/productos/`) y cada página de ventas (`/productos/<slug>/`).
+ * Formaciones (`/formaciones/`) y cada página de ventas (`/formaciones/<slug>/`).
  *
  * **Desde el 23 sep 2026 las maneja Emi desde su panel** (pestañas Tienda y
  * Págs. de ventas) y viven en Supabase: `products`, `sales_pages` —la

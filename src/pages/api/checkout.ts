@@ -8,7 +8,7 @@ import { routePath } from '../../i18n/ui';
 /**
  * El checkout de la membresía. **Desde el 22 sep 2026 vive acá**, no en la
  * academia: es el primer trozo de la unión de las dos casas, y lo que hace que
- * el botón de comprar de `/productos/estudiemos-juntos/` deje de salir del
+ * el botón de comprar de `/formaciones/estudiemos-juntos/` deje de salir del
  * sitio a mitad de una compra.
  *
  * Trasplantado de `emilse_rios_membresias` (`src/pages/api/checkout.ts`). Lo

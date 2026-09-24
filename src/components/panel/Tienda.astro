@@ -25,6 +25,7 @@
  */
 import { getImage } from 'astro:assets';
 import { catalogo } from '../../data/aula';
+import { productPath, routePath } from '../../i18n/ui';
 
 /** El catálogo del código, con sus fotos ya optimizadas, para importarlo. */
 const importable = await Promise.all(
@@ -61,7 +62,7 @@ const importable = await Promise.all(
       <h1 class="app-h1 pest-cab__h">Lo que vendes, como se ve.</h1>
     </div>
     <div class="tienda__cab-actos">
-      <a class="mono" href="/productos/" target="_blank" rel="noopener">Ver Formaciones ↗</a>
+      <a class="mono" href={routePath('products', 'es')} target="_blank" rel="noopener">Ver Formaciones ↗</a>
       <span data-t-nuevo></span>
     </div>
   </header>
@@ -180,7 +181,7 @@ const importable = await Promise.all(
       <label class="campo">
         <span class="campo__t">Nombre corto (dirección)</span>
         <input type="text" data-p="slug" spellcheck="false" autocomplete="off" placeholder="todo-el-diapason" />
-        <span class="campo__ayuda" data-t-slug-ayuda>/productos/…/</span>
+        <span class="campo__ayuda" data-t-slug-ayuda>{productPath('…', 'es')}</span>
       </label>
       <label class="campo">
         <span class="campo__t">Número</span>
@@ -207,6 +208,7 @@ const importable = await Promise.all(
 
 <script>
   import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+  import { productPath } from '../../i18n/ui';
   import {
     achicarFoto,
     alAbrir,
@@ -353,7 +355,7 @@ const importable = await Promise.all(
             /* En borrador no hay nada que ver; el hueco se guarda para que las
                columnas de la lista no bailen. */
             prod.estado !== 'borrador'
-              ? el('a', { class: 'mono', href: `/productos/${prod.slug}/`, target: '_blank', rel: 'noopener', text: 'Ver ↗' })
+              ? el('a', { class: 'mono', href: productPath(prod.slug, 'es'), target: '_blank', rel: 'noopener', text: 'Ver ↗' })
               : el('span', { class: 'mono tienda__hueco', 'aria-hidden': 'true', text: 'Ver ↗' }),
             editar,
           ),
@@ -431,7 +433,7 @@ const importable = await Promise.all(
   ['resumen_es', 'resumen_en'].forEach((k) => campo(k).addEventListener('input', () => cuenta(k)));
 
   function ayudaSlug() {
-    $('[data-t-slug-ayuda]').textContent = `/productos/${campo('slug').value || '…'}/`;
+    $('[data-t-slug-ayuda]').textContent = productPath(campo('slug').value || '…', 'es');
   }
   campo('slug').addEventListener('input', () => {
     slugTocado = true;

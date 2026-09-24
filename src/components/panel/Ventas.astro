@@ -93,6 +93,7 @@ const paraJs = { cartas, avisame: AVISAME };
 
 <script>
   import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+  import { productPath } from '../../i18n/ui';
   import { alAbrir, armarBotones, avisar, boton, el, faltaTabla, fechaHora, hace, leerHash, ocupado } from '../../lib/panel';
   import type { Bloque, Carta } from '../../data/cartas';
 
@@ -364,7 +365,7 @@ const paraJs = { cartas, avisame: AVISAME };
       const pub = publicadas.get(prod.slug);
       const detalle = [
         ESTADO_FICHA[prod.estado],
-        `/productos/${prod.slug}/`,
+        productPath(prod.slug, 'es'),
         pub ? `publicada ${cuando(pub)}` : null,
       ].filter(Boolean);
       ul.append(
@@ -383,7 +384,7 @@ const paraJs = { cartas, avisame: AVISAME };
             { class: 'fila__actos' },
             tienePagina &&
               prod.estado !== 'borrador' &&
-              el('a', { class: 'mono', href: `/productos/${prod.slug}/`, target: '_blank', rel: 'noopener', text: 'Ver ↗' }),
+              el('a', { class: 'mono', href: productPath(prod.slug, 'es'), target: '_blank', rel: 'noopener', text: 'Ver ↗' }),
             el('a', { class: 'mono ventas__escribir', href: `#ventas/${prod.slug}`, text: tienePagina ? 'Escribir →' : 'Empezarla →' }),
           ),
         ),
@@ -835,7 +836,7 @@ const paraJs = { cartas, avisame: AVISAME };
     cuerpo.append(el('p', { class: 'soft', text: 'Cargando…' }));
     $('[data-v-e-h]').textContent = p.nombre_es || p.slug;
     $('[data-v-e-eyebrow]').textContent = `Página de ventas · ${ESTADO_FICHA[p.estado]}`;
-    $('[data-v-e-dir]').textContent = `/productos/${p.slug}/`;
+    $('[data-v-e-dir]').textContent = productPath(p.slug, 'es');
     $('[data-v-e-errores]').hidden = true;
     window.scrollTo({ top: 0 });
 
@@ -950,7 +951,7 @@ const paraJs = { cartas, avisame: AVISAME };
     const aviso =
       p.estado === 'borrador'
         ? `¿Publicar la página de «${p.nombre_es}»?\n\nLa ficha está en borrador: la página queda lista, pero no se ve hasta que la ficha salga de borrador en la Tienda.`
-        : `¿Publicar la página de «${p.nombre_es}»?\n\nEn un minuto la ve todo el mundo en /productos/${p.slug}/.`;
+        : `¿Publicar la página de «${p.nombre_es}»?\n\nEn un minuto la ve todo el mundo en ${productPath(p.slug, 'es')}.`;
     if (!window.confirm(aviso)) return;
     await ocupado(publicarB, 'Publicando…', async () => {
       sucio = true;

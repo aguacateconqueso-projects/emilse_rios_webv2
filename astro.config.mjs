@@ -137,7 +137,7 @@ export default defineConfig({
   /**
    * Las direcciones viejas, que no se rompen: Emi las pegó en sus correos.
    *
-   * Son seis y están escritas a mano. Hasta el 23 sep 2026 había además dos
+   * Son diez y están escritas a mano. Hasta el 23 sep 2026 había además dos
    * patrones dinámicos —`/aulavirtual/[producto]` → `/productos/[producto]` y
    * su gemelo inglés— y **se quitaron porque hacían daño**: en Vercel se
    * convierten en «cualquier cosa bajo /aulavirtual/», así que se comían las
@@ -147,7 +147,13 @@ export default defineConfig({
    * cubrieran ya estas líneas: la única carta que vivió en
    * `/aulavirtual/<slug>/` fue la de la membresía (del 31 ago al 9 sep 2026,
    * se ve en el historial de `src/data/aula.ts`), y los productos nuevos nacen
-   * ya en `/productos/`, sin dirección vieja que redirigir.
+   * ya en Formaciones, sin dirección vieja que redirigir.
+   *
+   * Los dos patrones de `/productos/[producto]` y `/en/products/[producto]`
+   * (24 sep 2026) sí son dinámicos, y a propósito: bajo esas carpetas ya no
+   * vive ninguna página, así que llevarse «cualquier cosa» de ahí es justo lo
+   * que se quiere —cada página de ventas, también las que Emi cree mañana desde
+   * el panel—.
    *
    * Se resuelven **en Vercel**, antes de mirar ningún fichero. Van con y sin
    * barra final gracias a `redireccionesConBarra()`, más arriba: Astro no deja
@@ -158,10 +164,24 @@ export default defineConfig({
    */
   redirects: {
     /*
-     * La carta de la membresía vivió en el aula del 31 ago al 9 sep 2026.
+     * Formaciones vivió en `/productos/` —y en inglés en `/en/products/`— hasta
+     * el 24 sep 2026, cuando Adrián pidió que «products» no saliera en los
+     * enlaces. La portada y cada página de ventas: `/productos/estudiemos-juntos/`
+     * está pegada en los correos de Emi. Ver `routes` en `src/i18n/ui.ts`.
      */
-    '/aulavirtual/estudiemos-juntos': '/productos/estudiemos-juntos',
-    '/en/classroom/estudiemos-juntos': '/en/products/estudiemos-juntos',
+    '/productos': '/formaciones',
+    '/productos/[producto]': '/formaciones/[producto]',
+    '/en/products': '/en/courses',
+    '/en/products/[producto]': '/en/courses/[producto]',
+
+    /*
+     * La carta de la membresía vivió en el aula del 31 ago al 9 sep 2026. Va
+     * directo a su dirección de hoy, sin pasar por `/productos/`: una
+     * redirección en cadena es un viaje más para quien hace clic y una pista
+     * peor para Google.
+     */
+    '/aulavirtual/estudiemos-juntos': '/formaciones/estudiemos-juntos',
+    '/en/classroom/estudiemos-juntos': '/en/courses/estudiemos-juntos',
 
     /*
      * El escritorio de la alumna se llamaba `/panel/` y dejó de llamarse así el

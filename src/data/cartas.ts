@@ -11,7 +11,7 @@ import { NEWSLETTER_URL } from '../lib/membership';
  * Hasta ese día la de la membresía era un documento aparte con la ropa de la
  * academia —crema, Hanken Grotesk, cursor de clave de fa, notas musicales—, y
  * las de los cursos la copiaban. El componente es `CartaVenta.astro`, y la
- * página, `src/pages/productos/[producto].astro`.
+ * página, `src/pages/formaciones/[producto].astro`.
  *
  * Los textos viven acá: cambiar una frase es tocar este fichero, nunca
  * maquetación. Los de la membresía son los del copy nuevo de Emi del 23 sep,
@@ -1140,7 +1140,7 @@ const membresiaEn: Carta = {
 
 /**
  * Las cartas escritas, por el slug del producto. Un producto con carta tiene
- * página —`/productos/<slug>/`— y su ficha en Formaciones es un enlace, aunque
+ * página —`/formaciones/<slug>/`— y su ficha en Formaciones es un enlace, aunque
  * todavía no se venda. Uno sin carta sigue siendo solo su ficha.
  */
 export const cartas: Record<string, Record<Lang, Carta>> = {

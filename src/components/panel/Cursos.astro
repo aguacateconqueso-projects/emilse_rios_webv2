@@ -289,12 +289,23 @@ const deCatalogo = catalogo
           </select>
         </label>
         <label class="campo">
+          <span class="campo__t">Idioma</span>
+          <select data-bunny-idioma>
+            <option value="">Los dos</option>
+            <option value="es">Español</option>
+            <option value="en">Inglés</option>
+            <option value="sin">Sin marca</option>
+          </select>
+        </label>
+        <label class="campo">
           <span class="campo__t">Buscar</span>
           <input type="search" data-bunny-buscar placeholder="Título del video" />
         </label>
       </div>
       <p class="soft bunny__estado" data-bunny-estado role="status"></p>
       <ul class="bunny__lista" role="list" data-bunny-lista></ul>
+      {/* Solo al crear clases de golpe: qué clase sale de cada pareja de videos. */}
+      <div class="bunny__plan" data-bunny-plan hidden></div>
       <div class="dialogo__pie">
         <button class="btn-text" type="button" data-bunny-cerrar>Cerrar</button>
         <span data-bunny-hueco></span>
@@ -811,7 +822,7 @@ const deCatalogo = catalogo
 
   .bunny__filtros {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 10rem) minmax(0, 1fr);
     gap: var(--space-2);
     margin-top: var(--space-3);
   }
@@ -838,7 +849,7 @@ const deCatalogo = catalogo
 
   .bunny__lista :global(.bv) {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
     align-items: center;
     gap: var(--space-2);
     padding: var(--space-1) 0;
@@ -866,5 +877,82 @@ const deCatalogo = catalogo
     width: 1rem;
     height: 1rem;
     accent-color: var(--ink);
+  }
+
+  /* Al elegir un solo video, el título es el botón. */
+  .bunny__lista :global(.bv__elegir) {
+    padding: 0;
+    background: none;
+    border: 0;
+    font: inherit;
+    text-align: left;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  /* La etiqueta del idioma: ES / EN, o «ES?» si el video no lo dice. Se
+     pulsa para corregirla; corregida a mano, va en tinta. */
+  .bunny__lista :global(.bv__idioma) {
+    min-width: var(--space-6);
+    justify-content: center;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .bunny__lista :global(.bv__idioma:hover) {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+
+  /* --- El plan: qué clase sale de cada pareja de videos ---------------------- */
+  .bunny__plan {
+    margin-top: var(--space-3);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--ink);
+  }
+
+  .bunny__plan :global(.plan__t) {
+    font-size: var(--text-small);
+  }
+
+  .bunny__plan :global(.plan__lista) {
+    max-height: min(14rem, 30vh);
+    margin: var(--space-1) 0 0;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+  }
+
+  .bunny__plan :global(.plan__f) {
+    display: grid;
+    grid-template-columns: var(--space-4) minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-2);
+    padding: var(--space-1) 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: var(--text-small);
+    line-height: 1.35;
+  }
+
+  .bunny__plan :global(.plan__f .mono) {
+    font-size: 0.6875rem;
+  }
+
+  .bunny__plan :global(.plan__falta) {
+    color: var(--ink-soft);
+  }
+
+  .bunny__plan :global(.plan__aviso) {
+    margin-top: var(--space-1);
+    font-size: var(--text-small);
+  }
+
+  @media (max-width: 36rem) {
+    .bunny__plan :global(.plan__f) {
+      grid-template-columns: var(--space-4) minmax(0, 1fr);
+    }
+
+    .bunny__plan :global(.plan__f > :last-child) {
+      grid-column: 2;
+    }
   }
 </style>

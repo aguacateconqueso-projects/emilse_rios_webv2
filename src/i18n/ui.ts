@@ -46,8 +46,8 @@ export const ui = {
 
     /* --- La tienda, que está afuera y no pide nada ----------------------
        Se llamó «Productos» hasta el 23 sep 2026; desde entonces, a pedido de
-       Emi, «Formaciones». La dirección sigue siendo `/productos/`: ver
-       `routes`, más abajo. */
+       Emi, «Formaciones». Y desde el 24 sep 2026 su dirección también:
+       `/formaciones/` y `/en/courses/`. Ver `routes`, más abajo. */
     'products.title': 'Formaciones',
     'products.description':
       'Los cursos y la membresía de Emilse Ríos. Aprende contrabajo a tu ritmo, con acompañamiento de verdad.',
@@ -125,11 +125,15 @@ export function useTranslations(lang: Lang) {
 /**
  * Las páginas del sitio y su dirección en cada idioma.
  *
- * `products` se llama «Formaciones» / «Courses» desde el 23 sep 2026, y su
- * dirección **no cambió a propósito**: `/productos/estudiemos-juntos/` ya está
- * pegada en los correos de Emi, y renombrar la ruta obliga a redirigir las
- * viejas. Si un día se quiere `/formaciones/`, es esta línea más esas
- * redirecciones en `astro.config.mjs`.
+ * `products` se llama «Formaciones» / «Courses» desde el 23 sep 2026, y **su
+ * dirección también, desde el 24 sep 2026**: `/formaciones/` y
+ * `/en/courses/` (lo pidió Adrián: que «products» no salga en los enlaces).
+ * Hasta ese día fue `/productos/` y `/en/products/`, y esas direcciones siguen
+ * pegadas en los correos de Emi: **las redirige `astro.config.mjs`**, la
+ * portada y cada página de ventas, con un 301. Si esta línea vuelve a cambiar,
+ * las redirecciones de allá tienen que apuntar a la nueva, y
+ * `npm run audit:redirecciones` lo comprueba. La clave `products` es solo el
+ * nombre interno, igual que la tabla `products` de la base de datos.
  *
  * Cada idioma tiene su propio slug: en inglés la página es `/en/about/`, no
  * `/en/sobre-mi/`. Al añadir una página, se añade acá y en `src/pages`.
@@ -137,7 +141,7 @@ export function useTranslations(lang: Lang) {
 export const routes = {
   home: { es: '/', en: '/' },
   about: { es: '/sobre-mi', en: '/about' },
-  products: { es: '/productos', en: '/products' },
+  products: { es: '/formaciones', en: '/courses' },
   aula: { es: '/aulavirtual', en: '/classroom' },
 } as const satisfies Record<string, Record<Lang, string>>;
 
@@ -153,8 +157,8 @@ export function routePath(route: Route, lang: Lang): string {
 /**
  * Dirección de la carta de venta de un producto.
  *
- * Cuelga de la tienda, que está afuera y no pide sesión — `/productos/` y
- * `/en/products/` —, no del aula, que desde ahora pide haber pagado. El slug
+ * Cuelga de la tienda, que está afuera y no pide sesión — `/formaciones/` y
+ * `/en/courses/` —, no del aula, que desde ahora pide haber pagado. El slug
  * de la sección se traduce, pero **el del producto no**: el slug es la
  * identidad del producto, la misma que llevará su fila en la base de datos y
  * la que aparecerá en el enlace que Emi pegue en un correo. Un producto, un
