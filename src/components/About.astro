@@ -39,21 +39,22 @@ const { blocks } = getAboutCopy(lang);
             <div class="ahero__media">
               {/*
                 El retrato es horizontal —Emi en la calle, abrazada al
-                contrabajo, lanzando un beso con una pierna en alto— y el marco
-                no lo es: casi cuadrado en el escritorio, vertical en la
-                tableta, apenas apaisado en el teléfono. Así que la foto llena
-                el alto y lo que se recorta son los lados, calle y fachada. Emi
-                está justo en el centro, y el centro la sostiene en los tres.
+                contrabajo, lanzando un beso con una pierna en alto— y **se ve
+                entero**: el marco toma la proporción de la foto.
 
-                El 23 sep 2026 hubo dos: primero una vertical de la misma
-                sesión, y horas después esta, que es la que se queda.
+                Hasta el 24 sep 2026 el marco era el de la columna —casi
+                cuadrado en el escritorio, vertical en la tableta— y la foto lo
+                llenaba recortándose por los lados. Quedaba tan cerrada sobre
+                Emi que se leía como la vertical de la misma sesión, la que se
+                había cambiado por esta el día antes, y Adrián la dio por otra
+                foto. La calle y la fachada son parte de la foto que eligió.
               */}
               <MediaSlot
                 src={aboutMe}
                 placeholder={t('media.portrait')}
                 alt={t('media.portraitAlt')}
                 width={900}
-                position="center"
+                ratio={`${aboutMe.width} / ${aboutMe.height}`}
               />
             </div>
           </section>
@@ -144,34 +145,35 @@ const { blocks } = getAboutCopy(lang);
     text-wrap: pretty;
   }
 
+  /* El marco lo decide la foto desde el 24 sep 2026: su proporción, que llega
+     como `ratio` desde el fichero. En el escritorio va a media pantalla,
+     pegado al borde derecho y centrado en el alto del texto de al lado; un
+     horizontal a 720 px de ancho mide unos 405 de alto, menos que el texto,
+     así que nunca empuja la sección. (Del 23 al 24 sep el marco era el de la
+     columna y la foto lo llenaba recortada: ver el comentario del marcado.) */
   .ahero__media {
     flex: 1 1 27.5rem;
-    position: relative;
-    min-height: 27.5rem; /* 440 px */
-    border-left: 1px solid var(--rule);
+    align-self: center;
   }
 
-  /* El marco lo decide la página, no la foto. Mientras el retrato fue
-     horizontal daba igual: su alto natural nunca llegaba al de la columna de
-     texto. Con el vertical del 23 sep 2026 sí llega, y el marco crecía con él
-     —720 × 1080 en el escritorio, contra los 728 de alto que tenía—. Colgado
-     del marco, la foto lo llena sin empujarlo: en el escritorio manda el alto
-     del texto de al lado, y apilado, el `min-height` de abajo. */
   .ahero__media :global(.slot) {
-    position: absolute;
-    inset: 0;
+    height: auto;
+    min-height: 0;
+    border-right: 0;
   }
 
-  /* Apilado, el retrato no necesita media pantalla ni una regla al costado. */
+  /* Apilado, el retrato va a lo ancho, entero, debajo del texto. */
   @media (max-width: 55rem) {
     .ahero__text {
       padding: var(--space-6) var(--space-3) var(--space-12);
     }
 
     .ahero__media {
-      min-height: 21rem;
-      border-left: 0;
-      border-bottom: 1px solid var(--rule);
+      align-self: stretch;
+    }
+
+    .ahero__media :global(.slot) {
+      border-inline: 0;
     }
   }
 

@@ -4,7 +4,12 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 24 de septiembre de 2026, tarde: **Formaciones
+**Última actualización:** 24 de septiembre de 2026, noche: **una tanda de
+formato** en la Home, *Sobre mí* y las cuatro cartas —negritas del tamaño del
+cuerpo, tarjetas que destacan, el newsletter al final de todas las cartas como
+norma— (rama `claude/affectionate-faraday-ddgz0m` otra vez, rearrancada desde
+`main` tras el PR #54). Ver **Correcciones de formato del 24 de septiembre**,
+justo debajo de **La cortina**. Antes, esa tarde (PR #54): **Formaciones
 cambia de dirección**: `/formaciones/` y `/en/courses/`, y «products» deja de
 salir en los enlaces. Las viejas redirigen con un 301, página por página. Ver
 **Las direcciones viejas → Formaciones deja de llamarse `/productos/`**. Y en
@@ -167,6 +172,12 @@ bibliotecas de Bunny**, dentro de **El panel de Emi, completo**.
 >   `curl -sI https://www.emilserios.com/aulavirtual/estudiemos-juntos/` tienen
 >   que dar `301` hacia `/formaciones/estudiemos-juntos/`. Y en los correos
 >   nuevos, Emi pega ya las direcciones de `/formaciones/`.
+> - [ ] **La foto de *Sobre mí*: confirmar con Adrián** que la buena es
+>   `about_me3` (la horizontal de la calle, la única que subió para esto el 23
+>   sep). El 24 sep dijo que la puesta «no es la que pidió»: era esa misma, pero
+>   el marco la recortaba casi en cuadrado y se leía como la vertical. Desde
+>   entonces se ve entera. Si quería otra, `about_me.jpg` (el primer plano
+>   sonriendo, del 21 sep) sigue en el historial, en el commit `6e0a1f5`.
 > - [ ] **El SEO lo hace Emi, con Claude, cuando todo esté listo** (lo decidió
 >   Adrián el 24 sep 2026: no es suyo). Lo que ya está hecho de base: canonical
 >   y `hreflang` en cada página y direcciones en español y en inglés.
@@ -607,6 +618,79 @@ no tenía salida a `vercel.app`:
   vistas previas. No se sabe cuál tiene el dominio; el segundo parece un
   duplicado y conviene revisarlo —y borrarlo, si sobra— para no pagar dos
   builds ni confundir variables.
+
+---
+
+## Correcciones de formato del 24 de septiembre
+
+**24 de septiembre de 2026, por la noche.** Adrián mandó seis puntos, y en las
+cartas una regla nueva: **todas las páginas de ventas terminan invitando al
+newsletter**.
+
+**1. La Home.** «Cada semana envío correos…» pasa al tamaño de «Al
+suscribirte…», el párrafo que la sigue: letra y medida del cuerpo
+(`.hero__lead` en `Home.astro`). Deshace la mitad de la entradilla del 21 sep
+—el párrafo de apertura al tamaño del título de sección—; el centrado se queda.
+
+**2. La foto de *Sobre mí*.** Adrián dijo que no era la que pidió y que se
+había montado «en el web2_1». **No hay otro repo ni otra foto**: `web2_1` es
+el segundo proyecto de Vercel (`emilse-rios-webv2_1`), que construye este
+mismo repo, y la foto puesta ya era `about_me3`, la horizontal de la calle que
+él subió el 23 sep —idéntica byte a byte a la de `src/assets/img/about-me.jpg`—.
+Lo que pasaba: **el marco la recortaba** casi en cuadrado y se veía tan
+cerrada sobre Emi que se leía como la vertical de la misma sesión, la que se
+había descartado. Ahora **se ve entera**: el marco toma la proporción de la
+foto (`ratio` en `MediaSlot`), a media pantalla junto al texto en el
+escritorio y a lo ancho en el teléfono. Si la que quería es otra, las tres que
+subió siguen en el historial: `about_me.jpg` (`6e0a1f5`, primer plano
+sonriendo), `about_me2.jpg` (`7984abd`, la vertical) y `about_me3.png`
+(`fa4d82f`, la horizontal). Queda en **📋 LO QUE FALTA** para confirmarlo.
+
+**3 a 6. Las cuatro cartas.** Lo que pidió frase por frase resultó ser, casi
+siempre, el mismo tipo de bloque, así que se cambió el tipo y sale igual en
+las cuatro (y en lo que Emi escriba desde el panel):
+
+- **La negrita es negrita de cuerpo** (`fuerte`), del tamaño del párrafo que la
+  sigue: «Yo buscaba la respuesta…», «Esa tarde me quedé pensando…», «Y
+  después, cuando ya sabes…», «Tú puedes lograrlo…», «La verdad, no lo puedo
+  creer», «Empezar desde cero con alguien mirando…», «Escucharlo decir eso…»,
+  «Pero recuerdo que ese día Félix me dijo…» y «Te escuche a ti…». Hasta hoy
+  era la letra de titulares a 22 px. **Arrastra dos que Adrián no nombró**,
+  porque son del mismo tipo: «Estudiemos Juntos es una membresía de
+  ejercicios…» y «Entras de cero. Sales tocando…». La negrita es un 600 de
+  verdad: el fichero de Newsreader trae el eje de 200 a 800 y solo estaba
+  anunciado hasta 500 (`astro.config.mjs`); anunciado así, el navegador la
+  habría inventado.
+- **Un tipo nuevo, `cursiva`**: párrafo en cursiva del tamaño del cuerpo. Es
+  «Acá hay un ejercicio esta semana…» (y su gemelo inglés). Está también en el
+  editor de Págs. de ventas, como «Cursiva»; «Destacado» se llama ahora
+  «Negrita».
+- **Las tarjetas.** «Lo que encontrarás» (`puntos`), «es para ti» y «los que
+  más se han beneficiado» (`lista`, sí) y «no es para ti» (`lista`, no) dejan
+  de ser filas sueltas y pasan a ser **recuadros a escuadra que salen de la
+  columna** hasta el ancho de la ficha de precio (772 px, token nuevo
+  `--width-ficha`): el sí **en tinta**, con la letra en papel; el no y lo que
+  trae, **con borde de tinta**. Las filas llevan una marca tipográfica en mono
+  —`01`, `02`… en lo que trae; `+` y `−` en el sí y el no—, sin iconos. El sí
+  y el no seguidos quedan juntos, como pareja. **Y sus filas entran en
+  escalera** al aparecer la tarjeta: ver la enmienda del 24 sep en **El sistema
+  de diseño**.
+- **HER-MO-SO**, con guiones. Los puntos medios se veían descentrados en esa
+  cursiva; se probó subirlos al medio de la mayúscula y quedaban altos, así
+  que se tomó la otra salida que dio Adrián.
+- **El newsletter, al final de todas las cartas.** Después del último botón
+  —«Acá te unes» en la membresía, «Avísame cuando abra» en los cursos—, la
+  frase «¿Aún no estás suscrito al newsletter?» y **el campo de la Home, con su
+  regla** (`SubscribeForm.astro`), que da de alta ahí mismo. En la membresía
+  sustituye al enlace a la página de Klaviyo. La frase se cambia desde el
+  panel; si una carta no trae la suya, sale `NEWS_POR_DEFECTO` de
+  `src/data/cartas.ts`.
+
+**Cómo se probó.** En `npm run dev` con Chromium, trozo a trozo, en las cuatro
+cartas a 1440 y a 390 px: cada negrita junto al párrafo que la sigue, la
+cursiva, las seis tarjetas, HER-MO-SO y el newsletter del final; la Home y
+*Sobre mí* en escritorio y teléfono. `scripts/audit.mjs` en las páginas
+tocadas —rejilla de 8 y contraste AA— y cero errores en la consola.
 
 ---
 
@@ -3718,7 +3802,25 @@ componentes**: si hace falta uno nuevo, se añade como token.
 
 El sistema es de Emi y se puede cambiar. Lo que no se puede es cambiarlo sin
 dejar constancia, porque si no la tabla de arriba deja de ser fiable. Hasta hoy
-se ha tocado catorce veces:
+se ha tocado quince veces:
+
+- **24 sep 2026 · Las cartas: negrita de cuerpo, tarjetas y la escalera de
+  sus filas.** Lo pidió Adrián (ver **Correcciones de formato del 24 de
+  septiembre**). Tres cosas:
+  - **La negrita sube el peso de la letra de cuerpo.** Hasta hoy el sistema
+    destacaba cambiando a la de titulares, «sin subir el peso de la de
+    cuerpo». En las cartas ya no: Newsreader a 600, del tamaño del párrafo.
+    Fuera de las cartas no cambia nada.
+  - **Las tarjetas** son recuadros de 1 px, sin radio ni sombra, y la del sí
+    va en tinta, como la ficha de precio al pasarle el cursor: dentro de la
+    tabla. Salen de la columna de 640 px hasta 772, el ancho de esa ficha.
+  - **La escalera de las filas es la segunda animación de las cartas**, y la
+    tabla deja dos fuera de la Home: el revelado al bajar y esta. Es la
+    escalera de la entrada de *Sobre mí* —cada fila sube 8 px y se funde, cada
+    60 ms, en la curva y la duración del revelado—, disparada cuando la
+    tarjeta aparece. Con menos movimiento o sin JavaScript, las filas están
+    quietas y visibles. **Las cartas quedan en el tope**: una animación más es
+    otra enmienda.
 
 - **23 sep 2026 · El botón del sitio: relleno, imán, zoom y notas de colores.**
   Lo pidió Adrián para todos los botones de la web (ver **Los botones del

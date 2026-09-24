@@ -27,20 +27,25 @@ import { NEWSLETTER_URL } from '../lib/membership';
 /**
  * Un bloque del cuerpo de una carta. Un texto suelto es un párrafo; el resto
  * dice qué es:
- *   · fuerte     → párrafo destacado, en la tipografía de titulares.
+ *   · fuerte     → párrafo en negrita, del tamaño del cuerpo. Hasta el 24 sep
+ *                  2026 iba en la tipografía de titulares, más grande; Adrián
+ *                  lo pidió así en las cuatro cartas.
+ *   · cursiva    → párrafo en cursiva, del tamaño del cuerpo (24 sep 2026).
  *   · grito      → frase centrada, en cursiva, en la de titulares.
  *   · acento     → la frase más grande de la carta, centrada («El arco.»).
  *   · testimonio → la cita de una alumna, con su nombre.
  *                  La presentación va en el párrafo de antes, NUNCA dentro.
- *   · lista      → «para ti» (tono 'si') o «no es para ti» (tono 'no').
- *   · puntos     → lo que trae el curso, en filas.
+ *   · lista      → «para ti» (tono 'si') o «no es para ti» (tono 'no'). Van
+ *                  en tarjeta: la del sí, en tinta; la del no, con borde.
+ *   · puntos     → lo que trae el curso, en una tarjeta con las filas
+ *                  numeradas.
  *
  * ⚠️ En cada carta, **ES y EN tienen que tener los mismos bloques en el mismo
  * orden**: el cambio de idioma se ancla al bloque por su posición.
  */
 export type Bloque =
   | string
-  | { k: 'fuerte' | 'grito' | 'acento'; text: string }
+  | { k: 'fuerte' | 'cursiva' | 'grito' | 'acento'; text: string }
   | { k: 'testimonio'; text: string; autor: string }
   | { k: 'lista'; tono: 'si' | 'no'; titulo: string; items: string[] }
   | { k: 'puntos'; titulo?: string; items: string[] };
@@ -96,8 +101,15 @@ export type Carta = {
   faqH: string;
   /** `correo` y `a2`: la respuesta sigue con un enlace de correo y remata. */
   faq: { q: string; a: string; correo?: string; a2?: string }[];
-  /** El pie del newsletter, al final (membresía). */
-  news?: { pre: string; link: string };
+  /**
+   * El newsletter, al final: la frase de encima del campo. **Va en todas las
+   * cartas** desde el 24 sep 2026 —lo pidió Adrián, como norma—, con el mismo
+   * campo de la Home. Si la carta no trae la suya, sale `NEWS_POR_DEFECTO`.
+   * `link` era el texto del enlace a la página de Klaviyo que había antes; ya
+   * no se pinta —el botón del campo dice lo suyo— y se conserva porque las
+   * páginas guardadas desde el panel lo traen.
+   */
+  news?: { pre: string; link?: string };
   /** Las puertas y la cuenta atrás (membresía). */
   puertas?: Puertas;
 };
@@ -107,6 +119,12 @@ export type Carta = {
  * cursos que todavía no se venden y el pie de la membresía.
  */
 export const NEWSLETTER = NEWSLETTER_URL;
+
+/** El pie del newsletter de las cartas que no traen el suyo. */
+export const NEWS_POR_DEFECTO: Record<Lang, { pre: string }> = {
+  es: { pre: '¿Aún no estás suscrito al newsletter?' },
+  en: { pre: 'Not subscribed to the newsletter yet?' },
+};
 
 /** El botón de los cursos que todavía no se venden, en los dos idiomas. */
 export const AVISAME = {
@@ -186,7 +204,9 @@ const diapasonEs: Carta = {
     'Seguro te ha pasado: no entender cómo debe sonar la siguiente nota, sentir que no tienes fuerza para mantenerte en posición, no poder coordinar que el arco cambie igual que la mano izquierda, no entender el beat del metrónomo.',
     'Si eres de los que piensa «¡si escucho el metrónomo, me pierdo!», tranquilo, lo vamos a resolver. La finalidad es desarrollar ritmo interno y oído armónico poco a poco, sin aburrirse (por algo se llama así la formación).',
     '¿Y cuál es la parte divertida? El acompañamiento de piano. El piano de fondo desarrolla tu oído melódico cada día: dejas de depender del afinador y tienes un metrónomo automático marcándote cada beat.',
-    { k: 'acento', text: 'HER·MO·SO.' },
+    /* Con guiones desde el 24 sep 2026: con puntos medios («HER·MO·SO.») se
+       veían descentrados en esta cursiva, y Adrián pidió corregirlo. */
+    { k: 'acento', text: 'HER-MO-SO.' },
     'La verdad es que todos debemos estudiar escalas — todos, sin importar el nivel. Y con piano, es muchísimo más divertido.',
     { k: 'fuerte', text: 'Tú puedes lograrlo. Solo necesitas constancia y la guía correcta.' },
     {
@@ -321,7 +341,9 @@ const diapasonEn: Carta = {
     'I’m sure it’s happened to you: not knowing how the next note should sound, feeling you don’t have the strength to hold the position, not being able to coordinate the bow changing at the same time as the left hand, not understanding the metronome’s beat.',
     'If you’re one of those people who thinks “if I listen to the metronome, I get lost!”, relax, we’ll sort it out. The goal is to develop inner rhythm and a harmonic ear little by little, without getting bored (there’s a reason the program has that name).',
     'And what’s the fun part? The piano accompaniment. The piano in the background develops your melodic ear every day: you stop depending on the tuner, and you have an automatic metronome marking every beat for you.',
-    { k: 'acento', text: 'HER·MO·SO.' },
+    /* Con guiones desde el 24 sep 2026: con puntos medios («HER·MO·SO.») se
+       veían descentrados en esta cursiva, y Adrián pidió corregirlo. */
+    { k: 'acento', text: 'HER-MO-SO.' },
     'The truth is, we all need to practice scales — all of us, whatever our level. And with piano, it’s so much more fun.',
     { k: 'fuerte', text: 'You can do it. All you need is consistency and the right guide.' },
     {
@@ -969,7 +991,7 @@ const membresiaEs: Carta = {
     '¿Por qué haría eso?',
     'Porque las bibliotecas abruman. Cincuenta ejercicios archivados “para después” terminan en no hacer ninguno — y encima con la culpa de no estar haciendo nada.',
     'Si quieres una biblioteca infinita de ejercicios que nunca vas a hacer ni a terminar de comprender, puedes ir a YouTube. Es gratis, y podrás entretenerte todo el día, pasar horas simplemente buscando ejercicios específicos para ti. Suerte con eso.',
-    { k: 'fuerte', text: 'Acá hay un ejercicio esta semana. Si lo haces, avanzas. Si no lo haces, se va y viene otro. Sin culpas. Simple.' },
+    { k: 'cursiva', text: 'Acá hay un ejercicio esta semana. Si lo haces, avanzas. Si no lo haces, se va y viene otro. Sin culpas. Simple.' },
     '¿Te parece poco un ejercicio por semana? Mira lo que me escribió Laura:',
     { k: 'testimonio', autor: 'Laura', text: 'Siento que me ayudó a organizar un poco más el estudio. Como son pequeñas tareas, las puedo hacer aunque tenga poco tiempo, e igual trabajar algún objetivo' },
     'Volvamos, tienes un canal directo para escribirme. Respondo yo, no una inteligencia artificial. Esta es una membresía con acompañamiento continuo.',
@@ -1073,7 +1095,7 @@ const membresiaEn: Carta = {
     'Why would I do that?',
     'Because libraries overwhelm you. Fifty exercises filed away “for later” end with you doing none of them — and carrying the guilt of doing nothing on top of it.',
     'If what you want is an infinite library of exercises you’ll never do or fully understand, you can go to YouTube. It’s free, and you can keep yourself busy all day, spending hours just hunting for the exercises that are right for you. Good luck with that.',
-    { k: 'fuerte', text: 'Here there’s one exercise this week. Do it and you move forward. Don’t do it and it’s gone, and another one comes. No guilt. Simple.' },
+    { k: 'cursiva', text: 'Here there’s one exercise this week. Do it and you move forward. Don’t do it and it’s gone, and another one comes. No guilt. Simple.' },
     'Think one exercise a week isn’t enough? Here’s what Laura wrote me:',
     { k: 'testimonio', autor: 'Laura', text: 'I feel it helped me organize my practice a bit more. Since they’re small tasks, I can do them even when I’m short on time and still work toward a goal.' },
     'And guess what? You get a direct line to write to me. I answer, not an AI. This is a membership with real support behind it.',

@@ -24,11 +24,16 @@ const UNICODE = {
   ],
 };
 
-/** Genera las dos variantes (latin y latin-ext) de un mismo corte. */
-function cut(slug, weight, style) {
+/**
+ * Genera las dos variantes (latin y latin-ext) de un mismo corte.
+ *
+ * `declarado`: el rango de pesos que se anuncia en el `@font-face`, si no es
+ * el del nombre del fichero. Lo usa Newsreader (ver abajo).
+ */
+function cut(slug, weight, style, declarado = weight) {
   return Object.entries(UNICODE).map(([subset, unicodeRange]) => ({
     src: [`./src/assets/fonts/${slug}-${String(weight).replace(/\s+/g, '-')}-${style}-${subset}.woff2`],
-    weight: String(weight),
+    weight: String(declarado),
     style,
     unicodeRange,
   }));
@@ -238,9 +243,16 @@ export default defineConfig({
       fallbacks: ['Georgia', 'serif'],
       options: {
         variants: [
-          // Variable: un solo fichero cubre de 400 a 500.
-          ...cut('newsreader', '400 500', 'normal'),
-          ...cut('newsreader', '400 500', 'italic'),
+          /*
+            Variable: un solo fichero. Se llama «400-500» porque es lo que se
+            pidió al bajarlo, pero trae el eje entero, de 200 a 800 (se miró
+            con fontTools el 24 sep 2026). Se anuncia hasta 700 desde ese día,
+            cuando las cartas empezaron a usar negrita de cuerpo: anunciado
+            hasta 500, el navegador pintaba el 700 inventándolo, más gordo y
+            más borroso que el de verdad.
+          */
+          ...cut('newsreader', '400 500', 'normal', '400 700'),
+          ...cut('newsreader', '400 500', 'italic', '400 700'),
         ],
       },
     },
