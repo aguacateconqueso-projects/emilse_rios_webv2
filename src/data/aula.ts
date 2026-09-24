@@ -7,7 +7,7 @@ import vibratoFoto from '../assets/img/curso-vibrato.jpg';
 import { tieneCarta } from './cartas';
 
 /**
- * El catálogo de la tienda —`/productos/`—: la ficha de cada producto, más la
+ * El catálogo de la tienda —`/formaciones/`—: la ficha de cada producto, más la
  * dirección de la puerta del aula. Las cartas de venta viven aparte, en
  * `src/data/cartas.ts`.
  *

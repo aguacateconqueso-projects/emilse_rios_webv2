@@ -12,7 +12,13 @@
  * Existe por el 23 sep 2026: las redirecciones que Astro le genera a Vercel no
  * aceptaban la barra final —`/aulavirtual/estudiemos-juntos/` daba 404— y el
  * patrón dinámico `/aulavirtual/[producto]` se comía páginas reales del aula
- * pedidas sin barra. Ver `astro.config.mjs` y `progreso.md`.
+ * pedidas sin barra. Ver `astro.config.mjs` y `progreso.md`. Desde el 24 sep
+ * 2026 comprueba también que `/productos/` y `/en/products/` lleven a
+ * `/formaciones/` y `/en/courses/`, página por página.
+ *
+ * «Aterrizar» es llegar a una página que contesta: un fichero del build o una
+ * función —Formaciones y las páginas de ventas se resuelven en el servidor
+ * desde el 23 sep 2026—.
  *
  * Una simplificación, y es la única: una ruta con `dest` y sin `status` se da
  * por reescritura a una función (`_render`), que es lo único que el adaptador
@@ -70,8 +76,16 @@ function recorrer(ruta) {
  */
 const casos = [];
 const viejas = {
-  '/aulavirtual/estudiemos-juntos': '/productos/estudiemos-juntos/',
-  '/en/classroom/estudiemos-juntos': '/en/products/estudiemos-juntos/',
+  // Formaciones se llamó `/productos/` (y `/en/products/`) hasta el 24 sep 2026.
+  '/productos': '/formaciones/',
+  '/productos/estudiemos-juntos': '/formaciones/estudiemos-juntos/',
+  '/productos/todo-el-diapason': '/formaciones/todo-el-diapason/',
+  '/en/products': '/en/courses/',
+  '/en/products/estudiemos-juntos': '/en/courses/estudiemos-juntos/',
+  '/en/products/todo-el-diapason': '/en/courses/todo-el-diapason/',
+  // Va directo, sin pasar por `/productos/`.
+  '/aulavirtual/estudiemos-juntos': '/formaciones/estudiemos-juntos/',
+  '/en/classroom/estudiemos-juntos': '/en/courses/estudiemos-juntos/',
   '/aulavirtual/panel': '/aulavirtual/escritorio/',
   '/en/classroom/panel': '/en/classroom/desk/',
   // Desde el 23 sep 2026 el aula no tiene portada: se entra por el acceso.
@@ -89,13 +103,17 @@ const delAula = [
 for (const pagina of delAula) {
   casos.push({ ruta: `${pagina}/`, llega: `${pagina}/` }, { ruta: pagina, queda: true });
 }
+// Las direcciones nuevas de Formaciones son páginas de verdad: nada se las lleva.
+for (const pagina of ['/formaciones/', '/formaciones/estudiemos-juntos/', '/en/courses/', '/en/courses/estudiemos-juntos/']) {
+  casos.push({ ruta: pagina, llega: pagina });
+}
 
 let fallos = 0;
 for (const caso of casos) {
   const r = recorrer(caso.ruta);
   const final = r.saltos.at(-1);
   let ok;
-  if (caso.llega) ok = r.tipo === 'fichero' && final === caso.llega;
+  if (caso.llega) ok = (r.tipo === 'fichero' || r.tipo === 'función') && final === caso.llega;
   else ok = r.saltos.length === 1 && r.tipo !== 'bucle';
   if (!ok) fallos++;
   const camino = r.saltos.join(' → ');
