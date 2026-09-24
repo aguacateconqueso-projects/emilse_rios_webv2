@@ -14,7 +14,9 @@ de precio arreglada y la entrada animada en todas las páginas (#56). **Lo que
 falta, en la lista 📋 de abajo.** **El plan de Adrián para el 25 sep: salir en
 vivo** —subir la cortina, mudar la membresía y cobrar los cursos—, así que el 1
 de octubre ya se vende desde acá. Y el newsletter **ya da de alta**: Adrián se
-suscribió desde la Home el 24 sep y funcionó. El detalle de cada cosa está en las secciones que siguen a **La
+suscribió desde la Home el 24 sep y funcionó. ⚠️ **El proyecto de Vercel es
+`emilse-rios-webv2_1`**: las vistas previas buenas empiezan por
+`emilse-rios-webv21-git-…` (ver la regla de trabajo, justo abajo). El detalle de cada cosa está en las secciones que siguen a **La
 cortina**, de la más nueva a la más vieja.
 
 > **🚧 LA CORTINA ESTÁ BAJADA desde el 23 sep 2026.** Quien entra a
@@ -34,21 +36,33 @@ cortina**, de la más nueva a la más vieja.
 > vercel[bot] de su PR (Vercel acorta el nombre con un código que no se puede
 > adivinar). Si el PR de la rama ya se mergeó, la rama se rearranca desde
 > `main` con el mismo nombre (`git checkout -B <rama> origin/main`) y el PR
-> nuevo es otro PR. La del 24 sep, `claude/affectionate-faraday-ddgz0m` (PR
-> #54, #55 y #56, los tres mergeados), era:
+> nuevo es otro PR.
 >
-> **https://emilse-rios-webv2-git-claude-a-d4d0ea-adrians-projects-594b3131.vercel.app**
+> **⚠️ El proyecto de Vercel es `emilse-rios-webv2_1`, y solo ése.** Es el que
+> tiene `www.emilserios.com` y las variables —Supabase, Klaviyo, Bunny— y sus
+> vistas previas empiezan por **`emilse-rios-webv21-git-…`**. Había otro,
+> `emilse-rios-webv2` a secas, **sin variables ni dominio**: su vista previa
+> enseña las páginas públicas pero el panel sale «Sin conectar». Adrián lo
+> borra el 24 sep 2026 (sus capturas lo confirmaron: cero variables, solo
+> `emilse-rios-webv2.vercel.app`). **Esto ya se sabía** —estaba escrito en
+> `6000eda`, en la rama `claude/amazing-maxwell-jajhom`, empujado después de
+> mergear su PR, así que **nunca llegó a `main`**—, y por eso toda la sesión
+> del 24 sep le pasó a Adrián enlaces del proyecto equivocado. Se rescató al
+> cerrar esa sesión. Lección: **lo que se empuja a una rama con el PR ya
+> mergeado no existe**; ver **Cómo trabajamos**.
 >
-> Las de antes enseñan un `main` viejo: `…-git-claude-e-21eb3e-…`
-> (`claude/epic-bardeen-k6zfn7`, hasta el #52) y `…-git-claude-y-2c57cd-…`
-> (`claude/youthful-meitner-21x8ys`, hasta el #50).
+> La vista previa buena de `claude/affectionate-faraday-ddgz0m` (PR #54 a #57)
+> es:
 >
-> A la raíz se le añade la ruta: `/sobre-mi/`, `/en/courses/`… Con otra rama, la
-> raíz cambia: sale en el comentario de **vercel[bot]** del PR, fila
-> `emilse-rios-webv2`, enlace **Preview** (desde la sesión se lee con las
-> herramientas de GitHub, pidiendo los comentarios del PR). Vercel tarda un
-> par de minutos en construir después de cada push. Ver **La cortina → Cómo
-> se sigue viendo la web**.
+> **https://emilse-rios-webv21-git-claude-e5e804-adrians-projects-594b3131.vercel.app**
+>
+> A la raíz se le añade la ruta: `/sobre-mi/`, `/en/courses/`, `/panel/`… Con
+> otra rama, la raíz cambia: sale en el comentario de **vercel[bot]** del PR,
+> **fila `emilse-rios-webv2_1`**, enlace **Preview** (desde la sesión se lee
+> con las herramientas de GitHub, pidiendo los comentarios del PR; el
+> comentario se completa cuando termina el build, así que al principio puede
+> traer una sola fila). Vercel tarda un par de minutos en construir después
+> de cada push. Ver **La cortina → Cómo se sigue viendo la web**.
 
 > **📋 LO QUE FALTA — la lista vigente (cierre del 24 sep 2026).** Es la única
 > que manda: las de más abajo («cierre del 23 sep», «22 sep») quedan como
@@ -108,15 +122,11 @@ cortina**, de la más nueva a la más vieja.
 >    traducciones hechas acá** (marcadas `TRADUCIDO` en `src/data/cartas.ts`).
 >    Lo corrige ella misma en Págs. de ventas, que desde el #55 tiene también
 >    «Negrita» y «Cursiva» y la frase del newsletter del final.
-> 10. [ ] **Tres decisiones chicas de la carta de la membresía**, para Emi:
->     - **El video de un minuto** de la carta vieja: salió porque no está en su
->       copy nuevo. ¿Va? Si va, ¿después de qué párrafo?
->     - **El testimonio de Sergio** (el papá: «Esta buenisimo esto, se la di a
->       mi hijo…») está sin tildes, tal cual lo pegó ella. ¿Se corrige a
->       «Está buenísimo» o se deja como lo escribió él?
->     - **Al testimonio de Laura en inglés se le quitó el «Yes,»** del
->       principio, para que diga lo mismo que en español. ¿Está bien?
->     Las tres las cambia ella misma en Págs. de ventas.
+> 10. [x] **Tres decisiones chicas de la carta de la membresía** —resueltas por
+>     Adrián el 24 sep 2026—: **el video de un minuto no va**; el testimonio
+>     de Sergio pasa a **«Está buenísimo»**, con sus tildes; y a Laura en
+>     inglés **se le devuelve el «Yes,»**: «el copy de Emi en inglés se
+>     respeta», también cuando no calca al español.
 > 11. [ ] **La bienvenida de siete correos** en Klaviyo: *casi lista* (Adrián,
 >     24 sep). Cuando exista, la Home
 >     deja de prometer «un correo de bienvenida con un video»
@@ -143,8 +153,8 @@ cortina**, de la más nueva a la más vieja.
 > 14. [ ] **Los correos del hilo de dudas** —el foro de cada curso, donde la
 >     alumna le pregunta a Emi desde la clase y Emi contesta desde Mensajes—:
 >     un correo a Emi cuando entra una pregunta, y uno a la alumna cuando Emi
->     responde. *(Adrián preguntó qué era el 24 sep; está por decidir si se
->     hace.)* Hoy la alumna solo se
+>     responde. *(Adrián, 24 sep: le gusta; **Emi escribe los textos** de los
+>     dos correos y, cuando lleguen, se hacen.)* Hoy la alumna solo se
 >     entera al entrar al aula («Emi te respondió» en su escritorio). Pide
 >     decidir desde qué dirección se mandan (la academia manda por Resend con su
 >     dominio verificado; acá habría que verificar `emilserios.com`).
@@ -182,23 +192,25 @@ cortina**, de la más nueva a la más vieja.
 >   las direcciones de `/formaciones/`.
 > - [ ] Apagar la integración de WooCommerce en Klaviyo (mirando antes los
 >   flujos) y decidir con Emi la doble confirmación del newsletter.
-> - [ ] **El dominio, que sigue a nombre de Edu.** `emilserios.com` está
->   registrado en la cuenta de Namecheap de Edu (Adrián tiene acceso) y el
->   correo `info@emilserios.com` vive en su Hostinger. Funciona todo, pero si
->   Edu desaparece o cierra esas cuentas, Emi pierde el dominio y el correo.
->   Cuatro cosas: **pasar el dominio a una cuenta de Namecheap de Emi** (un
->   «push» desde la de Edu, gratis); **mudar el correo** fuera del Hostinger
->   de Edu; **mirar la línea `DKIM:`** en «Mostrar original» de un correo
->   enviado desde `info@`, para cerrar la duda de los CNAME de correo en
->   Cloudflare (el correo llega, así que es un control, no un fallo); y
->   **decidir qué se hace con `contrabajoenlaciudad.com`**, el otro dominio.
->   Ver **El dominio, y Edu**.
-> - [ ] Hay dos proyectos de Vercel construyendo este repo
->   (`emilse-rios-webv2` y `emilse-rios-webv2_1`). *Adrián lo borra el 24
->   sep.* ⚠️ **Se queda el que tiene `www.emilserios.com`** en Settings →
->   Domains y las variables (Supabase, Klaviyo, Bunny): borrar ese tira la web.
->   Los comentarios de vercel[bot] en los PR salen del `emilse-rios-webv2`.
->   Confirmar en la próxima sesión cuál quedó.
+> - [ ] **El dominio y el correo, en las cuentas de Edu.** `emilserios.com`
+>   está registrado en la cuenta de Namecheap de Edu y `info@emilserios.com`
+>   vive en su Hostinger. *Adrián, 24 sep: Edu no hará nada sin avisar; no
+>   corre prisa.* Si algún día se quiere a nombre de Emi, es un «push» del
+>   dominio a una cuenta suya (gratis) y mudar el correo. Y un control
+>   pendiente: la línea `DKIM:` en «Mostrar original» de un correo enviado
+>   desde `info@` (el correo llega, así que es un control, no un fallo). Ver
+>   **El dominio, y Edu**.
+> - [x] ~~`contrabajoenlaciudad.com`~~: **no es nada que haya que decidir.** Sale
+>   del primer commit del sitio (9 ago 2026), que lo dio por dominio a partir
+>   del nombre del newsletter, «Contrabajo en la Ciudad», con un
+>   `hola@contrabajoenlaciudad.com` en el pie. Desde el 21 sep 2026 nada lo
+>   usa: el sitio es `www.emilserios.com` y el buzón `info@emilserios.com`. Si
+>   Emi no lo tiene comprado, no existe.
+> - [ ] **Borrar el proyecto de Vercel `emilse-rios-webv2`** (a secas, sin
+>   `_1`): *Adrián, 24 sep*. Sus capturas lo confirman: cero variables y solo
+>   `emilse-rios-webv2.vercel.app`, sin `www.emilserios.com`. **Se queda
+>   `emilse-rios-webv2_1`.** Al abrir la próxima sesión, el comentario de
+>   vercel[bot] debería traer una sola fila, la de `_1`.
 > - [ ] Las cartas están **en el tope de dos animaciones** (el revelado y la
 >   escalera) y de tarjetas: una animación distinta más es una enmienda al
 >   sistema de diseño. Ver **Enmiendas, con fecha**.
@@ -638,11 +650,10 @@ no tenía salida a `vercel.app`:
   «Production».** Si `KLAVIYO_API_KEY` o las de Supabase están solo en
   Production, en la vista previa el formulario del newsletter avisa de que no
   está conectado y el aula no deja entrar.
-- **Hay dos proyectos de Vercel construyendo este mismo repo**:
-  `emilse-rios-webv2` y `emilse-rios-webv2_1`, así que cada PR sale con dos
-  vistas previas. No se sabe cuál tiene el dominio; el segundo parece un
-  duplicado y conviene revisarlo —y borrarlo, si sobra— para no pagar dos
-  builds ni confundir variables.
+- **Hubo dos proyectos de Vercel construyendo este mismo repo**:
+  `emilse-rios-webv2` y `emilse-rios-webv2_1`, así que cada PR salía con dos
+  vistas previas. **El bueno es `emilse-rios-webv2_1`** (el dominio y las
+  variables); el otro, sin nada, lo borra Adrián el 24 sep 2026.
 
 ---
 
@@ -703,8 +714,9 @@ suscribirte…», el párrafo que la sigue: letra y medida del cuerpo
 
 **2. La foto de *Sobre mí*.** Adrián dijo que no era la que pidió y que se
 había montado «en el web2_1». **No hay otro repo ni otra foto**: `web2_1` es
-el segundo proyecto de Vercel (`emilse-rios-webv2_1`), que construye este
-mismo repo, y la foto puesta ya era `about_me3`, la horizontal de la calle que
+el segundo proyecto de Vercel (`emilse-rios-webv2_1`, que resultó ser **el
+bueno**: ver la regla de trabajo, arriba del todo), que construye este mismo
+repo, y la foto puesta ya era `about_me3`, la horizontal de la calle que
 él subió el 23 sep —idéntica byte a byte a la de `src/assets/img/about-me.jpg`—.
 Lo que pasaba: **el marco la recortaba** casi en cuadrado y se veía tan
 cerrada sobre Emi que se leía como la vertical de la misma sesión, la que se
@@ -3838,7 +3850,11 @@ Astro 7, estático, sin framework de UI. No hace falta adaptador para Vercel.
   Emi, no yo. **Cuando llega feedback sobre algo ya mergeado, el trabajo nuevo
   arranca de `main` en una rama nueva y va en un PR nuevo** — así salió el #15.
   La señal de alarma es empujar a una rama y que el PR no muestre commits
-  nuevos.
+  nuevos. **Volvió a pasar el 24 sep 2026**, y esta vez con una nota de
+  `progreso.md` que decía cuál era el proyecto de Vercel bueno: se quedó en
+  `claude/amazing-maxwell-jajhom` y la sesión siguiente trabajó todo el día
+  con los enlaces del proyecto equivocado. **Antes de empujar, mirar si el PR
+  de la rama sigue abierto.**
 - **Antes de abrir un PR, comprobar de qué commit sale la rama.** Si `main` se
   ha movido, traerlo primero. A mitad de esta sesión se mergeó un PR que
   reescribía `progreso.md` entero y hubo que rehacer los cambios a mano sobre
@@ -5331,8 +5347,9 @@ que un curso **se venda solo**:
       (`src/data/home.ts`).
 - [ ] **El resto de copies nuevos.** Emi los cambió todos el 23 sep 2026; han
       entrado los de Formaciones y la carta de la membresía.
-- [ ] **Cuatro decisiones de la carta nueva**, que quedaron abiertas en el
-      PR #43:
+- [x] **Cuatro decisiones de la carta nueva**, que quedaron abiertas en el
+      PR #43. *Cerradas el 24 sep 2026 por Adrián: el video no va, Sergio con
+      tildes, y el «Yes,» de Laura vuelve.*
       - **El video de un minuto** salió porque no está en el copy nuevo. Si lo
         quiere, hay que decir dónde va.
       - ~~**Dentro del aula, el enlace a la tienda sigue diciendo «Tienda»**~~
