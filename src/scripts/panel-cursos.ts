@@ -21,6 +21,7 @@
  */
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { normalizeVideoUrl, videoEmbed, bunnyGuid, bunnyUrl, BUNNY_CURSOS_LIBRARY } from '../lib/video';
+import { emparejar, idiomaDe, leerTitulo, ordenNatural, type Idioma, type Pareja } from '../lib/bunny-idioma';
 import { reloj } from '../lib/aula-datos';
 import { cursoHref } from '../i18n/aula';
 import { alAbrir, armarBotones, avisar, boton, el, hace, ocupado } from '../lib/panel';
@@ -432,6 +433,9 @@ function pintarCabecera() {
   ver.href = cursoHref(C.slug, 'es', CON_PAGINA);
   const clases = todasLasClases();
   const sinVideo = clases.filter((l) => !l.video_es && !l.video_en).length;
+  /* Lo que falta de la versión inglesa: en el aula en inglés esas clases
+     enseñan el video en español. */
+  const sinIngles = clases.filter((l) => l.video_es && !l.video_en).length;
   const borrador = clases.filter((l) => !l.published).length;
   const partes = [
     C.published
@@ -440,6 +444,7 @@ function pintarCabecera() {
     `${C.unidades.length} bloques, ${clases.length} clases`,
   ];
   if (sinVideo) partes.push(`${sinVideo} sin video`);
+  if (sinIngles) partes.push(`${sinIngles} sin video en inglés`);
   if (borrador) partes.push(`${borrador} clases en borrador`);
   $('[data-ed-nota]').textContent = partes.join(' · ');
 }
@@ -1320,17 +1325,48 @@ accesoForm.addEventListener('submit', async (e) => {
 
 /* ==========================================================================
    BUNNY: elegir un video, o crear clases a partir de varios
+
+   Emi graba cada clase dos veces, en español y en inglés, y sube los dos
+   videos a la misma biblioteca. El selector lee el idioma de cada uno —de su
+   título, o del nombre de su colección: `lib/bunny-idioma.ts`— para que cada
+   video caiga en su hueco: al elegir uno, enseña los del idioma del hueco y
+   pone también su versión en el otro si ese está vacío; al crear clases de
+   golpe, hace **una clase por pareja**, no una por video.
    ========================================================================== */
 
 const dlg = $<HTMLDialogElement>('[data-bunny]');
-let bunnyModo: { modo: 'elegir'; lang: 'es' | 'en' } | { modo: 'importar'; unidad: Unidad } | null = null;
+let bunnyModo: { modo: 'elegir'; lang: Idioma } | { modo: 'importar'; unidad: Unidad } | null = null;
 let bunnyVideos: VideoBunny[] = [];
 let bunnyCargado = false;
 /* La biblioteca que leyó el selector: con ella se guarda cada video elegido. */
 let bunnyBiblioteca = BUNNY_CURSOS_LIBRARY;
+/* El nombre de cada colección, para el idioma de los videos que no lo dicen. */
+const bunnyColecciones = new Map<string, string>();
+/* Lo que Emi corrige pulsando la etiqueta del idioma. Vale hasta recargar el
+   panel: lo que dura es ponerlo en el título del video, en Bunny. */
+const idiomaCorregido = new Map<string, Idioma>();
 const elegidos = new Set<string>();
 const importarBtn = boton('Crear las clases', { solido: true });
 $('[data-bunny-hueco]', dlg).replaceWith(importarBtn);
+const filtroIdioma = $<HTMLSelectElement>('[data-bunny-idioma]', dlg);
+
+type VideoIdioma = VideoBunny & { idioma: Idioma | null };
+
+/** El idioma de un video: lo corregido a mano, lo que dice su título o su colección. */
+function idiomaVideo(v: VideoBunny): Idioma | null {
+  return (
+    idiomaCorregido.get(v.guid) ??
+    leerTitulo(v.titulo).idioma ??
+    (v.coleccion ? idiomaDe(bunnyColecciones.get(v.coleccion)) : null)
+  );
+}
+
+const conIdioma = (v: VideoBunny): VideoIdioma => ({ ...v, idioma: idiomaVideo(v) });
+/** El título de la clase: el del video sin «ES» / «EN» ni «.mp4». */
+const baseDe = (v: VideoBunny) => leerTitulo(v.titulo).base || v.titulo;
+const nombreIdioma = (l: Idioma) => (l === 'en' ? 'inglés' : 'español');
+const usadosEnCurso = () =>
+  new Set(todasLasClases().flatMap((l) => [bunnyGuid(l.video_es), bunnyGuid(l.video_en)]).filter(Boolean));
 
 async function token() {
   const {
@@ -1353,124 +1389,264 @@ async function cargarBunny() {
       return;
     }
     if (!r.ok || j.error) throw new Error(j.error || `Error ${r.status}`);
-    bunnyVideos = j.videos ?? [];
+    /* En orden natural: «2 …» antes que «10 …». Bunny ordena letra a letra. */
+    bunnyVideos = ((j.videos ?? []) as VideoBunny[]).sort((a, b) => ordenNatural(a.titulo, b.titulo));
     const sel = $<HTMLSelectElement>('[data-bunny-coleccion]', dlg);
     sel.textContent = '';
     sel.append(el('option', { value: '', text: `Todas (${bunnyVideos.length})` }));
-    (j.colecciones ?? []).forEach((col: { guid: string; nombre: string; videos: number }) =>
-      sel.append(el('option', { value: col.guid, text: `${col.nombre} (${col.videos})` })),
-    );
+    bunnyColecciones.clear();
+    (j.colecciones ?? []).forEach((col: { guid: string; nombre: string; videos: number }) => {
+      bunnyColecciones.set(col.guid, col.nombre);
+      sel.append(el('option', { value: col.guid, text: `${col.nombre} (${col.videos})` }));
+    });
     bunnyCargado = true;
+    prepararFiltroIdioma();
     pintarBunny();
   } catch (e) {
     estado.textContent = `No se pudo leer la biblioteca: ${(e as Error).message}`;
   }
 }
 
-function pintarBunny() {
+/**
+ * Al abrir para un hueco, el filtro enseña los videos de su idioma. Si la
+ * biblioteca no marca ninguno de ese idioma, enseña todos: filtrar dejaría la
+ * lista vacía sin decir por qué.
+ */
+function prepararFiltroIdioma() {
+  if (bunnyModo?.modo !== 'elegir') {
+    filtroIdioma.value = '';
+    return;
+  }
+  const l = bunnyModo.lang;
+  const hay = bunnyVideos.some((v) => (l === 'en' ? idiomaVideo(v) === 'en' : idiomaVideo(v) !== null));
+  filtroIdioma.value = hay ? l : '';
+}
+
+/** «Español» incluye los que no dicen idioma: son los que van como español. */
+function pasaIdioma(v: VideoBunny) {
+  const f = filtroIdioma.value;
+  const i = idiomaVideo(v);
+  if (!f) return true;
+  if (f === 'sin') return i === null;
+  return f === 'en' ? i === 'en' : i !== 'en';
+}
+
+/** `conservar`: sin volver arriba (al corregir un idioma a mitad de lista). */
+function pintarBunny(conservar = false) {
   const ul = $('[data-bunny-lista]', dlg);
+  const arriba = ul.scrollTop;
   ul.textContent = '';
   const col = $<HTMLSelectElement>('[data-bunny-coleccion]', dlg).value;
   const q = $<HTMLInputElement>('[data-bunny-buscar]', dlg).value.trim().toLowerCase();
-  const usados = new Set(todasLasClases().flatMap((l) => [bunnyGuid(l.video_es), bunnyGuid(l.video_en)]).filter(Boolean));
-  const vistos = bunnyVideos.filter((v) => (!col || v.coleccion === col) && (!q || v.titulo.toLowerCase().includes(q)));
+  const usados = usadosEnCurso();
+  const vistos = bunnyVideos.filter(
+    (v) => (!col || v.coleccion === col) && pasaIdioma(v) && (!q || v.titulo.toLowerCase().includes(q)),
+  );
   const multi = bunnyModo?.modo === 'importar';
   $('[data-bunny-estado]', dlg).textContent = vistos.length
     ? multi
-      ? 'Marca los videos: se crea una clase por cada uno, en este orden, con su título y su duración.'
-      : 'Pulsa un video para ponerlo en la clase.'
+      ? 'Marca los videos de los dos idiomas: se crea una clase por pareja, con su video en español y su versión en inglés, en este orden. La etiqueta ES / EN sale del título en Bunny; si se equivoca, púlsala.'
+      : 'Pulsa un video para ponerlo en la clase. La etiqueta ES / EN sale del título en Bunny; si se equivoca, púlsala.'
     : 'No hay videos que coincidan.';
   vistos.forEach((v) => {
+    const idioma = idiomaVideo(v);
     const meta = [reloj(v.segundos), v.listo ? '' : 'todavía procesándose', usados.has(v.guid) ? 'ya está en este curso' : '']
       .filter(Boolean)
       .join(' · ');
+    const texto = [el('span', { class: 'bv__t', text: v.titulo }), el('br'), el('span', { class: 'mono soft', text: meta })];
+    const etiqueta = el('button', {
+      class: ['estado', 'bv__idioma', idiomaCorregido.has(v.guid) && 'estado--tinta'].filter(Boolean).join(' '),
+      type: 'button',
+      text: idioma === 'en' ? 'EN' : idioma === 'es' ? 'ES' : 'ES?',
+      'aria-label': `${idioma ? `En ${nombreIdioma(idioma)}` : 'No dice su idioma: va como español'}. Cambiar a ${idioma === 'en' ? 'español' : 'inglés'}`,
+      title: idioma ? `En ${nombreIdioma(idioma)}. Pulsa para cambiarlo.` : 'El título no dice el idioma: va como español. Pulsa si es en inglés.',
+    });
+    etiqueta.addEventListener('click', (e) => {
+      e.stopPropagation();
+      idiomaCorregido.set(v.guid, idioma === 'en' ? 'es' : 'en');
+      pintarBunny(true);
+      contarElegidos();
+      ul.querySelector<HTMLElement>(`[data-guid="${v.guid}"] .bv__idioma`)?.focus();
+    });
     const li = el(
       'li',
-      { class: 'bv', tabindex: multi ? undefined : '0', role: multi ? undefined : 'button' },
-      multi ? el('input', { type: 'checkbox', 'aria-label': v.titulo, checked: elegidos.has(v.guid) }) : v.miniatura ? el('img', { src: v.miniatura, alt: '' }) : el('span'),
-      el('span', {}, el('span', { class: 'bv__t', text: v.titulo }), el('br'), el('span', { class: 'mono soft', text: meta })),
+      { class: 'bv', 'data-guid': v.guid },
+      multi
+        ? el('input', { type: 'checkbox', 'aria-label': v.titulo, checked: elegidos.has(v.guid) })
+        : v.miniatura
+          ? el('img', { src: v.miniatura, alt: '' })
+          : el('span'),
+      multi ? el('span', {}, ...texto) : el('button', { class: 'bv__elegir', type: 'button' }, ...texto),
+      etiqueta,
       multi && v.miniatura ? el('img', { src: v.miniatura, alt: '' }) : el('span'),
     );
-    const alternar = () => {
-      if (multi) {
-        const cb = li.querySelector('input')!;
-        if (elegidos.has(v.guid)) elegidos.delete(v.guid);
-        else elegidos.add(v.guid);
-        cb.checked = elegidos.has(v.guid);
-        contarElegidos();
-      } else elegirVideo(v);
-    };
     li.addEventListener('click', (e) => {
-      if ((e.target as HTMLElement).tagName === 'INPUT') {
-        e.stopPropagation();
-        if (elegidos.has(v.guid)) elegidos.delete(v.guid);
-        else elegidos.add(v.guid);
-        contarElegidos();
-        return;
-      }
-      alternar();
-    });
-    li.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        alternar();
-      }
+      if (!multi) return elegirVideo(v);
+      const cb = li.querySelector('input')!;
+      /* Un clic en la casilla ya la cambió; en el resto de la fila, se cambia acá. */
+      if (e.target !== cb) cb.checked = !cb.checked;
+      if (cb.checked) elegidos.add(v.guid);
+      else elegidos.delete(v.guid);
+      contarElegidos();
     });
     ul.append(li);
   });
+  if (conservar) ul.scrollTop = arriba;
 }
 
+/** Las clases que saldrían de lo marcado: una por pareja, en el orden de la lista. */
+const planDeClases = (): Pareja<VideoIdioma>[] =>
+  emparejar(bunnyVideos.filter((v) => elegidos.has(v.guid)).map(conIdioma));
+
 function contarElegidos() {
+  const pares = bunnyModo?.modo === 'importar' ? planDeClases() : [];
   const lbl = importarBtn.querySelector('.boton__label')!;
-  lbl.textContent = elegidos.size ? `Crear ${elegidos.size} ${elegidos.size === 1 ? 'clase' : 'clases'}` : 'Crear las clases';
-  importarBtn.disabled = elegidos.size === 0;
+  lbl.textContent = pares.length ? `Crear ${pares.length} ${pares.length === 1 ? 'clase' : 'clases'}` : 'Crear las clases';
+  importarBtn.disabled = pares.length === 0;
+  pintarPlan(pares);
+}
+
+/** Debajo de la lista, antes de crear nada: qué clase sale de cada pareja. */
+function pintarPlan(pares: Pareja<VideoIdioma>[]) {
+  const caja = $('[data-bunny-plan]', dlg);
+  caja.textContent = '';
+  caja.hidden = !pares.length;
+  if (!pares.length) return;
+  const n = elegidos.size;
+  caja.append(
+    el('p', {
+      class: 'plan__t',
+      text: `${n} ${n === 1 ? 'video' : 'videos'} → ${pares.length} ${pares.length === 1 ? 'clase' : 'clases'}, en este orden:`,
+    }),
+  );
+  const lado = (v: VideoIdioma | null, l: Idioma) =>
+    v
+      ? el('span', {}, el('span', { class: 'mono soft', text: `${l.toUpperCase()} · ` }), baseDe(v))
+      : el('span', { class: 'plan__falta' }, el('span', { class: 'mono', text: `${l.toUpperCase()} · ` }), `sin versión en ${nombreIdioma(l)}`);
+  const ol = el('ol', { class: 'plan__lista', role: 'list' });
+  pares.forEach((p, i) =>
+    ol.append(
+      el(
+        'li',
+        { class: 'plan__f' },
+        el('span', { class: 'mono soft', text: String(i + 1).padStart(2, '0') }),
+        lado(p.es, 'es'),
+        lado(p.en, 'en'),
+      ),
+    ),
+  );
+  caja.append(ol);
+
+  const avisos: string[] = [];
+  const sinMarca = pares.filter((p) => p.es && p.es.idioma === null).length;
+  const porOrden = pares.filter((p) => p.por === 'orden').length;
+  const soloEn = pares.filter((p) => !p.es).length;
+  if (sinMarca)
+    avisos.push(
+      `${sinMarca} ${sinMarca === 1 ? 'video no dice su idioma y va' : 'videos no dicen su idioma y van'} como español. Si alguno es en inglés, púlsale la etiqueta.`,
+    );
+  if (porOrden)
+    avisos.push(
+      `${porOrden} ${porOrden === 1 ? 'pareja se hizo' : 'parejas se hicieron'} por orden, porque sus títulos no coinciden: revísalas.`,
+    );
+  if (soloEn)
+    avisos.push(
+      `${soloEn} en inglés sin su versión en español: ${soloEn === 1 ? 'sale como clase' : 'salen como clases'} solo en inglés. Si la tienes, márcala también.`,
+    );
+  avisos.forEach((t) => caja.append(el('p', { class: 'plan__aviso soft', text: t })));
 }
 
 function abrirBunny(m: NonNullable<typeof bunnyModo>) {
   if (m.modo === 'importar' && !puedeSalir()) return;
   bunnyModo = m;
   elegidos.clear();
-  contarElegidos();
   importarBtn.hidden = m.modo !== 'importar';
   $('[data-bunny-para]', dlg).textContent =
     m.modo === 'elegir'
-      ? `Video en ${m.lang === 'es' ? 'español' : 'inglés'} · ${nombreClase(buscarClase(claseId) ?? { title_es: '', title_en: '' })}`
+      ? `Video en ${nombreIdioma(m.lang)} · ${nombreClase(buscarClase(claseId) ?? { title_es: '', title_en: '' })}`
       : `Clases nuevas en «${nombreUnidad(m.unidad)}»`;
+  contarElegidos();
   dlg.showModal();
   armarBotones();
   if (!bunnyCargado) void cargarBunny();
-  else pintarBunny();
+  else {
+    prepararFiltroIdioma();
+    pintarBunny();
+  }
+}
+
+/**
+ * La otra versión de un video, para ponerla sola en el otro hueco: la del
+ * mismo título o el mismo número. Primero en su colección; si no está, en toda
+ * la biblioteca (Emi puede tener una colección por idioma), donde un número
+ * solo vale si no se repite. Nunca «por orden», que es una suposición, ni una
+ * que ya esté en el curso.
+ */
+function parejaDe(v: VideoBunny): VideoBunny | null {
+  const usados = usadosEnCurso();
+  const buscarEn = (lista: VideoBunny[]) => {
+    const p = emparejar(lista.map(conIdioma)).find((x) => x.es?.guid === v.guid || x.en?.guid === v.guid);
+    if (!p || (p.por !== 'titulo' && p.por !== 'numero')) return null;
+    const otra = p.es?.guid === v.guid ? p.en : p.es;
+    return otra && !usados.has(otra.guid) ? otra : null;
+  };
+  return buscarEn(bunnyVideos.filter((x) => x.coleccion === v.coleccion)) ?? buscarEn(bunnyVideos);
+}
+
+function ponerVideo(v: VideoBunny, l: Idioma) {
+  c(`video_${l}`).value = bunnyUrl(v.guid, bunnyBiblioteca) ?? v.guid;
+  if (!c('duracion').value && v.segundos) c('duracion').value = reloj(v.segundos);
+  const titulo = c(`title_${l}`);
+  const actual = titulo.value.trim();
+  const base = baseDe(v);
+  /* En inglés, un título igual al español no suma: vacío, el aula ya lee el español. */
+  if ((!actual || actual === 'Clase nueva') && (l === 'es' || base !== c('title_es').value.trim())) titulo.value = base;
+  estadoVideo(l);
 }
 
 function elegirVideo(v: VideoBunny) {
   if (bunnyModo?.modo !== 'elegir') return;
   const l = bunnyModo.lang;
-  c(`video_${l}`).value = bunnyUrl(v.guid, bunnyBiblioteca) ?? v.guid;
-  if (!c('duracion').value && v.segundos) c('duracion').value = reloj(v.segundos);
-  const titulo = c(`title_${l}`);
-  if (l === 'es' && (!titulo.value.trim() || titulo.value.trim() === 'Clase nueva')) titulo.value = v.titulo;
-  estadoVideo(l);
+  const otro: Idioma = l === 'es' ? 'en' : 'es';
+  const idioma = idiomaVideo(v) ?? 'es';
+  ponerVideo(v, l);
+  /* Si el video es del idioma del hueco, y el otro hueco está vacío, su pareja. */
+  const par = idioma === l && !c(`video_${otro}`).value.trim() ? parejaDe(v) : null;
+  if (par) ponerVideo(par, otro);
   marcarSucio(true);
   dlg.close();
-  avisar('Video puesto: falta guardar la clase');
+  avisar(
+    idioma !== l
+      ? `Ojo: ese video parece en ${nombreIdioma(idioma)} y lo pusiste en ${nombreIdioma(l)}. Falta guardar la clase`
+      : par
+        ? `Video puesto, y su versión en ${nombreIdioma(otro)}: falta guardar la clase`
+        : 'Video puesto: falta guardar la clase',
+  );
 }
 
 importarBtn.addEventListener('click', async () => {
-  if (bunnyModo?.modo !== 'importar' || !C || !elegidos.size) return;
+  if (bunnyModo?.modo !== 'importar' || !C) return;
   const u = bunnyModo.unidad;
-  /* En el orden de la lista (el de los títulos en Bunny), no en el del clic. */
-  const videos = bunnyVideos.filter((v) => elegidos.has(v.guid));
+  const pares = planDeClases();
+  if (!pares.length) return;
   await ocupado(importarBtn, 'Creando…', async () => {
-    const filas = videos.map((v, i) => ({
-      course_id: C!.id,
-      unit_id: u.id,
-      title_es: v.titulo,
-      title_en: '',
-      video_es: bunnyUrl(v.guid, bunnyBiblioteca),
-      duration_s: v.segundos || null,
-      position: u.clases.length + i,
-      published: !C!.published,
-    }));
+    const filas = pares.map((p, i) => {
+      const es = p.es ? baseDe(p.es) : '';
+      const en = p.en ? baseDe(p.en) : '';
+      return {
+        course_id: C!.id,
+        unit_id: u.id,
+        title_es: es,
+        /* «01 Intro ES» y «01 Intro EN» dan el mismo título: en inglés se deja
+           vacío, para que el panel lo pida y el aula lea el español mientras. */
+        title_en: en === es ? '' : en,
+        video_es: p.es ? bunnyUrl(p.es.guid, bunnyBiblioteca) : null,
+        video_en: p.en ? bunnyUrl(p.en.guid, bunnyBiblioteca) : null,
+        duration_s: (p.es ?? p.en)!.segundos || null,
+        position: u.clases.length + i,
+        published: !C!.published,
+      };
+    });
     const { data, error } = await supabase.from('course_lessons').insert(filas).select();
     if (error) return avisar(`No se pudieron crear: ${error.message}`);
     (data ?? [])
@@ -1479,15 +1655,20 @@ importarBtn.addEventListener('click', async () => {
     dlg.close();
     pintarEsquema();
     pintarCabecera();
-    avisar(`${data?.length ?? 0} clases creadas: faltan los títulos en inglés`);
+    const hechas = data?.length ?? 0;
+    const sinTituloEn = filas.filter((f) => f.title_es && !f.title_en).length;
+    avisar(
+      `${hechas} ${hechas === 1 ? 'clase creada' : 'clases creadas'}${sinTituloEn ? `: ${sinTituloEn === 1 ? 'falta un título' : 'faltan títulos'} en inglés` : ''}`,
+    );
     const primera = data?.[0];
     if (primera) location.hash = `#cursos/${C!.id}/${primera.id}`;
   });
 });
 
 $('[data-bunny-cerrar]', dlg).addEventListener('click', () => dlg.close());
-$('[data-bunny-coleccion]', dlg).addEventListener('change', pintarBunny);
-$('[data-bunny-buscar]', dlg).addEventListener('input', pintarBunny);
+$('[data-bunny-coleccion]', dlg).addEventListener('change', () => pintarBunny());
+filtroIdioma.addEventListener('change', () => pintarBunny());
+$('[data-bunny-buscar]', dlg).addEventListener('input', () => pintarBunny());
 
 /* ==========================================================================
    Arranque
