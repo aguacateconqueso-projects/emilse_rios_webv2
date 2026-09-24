@@ -9,8 +9,11 @@ los pasos A.1–A.6** de **📋 LO QUE FALTA** —migraciones 0009 y 0010
 aplicadas, Emi admin, variables en Preview, Redirect URL comodín, clave de
 Bunny— y salió que **los cursos viven en otra biblioteca de Bunny** (754051, no
 la 741634 de la membresía); el código ya las separa. Ver **Las dos bibliotecas
-de Bunny**, dentro de **El panel de Emi, completo**. Antes, de madrugada: el
-panel de Emi completo y **una sola lista de lo que falta**, justo abajo.
+de Bunny**, dentro de **El panel de Emi, completo**. Y quedó claro **cuál es
+el proyecto de Vercel: `emilse-rios-webv2_1`**, el único que se usa (ver la
+regla de trabajo, justo abajo). Con la vista previa de ese proyecto Adrián
+entró al panel conectado. Antes, de madrugada: el panel de Emi completo y
+**una sola lista de lo que falta**, justo abajo.
 
 > **🚧 LA CORTINA ESTÁ BAJADA desde el 23 sep 2026.** Quien entra a
 > `www.emilserios.com` —a cualquier dirección— ve solo la firma de Emi sobre
@@ -24,23 +27,27 @@ panel de Emi completo y **una sola lista de lo que falta**, justo abajo.
 > sube un cambio, se le deja el enlace directo para verlo** —a la página
 > exacta que cambió, en la vista previa de la rama, no «mira el PR»—. Adrián
 > no encontraba las vistas previas, y una vez estuvo mirando la de una rama
-> vieja buscando cambios que estaban en otra. **Desde el 24 sep 2026 se
-> trabaja en la rama `claude/amazing-maxwell-jajhom`**; su raíz sale en el
-> comentario de vercel[bot] de su PR (Vercel acorta el nombre con un código
-> que no se puede adivinar). La de la noche del 23 sep,
-> `claude/epic-bardeen-k6zfn7` (PR #51 y #52, los dos mergeados), era:
+> vieja buscando cambios que estaban en otra.
 >
-> **https://emilse-rios-webv2-git-claude-e-21eb3e-adrians-projects-594b3131.vercel.app**
+> **⚠️ El proyecto de Vercel es `emilse-rios-webv2_1`, y solo ése** (Adrián,
+> 24 sep 2026). Es el que tiene las variables —Supabase, Klaviyo, Bunny— y
+> sus vistas previas empiezan por **`emilse-rios-webv21-git-…`**. El bot de
+> Vercel lista además otro proyecto, `emilse-rios-webv2` a secas: **no se
+> usa, y su vista previa sale «Sin conectar»** porque no tiene variables. El
+> 24 sep 2026 se le pasó a Adrián ese enlace por error y costó un rato.
 >
-> La de antes, `claude/youthful-meitner-21x8ys`, era
-> `…-git-claude-y-2c57cd-…`: enseña `main` hasta el #50, sin el aula nueva.
+> **Desde el 24 sep 2026 se trabaja en la rama
+> `claude/amazing-maxwell-jajhom`** (PR #53), y su raíz es:
 >
-> y se le añade la ruta: `/sobre-mi/`, `/en/products/`… Con otra rama, la
-> raíz cambia: sale en el comentario de **vercel[bot]** del PR, fila
-> `emilse-rios-webv2`, enlace **Preview** (desde la sesión se lee con las
-> herramientas de GitHub, pidiendo los comentarios del PR). Vercel tarda un
-> par de minutos en construir después de cada push. Ver **La cortina → Cómo
-> se sigue viendo la web**.
+> **https://emilse-rios-webv21-git-claude-853724-adrians-projects-594b3131.vercel.app**
+>
+> y se le añade la ruta: `/panel/`, `/sobre-mi/`, `/en/products/`… Con otra
+> rama, la raíz cambia (Vercel acorta el nombre con un código que no se puede
+> adivinar): sale en el comentario de **vercel[bot]** del PR, **fila
+> `emilse-rios-webv2_1`**, enlace **Preview**. Desde la sesión se lee con
+> `curl` a `api.github.com/repos/…/issues/<PR>/comments` y buscando
+> `emilse-rios-webv21-git-`. Vercel tarda un par de minutos en construir
+> después de cada push. Ver **La cortina → Cómo se sigue viendo la web**.
 
 > **📋 LO QUE FALTA — la lista vigente (24 sep 2026).** Es la única que manda:
 > las de más abajo («cierre del 23 sep», «22 sep») quedan como historia y lo
@@ -53,8 +60,9 @@ panel de Emi completo y **una sola lista de lo que falta**, justo abajo.
 > Mensajes). Rama `claude/epic-bardeen-k6zfn7`: **PR #51 y PR #52, los dos
 > mergeados**. Todo en **El panel de Emi, completo** y **El aula y el panel
 > de Emi, con la ropa del sitio**. El 24 sep al mediodía Adrián hizo A.1–A.6,
-> y la rama nueva, `claude/amazing-maxwell-jajhom`, separa las dos
-> bibliotecas de Bunny.
+> y la rama nueva, `claude/amazing-maxwell-jajhom` (**PR #53**), separa las
+> dos bibliotecas de Bunny. Adrián ya entró al panel conectado en su vista
+> previa.
 >
 > **A. Para que Emi pueda usar el panel (Adrián, fuera del código; una media
 > hora, en este orden).** Hasta que no esté hecho, el panel se ve pero no
@@ -81,7 +89,8 @@ panel de Emi completo y **una sola lista de lo que falta**, justo abajo.
 > 7. [ ] **En el panel → Tienda → «Importar el catálogo actual»**, una vez. Pide
 >    una vista previa construida **después** de poner las variables (las
 >    `PUBLIC_` se escriben en el build): la de `claude/amazing-maxwell-jajhom`
->    ya lo es.
+>    en `emilse-rios-webv2_1` ya lo es —
+>    `https://emilse-rios-webv21-git-claude-853724-adrians-projects-594b3131.vercel.app/panel/`—.
 >
 > **B. Lo de Emi (contenido, sin código).**
 >
@@ -147,8 +156,8 @@ panel de Emi completo y **una sola lista de lo que falta**, justo abajo.
 >   `contrabajoenlaciudad.com`. Ver **Pendiente → Bloquea el lanzamiento**.
 > - [ ] `curl -sI https://www.emilserios.com/aulavirtual/estudiemos-juntos/`
 >   tiene que dar `301` hacia `/productos/estudiemos-juntos/`.
-> - [ ] Hay dos proyectos de Vercel construyendo este repo
->   (`emilse-rios-webv2` y `emilse-rios-webv2_1`): ver cuál sobra y borrarlo.
+> - [x] ~~Cuál de los dos proyectos de Vercel es el bueno~~: es
+>   **`emilse-rios-webv2_1`** (Adrián, 24 sep 2026). El otro no se usa.
 > - [ ] Opcional: la cápsula «Ingresar al aula» del menú no suelta notas.
 > - [ ] Los audios de respuesta se graban en WebM (Chrome, Firefox) o MP4
 >   (Safari); un iPhone con iOS anterior al 17.4 no reproduce WebM. Si alguna
@@ -544,7 +553,7 @@ cortina porque ahí `VERCEL_ENV` vale `preview`:
   («Preview»). Enseña `main` más los cambios de ese PR.
 - **Cada rama tiene además una dirección fija**, que siempre apunta a su
   último push:
-  `emilse-rios-webv2-git-<rama>-adrians-projects-594b3131.vercel.app` (Vercel
+  `emilse-rios-webv21-git-<rama>-adrians-projects-594b3131.vercel.app` (Vercel
   acorta los nombres largos con un código). Una sesión que trabaja siempre en
   la misma rama tiene, por tanto, un solo enlace para todo el día.
 
@@ -552,17 +561,17 @@ cortina porque ahí `VERCEL_ENV` vale `preview`:
 escrito):
 
 - **Desde GitHub, lo más corto:** abrir el PR → pestaña **Conversation** →
-  bajar hasta el comentario de **vercel[bot]**, que es una tabla con los dos
-  proyectos → en la fila de `emilse-rios-webv2`, columna *Actions*, el enlace
-  **Preview**. (No dice «Visit Preview», como se escribió aquí al principio.)
+  bajar hasta el comentario de **vercel[bot]**, que es una tabla con dos
+  proyectos → en la fila de **`emilse-rios-webv2_1`**, columna *Actions*, el
+  enlace **Preview**. La otra fila no sirve: ver el último punto de esta
+  sección. (No dice «Visit Preview», como se escribió aquí al principio.)
   Un PR ya mergeado conserva el comentario y el enlace sigue funcionando.
 - **Ojo con abrir la de otra rama.** Cada rama tiene su dirección, y la de una
   rama vieja enseña esa rama, no la última. El 23 sep 2026 Adrián miraba la de
-  `claude/busy-heisenberg-2ig8dt` (`…-git-claude-b-bc8959-…`) buscando los
-  cambios del PR #47, que estaban en la de `claude/youthful-meitner-21x8ys`
-  (`…-git-claude-y-2c57cd-…`). Lo más seguro es entrar siempre desde el
-  comentario del PR.
-- **Desde Vercel:** el proyecto → **Deployments** → buscar la rama en la
+  `claude/busy-heisenberg-2ig8dt` buscando los cambios del PR #47, que estaban
+  en la de `claude/youthful-meitner-21x8ys`. Lo más seguro es entrar siempre
+  desde el comentario del PR.
+- **Desde Vercel:** el proyecto `emilse-rios-webv2_1` → **Deployments** → buscar la rama en la
   columna de la rama (o filtrar por ella) → pulsar el despliegue → **Visit**.
   El de arriba del todo es el último push.
 
@@ -578,11 +587,11 @@ no tenía salida a `vercel.app`:
   «Production».** Si `KLAVIYO_API_KEY` o las de Supabase están solo en
   Production, en la vista previa el formulario del newsletter avisa de que no
   está conectado y el aula no deja entrar.
-- **Hay dos proyectos de Vercel construyendo este mismo repo**:
-  `emilse-rios-webv2` y `emilse-rios-webv2_1`, así que cada PR sale con dos
-  vistas previas. No se sabe cuál tiene el dominio; el segundo parece un
-  duplicado y conviene revisarlo —y borrarlo, si sobra— para no pagar dos
-  builds ni confundir variables.
+- **El proyecto es `emilse-rios-webv2_1`** (Adrián, 24 sep 2026): ahí están
+  las variables y de ahí salen las vistas previas que sirven. Vercel construye
+  además un `emilse-rios-webv2` a secas que **no se usa**: su vista previa
+  sale «Sin conectar» porque no tiene variables. Todo lo de Vercel —variables,
+  despliegues, vistas previas— se hace en `_1`.
 
 ---
 
@@ -796,10 +805,11 @@ Solo aditiva e idempotente, como la 0009: no toca la membresía.
 2. **Las variables de Supabase también en «Preview»** en Vercel, y
    **`SUPABASE_SERVICE_ROLE_KEY` también ahí** si se quiere crear cuentas desde
    Personas en la vista previa.
-3. **La dirección de la vista previa en las Redirect URLs de Supabase Auth**
-   (`https://emilse-rios-webv2-git-claude-e-21eb3e-adrians-projects-594b3131.vercel.app/**`),
+3. **La dirección de la vista previa en las Redirect URLs de Supabase Auth**,
    o el enlace del correo de «poner la contraseña» que se manda desde Personas
-   lleva al Site URL en vez de a la vista previa.
+   lleva al Site URL en vez de a la vista previa. *(Hecho el 24 sep 2026 con
+   un comodín que vale para todas las ramas:
+   `https://*-adrians-projects-594b3131.vercel.app/**`.)*
 4. **La primera vez, en la Tienda, «Importar el catálogo actual».**
 
 ### Cómo se probó

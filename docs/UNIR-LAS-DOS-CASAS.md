@@ -78,8 +78,9 @@ Las dos primeras ya estaban desde la capa A. **Las dos últimas son nuevas**: so
 el puente de traspaso, y sin ellas el enlace que trae la sesión desde la
 academia no lleva a ninguna parte.
 
-Conviene añadir también las de la URL de Vercel (`*.vercel.app`) para poder
-probar antes de publicar.
+Y las vistas previas de Vercel, para poder probar antes de publicar, con un
+comodín que vale para todas las ramas (puesto el 24 sep 2026):
+`https://*-adrians-projects-594b3131.vercel.app/**`.
 
 **Y en esa misma pantalla, el Site URL**: cambiarlo de
 `https://www.emilseriosacademy.com` a `https://www.emilserios.com`. Es el
