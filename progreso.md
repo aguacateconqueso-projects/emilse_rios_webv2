@@ -4,28 +4,16 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 24 de septiembre de 2026, más tarde esa noche:
-**arreglada la ficha de precio de las cuatro cartas**, que el PR #55 rompió
-—una palabra por renglón en lo que incluye—, y **toda página entra con
-animación**. Ver **La ficha de precio rota, y la entrada en todas las
-páginas**, justo debajo de **La cortina**. Antes, esa noche (PR #55): **una
-tanda de formato** en la Home, *Sobre mí* y las cuatro cartas —negritas del tamaño del
-cuerpo, tarjetas que destacan, el newsletter al final de todas las cartas como
-norma— (rama `claude/affectionate-faraday-ddgz0m` otra vez, rearrancada desde
-`main` tras el PR #54). Ver **Correcciones de formato del 24 de septiembre**,
-justo debajo de **La cortina**. Antes, esa tarde (PR #54): **Formaciones
-cambia de dirección**: `/formaciones/` y `/en/courses/`, y «products» deja de
-salir en los enlaces. Las viejas redirigen con un 301, página por página. Ver
-**Las direcciones viejas → Formaciones deja de llamarse `/productos/`**. Y en
-la misma rama, **los videos de los cursos, en dos idiomas.** Emi sube cada clase en español y en inglés a la
-misma biblioteca de Bunny, y el selector del panel los metía todos en el hueco
-del español. Ahora lee el idioma de cada video por su título (o su colección)
-y **«+ Desde Bunny» hace una clase por pareja ES + EN**. Ver **Los videos de
-los cursos, en dos idiomas**, justo debajo de **La cortina**. Antes, al
-mediodía: **Adrián hizo los pasos A.1–A.6** de **📋 LO QUE FALTA** y salió que
-**los cursos viven en otra biblioteca de Bunny** (754051, no la 741634 de la
-membresía); el código ya las separa (PR #53, mergeado). Ver **Las dos
-bibliotecas de Bunny**, dentro de **El panel de Emi, completo**.
+**Última actualización:** 24 de septiembre de 2026, cierre del día. **Todo
+lo del día está en `main`, del PR #53 al #56**, y Adrián lo dio por bueno
+(«perfecto, todo ok»). En una línea: los cursos en su biblioteca de Bunny
+(#53); los videos ES / EN, cada uno en su hueco, y Formaciones en
+`/formaciones/` y `/en/courses/` (#54); una tanda de formato en la Home, *Sobre
+mí* y las cuatro cartas, con el newsletter al final de todas (#55); la ficha
+de precio arreglada y la entrada animada en todas las páginas (#56). **Lo que
+falta, en la lista 📋 de abajo**, y lo más urgente es **el 1 de octubre**
+(punto 15). El detalle de cada cosa está en las secciones que siguen a **La
+cortina**, de la más nueva a la más vieja.
 
 > **🚧 LA CORTINA ESTÁ BAJADA desde el 23 sep 2026.** Quien entra a
 > `www.emilserios.com` —a cualquier dirección— ve solo la firma de Emi sobre
@@ -39,82 +27,77 @@ bibliotecas de Bunny**, dentro de **El panel de Emi, completo**.
 > sube un cambio, se le deja el enlace directo para verlo** —a la página
 > exacta que cambió, en la vista previa de la rama, no «mira el PR»—. Adrián
 > no encontraba las vistas previas, y una vez estuvo mirando la de una rama
-> vieja buscando cambios que estaban en otra. **Desde la tarde del 24 sep
-> 2026 se trabaja en la rama `claude/affectionate-faraday-ddgz0m`** (la de
-> antes, `claude/amazing-maxwell-jajhom`, entró en `main` con el PR #53); su
-> raíz sale en el comentario de vercel[bot] de su PR (Vercel acorta el nombre
-> con un código que no se puede adivinar). La de la noche del 23 sep,
-> `claude/epic-bardeen-k6zfn7` (PR #51 y #52, los dos mergeados), era:
+> vieja buscando cambios que estaban en otra. **Cada sesión trabaja en su
+> propia rama**, y la raíz de su vista previa sale en el comentario de
+> vercel[bot] de su PR (Vercel acorta el nombre con un código que no se puede
+> adivinar). Si el PR de la rama ya se mergeó, la rama se rearranca desde
+> `main` con el mismo nombre (`git checkout -B <rama> origin/main`) y el PR
+> nuevo es otro PR. La del 24 sep, `claude/affectionate-faraday-ddgz0m` (PR
+> #54, #55 y #56, los tres mergeados), era:
 >
-> **https://emilse-rios-webv2-git-claude-e-21eb3e-adrians-projects-594b3131.vercel.app**
+> **https://emilse-rios-webv2-git-claude-a-d4d0ea-adrians-projects-594b3131.vercel.app**
 >
-> La de antes, `claude/youthful-meitner-21x8ys`, era
-> `…-git-claude-y-2c57cd-…`: enseña `main` hasta el #50, sin el aula nueva.
+> Las de antes enseñan un `main` viejo: `…-git-claude-e-21eb3e-…`
+> (`claude/epic-bardeen-k6zfn7`, hasta el #52) y `…-git-claude-y-2c57cd-…`
+> (`claude/youthful-meitner-21x8ys`, hasta el #50).
 >
-> y se le añade la ruta: `/sobre-mi/`, `/en/courses/`… Con otra rama, la
+> A la raíz se le añade la ruta: `/sobre-mi/`, `/en/courses/`… Con otra rama, la
 > raíz cambia: sale en el comentario de **vercel[bot]** del PR, fila
 > `emilse-rios-webv2`, enlace **Preview** (desde la sesión se lee con las
 > herramientas de GitHub, pidiendo los comentarios del PR). Vercel tarda un
 > par de minutos en construir después de cada push. Ver **La cortina → Cómo
 > se sigue viendo la web**.
 
-> **📋 LO QUE FALTA — la lista vigente (24 sep 2026).** Es la única que manda:
-> las de más abajo («cierre del 23 sep», «22 sep») quedan como historia y lo
-> que siga en pie de ellas está copiado acá. Al cerrar una sesión, se tacha lo
-> hecho y se añade lo nuevo **acá**, no en otra lista.
+> **📋 LO QUE FALTA — la lista vigente (cierre del 24 sep 2026).** Es la única
+> que manda: las de más abajo («cierre del 23 sep», «22 sep») quedan como
+> historia y lo que siga en pie de ellas está copiado acá. Al cerrar una
+> sesión, se tacha lo hecho y se añade lo nuevo **acá**, no en otra lista. Los
+> números no se cambian: otras secciones los citan («punto 15», «C.12»).
 >
-> **Dónde quedamos.** La noche del 23 sep se hizo el aula con la ropa del
-> sitio, los cursos en la base de datos y **el panel de Emi entero** (vista
-> general, Hoy, Membresía, Cursos, Tienda, Págs. de ventas, Personas y
-> Mensajes). Rama `claude/epic-bardeen-k6zfn7`: **PR #51 y PR #52, los dos
-> mergeados**. Todo en **El panel de Emi, completo** y **El aula y el panel
-> de Emi, con la ropa del sitio**. El 24 sep al mediodía Adrián hizo A.1–A.6,
-> y la rama `claude/amazing-maxwell-jajhom` separó las dos bibliotecas de
-> Bunny (PR #53, mergeado). Esa tarde, en `claude/affectionate-faraday-ddgz0m`,
-> **el selector de Bunny aprendió los dos idiomas** (ver **Los videos de los
-> cursos, en dos idiomas**) y **Formaciones pasó a `/formaciones/` y
-> `/en/courses/`**, con las viejas redirigidas (ver **Las direcciones viejas**).
+> **Dónde quedamos.** El 23 sep por la noche: el aula con la ropa del sitio,
+> los cursos en la base de datos y **el panel de Emi entero** (#51 y #52). El 24
+> sep: Adrián hizo A.1–A.6 al mediodía; los cursos en su biblioteca de Bunny
+> (#53); los videos ES / EN en su hueco y Formaciones en `/formaciones/` (#54);
+> formato en la Home, *Sobre mí* y las cartas (#55); la ficha de precio
+> arreglada y la entrada en todas las páginas (#56). **Todo mergeado; `main`
+> no tiene nada a medias.**
 >
-> **A. Para que Emi pueda usar el panel (Adrián, fuera del código; una media
-> hora, en este orden).** Hasta que no esté hecho, el panel se ve pero no
-> guarda nada de lo nuevo.
+> **⏰ Lo primero de la próxima sesión: el punto 15 (1 de octubre).** Después,
+> A.7 y C.12, que son de un rato y destraban a Emi.
+>
+> **A. Para que Emi pueda usar el panel (Adrián, fuera del código).**
 >
 > 1. [x] **Mergear el PR #52.**
 > 2. [x] **Supabase → SQL Editor: pegar `supabase/migrations/0009_cursos.sql` y
->    después `0010_tienda_paginas_mensajes.sql`**, una vez cada una. *(Hecho
->    el 24 sep 2026: «Success» las dos.)*
+>    después `0010_tienda_paginas_mensajes.sql`**. *(Hecho el 24 sep 2026:
+>    «Success» las dos.)*
 > 3. [x] **`supabase/set_admin.sql`**. *(Hecho el 24 sep 2026: Emi,
->    `emilserios.bass@gmail.com`, y Adrián salen como `admin`. La cuenta de Emi
->    ya existía, del 5 jul 2026.)*
-> 4. [x] **Vercel → variables de Supabase también en «Preview»**:
->    `PUBLIC_SUPABASE_URL` (la raíz, sin `/rest/v1`), `PUBLIC_SUPABASE_ANON_KEY`
->    y `SUPABASE_SERVICE_ROLE_KEY`. *(Hecho el 24 sep 2026.)*
-> 5. [x] **Supabase → Auth → Redirect URLs**, con **un comodín que vale para
->    las vistas previas de todas las ramas**:
+>    `emilserios.bass@gmail.com`, y Adrián salen como `admin`.)*
+> 4. [x] **Vercel → variables de Supabase también en «Preview»**. *(Hecho el
+>    24 sep 2026.)*
+> 5. [x] **Supabase → Auth → Redirect URLs** con el comodín
 >    `https://*-adrians-projects-594b3131.vercel.app/**`. *(Hecho el 24 sep
->    2026.)* Así no hay que añadir una dirección por rama.
-> 6. [x] **`BUNNY_STREAM_API_KEY`** en Vercel, y los *allowed referrers* de
->    Bunny. *(Hecho el 24 sep 2026.)* ⚠️ **La clave es la de la biblioteca
->    754051, la de los cursos**, no la 741634 de la membresía: ver **Las dos
->    bibliotecas de Bunny**.
-> 7. [ ] **En el panel → Tienda → «Importar el catálogo actual»**, una vez. Pide
->    una vista previa construida **después** de poner las variables (las
->    `PUBLIC_` se escriben en el build): la de `claude/amazing-maxwell-jajhom`
->    ya lo es.
+>    2026.)*
+> 6. [x] **`BUNNY_STREAM_API_KEY`** en Vercel y los *allowed referrers* de
+>    Bunny. *(Hecho el 24 sep 2026.)* ⚠️ Es la clave de la biblioteca
+>    **754051**, la de los cursos: ver **Las dos bibliotecas de Bunny**.
+> 7. [ ] **En el panel → Tienda → «Importar el catálogo actual»**, una vez.
+>    Cualquier vista previa de ahora en adelante sirve (las `PUBLIC_` ya están
+>    en el build), por ejemplo la de arriba + `/panel/#tienda`.
 >
 > **B. Lo de Emi (contenido, sin código).**
 >
-> 8. [ ] **Cargar su primer curso completo** en Cursos (los videos ya están en
->    Bunny) y darse de alta a sí misma o a alguien de prueba en Personas para
->    verlo como alumna. **Antes, que cada video diga su idioma en Bunny**: «ES» o
->    «EN» al final del título («01 Introducción ES», «01 Introduction EN»), o
->    una colección por idioma con «ES» / «EN» en el nombre. Con eso, «+ Desde
->    Bunny» arma el curso entero de una vez, cada video en su hueco. Ver **Los
->    videos de los cursos, en dos idiomas**.
-> 9. [ ] **Revisar la Tienda y las Págs. de ventas** con sus textos; el resto
->    de copies que cambió el 23 sep, y **tres traducciones hechas acá** que
->    tiene que mirar (marcadas `TRADUCIDO` en `src/data/cartas.ts`). Desde el
->    #52 esto lo puede corregir ella misma en Págs. de ventas.
+> 8. [ ] **Cargar su primer curso completo** en Cursos y darse de alta a sí
+>    misma o a alguien de prueba en Personas para verlo como alumna. **Antes,
+>    que cada video diga su idioma en Bunny**: «ES» o «EN» al final del título
+>    —mejor en el nombre del fichero antes de subirlo— («01 Introducción ES»,
+>    «01 Introduction EN»), o una colección por idioma. Con eso, «+ Desde
+>    Bunny» arma el curso de una vez, cada video en su hueco. Ver **Los videos
+>    de los cursos, en dos idiomas**.
+> 9. [ ] **Revisar la Tienda y las Págs. de ventas** con sus textos, y **tres
+>    traducciones hechas acá** (marcadas `TRADUCIDO` en `src/data/cartas.ts`).
+>    Lo corrige ella misma en Págs. de ventas, que desde el #55 tiene también
+>    «Negrita» y «Cursiva» y la frase del newsletter del final.
 > 10. [ ] **Tres decisiones chicas de la carta de la membresía**: el video de un
 >     minuto (¿va, y dónde?), las tildes del testimonio de Sergio, y el «Yes,»
 >     que se le quitó a Laura en inglés. Ver **Pendiente → Contenido que falta**.
@@ -122,40 +105,42 @@ bibliotecas de Bunny**, dentro de **El panel de Emi, completo**.
 >     deja de prometer «un correo de bienvenida con un video»
 >     (`src/data/home.ts`).
 >
-> **C. Código, para la próxima sesión (en este orden).**
+> **C. Código (en este orden, salvo el 15, que va primero por la fecha).**
 >
-> 12. [ ] **Probar contra el Supabase de verdad** en cuanto estén A.1–A.7: un
->     recorrido corto por cada pestaña, y **el puente `player.js` con un video
->     real de Bunny** (guarda el minuto solo; nunca se ha probado contra uno).
->     Y **el selector de Bunny con los títulos reales de Emi**: que las
->     etiquetas ES / EN salgan bien y el plan de «+ Desde Bunny» empareje cada
->     clase con su versión (probado solo con una biblioteca simulada).
-> 13. [ ] **⚠️ El cobro de los cursos, y que pagar dé acceso solo.** Hoy
->     `/api/checkout` solo cobra la membresía y **el webhook de Stripe vive en
->     la academia y solo sabe de la membresía**, así que un curso comprado no
->     se abre solo: se da a mano en Personas. Hace falta: el precio de Stripe
->     de cada curso (una columna en `products` o una variable), el checkout
->     por producto, y **decidir dónde se da el acceso**: (a) enseñarle cursos al
->     webhook de la academia, o (b) mudar el webhook acá — que es lo que
->     también pide la mudanza de la membresía (punto 17). Recomendación: (b),
->     si la membresía se muda pronto; (a) si los cursos se venden antes.
->     `products.course_id` ya dice qué curso abre cada ficha.
+> 12. [ ] **Probar contra el Supabase de verdad** en cuanto esté A.7: un
+>     recorrido corto por cada pestaña del panel, **el puente `player.js` con
+>     un video real de Bunny** (guarda el minuto solo; nunca se ha probado
+>     contra uno) y **el selector de Bunny con los títulos reales de Emi**:
+>     que las etiquetas ES / EN salgan bien y el plan de «+ Desde Bunny»
+>     empareje cada clase con su versión (solo se probó con una biblioteca
+>     simulada).
+> 13. [ ] **El cobro de los cursos, y que pagar dé acceso solo.** *Aplazado
+>     por Adrián el 24 sep 2026: «Stripe por ahora no».* Mientras tanto, un
+>     curso se da a mano en Personas. Cuando se retome: el precio de Stripe de
+>     cada curso (una columna en `products` o una variable), el checkout por
+>     producto, y **decidir dónde se da el acceso**: (a) enseñarle cursos al
+>     webhook de la academia, o (b) mudar el webhook acá, que es lo que también
+>     pide la mudanza de la membresía (punto 17). `products.course_id` ya dice
+>     qué curso abre cada ficha.
 > 14. [ ] **Los correos del hilo de dudas**: aviso a Emi cuando entra una
 >     pregunta y aviso a la alumna cuando Emi responde. Hoy la alumna solo se
 >     entera al entrar al aula («Emi te respondió» en su escritorio). Pide
 >     decidir desde qué dirección se mandan (la academia manda por Resend con su
 >     dominio verificado; acá habría que verificar `emilserios.com`).
-> 15. [ ] **⚠️ Antes del 1 de octubre: las puertas de la membresía abren ese
->     día** (`REOPENS_AT` en `src/lib/membership.ts`). Decidir si para
->     entonces la cortina está subida —y entonces **las variables de Stripe en
->     Vercel**, o el botón de pagar da un 500— o si ese ciclo se vende todavía
->     desde la academia. Las fechas de las puertas viven en los dos proyectos de
->     Vercel y hay que cambiarlas en los dos.
+> 15. [ ] **⚠️⏰ ANTES DEL 1 DE OCTUBRE (faltan 7 días al cierre del 24 sep):
+>     las puertas de la membresía abren ese día** (`REOPENS_AT` en
+>     `src/lib/membership.ts`). Con Stripe aplazado y la cortina bajada, lo
+>     natural es que **ese ciclo se venda todavía desde la academia**, como
+>     siempre: hay que confirmarlo con Adrián y comprobar que las fechas de las
+>     puertas están bien en **los dos proyectos de Vercel** (viven en los dos).
+>     Si en cambio se quiere vender desde acá, pide la cortina subida (punto
+>     16) y **las variables de Stripe en Vercel**, o el botón de pagar da un 500.
 > 16. [ ] **Subir la cortina** (`CORTINA_BAJADA = false` en
 >     `src/lib/cortina.ts`, en un PR) **con la prueba del newsletter** en la
 >     vista previa de ese mismo PR: los cinco pasos están en el relevo del
 >     cierre del 23 sep, abajo, y en **El newsletter, conectado → La primera
->     prueba**.
+>     prueba**. Desde el #55 hay un campo del newsletter más, al final de cada
+>     carta: probar también uno de esos.
 > 17. [ ] **Mudar la membresía, lo último**, con el dominio (Adrián, 23 sep):
 >     las páginas de la membresía (el ejercicio de la semana y el foro) al aula
 >     de acá, el webhook de Stripe acá, las fechas de las puertas en una sola
@@ -165,32 +150,40 @@ bibliotecas de Bunny**, dentro de **El panel de Emi, completo**.
 >
 > **D. Cabos sueltos, sin prisa.**
 >
+> - [ ] **El SEO lo hace Emi, con Claude, cuando todo esté listo** (lo decidió
+>   Adrián el 24 sep 2026: no es suyo). De base ya hay canonical y `hreflang`
+>   en cada página y direcciones en español y en inglés; falta todo lo demás
+>   (títulos y descripciones pensados para buscar, el sitemap, Search Console).
+> - [ ] Comprobar en vivo las direcciones viejas:
+>   `curl -sI https://www.emilserios.com/productos/estudiemos-juntos/` y
+>   `curl -sI https://www.emilserios.com/aulavirtual/estudiemos-juntos/` tienen
+>   que dar `301` hacia `/formaciones/estudiemos-juntos/` (la cortina no lo
+>   impide: la redirección va antes). Desde esta sesión no se llega a
+>   `emilserios.com` ni a `vercel.app`. Y en los correos nuevos, Emi pega ya
+>   las direcciones de `/formaciones/`.
 > - [ ] Apagar la integración de WooCommerce en Klaviyo (mirando antes los
 >   flujos) y decidir con Emi la doble confirmación del newsletter.
 > - [ ] El dominio: el push a una cuenta de Namecheap de Emi, mirar la línea
 >   `DKIM:` de un correo para cerrar lo de los CNAME proxied, mudar
 >   `info@emilserios.com` fuera del Hostinger de Edu y decidir
 >   `contrabajoenlaciudad.com`. Ver **Pendiente → Bloquea el lanzamiento**.
-> - [ ] Con la rama de `/formaciones/` ya en `main`:
->   `curl -sI https://www.emilserios.com/productos/estudiemos-juntos/` y
->   `curl -sI https://www.emilserios.com/aulavirtual/estudiemos-juntos/` tienen
->   que dar `301` hacia `/formaciones/estudiemos-juntos/`. Y en los correos
->   nuevos, Emi pega ya las direcciones de `/formaciones/`.
-> - [ ] **La foto de *Sobre mí*: confirmar con Adrián** que la buena es
->   `about_me3` (la horizontal de la calle, la única que subió para esto el 23
->   sep). El 24 sep dijo que la puesta «no es la que pidió»: era esa misma, pero
->   el marco la recortaba casi en cuadrado y se leía como la vertical. Desde
->   entonces se ve entera. Si quería otra, `about_me.jpg` (el primer plano
->   sonriendo, del 21 sep) sigue en el historial, en el commit `6e0a1f5`.
-> - [ ] **El SEO lo hace Emi, con Claude, cuando todo esté listo** (lo decidió
->   Adrián el 24 sep 2026: no es suyo). Lo que ya está hecho de base: canonical
->   y `hreflang` en cada página y direcciones en español y en inglés.
 > - [ ] Hay dos proyectos de Vercel construyendo este repo
 >   (`emilse-rios-webv2` y `emilse-rios-webv2_1`): ver cuál sobra y borrarlo.
-> - [ ] Opcional: la cápsula «Ingresar al aula» del menú no suelta notas.
+>   Confunde —el 24 sep Adrián creyó que un cambio se había montado «en el
+>   web2_1»— y cualquier fecha de las puertas hay que cambiarla en los dos.
+> - [ ] Las cartas están **en el tope de dos animaciones** (el revelado y la
+>   escalera) y de tarjetas: una animación distinta más es una enmienda al
+>   sistema de diseño. Ver **Enmiendas, con fecha**.
+> - [ ] Opcional: el panel de Emi no tiene entrada animada (es una
+>   herramienta, con su propio layout); si se quiere, es poner `entrada` en su
+>   `<main>`. Y la cápsula «Ingresar al aula» del menú no suelta notas.
 > - [ ] Los audios de respuesta se graban en WebM (Chrome, Firefox) o MP4
 >   (Safari); un iPhone con iOS anterior al 17.4 no reproduce WebM. Si alguna
 >   alumna avisa, convertir o grabar en MP4.
+> - [x] ~~La foto de *Sobre mí*~~: es `about_me3`, la horizontal de la calle, y
+>   desde el #55 se ve entera. Adrián dio todo por bueno tras el #56. Las otras
+>   dos siguen en el historial (`6e0a1f5` y `7984abd`) por si algún día se
+>   quiere cambiar.
 
 > *(Histórico: el relevo del cierre del 23 sep. Lo que sigue en pie está en
 > **📋 LO QUE FALTA**, arriba. Su punto 1, vestir el aula, se hizo esa misma
@@ -692,7 +685,8 @@ foto (`ratio` en `MediaSlot`), a media pantalla junto al texto en el
 escritorio y a lo ancho en el teléfono. Si la que quería es otra, las tres que
 subió siguen en el historial: `about_me.jpg` (`6e0a1f5`, primer plano
 sonriendo), `about_me2.jpg` (`7984abd`, la vertical) y `about_me3.png`
-(`fa4d82f`, la horizontal). Queda en **📋 LO QUE FALTA** para confirmarlo.
+(`fa4d82f`, la horizontal). *(Adrián dio todo por bueno tras el #56: se
+queda `about_me3`, entera.)*
 
 **3 a 6. Las cuatro cartas.** Lo que pidió frase por frase resultó ser, casi
 siempre, el mismo tipo de bloque, así que se cambió el tipo y sale igual en
