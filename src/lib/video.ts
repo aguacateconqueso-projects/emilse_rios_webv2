@@ -36,6 +36,17 @@ export const BUNNY_LIBRARY_ID = String(
   import.meta.env.PUBLIC_BUNNY_LIBRARY || import.meta.env.PUBLIC_BUNNY_LIBRARY_ID || '741634',
 ).trim();
 
+// Biblioteca de los CURSOS, que NO es la de arriba (24 sep 2026: los videos del
+// primer curso viven en la 754051; la 741634 es la de la membresía y la carta).
+// La leen el selector de Bunny del panel —la `BUNNY_STREAM_API_KEY` de Vercel es
+// la de ESTA biblioteca: en Bunny cada biblioteca tiene su clave— y lo que se
+// pega en una clase sin biblioteca (el GUID pelado, el enlace del CDN).
+//
+// ⚠️ No se arregla cambiando `PUBLIC_BUNNY_LIBRARY`: esa la usa también la
+//    pestaña Membresía, y un GUID pelado de un video semanal se guardaría con la
+//    biblioteca de los cursos, roto para quien paga.
+export const BUNNY_CURSOS_LIBRARY = String(import.meta.env.PUBLIC_BUNNY_CURSOS_LIBRARY || '754051').trim();
+
 // Host del reproductor cuando hay que construir la URL desde cero. Es el que
 // documenta Bunny y el que sale de su botón «Embed». (La carta usa el viejo
 // `player.mediadelivery.net`, que también responde; si un enlace llega con ese
@@ -79,11 +90,12 @@ function unwrap(input: unknown): string {
   return s.replace(/&amp;/g, '&').trim();
 }
 
-function buildBunny(s: string): string | null {
+function buildBunny(s: string, porDefecto: string = BUNNY_LIBRARY_ID): string | null {
   const guid = s.match(GUID_RE);
   if (!guid) return null;
   // La biblioteca son los dígitos que van justo antes del GUID en la ruta
-  // (`/embed/741634/GUID`, `/play/741634/GUID`). Si no están, la de siempre.
+  // (`/embed/741634/GUID`, `/play/741634/GUID`). Si no están, la que diga quien
+  // llama: la de siempre, o la de los cursos desde su pestaña.
   const lib = s.match(new RegExp('/(\\d{3,12})/' + guid[0], 'i'));
   // Si el enlace ya venía de mediadelivery, se respeta su host.
   const host = s.match(/https?:\/\/([a-z0-9.-]*mediadelivery\.net)/i);
@@ -93,7 +105,7 @@ function buildBunny(s: string): string | null {
   for (const [k, v] of Object.entries(BUNNY_FORCED)) params.set(k, v);
   for (const [k, v] of Object.entries(BUNNY_DEFAULTS)) if (!params.has(k)) params.set(k, v);
 
-  const library = lib ? lib[1] : BUNNY_LIBRARY_ID;
+  const library = lib ? lib[1] : porDefecto;
   return `https://${host ? host[1].toLowerCase() : BUNNY_HOST}/embed/${library}/${guid[0].toLowerCase()}?${params}`;
 }
 
@@ -124,11 +136,12 @@ function isLostBunny(s: string): boolean {
 
 // Lo que el aula necesita para pintar el <iframe>. Bunny primero: un embed suyo
 // también trae dígitos largos y si se mira Vimeo antes se lo lleva por delante.
-export function videoEmbed(input: unknown): VideoEmbed {
+// `biblioteca`, como en `normalizeVideoUrl`.
+export function videoEmbed(input: unknown, biblioteca?: string): VideoEmbed {
   const s = unwrap(input);
   if (!s) return { ok: false, reason: 'empty' };
 
-  const bunny = buildBunny(s);
+  const bunny = buildBunny(s, biblioteca);
   if (bunny) return { ok: true, provider: 'bunny', src: bunny, allow: ALLOW_BUNNY };
 
   if (isLostBunny(s)) return { ok: false, reason: 'bunny-lost' };
@@ -142,10 +155,11 @@ export function videoEmbed(input: unknown): VideoEmbed {
 // Lo que el panel guarda en la BD: la URL limpia del reproductor. Si no
 // reconoce ninguna plataforma guarda el texto tal cual, para no perder lo que
 // Emi pegó — el aula lo vuelve a intentar al pintar y, si tampoco puede, avisa.
-export function normalizeVideoUrl(input: unknown): string | null {
+// `biblioteca`: la de Bunny si lo pegado no la trae (los cursos pasan la suya).
+export function normalizeVideoUrl(input: unknown, biblioteca?: string): string | null {
   const s = unwrap(input);
   if (!s) return null;
-  return buildBunny(s) || buildVimeo(s) || String(input ?? '').trim();
+  return buildBunny(s, biblioteca) || buildVimeo(s) || String(input ?? '').trim();
 }
 
 // El GUID del video de Bunny que hay dentro de un enlace guardado, o `null`.
@@ -157,7 +171,8 @@ export function bunnyGuid(input: unknown): string | null {
 }
 
 // La dirección del reproductor de Bunny para un GUID de la biblioteca. Es lo
-// que guarda el panel cuando Emi elige un video del selector en vez de pegarlo.
-export function bunnyUrl(guid: string): string | null {
-  return buildBunny(guid);
+// que guarda el panel cuando Emi elige un video del selector en vez de pegarlo,
+// con la biblioteca que leyó el selector.
+export function bunnyUrl(guid: string, biblioteca?: string): string | null {
+  return buildBunny(guid, biblioteca);
 }

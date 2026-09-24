@@ -4,10 +4,13 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 24 de septiembre de 2026, de madrugada: el panel de
-Emi completo —vista general, Tienda, Págs. de ventas, Personas y Mensajes— (ver
-**El panel de Emi, completo**) y **una sola lista de lo que falta**, justo
-abajo: **📋 LO QUE FALTA**.
+**Última actualización:** 24 de septiembre de 2026, mediodía: **Adrián hizo
+los pasos A.1–A.6** de **📋 LO QUE FALTA** —migraciones 0009 y 0010
+aplicadas, Emi admin, variables en Preview, Redirect URL comodín, clave de
+Bunny— y salió que **los cursos viven en otra biblioteca de Bunny** (754051, no
+la 741634 de la membresía); el código ya las separa. Ver **Las dos bibliotecas
+de Bunny**, dentro de **El panel de Emi, completo**. Antes, de madrugada: el
+panel de Emi completo y **una sola lista de lo que falta**, justo abajo.
 
 > **🚧 LA CORTINA ESTÁ BAJADA desde el 23 sep 2026.** Quien entra a
 > `www.emilserios.com` —a cualquier dirección— ve solo la firma de Emi sobre
@@ -21,9 +24,11 @@ abajo: **📋 LO QUE FALTA**.
 > sube un cambio, se le deja el enlace directo para verlo** —a la página
 > exacta que cambió, en la vista previa de la rama, no «mira el PR»—. Adrián
 > no encontraba las vistas previas, y una vez estuvo mirando la de una rama
-> vieja buscando cambios que estaban en otra. **Desde la noche del 23 sep 2026
-> se trabaja en la rama `claude/epic-bardeen-k6zfn7`** (PR #51, mergeado; y
-> después PR #52, con el resto del panel), y su raíz es:
+> vieja buscando cambios que estaban en otra. **Desde el 24 sep 2026 se
+> trabaja en la rama `claude/amazing-maxwell-jajhom`**; su raíz sale en el
+> comentario de vercel[bot] de su PR (Vercel acorta el nombre con un código
+> que no se puede adivinar). La de la noche del 23 sep,
+> `claude/epic-bardeen-k6zfn7` (PR #51 y #52, los dos mergeados), era:
 >
 > **https://emilse-rios-webv2-git-claude-e-21eb3e-adrians-projects-594b3131.vercel.app**
 >
@@ -45,38 +50,38 @@ abajo: **📋 LO QUE FALTA**.
 > **Dónde quedamos.** La noche del 23 sep se hizo el aula con la ropa del
 > sitio, los cursos en la base de datos y **el panel de Emi entero** (vista
 > general, Hoy, Membresía, Cursos, Tienda, Págs. de ventas, Personas y
-> Mensajes). Rama `claude/epic-bardeen-k6zfn7`: **PR #51 ya mergeado** (aula,
-> cursos, Hoy, Membresía, Cursos) y **PR #52 abierto** (el resto), con la
-> vista previa en verde. Todo en **El panel de Emi, completo** y **El aula y
-> el panel de Emi, con la ropa del sitio**. Si el #52 ya entró cuando se lea
-> esto, lo siguiente arranca de `main` (`git checkout -B <rama> origin/main`).
+> Mensajes). Rama `claude/epic-bardeen-k6zfn7`: **PR #51 y PR #52, los dos
+> mergeados**. Todo en **El panel de Emi, completo** y **El aula y el panel
+> de Emi, con la ropa del sitio**. El 24 sep al mediodía Adrián hizo A.1–A.6,
+> y la rama nueva, `claude/amazing-maxwell-jajhom`, separa las dos
+> bibliotecas de Bunny.
 >
 > **A. Para que Emi pueda usar el panel (Adrián, fuera del código; una media
 > hora, en este orden).** Hasta que no esté hecho, el panel se ve pero no
 > guarda nada de lo nuevo.
 >
-> 1. [ ] **Mergear el PR #52.**
-> 2. [ ] **Supabase → SQL Editor: pegar `supabase/migrations/0009_cursos.sql` y
->    después `0010_tienda_paginas_mensajes.sql`**, una vez cada una. Las dos
->    solo agregan: no tocan la membresía que está cobrando, y pegarlas dos
->    veces no rompe nada.
-> 3. [ ] **`supabase/set_admin.sql`**, si Emi todavía no es admin: antes, que
->    haya entrado una vez por `/aulavirtual/entrar/` con
->    `emilserios.bass@gmail.com` (`emilse.art@gmail.com` era de prueba y se
->    ignora).
-> 4. [ ] **Vercel → variables de Supabase también en «Preview»**:
+> 1. [x] **Mergear el PR #52.**
+> 2. [x] **Supabase → SQL Editor: pegar `supabase/migrations/0009_cursos.sql` y
+>    después `0010_tienda_paginas_mensajes.sql`**, una vez cada una. *(Hecho
+>    el 24 sep 2026: «Success» las dos.)*
+> 3. [x] **`supabase/set_admin.sql`**. *(Hecho el 24 sep 2026: Emi,
+>    `emilserios.bass@gmail.com`, y Adrián salen como `admin`. La cuenta de Emi
+>    ya existía, del 5 jul 2026.)*
+> 4. [x] **Vercel → variables de Supabase también en «Preview»**:
 >    `PUBLIC_SUPABASE_URL` (la raíz, sin `/rest/v1`), `PUBLIC_SUPABASE_ANON_KEY`
->    y `SUPABASE_SERVICE_ROLE_KEY` (sin esta, Personas no crea cuentas). Con la
->    cortina bajada, el panel solo se usa en la vista previa.
-> 5. [ ] **Supabase → Auth → Redirect URLs: añadir la de la vista previa**
->    (`https://emilse-rios-webv2-git-claude-e-21eb3e-adrians-projects-594b3131.vercel.app/**`),
->    o el correo de «poner la contraseña» que se manda desde Personas lleva a
->    otra parte.
-> 6. [ ] **`BUNNY_STREAM_API_KEY`** en Vercel (Production y Preview), para
->    «Elegir de Bunny»; opcional `BUNNY_CDN_HOST` para las miniaturas. Y en
->    Bunny, la vista previa y `emilserios.com` en los *allowed referrers* si la
->    biblioteca los restringe.
-> 7. [ ] **En el panel → Tienda → «Importar el catálogo actual»**, una vez.
+>    y `SUPABASE_SERVICE_ROLE_KEY`. *(Hecho el 24 sep 2026.)*
+> 5. [x] **Supabase → Auth → Redirect URLs**, con **un comodín que vale para
+>    las vistas previas de todas las ramas**:
+>    `https://*-adrians-projects-594b3131.vercel.app/**`. *(Hecho el 24 sep
+>    2026.)* Así no hay que añadir una dirección por rama.
+> 6. [x] **`BUNNY_STREAM_API_KEY`** en Vercel, y los *allowed referrers* de
+>    Bunny. *(Hecho el 24 sep 2026.)* ⚠️ **La clave es la de la biblioteca
+>    754051, la de los cursos**, no la 741634 de la membresía: ver **Las dos
+>    bibliotecas de Bunny**.
+> 7. [ ] **En el panel → Tienda → «Importar el catálogo actual»**, una vez. Pide
+>    una vista previa construida **después** de poner las variables (las
+>    `PUBLIC_` se escriben en el build): la de `claude/amazing-maxwell-jajhom`
+>    ya lo es.
 >
 > **B. Lo de Emi (contenido, sin código).**
 >
@@ -296,8 +301,8 @@ pagando sin recibir acceso.
 | **Identidad** | El logo de Emi, vectorizado, en cabecera, pie, entrada y favicon. |
 | **Alcance** | Desde el 31 ago 2026 esto deja de ser solo el sitio: aquí van también el aula, la membresía y los cursos. Ver **La plataforma**. |
 | **Sesión** | **Conectada y probada el 22 sep 2026**: se entra de verdad, contra el **mismo Supabase de la academia**, y el candado pide **suscripción al día**. Las variables y las Redirect URLs ya están puestas. Falta `set_admin.sql`. Ver `docs/CONECTAR-EL-AULA.md`. |
-| **Cursos** | **En la base de datos desde el 23 sep 2026** (`supabase/migrations/0009_cursos.sql`, **pendiente de aplicar** en Supabase). Emi los arma sola desde `/panel/#cursos`; el aula los lee por consulta, con la RLS decidiendo. Ver **El aula y el panel de Emi**. |
-| **Tienda** | **Desde el 23 sep 2026 la maneja Emi** desde el panel: las fichas de Formaciones, sus páginas de ventas (borrador y publicada) y quién tiene qué (`0010_tienda_paginas_mensajes.sql`, **pendiente de aplicar**). Formaciones y las páginas se resuelven en el servidor con un minuto de caché, y sin la base de datos enseñan lo del código. Ver **El panel de Emi, completo**. |
+| **Cursos** | **En la base de datos desde el 23 sep 2026** (`supabase/migrations/0009_cursos.sql`, **aplicada en Supabase el 24 sep 2026**). Emi los arma sola desde `/panel/#cursos`; el aula los lee por consulta, con la RLS decidiendo. Ver **El aula y el panel de Emi**. |
+| **Tienda** | **Desde el 23 sep 2026 la maneja Emi** desde el panel: las fichas de Formaciones, sus páginas de ventas (borrador y publicada) y quién tiene qué (`0010_tienda_paginas_mensajes.sql`, **aplicada el 24 sep 2026**). Formaciones y las páginas se resuelven en el servidor con un minuto de caché, y sin la base de datos enseñan lo del código. Ver **El panel de Emi, completo**. |
 | **Cobro** | **Desde el 22 sep 2026 vive acá.** `/api/checkout` crea la sesión de Stripe, `/gracias/` recoge a quien pagó y `/api/claim-account` le crea la cuenta. El **webhook sigue en la academia**, y es correcto que siga: ver **La unión de las dos casas**. |
 | **Newsletter** | **Conectado desde el 22 sep 2026.** `/api/suscribir` da de alta en la lista real de Klaviyo (`SaE8Px`), con la API en su versión `2026-07-15`. `KLAVIYO_API_KEY` **puesta en Vercel el 23 sep 2026**, con los permisos Lists, Profiles y Subscriptions; **la prueba se hace al subir la cortina**, junto con la bienvenida de siete correos —ver **El newsletter, conectado → La primera prueba**—. La integración de WooCommerce de Klaviyo está muerta desde el 21 sep y **se apaga**: los cobros son de Stripe. |
 | **Lo que falta para lanzar** | **Las variables de Stripe en Vercel**, o el botón de comprar da un 500 (`KLAVIYO_API_KEY` ya está, 23 sep). Y **subir la cortina**, con la prueba del newsletter y la bienvenida de siete correos de Emi en el mismo momento. **Ojo: las puertas de la membresía abren el 1 oct.** La lista completa y en orden: **📋 LO QUE FALTA**, arriba del todo. |
@@ -830,6 +835,34 @@ creación de cuentas de admin y `/storage/v1`), con Chromium:
 verdad (la sesión no llega a Bunny) y el correo real de «poner la
 contraseña». **El audio se graba en WebM** en Chrome y Firefox y en MP4 en
 Safari; los iPhone con iOS anterior al 17.4 no reproducen WebM.
+
+### Las dos bibliotecas de Bunny
+
+**24 de septiembre de 2026.** Al poner `BUNNY_STREAM_API_KEY`, Adrián vio que
+la biblioteca de los cursos es la **754051**, no la **741634** que el código
+daba por la de todo. La 741634 es la de la membresía y la carta. Con una sola,
+el selector «Elegir de Bunny» le pedía a Bunny la 741634 con la clave de la
+754051 —que Bunny rechaza: **cada biblioteca tiene su clave**— y un video
+elegido se habría guardado con la biblioteca equivocada.
+
+**No se arregló con `PUBLIC_BUNNY_LIBRARY=754051`**, que era lo corto: esa
+variable la lee también la pestaña **Membresía**, y un GUID pelado de un video
+semanal se habría guardado con la biblioteca de los cursos, roto para quien
+paga. Se separaron:
+
+- **`BUNNY_LIBRARY_ID`** (`src/lib/video.ts`, 741634): la de siempre, para
+  la membresía, Mensajes y todo lo que no diga otra cosa.
+- **`BUNNY_CURSOS_LIBRARY`** (754051; se puede cambiar con
+  `PUBLIC_BUNNY_CURSOS_LIBRARY`): la del selector (`/api/panel/bunny`) y la
+  que usa la pestaña Cursos cuando lo pegado no trae biblioteca —el GUID
+  pelado, el enlace del CDN—. Un «Embed» pegado trae la suya y se respeta.
+- `normalizeVideoUrl`, `videoEmbed` y `bunnyUrl` aceptan la biblioteca como
+  segundo argumento; sin él, la de siempre.
+
+⚠️ **El selector lee una sola biblioteca**, porque la clave es de una sola. Si
+un curso futuro vive en otra, Emi puede pegar su «Embed» —trae la biblioteca—,
+pero para elegirlo de la lista hará falta la clave de la cuenta de Bunny (que
+lista las bibliotecas) o una clave por biblioteca.
 
 ### Lo que queda abierto
 
