@@ -20,7 +20,7 @@
  * vez y un guardado a medias publicaría media clase.
  */
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import { normalizeVideoUrl, videoEmbed, bunnyGuid, bunnyUrl } from '../lib/video';
+import { normalizeVideoUrl, videoEmbed, bunnyGuid, bunnyUrl, BUNNY_CURSOS_LIBRARY } from '../lib/video';
 import { reloj } from '../lib/aula-datos';
 import { cursoHref } from '../i18n/aula';
 import { alAbrir, armarBotones, avisar, boton, el, hace, ocupado } from '../lib/panel';
@@ -917,7 +917,7 @@ function estadoVideo(l: 'es' | 'en') {
       caja.textContent = '';
       return;
     }
-    const e = videoEmbed(c(`video_${l}`).value);
+    const e = videoEmbed(c(`video_${l}`).value, BUNNY_CURSOS_LIBRARY);
     if (!e.ok) return avisar('No hay un video que probar');
     caja.textContent = '';
     caja.append(el('iframe', { src: e.src, allow: e.allow, allowfullscreen: true, title: 'Prueba del video', loading: 'lazy' }));
@@ -1034,8 +1034,8 @@ async function guardarClase(): Promise<boolean> {
         title_en,
         summary_es: c<HTMLTextAreaElement>('summary_es').value.trim() || null,
         summary_en: c<HTMLTextAreaElement>('summary_en').value.trim() || null,
-        video_es: normalizeVideoUrl(c('video_es').value),
-        video_en: normalizeVideoUrl(c('video_en').value),
+        video_es: normalizeVideoUrl(c('video_es').value, BUNNY_CURSOS_LIBRARY),
+        video_en: normalizeVideoUrl(c('video_en').value, BUNNY_CURSOS_LIBRARY),
         duration_s: dur,
         published: publicada,
         materials: materiales.map(({ _fichero, ...m }) => m),
@@ -1326,6 +1326,8 @@ const dlg = $<HTMLDialogElement>('[data-bunny]');
 let bunnyModo: { modo: 'elegir'; lang: 'es' | 'en' } | { modo: 'importar'; unidad: Unidad } | null = null;
 let bunnyVideos: VideoBunny[] = [];
 let bunnyCargado = false;
+/* La biblioteca que leyó el selector: con ella se guarda cada video elegido. */
+let bunnyBiblioteca = BUNNY_CURSOS_LIBRARY;
 const elegidos = new Set<string>();
 const importarBtn = boton('Crear las clases', { solido: true });
 $('[data-bunny-hueco]', dlg).replaceWith(importarBtn);
@@ -1344,6 +1346,7 @@ async function cargarBunny() {
     const r = await fetch('/api/panel/bunny', { headers: { Authorization: `Bearer ${await token()}` } });
     const j = await r.json().catch(() => ({}));
     if (r.status === 401) throw new Error('El servidor no reconoce tu sesión de admin.');
+    if (j.biblioteca) bunnyBiblioteca = String(j.biblioteca);
     if (j.configurado === false) {
       estado.textContent =
         'Falta la clave de la biblioteca de Bunny en Vercel (BUNNY_STREAM_API_KEY). Mientras tanto, pega el «Embed» de cada video a mano: funciona igual.';
@@ -1442,7 +1445,7 @@ function abrirBunny(m: NonNullable<typeof bunnyModo>) {
 function elegirVideo(v: VideoBunny) {
   if (bunnyModo?.modo !== 'elegir') return;
   const l = bunnyModo.lang;
-  c(`video_${l}`).value = bunnyUrl(v.guid) ?? v.guid;
+  c(`video_${l}`).value = bunnyUrl(v.guid, bunnyBiblioteca) ?? v.guid;
   if (!c('duracion').value && v.segundos) c('duracion').value = reloj(v.segundos);
   const titulo = c(`title_${l}`);
   if (l === 'es' && (!titulo.value.trim() || titulo.value.trim() === 'Clase nueva')) titulo.value = v.titulo;
@@ -1463,7 +1466,7 @@ importarBtn.addEventListener('click', async () => {
       unit_id: u.id,
       title_es: v.titulo,
       title_en: '',
-      video_es: bunnyUrl(v.guid),
+      video_es: bunnyUrl(v.guid, bunnyBiblioteca),
       duration_s: v.segundos || null,
       position: u.clases.length + i,
       published: !C!.published,

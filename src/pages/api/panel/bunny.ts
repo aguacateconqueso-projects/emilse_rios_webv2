@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { adminDeLaPeticion } from '../../../lib/supabase-admin';
+import { BUNNY_CURSOS_LIBRARY } from '../../../lib/video';
 
 /**
  * La biblioteca de Bunny Stream de Emi, para el panel.
@@ -17,7 +18,8 @@ import { adminDeLaPeticion } from '../../../lib/supabase-admin';
  * ⚠️ **La clave de Bunny no puede ir al navegador**: con ella se borran videos.
  * Por eso esto es una ruta de servidor y la clave vive en Vercel como
  * `BUNNY_STREAM_API_KEY`, sin `PUBLIC_`. Es la «API Key» de la biblioteca
- * (Bunny → Stream → la biblioteca → API), no la de la cuenta.
+ * de los cursos (Bunny → Stream → la biblioteca → API), no la de la cuenta
+ * ni la de la biblioteca de la membresía.
  *
  * ⚠️ **Solo para el panel**: empieza por `adminDeLaPeticion()`, que corre en el
  * servidor y lee el rol de la base de datos. Sin sesión de admin, 401.
@@ -52,12 +54,10 @@ export const GET: APIRoute = async ({ request, url }) => {
   if (!admin) return json({ error: 'no_autorizado' }, 401);
 
   const clave = process.env.BUNNY_STREAM_API_KEY?.trim();
-  const biblioteca = (
-    process.env.PUBLIC_BUNNY_LIBRARY ||
-    process.env.PUBLIC_BUNNY_LIBRARY_ID ||
-    import.meta.env.PUBLIC_BUNNY_LIBRARY ||
-    '741634'
-  ).trim();
+  /* La biblioteca de los CURSOS, que es la de la clave: en Bunny cada
+     biblioteca tiene la suya. No la de la membresía (`PUBLIC_BUNNY_LIBRARY`):
+     con esa, Bunny contesta 401 a esta clave. Ver `BUNNY_CURSOS_LIBRARY`. */
+  const biblioteca = (process.env.PUBLIC_BUNNY_CURSOS_LIBRARY || BUNNY_CURSOS_LIBRARY).trim();
   if (!clave) return json({ configurado: false, biblioteca });
 
   /* Opcional: el host del CDN de la biblioteca (`vz-xxxx.b-cdn.net`), para
