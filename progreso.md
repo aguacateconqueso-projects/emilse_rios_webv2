@@ -4,9 +4,10 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 23 de septiembre de 2026, tarde en la noche: el
-panel de Emi completo —vista general, Tienda, Págs. de ventas, Personas y
-Mensajes— (ver **El panel de Emi, completo**).
+**Última actualización:** 24 de septiembre de 2026, de madrugada: el panel de
+Emi completo —vista general, Tienda, Págs. de ventas, Personas y Mensajes— (ver
+**El panel de Emi, completo**) y **una sola lista de lo que falta**, justo
+abajo: **📋 LO QUE FALTA**.
 
 > **🚧 LA CORTINA ESTÁ BAJADA desde el 23 sep 2026.** Quien entra a
 > `www.emilserios.com` —a cualquier dirección— ve solo la firma de Emi sobre
@@ -36,31 +37,121 @@ Mensajes— (ver **El panel de Emi, completo**).
 > par de minutos en construir después de cada push. Ver **La cortina → Cómo
 > se sigue viendo la web**.
 
-> **Para quien retome en una sesión nueva (noche del 23 sep 2026).** Esta
-> sesión abrió lo que la de la tarde dejó para después: **el aula con la ropa
-> del sitio, los cursos en la base de datos y el panel de Emi entero**: la
-> vista general, Hoy, Membresía, Cursos, Tienda, Págs. de ventas, Personas y
-> Mensajes. Rama `claude/epic-bardeen-k6zfn7`: **PR #51** (mergeado: aula,
-> cursos, Hoy, Membresía, Cursos) y **PR #52** (el resto). Todo en **El panel
-> de Emi, completo** y **El aula y el panel de Emi, con la ropa del sitio**.
+> **📋 LO QUE FALTA — la lista vigente (24 sep 2026).** Es la única que manda:
+> las de más abajo («cierre del 23 sep», «22 sep») quedan como historia y lo
+> que siga en pie de ellas está copiado acá. Al cerrar una sesión, se tacha lo
+> hecho y se añade lo nuevo **acá**, no en otra lista.
 >
-> **Lo que viene, en orden:**
+> **Dónde quedamos.** La noche del 23 sep se hizo el aula con la ropa del
+> sitio, los cursos en la base de datos y **el panel de Emi entero** (vista
+> general, Hoy, Membresía, Cursos, Tienda, Págs. de ventas, Personas y
+> Mensajes). Rama `claude/epic-bardeen-k6zfn7`: **PR #51 ya mergeado** (aula,
+> cursos, Hoy, Membresía, Cursos) y **PR #52 abierto** (el resto), con la
+> vista previa en verde. Todo en **El panel de Emi, completo** y **El aula y
+> el panel de Emi, con la ropa del sitio**. Si el #52 ya entró cuando se lea
+> esto, lo siguiente arranca de `main` (`git checkout -B <rama> origin/main`).
 >
-> 1. **⚠️ Aplicar en Supabase `supabase/migrations/0009_cursos.sql` y después
->    `0010_tienda_paginas_mensajes.sql`** (las dos solo aditivas e
->    idempotentes), poner las variables de Supabase —y la `service_role`—
->    también en **Preview** en Vercel, la dirección de la vista previa en las
->    Redirect URLs de Supabase y `BUNNY_STREAM_API_KEY`. Los pasos, en
->    **El panel de Emi, completo → Lo que hay que hacer fuera del código** y en
->    la sección de la 0009.
-> 2. **Emi importa el catálogo en la Tienda, carga su primer curso** y se mira
->    con un video de verdad: el puente `player.js` que guarda el minuto sigue
->    sin probarse contra uno.
-> 3. **El cobro de los cursos** y que pagar uno dé acceso solo (el webhook de
->    la academia solo sabe de la membresía).
-> 4. Lo que seguía del relevo de la tarde (abajo): copies de Emi, la
->    bienvenida de siete correos, Stripe y subir la cortina. **La membresía se
->    muda la última**, con el dominio (Adrián, 23 sep 2026).
+> **A. Para que Emi pueda usar el panel (Adrián, fuera del código; una media
+> hora, en este orden).** Hasta que no esté hecho, el panel se ve pero no
+> guarda nada de lo nuevo.
+>
+> 1. [ ] **Mergear el PR #52.**
+> 2. [ ] **Supabase → SQL Editor: pegar `supabase/migrations/0009_cursos.sql` y
+>    después `0010_tienda_paginas_mensajes.sql`**, una vez cada una. Las dos
+>    solo agregan: no tocan la membresía que está cobrando, y pegarlas dos
+>    veces no rompe nada.
+> 3. [ ] **`supabase/set_admin.sql`**, si Emi todavía no es admin: antes, que
+>    haya entrado una vez por `/aulavirtual/entrar/` con
+>    `emilserios.bass@gmail.com` (`emilse.art@gmail.com` era de prueba y se
+>    ignora).
+> 4. [ ] **Vercel → variables de Supabase también en «Preview»**:
+>    `PUBLIC_SUPABASE_URL` (la raíz, sin `/rest/v1`), `PUBLIC_SUPABASE_ANON_KEY`
+>    y `SUPABASE_SERVICE_ROLE_KEY` (sin esta, Personas no crea cuentas). Con la
+>    cortina bajada, el panel solo se usa en la vista previa.
+> 5. [ ] **Supabase → Auth → Redirect URLs: añadir la de la vista previa**
+>    (`https://emilse-rios-webv2-git-claude-e-21eb3e-adrians-projects-594b3131.vercel.app/**`),
+>    o el correo de «poner la contraseña» que se manda desde Personas lleva a
+>    otra parte.
+> 6. [ ] **`BUNNY_STREAM_API_KEY`** en Vercel (Production y Preview), para
+>    «Elegir de Bunny»; opcional `BUNNY_CDN_HOST` para las miniaturas. Y en
+>    Bunny, la vista previa y `emilserios.com` en los *allowed referrers* si la
+>    biblioteca los restringe.
+> 7. [ ] **En el panel → Tienda → «Importar el catálogo actual»**, una vez.
+>
+> **B. Lo de Emi (contenido, sin código).**
+>
+> 8. [ ] **Cargar su primer curso completo** en Cursos (los videos ya están en
+>    Bunny) y darse de alta a sí misma o a alguien de prueba en Personas para
+>    verlo como alumna.
+> 9. [ ] **Revisar la Tienda y las Págs. de ventas** con sus textos; el resto
+>    de copies que cambió el 23 sep, y **tres traducciones hechas acá** que
+>    tiene que mirar (marcadas `TRADUCIDO` en `src/data/cartas.ts`). Desde el
+>    #52 esto lo puede corregir ella misma en Págs. de ventas.
+> 10. [ ] **Tres decisiones chicas de la carta de la membresía**: el video de un
+>     minuto (¿va, y dónde?), las tildes del testimonio de Sergio, y el «Yes,»
+>     que se le quitó a Laura en inglés. Ver **Pendiente → Contenido que falta**.
+> 11. [ ] **La bienvenida de siete correos** en Klaviyo. Cuando exista, la Home
+>     deja de prometer «un correo de bienvenida con un video»
+>     (`src/data/home.ts`).
+>
+> **C. Código, para la próxima sesión (en este orden).**
+>
+> 12. [ ] **Probar contra el Supabase de verdad** en cuanto estén A.1–A.7: un
+>     recorrido corto por cada pestaña, y **el puente `player.js` con un video
+>     real de Bunny** (guarda el minuto solo; nunca se ha probado contra uno).
+> 13. [ ] **⚠️ El cobro de los cursos, y que pagar dé acceso solo.** Hoy
+>     `/api/checkout` solo cobra la membresía y **el webhook de Stripe vive en
+>     la academia y solo sabe de la membresía**, así que un curso comprado no
+>     se abre solo: se da a mano en Personas. Hace falta: el precio de Stripe
+>     de cada curso (una columna en `products` o una variable), el checkout
+>     por producto, y **decidir dónde se da el acceso**: (a) enseñarle cursos al
+>     webhook de la academia, o (b) mudar el webhook acá — que es lo que
+>     también pide la mudanza de la membresía (punto 17). Recomendación: (b),
+>     si la membresía se muda pronto; (a) si los cursos se venden antes.
+>     `products.course_id` ya dice qué curso abre cada ficha.
+> 14. [ ] **Los correos del hilo de dudas**: aviso a Emi cuando entra una
+>     pregunta y aviso a la alumna cuando Emi responde. Hoy la alumna solo se
+>     entera al entrar al aula («Emi te respondió» en su escritorio). Pide
+>     decidir desde qué dirección se mandan (la academia manda por Resend con su
+>     dominio verificado; acá habría que verificar `emilserios.com`).
+> 15. [ ] **⚠️ Antes del 1 de octubre: las puertas de la membresía abren ese
+>     día** (`REOPENS_AT` en `src/lib/membership.ts`). Decidir si para
+>     entonces la cortina está subida —y entonces **las variables de Stripe en
+>     Vercel**, o el botón de pagar da un 500— o si ese ciclo se vende todavía
+>     desde la academia. Las fechas de las puertas viven en los dos proyectos de
+>     Vercel y hay que cambiarlas en los dos.
+> 16. [ ] **Subir la cortina** (`CORTINA_BAJADA = false` en
+>     `src/lib/cortina.ts`, en un PR) **con la prueba del newsletter** en la
+>     vista previa de ese mismo PR: los cinco pasos están en el relevo del
+>     cierre del 23 sep, abajo, y en **El newsletter, conectado → La primera
+>     prueba**.
+> 17. [ ] **Mudar la membresía, lo último**, con el dominio (Adrián, 23 sep):
+>     las páginas de la membresía (el ejercicio de la semana y el foro) al aula
+>     de acá, el webhook de Stripe acá, las fechas de las puertas en una sola
+>     casa, el puente `/pasar/` pegado en la academia, y **recién entonces**
+>     redirigir `emilseriosacademy.com`. Antes de eso, redirigirla mata el
+>     webhook y deja a gente pagando sin acceso.
+>
+> **D. Cabos sueltos, sin prisa.**
+>
+> - [ ] Apagar la integración de WooCommerce en Klaviyo (mirando antes los
+>   flujos) y decidir con Emi la doble confirmación del newsletter.
+> - [ ] El dominio: el push a una cuenta de Namecheap de Emi, mirar la línea
+>   `DKIM:` de un correo para cerrar lo de los CNAME proxied, mudar
+>   `info@emilserios.com` fuera del Hostinger de Edu y decidir
+>   `contrabajoenlaciudad.com`. Ver **Pendiente → Bloquea el lanzamiento**.
+> - [ ] `curl -sI https://www.emilserios.com/aulavirtual/estudiemos-juntos/`
+>   tiene que dar `301` hacia `/productos/estudiemos-juntos/`.
+> - [ ] Hay dos proyectos de Vercel construyendo este repo
+>   (`emilse-rios-webv2` y `emilse-rios-webv2_1`): ver cuál sobra y borrarlo.
+> - [ ] Opcional: la cápsula «Ingresar al aula» del menú no suelta notas.
+> - [ ] Los audios de respuesta se graban en WebM (Chrome, Firefox) o MP4
+>   (Safari); un iPhone con iOS anterior al 17.4 no reproduce WebM. Si alguna
+>   alumna avisa, convertir o grabar en MP4.
+
+> *(Histórico: el relevo del cierre del 23 sep. Lo que sigue en pie está en
+> **📋 LO QUE FALTA**, arriba. Su punto 1, vestir el aula, se hizo esa misma
+> noche.)*
 >
 > **Para quien retome en una sesión nueva (cierre del 23 sep 2026).** Con la
 > cortina bajada se está terminando la web detrás. **Todo lo del día está en
@@ -170,7 +261,8 @@ Fue un día largo, y estas cinco cosas se movieron, de la última a la primera:
 | **La sesión** | Puesto el puente que la trae desde la academia, para que nadie tenga que recordar su contraseña al mudarse. |
 | **El sitio** | (21 sep) Salió al aire en su dominio y dejó de enseñar huecos. |
 
-**Lo que falta, y nada de ello es código:**
+**Lo que falta, y nada de ello es código** *(histórico, del 22 sep: la lista
+vigente es **📋 LO QUE FALTA**, arriba; `KLAVIYO_API_KEY` ya está puesta)*:
 
 1. **`supabase/set_admin.sql`**, para que Emi y Adrián sean admin. Antes,
    comprobar cuál es el correo real de Emi.
@@ -208,7 +300,7 @@ pagando sin recibir acceso.
 | **Tienda** | **Desde el 23 sep 2026 la maneja Emi** desde el panel: las fichas de Formaciones, sus páginas de ventas (borrador y publicada) y quién tiene qué (`0010_tienda_paginas_mensajes.sql`, **pendiente de aplicar**). Formaciones y las páginas se resuelven en el servidor con un minuto de caché, y sin la base de datos enseñan lo del código. Ver **El panel de Emi, completo**. |
 | **Cobro** | **Desde el 22 sep 2026 vive acá.** `/api/checkout` crea la sesión de Stripe, `/gracias/` recoge a quien pagó y `/api/claim-account` le crea la cuenta. El **webhook sigue en la academia**, y es correcto que siga: ver **La unión de las dos casas**. |
 | **Newsletter** | **Conectado desde el 22 sep 2026.** `/api/suscribir` da de alta en la lista real de Klaviyo (`SaE8Px`), con la API en su versión `2026-07-15`. `KLAVIYO_API_KEY` **puesta en Vercel el 23 sep 2026**, con los permisos Lists, Profiles y Subscriptions; **la prueba se hace al subir la cortina**, junto con la bienvenida de siete correos —ver **El newsletter, conectado → La primera prueba**—. La integración de WooCommerce de Klaviyo está muerta desde el 21 sep y **se apaga**: los cobros son de Stripe. |
-| **Lo que falta para lanzar** | **Las variables de Stripe en Vercel**, o el botón de comprar da un 500 (`KLAVIYO_API_KEY` ya está, 23 sep). Y **subir la cortina**, con la prueba del newsletter y la bienvenida de siete correos de Emi en el mismo momento. |
+| **Lo que falta para lanzar** | **Las variables de Stripe en Vercel**, o el botón de comprar da un 500 (`KLAVIYO_API_KEY` ya está, 23 sep). Y **subir la cortina**, con la prueba del newsletter y la bienvenida de siete correos de Emi en el mismo momento. **Ojo: las puertas de la membresía abren el 1 oct.** La lista completa y en orden: **📋 LO QUE FALTA**, arriba del todo. |
 
 **Formaciones y las páginas de ventas se resuelven en el servidor desde el 23
 sep 2026** (un minuto de caché): leen lo que Emi publica desde el panel y, si
@@ -741,9 +833,14 @@ Safari; los iPhone con iOS anterior al 17.4 no reproducen WebM.
 
 ### Lo que queda abierto
 
+Todo, en orden, en **📋 LO QUE FALTA**, arriba del todo. Lo que nace de esta
+tanda:
+
 - **El cobro de los cursos**: `/api/checkout` para cursos y, sobre todo, **que
   pagar un curso dé acceso solo**. El webhook vive en la academia y hoy solo
   sabe de la membresía; `products.course_id` ya dice qué curso abre cada ficha.
+- **Los correos del hilo**: avisar a Emi de cada pregunta y a la alumna de
+  cada respuesta.
 - **La membresía se muda la última**, con el dominio y la cortina.
 - El puente `player.js` que guarda el minuto, contra un video real.
 
@@ -4753,10 +4850,11 @@ enseñárselo.
 - [x] **Pasar los videos de Vimeo a Bunny Stream.** Hecho por Emi; confirmado el
       19 sep 2026. La migración está terminada.
 
-- [ ] **⚠️ Aplicar `supabase/migrations/0009_cursos.sql`** en Supabase → SQL
-      Editor. Sin ella la pestaña Cursos del panel lo dice y no deja crear
-      nada. Solo aditiva e idempotente. Ver **El aula y el panel de Emi → Lo
-      que hay que hacer fuera del código**, que tiene los cinco pasos.
+- [ ] **⚠️ Aplicar `supabase/migrations/0009_cursos.sql` y después
+      `0010_tienda_paginas_mensajes.sql`** en Supabase → SQL Editor. Sin la
+      0009 la pestaña Cursos lo dice y no deja crear nada; sin la 0010, Tienda y
+      Págs. de ventas tampoco, y Mensajes responde solo con texto. Las dos solo
+      aditivas e idempotentes. Los pasos: **📋 LO QUE FALTA → A**.
 
 - [ ] **`BUNNY_STREAM_API_KEY` en Vercel**, para «Elegir de Bunny» y «+ Desde
       Bunny» en el panel. Sin ella se pega el «Embed» a mano, como en la
@@ -4783,7 +4881,9 @@ enseñárselo.
       sirviendo: lo que se pierde es el guardado automático, no la clase — por
       eso el botón de marcar a mano nunca se esconde.
 
-- [ ] **El contenido de verdad de los cursos.** Las tres unidades y las once
+- [ ] **El contenido de verdad de los cursos.** Desde el 23 sep 2026 Emi los
+      carga ella misma en el panel (Cursos); lo de abajo describe el curso de
+      muestra, que ya solo se ve en modo maqueta. Las tres unidades y las once
       clases de `curso-01` son **de muestra**: están escritas con la forma que
       tienen los cursos de Emi para que el diseño se juzgue con textos de largo
       realista, pero los títulos son marcadores. Del primer curso ya se sabe el
@@ -4802,7 +4902,9 @@ enseñárselo.
       video. Confirmado por Emi el 19 sep 2026, y de ahí salió el cambio de
       vocabulario.
 
-- [ ] **El cuarto estado del catálogo: `borrador`.** Emi tiene tres cursos
+- [x] **El cuarto estado del catálogo: `borrador`.** Hecho el 23 sep 2026 con
+      la pestaña Tienda: *borrador, próximamente, a la venta y cerrado*, en
+      `products` (migración 0010). Lo que decía: Emi tiene tres cursos
       completos y va a publicarlos de a uno, así que un curso tiene que poder
       estar **cargado entero y no verse**. Hoy `src/data/aula.ts` solo conoce
       `venta` y `proximamente`; hacen falta cuatro. La tabla está en **El panel
@@ -4812,18 +4914,19 @@ enseñárselo.
       y las dudas viven en `course_progress` y `course_questions`, atados a la
       persona. `window.Aula` se fue; su sitio es `src/lib/aula-datos.ts`.
 
-- [ ] **El otro lado del hilo: el panel de Emi y los correos.** Desde el 23
-      sep 2026 las dudas ya se guardan en `course_questions` y «Hoy» las
-      cuenta; **falta la pestaña Mensajes**, donde Emi las lee y responde, y los
-      correos. Una pregunta sin
+- [ ] **El otro lado del hilo: los correos.** ✅ **La pestaña Mensajes está
+      hecha** (23 sep 2026, PR #52): Emi lee y responde con texto, video o
+      audio, y la alumna lo ve en su hilo y con un aviso en su escritorio.
+      **Faltan los correos** —**📋 LO QUE FALTA → 14**—. Lo que decía: las
+      dudas ya se guardan en `course_questions` y «Hoy» las cuenta. Una pregunta sin
       respuesta no es una función, es un buzón roto. Hacen falta las dos
       direcciones —aviso a Emi cuando entra una duda, aviso a la alumna cuando
       Emi contesta— y la pantalla donde Emi las lee y responde. Sigue en pie lo
       decidido el 31 de agosto: en el hilo de un curso Emi puede responder con
       video y con audio.
 
-- [ ] **Que el aula pida la sesión acá, contra el MISMO Supabase de la
-      academia.** No se migra nada ni se crea un proyecto nuevo: se añade
+- [x] **Que el aula pida la sesión acá, contra el MISMO Supabase de la
+      academia.** Hecho y probado el 22 sep 2026 (ver **El aula, conectada**). No se migra nada ni se crea un proyecto nuevo: se añade
       `emilserios.com` a Site URL y Redirect URLs, y listo. El plan entero —las
       tres capas para que reentrar cueste un clic, el orden de los seis pasos y
       las tres trampas— está en **La plataforma → La mudanza de la sesión**.
@@ -4838,6 +4941,21 @@ enseñárselo.
 
 - [ ] **Probar el puente `player.js` contra un video de verdad** (sigue abajo,
       más detallado): es lo que guarda el minuto solo.
+
+### La tienda, para vender cursos
+
+Lo que Emi ya puede hacer desde el 23 sep 2026: subir las fichas, ponerlas a la
+venta, escribir y publicar sus páginas, y dar cursos a mano. Lo que falta para
+que un curso **se venda solo**:
+
+- [ ] **El precio de Stripe de cada curso** (crearlo en Stripe y guardar su id:
+      una columna en `products` en una migración 0011, o una variable por curso).
+- [ ] **`/api/checkout` por producto**, no solo la membresía.
+- [ ] **Que pagar dé acceso**: el webhook de la academia hoy solo escribe la
+      membresía. Decidir entre enseñarle cursos allá o mudarlo acá (**📋 LO QUE
+      FALTA → 13**). `products.course_id` ya dice qué curso abre cada ficha, y
+      `course_access.source` ya admite `stripe`.
+- [ ] **Los correos del hilo de dudas** (**📋 LO QUE FALTA → 14**).
 
 ### Contenido que falta (de Emi)
 
