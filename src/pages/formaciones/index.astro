@@ -25,6 +25,7 @@ Astro.response.headers.set('Cache-Control', CACHE_TIENDA);
   title={`${t('products.title')} · ${t('site.title')}`}
   description={t('products.description')}
   route="products"
+  entrada={false}
 >
   <Catalogo lang={lang} fichas={fichas.filter((f) => f.estado !== 'borrador')} />
 </Base>

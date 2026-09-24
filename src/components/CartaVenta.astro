@@ -119,16 +119,19 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
   data-lead-today={p?.closeLeadToday}
   data-lead-day={p?.closeLeadDay}
 >
-  {/* --- La entrada, a dos columnas, como *Sobre mí* ------------------------ */}
+  {/* --- La entrada, a dos columnas, como *Sobre mí* ------------------------
+      Y entra como *Sobre mí* (24 sep 2026; hasta ese día la carta aparecía de
+      golpe): los tres renglones suben en escalera y la foto se funde sin
+      subir. Las clases `entrada` y `entrada-foto` están en `base.css`. */}
   <header class="venta__hero" data-bloque>
     <div class="venta__intro">
       <div class="venta__introInner">
-        <a class="mono soft venta__back" href={routePath('products', lang)}>{t('products.back')}</a>
-        <h1 class="venta__title">{c.title}</h1>
-        <p class="venta__sub">{c.subtitle}</p>
+        <a class="mono soft venta__back entrada" style="--i:0" href={routePath('products', lang)}>{t('products.back')}</a>
+        <h1 class="venta__title entrada" style="--i:1">{c.title}</h1>
+        <p class="venta__sub entrada" style="--i:2">{c.subtitle}</p>
       </div>
     </div>
-    <div class="venta__media">
+    <div class="venta__media entrada-foto">
       <MediaSlot src={producto.foto} alt={c.photoAlt} placeholder={copia.fotoPie} width={900} />
     </div>
   </header>
@@ -668,13 +671,6 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
     .venta__card {
       padding: var(--space-4) var(--space-3);
     }
-
-    /* En el teléfono la marca («+», «01») cabe en 24 px y el texto gana el
-       resto: a 32 + 16 se quedaba en renglones de cuatro palabras. */
-    .venta__card .venta__filas li {
-      grid-template-columns: var(--space-3) minmax(0, 1fr);
-      gap: var(--space-1);
-    }
   }
 
   .venta__h {
@@ -685,21 +681,50 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
     text-wrap: balance;
   }
 
+  /* Las filas —lo que incluye la ficha de precio y las de las tarjetas—:
+     separadas por reglas de 1 px, sin viñetas. Esto es lo que COMPARTEN.
+
+     ⚠️ Lo propio de las tarjetas va colgado de `.venta__card`, nunca de
+     `.venta__filas` a secas: la ficha de precio usa esta misma clase para lo
+     que incluye. El 24 sep 2026 la columna de la marca («+», «01») se le puso a
+     todas, la ficha no tiene marca, y su texto se quedó en esos 32 px, una
+     palabra por renglón, en las cuatro cartas. */
   .venta__filas {
-    margin: var(--space-4) 0 0;
+    margin: var(--space-3) 0 0;
     padding: 0;
     list-style: none;
+    border-bottom: 1px solid var(--rule);
   }
 
   .venta__filas li {
-    display: grid;
-    grid-template-columns: var(--space-4) minmax(0, 1fr);
-    gap: var(--space-2);
     border-top: 1px solid var(--rule);
     padding: var(--space-2) 0;
     font-size: var(--text-small);
     line-height: 1.5;
     text-wrap: pretty;
+  }
+
+  /* En las tarjetas: más aire bajo el título, sin regla al pie —el borde de
+     la tarjeta ya cierra— y cada fila con su marca a la izquierda. */
+  .venta__card .venta__filas {
+    margin-top: var(--space-4);
+    border-bottom: 0;
+  }
+
+  .venta__card .venta__filas li {
+    display: grid;
+    grid-template-columns: var(--space-4) minmax(0, 1fr);
+    gap: var(--space-2);
+  }
+
+  /* En el teléfono la marca cabe en 24 px y el texto gana el resto: a 32 + 16
+     se quedaba en renglones de cuatro palabras. Va DESPUÉS de la regla de
+     arriba, que tiene el mismo peso y si no la pisaría. */
+  @media (max-width: 38rem) {
+    .venta__card .venta__filas li {
+      grid-template-columns: var(--space-3) minmax(0, 1fr);
+      gap: var(--space-1);
+    }
   }
 
   /* La marca comparte el renglón de 24 px del texto (16 × 1,5), así que se

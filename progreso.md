@@ -4,8 +4,12 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 24 de septiembre de 2026, noche: **una tanda de
-formato** en la Home, *Sobre mí* y las cuatro cartas —negritas del tamaño del
+**Última actualización:** 24 de septiembre de 2026, más tarde esa noche:
+**arreglada la ficha de precio de las cuatro cartas**, que el PR #55 rompió
+—una palabra por renglón en lo que incluye—, y **toda página entra con
+animación**. Ver **La ficha de precio rota, y la entrada en todas las
+páginas**, justo debajo de **La cortina**. Antes, esa noche (PR #55): **una
+tanda de formato** en la Home, *Sobre mí* y las cuatro cartas —negritas del tamaño del
 cuerpo, tarjetas que destacan, el newsletter al final de todas las cartas como
 norma— (rama `claude/affectionate-faraday-ddgz0m` otra vez, rearrancada desde
 `main` tras el PR #54). Ver **Correcciones de formato del 24 de septiembre**,
@@ -618,6 +622,50 @@ no tenía salida a `vercel.app`:
   vistas previas. No se sabe cuál tiene el dominio; el segundo parece un
   duplicado y conviene revisarlo —y borrarlo, si sobra— para no pagar dos
   builds ni confundir variables.
+
+---
+
+## La ficha de precio rota, y la entrada en todas las páginas
+
+**24 de septiembre de 2026, más tarde esa noche.** Adrián, con el #55 ya
+mergeado: la ficha de precio de las cuatro cartas salía con **una palabra por
+renglón** en la columna de lo que incluye —«¿por qué le metiste mano?»—, y
+«toda página que abra tiene que tener animación de entrada».
+
+**Por qué se rompió la ficha.** Lo que incluye la ficha de precio es una lista
+con la clase `venta__filas`, **la misma** que las filas de las tarjetas nuevas
+del #55. A esas filas se les dio una columna de 32 px a la izquierda para la
+marca («+», «01») escribiendo la regla sobre `.venta__filas li` a secas, así
+que **le llegó también a la ficha**, que no tiene marca: su texto cayó en esos
+32 px. No se vio porque las pruebas del #55 fotografiaron las tarjetas, las
+negritas y el newsletter, pero no la ficha. **Arreglo:** lo compartido vuelve a
+ser exactamente lo de antes del #55 y lo propio de las tarjetas cuelga de
+`.venta__card` (con un aviso escrito en el CSS). Comprobado en las cuatro
+fichas, a 1440 y a 390 px. **Lección para la próxima:** antes de cambiar una
+clase, buscar todos los sitios que la usan, y fotografiar la página entera, no
+solo lo que se tocó.
+
+**La entrada, en todas las páginas.** Hasta hoy la tenían la Home (la firma, o
+la escalera al volver) y *Sobre mí*; Formaciones, las cartas, el aula y
+«gracias» aparecían de golpe. Ahora todas entran con **el gesto de *Sobre
+mí***: suben 16 px y se funden, 0,7 s, en escalera de 60 ms.
+
+- **A medida** en las cartas —«Volver a Formaciones», el título y el subtítulo
+  en escalera, y la foto que se funde sin subir, como el retrato de *Sobre
+  mí*— y en Formaciones —el titular y sus tres renglones—. Es la clase
+  `.entrada` con su `--i`, y `.entrada-foto`, en `base.css`. La cabecera de
+  Formaciones deja el revelado del scroll, que ya en pantalla no se notaba.
+- **General** en el resto: `Base.astro` pone `data-entrada` en `<main>` y lo
+  que cuelga de él entra en escalera. Las páginas con la suya la apagan con
+  `entrada={false}`: la Home, *Sobre mí*, Formaciones y las cartas.
+- Es CSS: corre al pintar, sin esperar a JavaScript. Con menos movimiento no
+  hay entrada. El panel de Emi no la lleva: es una herramienta y tiene su
+  propio layout.
+
+Probado en Chromium: once páginas —las cartas en los dos idiomas, Formaciones,
+el acceso, el escritorio, «gracias», *Sobre mí* y la Home—, con su animación a
+los 120 ms y todo visible al terminar; cero errores en la consola; la auditoría
+de rejilla y contraste, limpia.
 
 ---
 
@@ -3802,7 +3850,16 @@ componentes**: si hace falta uno nuevo, se añade como token.
 
 El sistema es de Emi y se puede cambiar. Lo que no se puede es cambiarlo sin
 dejar constancia, porque si no la tabla de arriba deja de ser fiable. Hasta hoy
-se ha tocado quince veces:
+se ha tocado dieciséis veces:
+
+- **24 sep 2026 · Toda página tiene entrada, y no suma una animación.** Lo pidió
+  Adrián (ver **La ficha de precio rota, y la entrada en todas las páginas**).
+  La entrada es la escalera de *Sobre mí* —subir 16 px y fundirse, en escalera
+  de 60 ms—, la misma que desde el #55 traen las filas de las tarjetas de las
+  cartas, solo que disparada por la carga y no por la tarjeta. Por la regla del
+  31 de agosto, aplicar un movimiento que ya existe a más sitios no es añadir
+  uno: **las cartas siguen en dos** (el revelado y la escalera) y el resto de
+  páginas también (el revelado y la entrada).
 
 - **24 sep 2026 · Las cartas: negrita de cuerpo, tarjetas y la escalera de
   sus filas.** Lo pidió Adrián (ver **Correcciones de formato del 24 de

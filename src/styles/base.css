@@ -296,6 +296,68 @@ a:hover {
 }
 
 /* ==========================================================================
+   La entrada — toda página entra (24 sep 2026)
+   ==========================================================================
+   Lo pidió Adrián: «toda página que abra tiene que tener animación de
+   entrada»; hasta ese día solo la tenían la Home y *Sobre mí*, y el resto
+   —Formaciones, las cartas, el aula— aparecía de golpe.
+
+   Es **la entrada de *Sobre mí***, el mismo gesto en todas partes: cada pieza
+   sube 16 px y se funde, 0,7 s, en la curva del revelado, en escalera de
+   60 ms. Esta es la general, para lo que cuelga de `<main data-entrada>`
+   (`Base.astro`); las páginas con una hecha a medida —la Home, *Sobre mí*,
+   Formaciones, las cartas— la apagan y usan `.entrada` con su `--i`, abajo.
+   (No `.entra`: ese nombre es de la entrada de la Home, en `Home.astro`.)
+
+   Es CSS y no espera a nada: corre al pintar, sin JavaScript. Con menos
+   movimiento, no hay entrada. */
+@media (prefers-reduced-motion: no-preference) {
+  .main[data-entrada] > * {
+    animation: entrada-sube var(--duration-reveal) var(--ease-reveal) both;
+  }
+
+  .main[data-entrada] > :nth-child(2) {
+    animation-delay: 0.06s;
+  }
+
+  .main[data-entrada] > :nth-child(n + 3) {
+    animation-delay: 0.12s;
+  }
+
+  /* La escalera a medida: cada renglón dice su peldaño con `--i`. */
+  .entrada {
+    animation: entrada-sube var(--duration-reveal) var(--ease-reveal) both;
+    animation-delay: calc(0.05s + var(--i, 0) * 0.06s);
+  }
+
+  /* Las fotos pegadas a los bordes se funden sin subir: moverlas despegaría
+     su regla del borde de la ventana durante medio segundo (ver *Sobre mí*). */
+  .entrada-foto {
+    animation: entrada-funde 0.9s var(--ease-reveal) 0.1s both;
+  }
+}
+
+@keyframes entrada-sube {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-2));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes entrada-funde {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ==========================================================================
    El botón — uno solo para todo el sitio (23 sep 2026)
    ==========================================================================
    Es el de la carta de la membresía que vino de la academia, el que Adrián

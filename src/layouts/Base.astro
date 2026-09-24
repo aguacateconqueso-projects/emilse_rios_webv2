@@ -27,6 +27,14 @@ interface Props {
   /** El contrabajo detrás del cristal, también solo en la Home. */
   backdrop?: boolean;
   /**
+   * La entrada general: lo que hay en `<main>` sube 16 px y se funde al
+   * cargar, en escalera (ver «La entrada» en `base.css`). **Toda página entra
+   * con animación** desde el 24 sep 2026 —lo pidió Adrián—. Las que tienen
+   * la suya, hecha a medida, la apagan con `entrada={false}`: la Home, *Sobre
+   * mí*, Formaciones y las cartas de venta.
+   */
+  entrada?: boolean;
+  /**
    * Fuera de los buscadores. Lo llevan el aula —acceso, escritorio, cursos— y
    * `/gracias/`: están detrás de una sesión, o son un formulario, y no tienen
    * nada que hacer en Google. Desde el 23 sep 2026, cuando el aula pasó a
@@ -43,6 +51,7 @@ const {
   pathEn,
   intro = false,
   backdrop = false,
+  entrada = true,
   noindex = false,
 } = Astro.props;
 const t = useTranslations(lang);
@@ -123,7 +132,7 @@ const altEn = new URL(hrefEn, Astro.site);
 
     <Header lang={lang} route={route} hrefEs={hrefEs} hrefEn={hrefEn} />
 
-    <main id="contenido" class="main">
+    <main id="contenido" class="main" data-entrada={entrada ? '' : undefined}>
       <slot />
     </main>
 
