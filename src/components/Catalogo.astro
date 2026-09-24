@@ -52,11 +52,14 @@ const t = useTranslations(lang);
   Adrián —«no pinta nada»—, lo mismo que los de la Home y *Sobre mí* el 21 sep.
   Los números de las fichas se quedan: esos sí ordenan algo.
 */}
-<section class="tienda__wrap tienda__head reveal">
-  <h1 class="tienda__title">{t('products.heading')}</h1>
-  <p class="tienda__lead">{t('products.lead')}</p>
-  <p class="tienda__lead tienda__lead--close">{t('products.close')}</p>
-  <a class="mono tienda__in" href={entrarHref[lang]}>{t('products.enrolled')}</a>
+<section class="tienda__wrap tienda__head">
+  {/* La entrada (24 sep 2026): el titular y sus renglones suben en escalera al
+      cargar, como en *Sobre mí*. Hasta ese día la cabecera llevaba el
+      revelado del scroll, que al estar ya en pantalla se leía como nada. */}
+  <h1 class="tienda__title entrada" style="--i:0">{t('products.heading')}</h1>
+  <p class="tienda__lead entrada" style="--i:1">{t('products.lead')}</p>
+  <p class="tienda__lead tienda__lead--close entrada" style="--i:2">{t('products.close')}</p>
+  <a class="mono tienda__in entrada" style="--i:3" href={entrarHref[lang]}>{t('products.enrolled')}</a>
 </section>
 
 <section class="tienda__wrap block">
