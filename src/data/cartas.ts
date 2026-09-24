@@ -1003,7 +1003,7 @@ const membresiaEs: Carta = {
       'Personas que estudian por su cuenta y quieren una meta clara semanal para avanzar técnicamente.',
     ] },
     'Y este me llegó de un papá:',
-    { k: 'testimonio', autor: 'Sergio', text: 'Esta buenisimo esto, se la di a mi hijo para que vaya trabajando técnica por su cuenta, y me dijo que se entiende muy bien, que entendió por qué no hay que apretar con el pulgar, y le gustan los ejercicios' },
+    { k: 'testimonio', autor: 'Sergio', text: 'Está buenísimo esto, se la di a mi hijo para que vaya trabajando técnica por su cuenta, y me dijo que se entiende muy bien, que entendió por qué no hay que apretar con el pulgar, y le gustan los ejercicios' },
     'Creo fielmente que el arco alemán es la manera más natural de tomar el arco, y gracias a eso es muchísimo más fácil dominar los golpes de arco en menos tiempo. Por eso, esta es una membresía especializada en arco alemán.',
     { k: 'lista', tono: 'no', titulo: 'Esta membresía NO es para ti si:', items: [
       'Buscas una biblioteca infinita de ejercicios para guardar y ver algún día. Acá no hay biblioteca, no hay archivo, no hay “lo veo después”.',
@@ -1097,7 +1097,7 @@ const membresiaEn: Carta = {
     'If what you want is an infinite library of exercises you’ll never do or fully understand, you can go to YouTube. It’s free, and you can keep yourself busy all day, spending hours just hunting for the exercises that are right for you. Good luck with that.',
     { k: 'cursiva', text: 'Here there’s one exercise this week. Do it and you move forward. Don’t do it and it’s gone, and another one comes. No guilt. Simple.' },
     'Think one exercise a week isn’t enough? Here’s what Laura wrote me:',
-    { k: 'testimonio', autor: 'Laura', text: 'I feel it helped me organize my practice a bit more. Since they’re small tasks, I can do them even when I’m short on time and still work toward a goal.' },
+    { k: 'testimonio', autor: 'Laura', text: 'Yes, I feel it helped me organize my practice a bit more. Since they’re small tasks, I can do them even when I’m short on time and still work toward a goal.' },
     'And guess what? You get a direct line to write to me. I answer, not an AI. This is a membership with real support behind it.',
     { k: 'lista', tono: 'si', titulo: 'The people who’ve gotten the most out of this membership:', items: [
       'Conservatory students buried in method books (the standard conservatory program), where the bow plays second fiddle.',

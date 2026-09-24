@@ -91,7 +91,9 @@ Las dos primeras son donde aterriza el enlace del correo de la contraseña; sin
 ellas, ese enlace no lleva a ninguna parte. Las dos últimas son el puente de
 traspaso desde la academia.
 
-Conviene añadir también las de la URL de Vercel (`*.vercel.app`).
+Y las vistas previas de Vercel, con un comodín que vale para todas las ramas
+(puesto el 24 sep 2026): `https://*-adrians-projects-594b3131.vercel.app/**`.
+El proyecto de Vercel es `emilse-rios-webv2_1`.
 
 ### Y el Site URL, en esa misma pantalla
 
