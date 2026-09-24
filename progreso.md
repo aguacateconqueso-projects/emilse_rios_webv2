@@ -11,8 +11,10 @@ lo del día está en `main`, del PR #53 al #56**, y Adrián lo dio por bueno
 `/formaciones/` y `/en/courses/` (#54); una tanda de formato en la Home, *Sobre
 mí* y las cuatro cartas, con el newsletter al final de todas (#55); la ficha
 de precio arreglada y la entrada animada en todas las páginas (#56). **Lo que
-falta, en la lista 📋 de abajo**, y lo más urgente es **el 1 de octubre**
-(punto 15). El detalle de cada cosa está en las secciones que siguen a **La
+falta, en la lista 📋 de abajo.** **El plan de Adrián para el 25 sep: salir en
+vivo** —subir la cortina, mudar la membresía y cobrar los cursos—, así que el 1
+de octubre ya se vende desde acá. Y el newsletter **ya da de alta**: Adrián se
+suscribió desde la Home el 24 sep y funcionó. El detalle de cada cosa está en las secciones que siguen a **La
 cortina**, de la más nueva a la más vieja.
 
 > **🚧 LA CORTINA ESTÁ BAJADA desde el 23 sep 2026.** Quien entra a
@@ -62,8 +64,15 @@ cortina**, de la más nueva a la más vieja.
 > arreglada y la entrada en todas las páginas (#56). **Todo mergeado; `main`
 > no tiene nada a medias.**
 >
-> **⏰ Lo primero de la próxima sesión: el punto 15 (1 de octubre).** Después,
-> A.7 y C.12, que son de un rato y destraban a Emi.
+> **⏰ El plan del 25 sep (Adrián): salir en vivo ese día.** Primero la prueba
+> del panel contra el Supabase de verdad (C.12); después, juntos, **el cobro de
+> los cursos (13), subir la cortina (16) y mudar la membresía (17)**. Con eso,
+> el 1 de octubre (15) las puertas se abren acá. Los tres se tocan entre sí
+> por **el webhook de Stripe**, que es el que da el acceso después de pagar:
+> hoy vive en la academia y solo sabe de la membresía. La membresía ya se
+> cobra desde acá con él allá; los cursos necesitan que alguno de los dos
+> webhooks sepa de cursos (13), y la academia no se redirige hasta que el
+> webhook se mude (17).
 >
 > **A. Para que Emi pueda usar el panel (Adrián, fuera del código).**
 >
@@ -81,9 +90,9 @@ cortina**, de la más nueva a la más vieja.
 > 6. [x] **`BUNNY_STREAM_API_KEY`** en Vercel y los *allowed referrers* de
 >    Bunny. *(Hecho el 24 sep 2026.)* ⚠️ Es la clave de la biblioteca
 >    **754051**, la de los cursos: ver **Las dos bibliotecas de Bunny**.
-> 7. [ ] **En el panel → Tienda → «Importar el catálogo actual»**, una vez.
->    Cualquier vista previa de ahora en adelante sirve (las `PUBLIC_` ya están
->    en el build), por ejemplo la de arriba + `/panel/#tienda`.
+> 7. [x] **En el panel → Tienda → «Importar el catálogo actual»**, una vez.
+>    *(Hecho por Adrián el 24 sep 2026.)* Desde ese momento Formaciones y sus
+>    fichas salen de la base de datos, no del código.
 >
 > **B. Lo de Emi (contenido, sin código).**
 >
@@ -94,54 +103,67 @@ cortina**, de la más nueva a la más vieja.
 >    «01 Introduction EN»), o una colección por idioma. Con eso, «+ Desde
 >    Bunny» arma el curso de una vez, cada video en su hueco. Ver **Los videos
 >    de los cursos, en dos idiomas**.
-> 9. [ ] **Revisar la Tienda y las Págs. de ventas** con sus textos, y **tres
+> 9. [ ] **Revisar la Tienda y las Págs. de ventas** con sus textos (Adrián se
+>    lo pide el 24 sep), y **tres
 >    traducciones hechas acá** (marcadas `TRADUCIDO` en `src/data/cartas.ts`).
 >    Lo corrige ella misma en Págs. de ventas, que desde el #55 tiene también
 >    «Negrita» y «Cursiva» y la frase del newsletter del final.
-> 10. [ ] **Tres decisiones chicas de la carta de la membresía**: el video de un
->     minuto (¿va, y dónde?), las tildes del testimonio de Sergio, y el «Yes,»
->     que se le quitó a Laura en inglés. Ver **Pendiente → Contenido que falta**.
-> 11. [ ] **La bienvenida de siete correos** en Klaviyo. Cuando exista, la Home
+> 10. [ ] **Tres decisiones chicas de la carta de la membresía**, para Emi:
+>     - **El video de un minuto** de la carta vieja: salió porque no está en su
+>       copy nuevo. ¿Va? Si va, ¿después de qué párrafo?
+>     - **El testimonio de Sergio** (el papá: «Esta buenisimo esto, se la di a
+>       mi hijo…») está sin tildes, tal cual lo pegó ella. ¿Se corrige a
+>       «Está buenísimo» o se deja como lo escribió él?
+>     - **Al testimonio de Laura en inglés se le quitó el «Yes,»** del
+>       principio, para que diga lo mismo que en español. ¿Está bien?
+>     Las tres las cambia ella misma en Págs. de ventas.
+> 11. [ ] **La bienvenida de siete correos** en Klaviyo: *casi lista* (Adrián,
+>     24 sep). Cuando exista, la Home
 >     deja de prometer «un correo de bienvenida con un video»
 >     (`src/data/home.ts`).
 >
-> **C. Código (en este orden, salvo el 15, que va primero por la fecha).**
+> **C. Código (el orden del 25 sep está arriba, en «El plan del 25 sep»).**
 >
-> 12. [ ] **Probar contra el Supabase de verdad** en cuanto esté A.7: un
+> 12. [ ] **Probar contra el Supabase de verdad** —A.7 ya está; Adrián lo
+>     prueba en la próxima sesión—: un
 >     recorrido corto por cada pestaña del panel, **el puente `player.js` con
 >     un video real de Bunny** (guarda el minuto solo; nunca se ha probado
 >     contra uno) y **el selector de Bunny con los títulos reales de Emi**:
 >     que las etiquetas ES / EN salgan bien y el plan de «+ Desde Bunny»
 >     empareje cada clase con su versión (solo se probó con una biblioteca
 >     simulada).
-> 13. [ ] **El cobro de los cursos, y que pagar dé acceso solo.** *Aplazado
->     por Adrián el 24 sep 2026: «Stripe por ahora no».* Mientras tanto, un
->     curso se da a mano en Personas. Cuando se retome: el precio de Stripe de
+> 13. [ ] **El cobro de los cursos, y que pagar dé acceso solo.** *Adrián, 24
+>     sep: «mañana lo resolvemos».* Mientras tanto, un curso se da a mano en
+>     Personas. Lo que pide: el precio de Stripe de
 >     cada curso (una columna en `products` o una variable), el checkout por
 >     producto, y **decidir dónde se da el acceso**: (a) enseñarle cursos al
 >     webhook de la academia, o (b) mudar el webhook acá, que es lo que también
 >     pide la mudanza de la membresía (punto 17). `products.course_id` ya dice
 >     qué curso abre cada ficha.
-> 14. [ ] **Los correos del hilo de dudas**: aviso a Emi cuando entra una
->     pregunta y aviso a la alumna cuando Emi responde. Hoy la alumna solo se
+> 14. [ ] **Los correos del hilo de dudas** —el foro de cada curso, donde la
+>     alumna le pregunta a Emi desde la clase y Emi contesta desde Mensajes—:
+>     un correo a Emi cuando entra una pregunta, y uno a la alumna cuando Emi
+>     responde. *(Adrián preguntó qué era el 24 sep; está por decidir si se
+>     hace.)* Hoy la alumna solo se
 >     entera al entrar al aula («Emi te respondió» en su escritorio). Pide
 >     decidir desde qué dirección se mandan (la academia manda por Resend con su
 >     dominio verificado; acá habría que verificar `emilserios.com`).
-> 15. [ ] **⚠️⏰ ANTES DEL 1 DE OCTUBRE (faltan 7 días al cierre del 24 sep):
->     las puertas de la membresía abren ese día** (`REOPENS_AT` en
->     `src/lib/membership.ts`). Con Stripe aplazado y la cortina bajada, lo
->     natural es que **ese ciclo se venda todavía desde la academia**, como
->     siempre: hay que confirmarlo con Adrián y comprobar que las fechas de las
->     puertas están bien en **los dos proyectos de Vercel** (viven en los dos).
->     Si en cambio se quiere vender desde acá, pide la cortina subida (punto
->     16) y **las variables de Stripe en Vercel**, o el botón de pagar da un 500.
+> 15. [ ] **⚠️ El 1 de octubre abren las puertas de la membresía**
+>     (`REOPENS_AT` en `src/lib/membership.ts`). *Adrián, 24 sep: «tenemos
+>     tiempo, mañana ya estamos en vivo con eso funcionando»*: se vende
+>     **desde acá**. Pide, antes de esa fecha: la cortina subida (16), **las
+>     variables de Stripe en este proyecto de Vercel** (sin ellas el botón de
+>     pagar da un 500; la lista en `docs/UNIR-LAS-DOS-CASAS.md`) y las fechas
+>     de las puertas `MEMBERSHIP_CLOSES_AT` / `MEMBERSHIP_REOPENS_AT` puestas
+>     acá. Mientras el webhook siga en la academia (17), también allá.
 > 16. [ ] **Subir la cortina** (`CORTINA_BAJADA = false` en
->     `src/lib/cortina.ts`, en un PR) **con la prueba del newsletter** en la
->     vista previa de ese mismo PR: los cinco pasos están en el relevo del
->     cierre del 23 sep, abajo, y en **El newsletter, conectado → La primera
->     prueba**. Desde el #55 hay un campo del newsletter más, al final de cada
->     carta: probar también uno de esos.
-> 17. [ ] **Mudar la membresía, lo último**, con el dominio (Adrián, 23 sep):
+>     `src/lib/cortina.ts`, en un PR). *Adrián: «mañana la subimos» (25 sep).*
+>     **El alta al newsletter ya funciona**: Adrián se suscribió desde la Home
+>     el 24 sep. Queda, en la vista previa de ese PR: que llegue el primero de
+>     los siete correos cuando la serie esté, y probar también el campo del
+>     final de una carta (nuevo desde el #55). Los pasos, en **El newsletter,
+>     conectado → La primera prueba**.
+> 17. [ ] **Mudar la membresía** —*Adrián, 24 sep: «mañana la mudamos»*—:
 >     las páginas de la membresía (el ejercicio de la semana y el foro) al aula
 >     de acá, el webhook de Stripe acá, las fechas de las puertas en una sola
 >     casa, el puente `/pasar/` pegado en la academia, y **recién entonces**
@@ -150,11 +172,8 @@ cortina**, de la más nueva a la más vieja.
 >
 > **D. Cabos sueltos, sin prisa.**
 >
-> - [ ] **El SEO lo hace Emi, con Claude, cuando todo esté listo** (lo decidió
->   Adrián el 24 sep 2026: no es suyo). De base ya hay canonical y `hreflang`
->   en cada página y direcciones en español y en inglés; falta todo lo demás
->   (títulos y descripciones pensados para buscar, el sitemap, Search Console).
-> - [ ] Comprobar en vivo las direcciones viejas:
+> - [ ] Comprobar en vivo las direcciones viejas (Adrián, en la próxima
+>   sesión):
 >   `curl -sI https://www.emilserios.com/productos/estudiemos-juntos/` y
 >   `curl -sI https://www.emilserios.com/aulavirtual/estudiemos-juntos/` tienen
 >   que dar `301` hacia `/formaciones/estudiemos-juntos/` (la cortina no lo
@@ -163,14 +182,23 @@ cortina**, de la más nueva a la más vieja.
 >   las direcciones de `/formaciones/`.
 > - [ ] Apagar la integración de WooCommerce en Klaviyo (mirando antes los
 >   flujos) y decidir con Emi la doble confirmación del newsletter.
-> - [ ] El dominio: el push a una cuenta de Namecheap de Emi, mirar la línea
->   `DKIM:` de un correo para cerrar lo de los CNAME proxied, mudar
->   `info@emilserios.com` fuera del Hostinger de Edu y decidir
->   `contrabajoenlaciudad.com`. Ver **Pendiente → Bloquea el lanzamiento**.
+> - [ ] **El dominio, que sigue a nombre de Edu.** `emilserios.com` está
+>   registrado en la cuenta de Namecheap de Edu (Adrián tiene acceso) y el
+>   correo `info@emilserios.com` vive en su Hostinger. Funciona todo, pero si
+>   Edu desaparece o cierra esas cuentas, Emi pierde el dominio y el correo.
+>   Cuatro cosas: **pasar el dominio a una cuenta de Namecheap de Emi** (un
+>   «push» desde la de Edu, gratis); **mudar el correo** fuera del Hostinger
+>   de Edu; **mirar la línea `DKIM:`** en «Mostrar original» de un correo
+>   enviado desde `info@`, para cerrar la duda de los CNAME de correo en
+>   Cloudflare (el correo llega, así que es un control, no un fallo); y
+>   **decidir qué se hace con `contrabajoenlaciudad.com`**, el otro dominio.
+>   Ver **El dominio, y Edu**.
 > - [ ] Hay dos proyectos de Vercel construyendo este repo
->   (`emilse-rios-webv2` y `emilse-rios-webv2_1`): ver cuál sobra y borrarlo.
->   Confunde —el 24 sep Adrián creyó que un cambio se había montado «en el
->   web2_1»— y cualquier fecha de las puertas hay que cambiarla en los dos.
+>   (`emilse-rios-webv2` y `emilse-rios-webv2_1`). *Adrián lo borra el 24
+>   sep.* ⚠️ **Se queda el que tiene `www.emilserios.com`** en Settings →
+>   Domains y las variables (Supabase, Klaviyo, Bunny): borrar ese tira la web.
+>   Los comentarios de vercel[bot] en los PR salen del `emilse-rios-webv2`.
+>   Confirmar en la próxima sesión cuál quedó.
 > - [ ] Las cartas están **en el tope de dos animaciones** (el revelado y la
 >   escalera) y de tarjetas: una animación distinta más es una enmienda al
 >   sistema de diseño. Ver **Enmiendas, con fecha**.
@@ -3770,9 +3798,7 @@ Formaciones desde el día anterior, pero la dirección seguía siendo
 ⚠️ **Lo que queda fuera de este repo:** los enlaces que apuntan a
 `/productos/…` desde otros sitios —los correos de Emi, la academia, Klaviyo,
 Stripe— siguen funcionando por la redirección, pero lo limpio es ir
-cambiándolos a `/formaciones/…` cuando se toquen. Y el SEO en sí (títulos,
-descripciones, el sitemap que todavía no existe) **lo hace Emi con Claude
-cuando todo esté listo**, no Adrián.
+cambiándolos a `/formaciones/…` cuando se toquen.
 
 ---
 
@@ -3818,6 +3844,9 @@ Astro 7, estático, sin framework de UI. No hace falta adaptador para Vercel.
   reescribía `progreso.md` entero y hubo que rehacer los cambios a mano sobre
   la estructura nueva.
 - Este documento se actualiza **en el mismo PR** que introduce el cambio.
+- **Del posicionamiento en buscadores no se habla** (Adrián, 24 sep 2026: «no
+  me lo nombres más, no nos importa»). No se propone, no va en las listas de lo
+  que falta.
 
 ---
 
