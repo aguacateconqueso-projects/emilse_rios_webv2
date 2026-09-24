@@ -109,7 +109,7 @@ export type Carta = {
 export const NEWSLETTER = NEWSLETTER_URL;
 
 /** El botón de los cursos que todavía no se venden, en los dos idiomas. */
-const AVISAME = {
+export const AVISAME = {
   es: { texto: 'Avísame cuando abra', href: NEWSLETTER, fuera: true },
   en: { texto: 'Let me know when it opens', href: NEWSLETTER, fuera: true },
 };

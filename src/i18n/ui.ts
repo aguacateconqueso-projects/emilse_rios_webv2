@@ -56,6 +56,7 @@ export const ui = {
       'Cada formación de contrabajo nace de una historia: una profesora que odiaba las escalas, un estudiante que después de año y medio no conocía ninguna obra para contrabajo, una contrabajista con vibrato de cabra. Entra y te la cuento. Tal vez te funcione a ti también.',
     'products.close': 'No necesitas un talento innato ni una edad específica. Solo constancia.',
     'products.soon': 'Próximamente',
+    'products.closed': 'Cerrado por ahora',
     'products.back': 'Volver a Formaciones',
     'products.enrolled': '¿Ya compraste? El aula es por acá',
 
@@ -106,6 +107,7 @@ export const ui = {
       "Every double bass course was born from a story: a teacher who hated scales, a student who, after a year and a half, didn't know a single piece for double bass, a bassist with a goat vibrato. Come in and I'll tell you. Maybe it'll work for you too.",
     'products.close': "You don't need innate talent or a specific age. Just consistency.",
     'products.soon': 'Coming soon',
+    'products.closed': 'Closed for now',
     'products.back': 'Back to Courses',
     'products.enrolled': 'Already bought? The classroom is this way',
 

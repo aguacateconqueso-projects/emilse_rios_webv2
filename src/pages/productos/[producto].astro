@@ -1,96 +1,24 @@
 ---
 /**
- * Las cartas de venta, en español: la membresía y los cursos.
+ * Las páginas de ventas, en español: la membresía y los cursos.
  *
- * Desde el 23 sep 2026, por la noche, **todas pasan por acá y todas van
- * dentro de `Base.astro`**, con el menú y el pie del sitio. Hasta ese día
- * cada carta tenía su fichero suelto y su propio documento, porque se vestía
- * con la ropa de la academia y la hoja del sitio no podía colarse; al pasar
- * al sistema del sitio, esa razón desapareció.
+ * **Se resuelven en el servidor desde el 23 sep 2026** (`prerender = false`),
+ * con un minuto de caché en Vercel: Emi publica desde el panel (Págs. de
+ * ventas, y la ficha en Tienda) y al minuto está en la web, sin desplegar.
+ * Si la base de datos no tiene esa página, sale la de `src/data/cartas.ts`;
+ * si no hay ninguna, o la ficha está en borrador, 404. Ver `src/lib/tienda.ts`.
  *
- * Una página por cada producto que tenga carta escrita en
- * `src/data/cartas.ts`, se venda o no todavía. La carta es
- * `CartaVenta.astro`.
+ * Con la cortina bajada, `src/middleware.ts` la tapa igual que al resto.
  */
-import Base from '../../layouts/Base.astro';
-import CartaVenta from '../../components/CartaVenta.astro';
-import { useTranslations, productPath } from '../../i18n/ui';
-import { catalogo, type Product } from '../../data/aula';
-import { cartas, tieneCarta } from '../../data/cartas';
+import PaginaVenta from '../../components/PaginaVenta.astro';
+import { leerPagina, CACHE_TIENDA } from '../../lib/tienda';
 
-export function getStaticPaths() {
-  return catalogo
-    .filter((producto) => tieneCarta(producto.slug))
-    .map((producto) => ({
-      params: { producto: producto.slug },
-      props: { producto },
-    }));
-}
+export const prerender = false;
 
-interface Props {
-  producto: Product;
-}
-const { producto } = Astro.props;
 const lang = 'es' as const;
-const t = useTranslations(lang);
-const c = cartas[producto.slug][lang];
-
-const SITE = Astro.site?.origin ?? 'https://www.emilserios.com';
-const canonical = `${SITE}${productPath(producto.slug, lang)}`;
-/* La imagen al compartir es la foto del producto: `foto.src` es la original,
-   que Astro publica en cuanto alguien la nombra. */
-const ogImage = producto.foto ? new URL(producto.foto.src, SITE).href : undefined;
-
-/* Lo que Google necesita para entender la página: qué es, de quién, y las
-   preguntas frecuentes con el mismo texto que se ve —si no coincide, Google
-   las descarta—. A propósito sin precio (Product/Offer): un importe horneado
-   acá se desfasa el día que cambie en Stripe. */
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'WebPage',
-      '@id': `${canonical}#webpage`,
-      url: canonical,
-      name: c.metaTitle,
-      description: c.metaDesc,
-      inLanguage: lang,
-      publisher: { '@id': `${SITE}/#emilse` },
-    },
-    {
-      '@type': 'Person',
-      '@id': `${SITE}/#emilse`,
-      name: 'Emilse Rios',
-      jobTitle: lang === 'en' ? 'Double bassist and teacher' : 'Contrabajista y profesora',
-      url: 'https://emilserios.com',
-      sameAs: ['https://emilserios.com'],
-    },
-    {
-      '@type': 'FAQPage',
-      '@id': `${canonical}#faq`,
-      inLanguage: lang,
-      mainEntity: c.faq.map((f) => ({
-        '@type': 'Question',
-        name: f.q,
-        acceptedAnswer: { '@type': 'Answer', text: [f.a, f.correo, f.a2].filter(Boolean).join('') },
-      })),
-    },
-  ],
-};
+const pagina = await leerPagina(Astro.params.producto ?? '');
+if (!pagina) return new Response(null, { status: 404 });
+Astro.response.headers.set('Cache-Control', CACHE_TIENDA);
 ---
 
-<Base
-  lang={lang}
-  title={`${c.metaTitle}`}
-  description={c.metaDesc}
-  route="products"
-  pathEs={productPath(producto.slug, 'es')}
-  pathEn={productPath(producto.slug, 'en')}
->
-  <Fragment slot="head">
-    {ogImage && <meta property="og:image" content={ogImage} />}
-    {ogImage && <meta property="og:image:alt" content={c.photoAlt} />}
-    <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
-  </Fragment>
-  <CartaVenta lang={lang} producto={producto} c={c} />
-</Base>
+<PaginaVenta lang={lang} producto={pagina.ficha} c={pagina.carta[lang]} />

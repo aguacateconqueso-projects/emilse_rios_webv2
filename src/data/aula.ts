@@ -25,8 +25,16 @@ import { tieneCarta } from './cartas';
  * es tocar este fichero, nunca maquetación.
  */
 
-/** Un producto a la venta tiene página y botón; uno por llegar, ninguna de las dos. */
-export type Estado = 'venta' | 'proximamente';
+/**
+ * Los cuatro estados de una ficha (decididos el 19 sep 2026). Los del código
+ * solo usan `venta` y `proximamente`; `borrador` y `cerrado` llegaron con la
+ * pestaña Tienda del panel, el 23 sep 2026:
+ *   borrador      no se ve en ninguna parte
+ *   proximamente  se ve; su botón es «Avísame cuando abra»
+ *   venta         se ve y se compra
+ *   cerrado       se ve y no se compra; quien ya lo tiene, lo sigue teniendo
+ */
+export type Estado = 'borrador' | 'proximamente' | 'venta' | 'cerrado';
 
 /** Manda cómo se cobra y cómo caduca el derecho de acceso, no cómo se pinta. */
 export type Tipo = 'membresia' | 'curso';
@@ -49,8 +57,12 @@ export type Product = {
   estado: Estado;
   /** El número que va al margen de la ficha. Se escribe, no se calcula. */
   num: string;
-  /** La foto del producto. Sin ella, la ficha dibuja un marco con su etiqueta. */
-  foto?: ImageMetadata;
+  /**
+   * La foto del producto. Sin ella, la ficha dibuja un marco con su etiqueta.
+   * Importada de `src/assets` en el catálogo del código; una URL cuando la
+   * ficha viene de la pestaña Tienda (el bucket público «tienda»).
+   */
+  foto?: ImageMetadata | string;
   copia: Record<Lang, Copia>;
 };
 

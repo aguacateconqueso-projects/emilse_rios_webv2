@@ -1,0 +1,230 @@
+---
+/**
+ * La vista general — la primera pantalla del panel.
+ *
+ * Adrián la pidió de vuelta el 23 sep 2026, cuando el panel empezó a abrirse
+ * en «Hoy»: «extraño la vista general que teníamos antes; la primera vista de
+ * Emi debería ser esa». Era la de la capa A: «Tu plataforma, de punta a
+ * punta.» y una tarjeta por sección. Ahora las tarjetas son puertas —cada una
+ * abre su pestaña— y dicen, en una línea, cómo está esa parte: lo que hay en
+ * vivo, lo que espera respuesta, lo que está en borrador.
+ *
+ * Las secciones salen de `src/data/panel.ts`, la misma lista que la barra.
+ */
+import { secciones } from '../../data/panel';
+---
+
+<div class="app-wrap inicio" data-inicio>
+  <p class="eyebrow">Panel</p>
+  <h1 class="app-h1 inicio__h">Tu plataforma, de punta a punta.</h1>
+
+  <ul class="tarjetas" role="list">
+    {
+      secciones.map((s, i) => (
+        <li>
+          <a class="tarjeta" href={`#${s.id}`}>
+            <span class="mono soft tarjeta__n">{String(i + 1).padStart(2, '0')}</span>
+            <span class="tarjeta__t">{s.titulo}</span>
+            <span class="tarjeta__que">{s.que}</span>
+            <span class="mono tarjeta__vivo" data-vivo={s.id} aria-live="polite"></span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<script>
+  import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+  import { alAbrir, fechaHora } from '../../lib/panel';
+
+  const raiz = document.querySelector<HTMLElement>('[data-inicio]')!;
+  const vivo = (id: string, texto: string) => {
+    const el = raiz.querySelector<HTMLElement>(`[data-vivo="${id}"]`);
+    if (el) el.textContent = texto;
+  };
+  const n = (x: number) => x.toLocaleString('es-ES');
+  const plural = (x: number, uno: string, varios: string) => `${n(x)} ${x === 1 ? uno : varios}`;
+
+  /**
+   * Cada línea se pide por su cuenta: si una tabla todavía no existe (la
+   * migración de la tienda sin aplicar, por ejemplo), esa tarjeta lo dice y
+   * las demás siguen.
+   */
+  async function cargar() {
+    const ahora = Date.now();
+    const hoy = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+    vivo('hoy', hoy.charAt(0).toUpperCase() + hoy.slice(1));
+
+    await Promise.all([
+      /* Membresía: lo que está en vivo esta semana. */
+      supabase
+        .from('exercises')
+        .select('kind, title_es, publish_at, unpublish_at')
+        .then(({ data, error }) => {
+          if (error) return vivo('membresia', 'Sin leer');
+          const semana = (data ?? []).filter(
+            (e) => (e.kind ?? 'semana') === 'semana' && Date.parse(e.publish_at) <= ahora && Date.parse(e.unpublish_at) > ahora,
+          );
+          const proxima = (data ?? []).some((e) => (e.kind ?? 'semana') === 'semana' && Date.parse(e.publish_at) > ahora);
+          if (!semana.length) return vivo('membresia', proxima ? 'Nada en vivo · hay uno programado' : 'Nada en vivo esta semana');
+          vivo('membresia', `En vivo hasta el ${fechaHora(semana[0].unpublish_at)}${proxima ? '' : ' · nada programado después'}`);
+        }),
+
+      /* Cursos: publicados y en borrador. */
+      supabase
+        .from('courses')
+        .select('published')
+        .then(({ data, error }) => {
+          if (error) return vivo('cursos', 'Falta la migración de los cursos');
+          const pub = (data ?? []).filter((c) => c.published).length;
+          const borr = (data ?? []).length - pub;
+          vivo('cursos', data?.length ? `${plural(pub, 'publicado', 'publicados')} · ${plural(borr, 'en borrador', 'en borrador')}` : 'Todavía ninguno');
+        }),
+
+      /* Tienda: fichas y cuáles se venden. */
+      supabase
+        .from('products')
+        .select('estado')
+        .then(({ data, error }) => {
+          if (error) return vivo('tienda', 'Falta la migración de la tienda');
+          if (!data?.length) return vivo('tienda', 'Formaciones usa todavía el catálogo del código');
+          const venta = data.filter((p) => p.estado === 'venta').length;
+          vivo('tienda', `${plural(data.length, 'ficha', 'fichas')} · ${n(venta)} a la venta`);
+        }),
+
+      /* Páginas de ventas: publicadas y con cambios sin publicar. */
+      Promise.all([
+        supabase.from('sales_pages').select('slug, published_at'),
+        supabase.from('sales_page_drafts').select('slug, updated_at'),
+      ]).then(([pub, borr]) => {
+        if (pub.error || borr.error) return vivo('ventas', 'Falta la migración de la tienda');
+        const publicadas = new Map((pub.data ?? []).map((p) => [p.slug, Date.parse(p.published_at)]));
+        const pendientes = (borr.data ?? []).filter((b) => {
+          const p = publicadas.get(b.slug);
+          return !p || Date.parse(b.updated_at) > p;
+        }).length;
+        if (!publicadas.size && !pendientes) return vivo('ventas', 'Las páginas son todavía las del código');
+        vivo('ventas', `${plural(publicadas.size, 'publicada', 'publicadas')}${pendientes ? ` · ${n(pendientes)} con cambios sin publicar` : ''}`);
+      }),
+
+      /* Personas: cuentas y membresías activas. */
+      Promise.all([
+        supabase.from('profiles').select('id', { count: 'exact', head: true }),
+        supabase.from('subscriptions').select('user_id, status, current_period_end'),
+      ]).then(([perfiles, subs]) => {
+        if (perfiles.error) return vivo('personas', 'Sin leer');
+        const activas = new Set(
+          (subs.data ?? [])
+            .filter((s) => s.status === 'active' && (!s.current_period_end || Date.parse(s.current_period_end) > ahora))
+            .map((s) => s.user_id),
+        ).size;
+        vivo('personas', `${plural(perfiles.count ?? 0, 'cuenta', 'cuentas')} · ${n(activas)} con membresía`);
+      }),
+
+      /* Mensajes: lo que espera respuesta. */
+      Promise.all([
+        supabase.from('questions').select('id, answers(id), exercises(publish_at, unpublish_at, kind)'),
+        supabase.from('course_questions').select('id', { count: 'exact', head: true }).is('answered_at', null),
+      ]).then(([foro, cursos]) => {
+        /* La misma regla que «Hoy» y Mensajes: cuenta el foro de lo que sigue en el aula. */
+        const f = (foro.data ?? []).filter((q: any) => {
+          const e = q.exercises;
+          const vivo = e && Date.parse(e.publish_at) <= ahora && (e.kind === 'bonus' || Date.parse(e.unpublish_at) > ahora);
+          return vivo && !q.answers?.length;
+        }).length;
+        const c = cursos.error ? 0 : cursos.count ?? 0;
+        const total = f + c;
+        vivo('mensajes', total ? `${plural(total, 'pregunta sin responder', 'preguntas sin responder')}` : 'Todo respondido');
+        document.dispatchEvent(new CustomEvent('panel:pendientes', { detail: total }));
+      }),
+    ]);
+  }
+
+  let abierta = false;
+  alAbrir('inicio', async () => {
+    if (!isSupabaseConfigured) return;
+    abierta = true;
+    await cargar();
+  });
+
+  /* Se relee al volver: es la puerta de entrada y tiene que decir lo de ahora. */
+  document.addEventListener('panel:pestana', (e) => {
+    if ((e as CustomEvent).detail === 'inicio' && abierta) void cargar();
+  });
+</script>
+
+<style>
+  .inicio {
+    padding-top: var(--space-6);
+  }
+
+  .inicio__h {
+    margin-top: var(--space-2);
+    max-width: 14ch;
+  }
+
+  .tarjetas {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-2);
+    margin: var(--space-6) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (max-width: 62rem) {
+    .tarjetas {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 38rem) {
+    .tarjetas {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Una caja con su regla de 1 px, sin sombra y sin levantarse: al pasar, la
+     regla se vuelve de tinta. Toda la tarjeta es la zona pulsable. */
+  .tarjeta {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: var(--space-3);
+    border: 1px solid var(--rule);
+    color: inherit;
+    transition: border-color 0.2s var(--ease-reveal);
+  }
+
+  .tarjeta:hover,
+  .tarjeta:focus-visible {
+    border-color: var(--ink);
+  }
+
+  .tarjeta__t {
+    margin-top: var(--space-2);
+    font-family: var(--font-display);
+    font-size: var(--text-section);
+    line-height: var(--leading-section);
+  }
+
+  .tarjeta__que {
+    margin-top: var(--space-1);
+    color: var(--ink-soft);
+    font-size: var(--text-small);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  /* La línea en vivo, abajo del todo: lo que cambia de un día a otro. */
+  .tarjeta__vivo {
+    margin-top: auto;
+    padding-top: var(--space-3);
+  }
+
+  .tarjeta__vivo:empty::before {
+    content: '·';
+    color: var(--ink-soft);
+  }
+</style>

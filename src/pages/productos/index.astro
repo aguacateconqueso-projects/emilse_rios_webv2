@@ -1,10 +1,23 @@
 ---
+/**
+ * Formaciones, en español: el catálogo.
+ *
+ * **Se resuelve en el servidor desde el 23 sep 2026**, con un minuto de caché:
+ * las fichas las maneja Emi desde la pestaña Tienda del panel. Mientras la
+ * tienda de la base de datos esté vacía, o si no contesta, salen las del
+ * código (`src/data/aula.ts`). Ver `src/lib/tienda.ts`.
+ */
 import Base from '../../layouts/Base.astro';
 import Catalogo from '../../components/Catalogo.astro';
 import { useTranslations } from '../../i18n/ui';
+import { leerCatalogo, CACHE_TIENDA } from '../../lib/tienda';
+
+export const prerender = false;
 
 const lang = 'es' as const;
 const t = useTranslations(lang);
+const { fichas } = await leerCatalogo();
+Astro.response.headers.set('Cache-Control', CACHE_TIENDA);
 ---
 
 <Base
@@ -13,5 +26,5 @@ const t = useTranslations(lang);
   description={t('products.description')}
   route="products"
 >
-  <Catalogo lang={lang} />
+  <Catalogo lang={lang} fichas={fichas.filter((f) => f.estado !== 'borrador')} />
 </Base>

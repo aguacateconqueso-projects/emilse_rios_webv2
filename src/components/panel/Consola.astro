@@ -18,24 +18,25 @@
 import { useAula, escritorioPath, entrarPath, salirPath } from '../../i18n/aula';
 import { isSupabaseConfigured } from '../../lib/supabase';
 import Boton from '../Boton.astro';
+import { secciones } from '../../data/panel';
+import Inicio from './Inicio.astro';
 import Hoy from './Hoy.astro';
 import Membresia from './Membresia.astro';
 import Cursos from './Cursos.astro';
-import Proximamente from './Proximamente.astro';
+import Tienda from './Tienda.astro';
+import Ventas from './Ventas.astro';
+import Personas from './Personas.astro';
+import Mensajes from './Mensajes.astro';
 
 const lang = 'es' as const;
 const a = useAula(lang);
 
-/** Las pestañas, en el orden de la barra. Las que no están hechas se ven y se dicen. */
-const pestanas = [
-  { id: 'hoy', t: 'Hoy' },
-  { id: 'membresia', t: 'Membresía' },
-  { id: 'cursos', t: 'Cursos' },
-  { id: 'tienda', t: 'Tienda', pronto: true },
-  { id: 'cartas', t: 'Cartas', pronto: true },
-  { id: 'personas', t: 'Personas', pronto: true },
-  { id: 'mensajes', t: 'Mensajes', pronto: true },
-] as const;
+/**
+ * Las pestañas, en el orden de la barra: la vista general primero —es la
+ * pantalla con la que se abre el panel— y después las secciones de
+ * `src/data/panel.ts`.
+ */
+const pestanas = [{ id: 'inicio', titulo: 'Inicio' }, ...secciones];
 ---
 
 <div
@@ -66,7 +67,7 @@ const pestanas = [
   <div class="consola__cuerpo" data-cuerpo hidden>
     <header class="pbar">
       <div class="pbar__in">
-        <a class="pbar__logo" href="/panel/#hoy" aria-label="Panel · Hoy">
+        <a class="pbar__logo" href="/panel/#inicio" aria-label="Panel · Vista general">
           <img src="/logo.svg" alt="Emilse Ríos" width="1631" height="487" />
           <span class="mono">{a('panel.title')}</span>
         </a>
@@ -74,12 +75,9 @@ const pestanas = [
         <nav class="pbar__tabs" aria-label="Secciones del panel">
           {
             pestanas.map((p) => (
-              <a
-                class:list={['mono', 'pbar__tab', 'pronto' in p && 'pbar__tab--pronto']}
-                href={`#${p.id}`}
-                data-ir-pestana={p.id}
-              >
-                {p.t}
+              <a class="mono pbar__tab" href={`#${p.id}`} data-ir-pestana={p.id}>
+                {p.titulo}
+                {p.id === 'mensajes' && <span class="pbar__cuenta tnum" data-pendientes hidden />}
               </a>
             ))
           }
@@ -106,13 +104,14 @@ const pestanas = [
     }
 
     <main class="consola__main" id="contenido">
+      <section data-pestana="inicio" hidden><Inicio /></section>
       <section data-pestana="hoy" hidden><Hoy /></section>
       <section data-pestana="membresia" hidden><Membresia /></section>
       <section data-pestana="cursos" hidden><Cursos /></section>
-      <section data-pestana="tienda" hidden><Proximamente cual="tienda" /></section>
-      <section data-pestana="cartas" hidden><Proximamente cual="cartas" /></section>
-      <section data-pestana="personas" hidden><Proximamente cual="personas" /></section>
-      <section data-pestana="mensajes" hidden><Proximamente cual="mensajes" /></section>
+      <section data-pestana="tienda" hidden><Tienda /></section>
+      <section data-pestana="ventas" hidden><Ventas /></section>
+      <section data-pestana="personas" hidden><Personas /></section>
+      <section data-pestana="mensajes" hidden><Mensajes /></section>
     </main>
   </div>
 </div>
@@ -141,6 +140,16 @@ const pestanas = [
     };
 
     window.addEventListener('hashchange', () => mostrar(leerHash()[0]));
+
+    /* Cuántas preguntas esperan respuesta, al lado de «Mensajes». Lo avisan la
+       vista general y la propia pestaña cada vez que cuentan. */
+    document.addEventListener('panel:pendientes', (e) => {
+      const n = Number((e as CustomEvent).detail) || 0;
+      const b = caja.querySelector<HTMLElement>('[data-pendientes]');
+      if (!b) return;
+      b.textContent = String(n);
+      b.hidden = n === 0;
+    });
 
     (async () => {
       /* Sin backend no hay a quién preguntarle el rol: se abre, y cada pestaña
@@ -244,11 +253,16 @@ const pestanas = [
     border-bottom-color: var(--ink);
   }
 
-  /* Las que todavía no están hechas llevan un punto al lado. No van más
-     claras: por debajo de la tinta secundaria el texto no llega a AA, y se
-     pueden abrir —dicen qué van a hacer—. */
-  .pbar__tab--pronto::after {
-    content: ' ·';
+  /* Las preguntas que esperan respuesta, al lado de «Mensajes»: la cifra en
+     tinta invertida, que es lo que hay que ver de un vistazo. */
+  .pbar__cuenta {
+    display: inline-block;
+    min-width: var(--space-3);
+    margin-left: var(--space-1);
+    padding-inline: var(--space-1);
+    background: var(--ink);
+    color: var(--paper);
+    text-align: center;
   }
 
   .pbar__fin {

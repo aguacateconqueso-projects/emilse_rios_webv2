@@ -1300,7 +1300,7 @@ accesoForm.addEventListener('submit', async (e) => {
     if (error || !perfil) {
       err.textContent = error
         ? `No se pudo buscar: ${error.message}`
-        : 'No hay ninguna cuenta con ese correo. Tiene que entrar una vez por la pantalla de acceso del aula (pidiendo el enlace de «primera vez») y después se lo das.';
+        : 'No hay ninguna cuenta con ese correo. Créala en Personas → «Nueva persona», y ahí mismo puedes darle este curso.';
       err.hidden = false;
       return;
     }
