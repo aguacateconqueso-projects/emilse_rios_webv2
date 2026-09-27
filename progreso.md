@@ -21,9 +21,11 @@ suscribió desde la Home el 24 sep y funcionó. ⚠️ **El proyecto de Vercel e
 `emilse-rios-webv21-git-…` (ver la regla de trabajo, justo abajo). El detalle de cada cosa está en las secciones que siguen a **La
 cortina**, de la más nueva a la más vieja.
 
-> **🧵 27 sep 2026: la salida en vivo, en la rama `claude/magical-keller-qtja38`.**
-> El 25 no se salió (en `main` no entró nada entre el 24 y el 27). El 27 esa
-> rama trae dos cosas en el mismo PR, y **mergearlo es salir en vivo**:
+> **🧵 27 sep 2026: la salida en vivo, en el PR #58** (rama
+> `claude/magical-keller-qtja38`). Su vista previa:
+> **https://emilse-rios-webv21-git-claude-aa2776-adrians-projects-594b3131.vercel.app**
+> El 25 no se salió (en `main` no entró nada entre el 24 y el 27). El PR trae
+> dos cosas, y **mergearlo es salir en vivo**:
 >
 > 1. **La cortina sube** (`CORTINA_BAJADA = false`, commit `5a219e8`).
 > 2. **La tanda de correcciones de Emi** (copy y móvil), toda hecha:
