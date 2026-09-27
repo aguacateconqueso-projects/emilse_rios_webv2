@@ -55,16 +55,21 @@ const jsonLd = {
       url: 'https://emilserios.com',
       sameAs: ['https://emilserios.com'],
     },
-    {
-      '@type': 'FAQPage',
-      '@id': `${canonical}#faq`,
-      inLanguage: lang,
-      mainEntity: (c.faq ?? []).map((f) => ({
-        '@type': 'Question',
-        name: f.q,
-        acceptedAnswer: { '@type': 'Answer', text: [f.a, f.correo, f.a2].filter(Boolean).join('') },
-      })),
-    },
+    /* Sin preguntas no hay FAQPage: Google la da por inválida vacía. */
+    ...(c.faq?.length
+      ? [
+          {
+            '@type': 'FAQPage',
+            '@id': `${canonical}#faq`,
+            inLanguage: lang,
+            mainEntity: c.faq.map((f) => ({
+              '@type': 'Question',
+              name: f.q,
+              acceptedAnswer: { '@type': 'Answer', text: [f.a, f.correo, f.a2].filter(Boolean).join('') },
+            })),
+          },
+        ]
+      : []),
   ],
 };
 ---

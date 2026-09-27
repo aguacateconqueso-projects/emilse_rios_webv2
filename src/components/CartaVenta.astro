@@ -128,7 +128,7 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
       <div class="venta__introInner">
         <a class="mono soft venta__back entrada" style="--i:0" href={routePath('products', lang)}>{t('products.back')}</a>
         <h1 class="venta__title entrada" style="--i:1">{c.title}</h1>
-        <p class="venta__sub entrada" style="--i:2">{c.subtitle}</p>
+        {c.subtitle && <p class="venta__sub entrada" style="--i:2">{c.subtitle}</p>}
       </div>
     </div>
     <div class="venta__media entrada-foto">
@@ -165,6 +165,16 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
                 <blockquote class="venta__cita">«{b.text}»</blockquote>
                 <figcaption class="mono soft venta__quien">{b.autor}</figcaption>
               </figure>
+            );
+          /* Viñetas dentro del texto, sin recuadro (27 sep 2026): lo que se
+             enumera en medio de la conversación. */
+          if (b.k === 'vinetas')
+            return (
+              <ul class="venta__vinetas reveal" data-bloque>
+                {b.items.map((li: string) => (
+                  <li>{li}</li>
+                ))}
+              </ul>
             );
           /* Las tarjetas: ver «Las tarjetas» en el CSS. Cada fila lleva su
              `--i` para entrar en escalera cuando la tarjeta aparece. */
@@ -289,12 +299,23 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
         <div class="row__body venta__pd">
           <p class="mono soft">{c.pd.rotulo}</p>
           <p class="venta__pd-text">{c.pd.text}</p>
+          {/* La segunda posdata, debajo de la primera y con su rótulo. */}
+          {
+            c.pd2 && (
+              <>
+                <p class="mono soft venta__pd2">{c.pd2.rotulo}</p>
+                <p class="venta__pd-text">{c.pd2.text}</p>
+              </>
+            )
+          }
         </div>
       </section>
     )
   }
 
-  {/* --- Preguntas ------------------------------------------------------------ */}
+  {/* --- Preguntas ------------------------------------------------------------
+      Solo si las hay: la carta de clases 1:1 no lleva (27 sep 2026). */}
+  {c.faq.length > 0 && (
   <section class="row row--flush block reveal" data-bloque>
     <div class="row__body">
       <h2 class="section-title">{c.faqH}</h2>
@@ -319,6 +340,7 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
       </div>
     </div>
   </section>
+  )}
 
   <div class="venta__cta reveal" data-bloque>
     <BotonVenta c={c} puertas={puertas} />
@@ -671,6 +693,23 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
     text-align: center;
   }
 
+  /* Las viñetas dentro del texto: la letra y el aire de los párrafos, con la
+     viñeta colgada a la izquierda para que el texto siga alineado con la
+     columna. */
+  .venta__cuerpo > .venta__vinetas {
+    margin: 0 0 var(--space-3);
+    padding-left: 1.25em;
+    list-style: disc;
+  }
+
+  .venta__vinetas > li {
+    text-wrap: pretty;
+  }
+
+  .venta__vinetas > li + li {
+    margin-top: var(--space-2);
+  }
+
   /* La cita de una alumna: en cursiva de titulares, entre dos reglas, y su
      nombre en mono. Como los testimonios de *Sobre mí*. */
   .venta__testimonio {
@@ -988,6 +1027,10 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
   .venta__pd {
     border-top: 1px solid var(--rule);
     padding-top: var(--space-4);
+  }
+
+  .venta__pd2 {
+    margin-top: var(--space-4);
   }
 
   .venta__pd-text {

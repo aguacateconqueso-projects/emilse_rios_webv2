@@ -14,7 +14,9 @@
 --   · el texto de la ficha (`resumen_*`) de las cuatro que ya estaban;
 --   · el nombre en inglés de la membresía («Let’s Study Together»);
 --   · el número y el orden de las seis;
---   · y crea «Todas las escalas» y «Clases online», las dos «Próximamente».
+--   · y crea «Todas las escalas» y «Clases online 1:1», las dos
+--     «Próximamente» y con su página de ventas (la carta está en el código).
+--     Su precio solo se ve en la ficha cuando se pasan a «A la venta».
 -- No toca el estado, el precio ni la foto de las que ya estaban: si Emi los
 -- cambió desde la Tienda, se quedan como ella los dejó.
 --
@@ -53,19 +55,22 @@ where slug = 'tu-vibrato-como-un-cantante';
 insert into public.products
   (slug, tipo, estado, position, num,
    nombre_es, nombre_en, resumen_es, resumen_en,
+   precio_es, precio_en, cadencia_es, cadencia_en,
    foto_url, foto_alt_es, foto_alt_en)
 values
   ('todas-las-escalas', 'curso', 'proximamente', 2, '03',
    'Todas las escalas (sin aburrirte)', 'All the scales (without getting bored)',
    'Las escalas no son aburridas, la manera en la que las estudias, sí.',
    'Scales aren’t boring. The way you study them is.',
+   '87 €', '€87', 'pago único', 'one-time',
    '/fotos/todas-las-escalas.webp',
    'Emilse Ríos con su contrabajo delante de una puerta de madera, en Madrid',
    'Emilse Ríos with her double bass in front of a wooden door, in Madrid'),
   ('clases-online', 'curso', 'proximamente', 5, '06',
-   'Clases online', 'Online lessons',
+   'Clases online 1:1', '1:1 Online Lessons',
    'El talento no existe. No como te lo vendieron. No es un don mágico que algunos tienen y otros no.',
-   'The talent doesn’t exist. Not the way they sold it to you. It’s not a magical gift that some people have and others don’t.',
+   'Talent doesn’t exist. Not the way they sold it to you. It’s not a magical gift that some people have and others don’t.',
+   '70 €', '€70', 'la primera clase', 'first lesson',
    '/fotos/clases-online.webp',
    'Emilse Ríos en una calle con árboles, abrazada a su contrabajo',
    'Emilse Ríos on a tree-lined street, hugging her double bass')
@@ -75,7 +80,11 @@ on conflict (slug) do update set
   nombre_es = excluded.nombre_es,
   nombre_en = excluded.nombre_en,
   resumen_es = excluded.resumen_es,
-  resumen_en = excluded.resumen_en;
+  resumen_en = excluded.resumen_en,
+  precio_es = excluded.precio_es,
+  precio_en = excluded.precio_en,
+  cadencia_es = excluded.cadencia_es,
+  cadencia_en = excluded.cadencia_en;
 
 commit;
 

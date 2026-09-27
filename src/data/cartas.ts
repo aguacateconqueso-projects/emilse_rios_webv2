@@ -39,6 +39,10 @@ import { NEWSLETTER_URL } from '../lib/membership';
  *                  en tarjeta: la del sí, en tinta; la del no, con borde.
  *   · puntos     → lo que trae el curso, en una tarjeta con las filas
  *                  numeradas.
+ *   · vinetas    → una lista corta dentro del texto, con viñetas y sin
+ *                  recuadro (27 sep 2026). Para lo que se enumera en medio
+ *                  de la conversación: la recomendación de Isra es tres como
+ *                  mucho, y con viñeta, no con número.
  *
  * ⚠️ En cada carta, **ES y EN tienen que tener los mismos bloques en el mismo
  * orden**: el cambio de idioma se ancla al bloque por su posición.
@@ -48,7 +52,8 @@ export type Bloque =
   | { k: 'fuerte' | 'cursiva' | 'grito' | 'acento'; text: string }
   | { k: 'testimonio'; text: string; autor: string }
   | { k: 'lista'; tono: 'si' | 'no'; titulo: string; items: string[] }
-  | { k: 'puntos'; titulo?: string; items: string[] };
+  | { k: 'puntos'; titulo?: string; items: string[] }
+  | { k: 'vinetas'; items: string[] };
 
 /** Los textos de las puertas de la membresía. Solo ella las tiene. */
 export type Puertas = {
@@ -104,9 +109,14 @@ export type Carta = {
   testimonios?: { titulo: string; items: { text: string; autor: string }[] };
   /** La posdata, entre la ficha de precio y las preguntas. */
   pd?: { rotulo: string; text: string };
+  /** Una segunda posdata, debajo de la primera (clases 1:1, 27 sep 2026). */
+  pd2?: { rotulo: string; text: string };
 
   faqH: string;
-  /** `correo` y `a2`: la respuesta sigue con un enlace de correo y remata. */
+  /**
+   * `correo` y `a2`: la respuesta sigue con un enlace de correo y remata.
+   * Vacía, la carta no lleva sección de preguntas (clases 1:1).
+   */
   faq: { q: string; a: string; correo?: string; a2?: string }[];
   /**
    * El newsletter, al final: la frase de encima del campo. **Va en todas las
@@ -1182,6 +1192,370 @@ const membresiaEn: Carta = {
   },
 };
 
+/* ==========================================================================
+   Todas las escalas (sin aburrirte) — ficha 03
+   ==========================================================================
+
+   El copy es de Emi, el del 27 sep 2026, palabra por palabra. Hasta ese día
+   esta formación no tenía carta: se vendía solo dentro de «Todo el diapasón»
+   y su ficha abría la carta del diapasón. Lo nuestro, otra vez, es la ropa:
+   las tres frases en negrita, la tarjeta de lo que trae y la de «para ti».
+
+   El subtítulo es la línea de su portada. El «Nos vemos dentro» del botón
+   espera al cobro de los cursos: mientras tanto, como las otras, «Avísame
+   cuando abra».
+   ========================================================================== */
+
+const escalasEs: Carta = {
+  metaTitle: 'Todas las escalas (sin aburrirte) — Formación de Emilse Rios',
+  metaDesc:
+    'Una profesora de contrabajo que odiaba las escalas, y cómo hizo las paces con ellas. Las 24 escalas mayores y menores melódicas en dos octavas, con PDF de digitaciones, video y acompañamiento de piano.',
+  title: 'Todas las escalas (sin aburrirte)',
+  subtitle: 'Las escalas no son aburridas, la manera en la que las estudias, sí.',
+  ledeA: 'Una profesora de contrabajo que odiaba las escalas.',
+  photoAlt: 'Emilse Ríos con su contrabajo delante de una puerta de madera, en Madrid',
+  carta: [
+    'En esta historia te cuento cómo hice las paces con ellas — y cómo tú también puedes.',
+    'Sinceramente, siempre odié las escalas.',
+    'Pero no me malinterpretes: me encantaba y me encanta estudiar. Podía pasar horas con obras, con técnica, con ejercicios de arco (aún lo hago).',
+    'Pero las escalas me daban un fastidio enorme. Y cuando empecé a dar clases, no tenía moral para pedírselas a mis alumnos — porque yo misma las evitaba.',
+    'El problema es que nadie puede escapar de ellas. Son el recurso más útil que tenemos para conocer armonía, entrenar el oído, la memoria muscular… y podría alargar esta lista hasta cansarte.',
+    'Muy seguramente lo sabes: en todas las audiciones juveniles te piden una escala junto con la obra. Y como mis alumnos están constantemente presentando audiciones, decidí arreglar el problema.',
+    'Primero para mí — hacer las paces con mi incomodidad y encontrar una forma de enamorarme de las escalas. Porque si yo no lo podía disfrutar, ¿con qué moral se lo pedía a mis alumnos?',
+    { k: 'fuerte', text: 'Así que emprendí la misión: hacer que el estudio de escalas sea divertido.' },
+    'Le pedí a un amigo pianista y compositor que me hiciera un acompañamiento para Do mayor. Algo diferente. No el típico acorde de primero, quinto y primero. No al unísono.',
+    'Quería una armonía cambiante, moderna, que me invitara a escuchar la siguiente nota — que me hiciera querer seguir tocando.',
+    'El experimento funcionó tan bien que empecé a compartirlo con mis alumnos. Se engancharon. Me empezaron a pedir otras tonalidades. Y al final le dije a mi amigo: necesito que hagas esto para todas las escalas.',
+    'Así nació esta formación. La grabé completa para que mis alumnos pudieran volver a ella antes de cada audición — escoger cada semana una tonalidad diferente y practicarla con todo lo necesario.',
+    {
+      k: 'puntos',
+      titulo: 'En esta formación encontrarás:',
+      items: [
+        'PDF con todas las escalas y mis digitaciones favoritas para llevar al atril.',
+        'Video de cada escala donde la toco, para que tengas referencia auditiva y visual con mis digitaciones recomendadas.',
+        'El audio de acompañamiento de piano de cada una, para practicar acompañado. Debo confesar que no es fácil a la primera: si has tocado antes escalas con piano, seguro estás acostumbrado a acordes básicos y aburridos, y esto no va por allí. Vas a tener que prestar atención, pero no te preocupes: te dejo un video de referencia y así arrancas.',
+      ],
+    },
+    { k: 'fuerte', text: 'El mejor entrenamiento auditivo que puedes encontrar para trabajar con tu instrumento.' },
+    'Escogí únicamente las escalas mayores y menores melódicas en dos octavas porque son las que realmente se usan, se piden en audiciones juveniles y te ayudan a recorrer el diapasón de manera fluida — las de la vida cotidiana del contrabajista. Basta de acumular contenido que no vas a ver: terminas abrumado.',
+    'Y cada vez que practiques estarás desarrollando consciencia melódica: aprendes a escuchar la armonía del piano y a responderle con tu instrumento. Dejas de depender del afinador. Dejas de necesitar metrónomo — el piano te marca cada beat.',
+    { k: 'fuerte', text: 'Todos pueden disfrutar estudiando escalas. Solo necesitan el enfoque correcto.' },
+    {
+      k: 'lista',
+      tono: 'si',
+      titulo: 'Esta formación es para ti si:',
+      items: [
+        'Sabes que deberías estudiar escalas… y siempre las terminas evitando.',
+        'Estás preparando audiciones y quieres llegar con las tonalidades resueltas.',
+        'Quieres una rutina de calentamiento clara para antes de ensayos y clases.',
+        'Estudias solo en casa y quieres entrenar afinación y oído sin depender del afinador.',
+      ],
+    },
+    'Esta formación NO es para ti si todavía no conoces las primeras posiciones del instrumento — te quedaría grande. Empieza por «Contrabajo desde cero». Y si lo que buscas es recorrer todo el diapasón, esta formación ya viene incluida completa dentro de «Todo el diapasón: de posición 1 al pulgar, ¡sin miedo!» — no la compres dos veces.',
+    'No necesitas talento, ni una edad correcta, ni condición física especial. Solo necesitas constancia — y un piano que te acompañe. Del piano me encargo yo.',
+  ],
+
+  includesH: 'Te cuento qué incluye',
+  titleEcho: 'All the scales (without getting bored)',
+  priceLabel: 'Precio',
+  price: '87 €',
+  priceNote: 'El acceso a la formación es de 87 €.',
+  priceFeatures: [
+    'Las 24 escalas —mayores y menores melódicas— en dos octavas.',
+    'PDF de cada una con mis digitaciones favoritas, para el atril.',
+    'Video de cada escala donde la toco, como referencia.',
+    'El acompañamiento de piano de cada una.',
+    'El acceso es tuyo, sin caducidad, 24/7.',
+  ],
+  boton: AVISAME.es,
+  pd: {
+    rotulo: 'PD',
+    text: 'Si la profesora que odiaba las escalas terminó grabando una formación entera sobre ellas, créeme: tú también puedes terminar disfrutándolas.',
+  },
+
+  faqH: 'Preguntas frecuentes',
+  faq: [
+    {
+      q: '¿Qué nivel necesito?',
+      a: 'Conocer las primeras posiciones del instrumento. Desde ahí, cada escala trae mi digitación recomendada en PDF y video.',
+    },
+    {
+      q: '¿Qué incluye exactamente?',
+      a: 'Las 24 escalas — mayores y menores melódicas — en dos octavas. Cada una con su PDF de digitaciones, video de referencia donde la toco y audio de acompañamiento de piano.',
+    },
+    {
+      q: '¿Por qué solo dos octavas?',
+      a: 'Porque son las que se piden en audiciones y las que usamos en la vida real. Nada de relleno para inflar el temario.',
+    },
+    {
+      q: '¿Necesito un pianista?',
+      a: 'No. Todos los acompañamientos están grabados: los reproduces desde el aula o los descargas, y tocas encima.',
+    },
+    {
+      q: '¿Cuánto tiempo necesito?',
+      a: 'Una tonalidad por semana es un ritmo perfecto. Con 20–30 minutos, los días que puedas, avanzas.',
+    },
+    {
+      q: '¿Cuánto dura mi acceso?',
+      a: 'Es tuyo, sin caducidad, 24/7. Ideal para volver antes de cada audición.',
+    },
+    {
+      q: '¿Esta formación está dentro de «Todo el diapasón»?',
+      a: 'Sí, completa. Si planeas hacer el recorrido del diapasón entero, cómprala allá — acá solo si lo tuyo son las escalas.',
+    },
+  ],
+};
+
+const escalasEn: Carta = {
+  metaTitle: 'All the scales (without getting bored) — A program by Emilse Rios',
+  metaDesc:
+    'A double bass teacher who hated scales, and how she made peace with them. All 24 major and melodic minor scales in two octaves, with fingering PDFs, videos and piano accompaniment.',
+  title: 'All the scales (without getting bored)',
+  subtitle: 'Scales aren’t boring. The way you study them is.',
+  ledeA: 'A double bass teacher who hated scales.',
+  photoAlt: 'Emilse Ríos with her double bass in front of a wooden door, in Madrid',
+  carta: [
+    'In this story I’ll tell you how I made peace with them — and how you can too.',
+    'Honestly, I always hated scales.',
+    'But don’t get me wrong: I loved practicing, and I still do. I could spend hours on pieces, on technique, on bow exercises (still can).',
+    'But scales bored me to death. And when I started teaching, I didn’t feel I had any right to ask my students for them — because I avoided them myself.',
+    'The problem is that nobody can escape them. They’re the most useful tool we have for understanding harmony, training the ear, muscle memory… and I could keep this list going until you got tired.',
+    'You probably already know this: every youth audition asks for a scale along with the piece. And since my students are constantly auditioning, I decided to fix the problem.',
+    'First for me — to make peace with my discomfort and find a way to fall in love with scales. Because if I couldn’t enjoy them, how could I ask that of my students with a straight face?',
+    { k: 'fuerte', text: 'So I set out on a mission: to make practicing scales fun.' },
+    'I asked a pianist and composer friend to write me an accompaniment for C major. Something different. Not the usual one–five–one chords. Not in unison.',
+    'I wanted changing, modern harmony that would invite me to listen for the next note — that would make me want to keep playing.',
+    'The experiment worked so well that I started sharing it with my students. They got hooked. They started asking me for other keys. And in the end I told my friend: I need you to do this for every scale.',
+    'That’s how this program was born. I recorded it in full so my students could come back to it before every audition — pick a different key each week and practice it with everything they need.',
+    {
+      k: 'puntos',
+      titulo: 'In this program you’ll find:',
+      items: [
+        'A PDF with all the scales and my favorite fingerings to put on your music stand.',
+        'A video of each scale where I play it, so you have an audio and visual reference with my recommended fingerings.',
+        'The piano accompaniment audio for each one, so you can practice with accompaniment. I have to confess it’s not easy at first: if you’ve played scales with piano before, you’re probably used to basic, boring chords, and this is nothing like that. You’ll have to pay attention, but don’t worry: I’ve left you a reference video so you can get started.',
+      ],
+    },
+    { k: 'fuerte', text: 'The best ear training you’ll find for working with your instrument.' },
+    'I chose only the major and melodic minor scales in two octaves because they’re the ones actually used, the ones asked for in youth auditions, and the ones that help you move across the fingerboard fluently — the everyday scales of a double bass player. Enough piling up content you’ll never get to: you just end up overwhelmed.',
+    'And every time you practice, you’ll be developing melodic awareness: you learn to listen to the piano’s harmony and answer it with your instrument. You stop depending on the tuner. You stop needing a metronome — the piano marks every beat for you.',
+    { k: 'fuerte', text: 'Everyone can enjoy practicing scales. All they need is the right approach.' },
+    {
+      k: 'lista',
+      tono: 'si',
+      titulo: 'This program is for you if:',
+      items: [
+        'You know you should practice scales… and you always end up avoiding them.',
+        'You’re preparing for auditions and want to show up with your keys nailed down.',
+        'You want a clear warm-up routine before rehearsals and lessons.',
+        'You practice alone at home and want to train your intonation and ear without depending on a tuner.',
+      ],
+    },
+    'This program is NOT for you if you don’t know the first positions on the instrument yet — it would be too much for now. Start with “Double bass from scratch.” And if what you’re after is covering the whole fingerboard, this program already comes included in full inside “Fingerboard: from position 1 to thumb, No fear!” — don’t buy it twice.',
+    'You don’t need talent, the right age, or any special physical build. All you need is consistency — and a piano to play along with. I’ll take care of the piano.',
+  ],
+
+  includesH: 'What’s included',
+  titleEcho: 'Todas las escalas (sin aburrirte)',
+  priceLabel: 'Price',
+  price: '€87',
+  priceNote: 'Access to the program is €87.',
+  priceFeatures: [
+    'All 24 scales — major and melodic minor — in two octaves.',
+    'A PDF of each one with my favorite fingerings, for your music stand.',
+    'A video of each scale where I play it, as a reference.',
+    'The piano accompaniment for each one.',
+    'Access is yours, no expiration, 24/7.',
+  ],
+  boton: AVISAME.en,
+  pd: {
+    rotulo: 'PS',
+    text: 'If the teacher who hated scales ended up recording an entire program about them, believe me: you can end up enjoying them too.',
+  },
+
+  faqH: 'Frequently asked questions',
+  faq: [
+    {
+      q: 'What level do I need?',
+      a: 'You need to know the first positions on the instrument. From there, every scale comes with my recommended fingering in the PDF and the video.',
+    },
+    {
+      q: 'What exactly is included?',
+      a: 'All 24 scales — major and melodic minor — in two octaves. Each one with its fingering PDF, a reference video where I play it, and a piano accompaniment audio.',
+    },
+    {
+      q: 'Why only two octaves?',
+      a: 'Because that’s what auditions ask for and what we use in real life. No filler to pad out the syllabus.',
+    },
+    {
+      q: 'Do I need a pianist?',
+      a: 'No. All the accompaniments are recorded: you play them from the classroom or download them, and play along.',
+    },
+    {
+      q: 'How much time do I need?',
+      a: 'One key per week is a perfect pace. With 20–30 minutes, on the days you can, you’ll make progress.',
+    },
+    {
+      q: 'How long do I have access?',
+      a: 'It’s yours, no expiration, 24/7. Perfect for coming back before every audition.',
+    },
+    {
+      q: 'Is this program included in “Fingerboard”?',
+      a: 'Yes, in full. If you’re planning to cover the whole fingerboard, buy it there — buy it here only if scales are what you’re after.',
+    },
+  ],
+};
+
+/* ==========================================================================
+   Clases online 1:1 — ficha 06
+   ==========================================================================
+
+   El copy es de Emi, el del 27 sep 2026, palabra por palabra. Tres cosas de
+   la ropa que son nuevas en esta carta:
+
+     · «Las dos realidades» van en viñetas dentro del texto (`vinetas`), no
+       numeradas ni en recuadro: la regla de Isra.
+     · Dos posdatas (`pd` y `pd2`), como las escribió ella.
+     · No lleva preguntas frecuentes: con `faq` vacía no sale la sección.
+
+   **El botón escribe un correo**: «coordinamos la fecha por email», dice la
+   carta, así que «Agenda tu clase ahora» abre uno a info@ con el asunto ya
+   puesto. Si algún día la primera clase se cobra por adelantado, se pega acá
+   un enlace de pago de Stripe y listo. Mientras la ficha no esté «a la venta»
+   en la Tienda, el botón es «Avísame cuando abra» —«si el botón está activo,
+   hay lugar; si no, suscríbete»—: Emi lo abre por temporadas.
+
+   ⚠️ Faltan los testimonios («Qué dicen mis alumnos sobre mí»): Emi los
+   quería traer de la web vieja. Cuando lleguen, van en `testimonios`, como
+   en la del vibrato.
+   ========================================================================== */
+
+const clasesEs: Carta = {
+  metaTitle: 'Clases online 1:1 — Emilse Rios',
+  metaDesc:
+    'Clases de contrabajo online, una a una, con Emilse Rios. En la primera te llevas tu plan de estudio en PDF, sigamos juntos o no.',
+  title: 'Clases online 1:1',
+  subtitle: '',
+  ledeA: 'El talento no existe.',
+  ledeB: 'O al menos, no como te lo vendieron.',
+  photoAlt: 'Emilse Ríos en una calle con árboles, abrazada a su contrabajo',
+  carta: [
+    'No es un don mágico que algunos tienen y otros no.',
+    'En mi camino como docente me he encontrado con dos realidades que se repiten una y otra vez:',
+    {
+      k: 'vinetas',
+      items: [
+        'A casi todos los que aprenden contrabajo por su cuenta les pasa lo mismo: material no les falta. En redes hay miles de videos. Lo que falta es rumbo. Estudian mucho, dando vueltas, sin saber si lo que tocan hoy tiene algo que ver con su meta.',
+        'Cuando en una institución te encasillan en un programa preestablecido, pasan años antes de que puedas hacer clic con los principios básicos. Te atoras en una información que no está diseñada para ayudarte a ti.',
+      ],
+    },
+    'Hay dos tipos de profesores de contrabajo: los muy buenos y los que te ubican en su libro de métodos favorito. «A partir de hoy vas a estudiar _____» (Simandl, Billè, el que prefieran…).',
+    'Y progresivamente vas a aburrirte y a pasar meses, años, intentando pasar de una posición a otra.',
+    'Hasta que por fin, en el año 2078 (o más, no sé cuándo estarás leyendo esto), logres llegar a la posición del pulgar.',
+    { k: 'fuerte', text: 'Si eso es lo que buscas, no es por aquí.' },
+    'En la primera clase conozco tu recorrido y metas con el instrumento, conozco tu nivel actual y tu disponibilidad de tiempo real. Con eso armo tu plan de estudio y te entrego un PDF.',
+    '¿Por qué me tomo ese trabajo, si podría decírtelo en clase?',
+    'Porque si después de la primera clase decidimos que no somos el uno para el otro, quiero que igual te lleves algo que sirva. Un camino claro. Conmigo, o con el maestro que elijas.',
+    { k: 'fuerte', text: 'Tú también puedes lograrlo. Y eso no debería depender de que sigamos juntos.' },
+    '¿Y si seguimos? No desaparezco entre clases. Me escribes cuando una duda te traba. Para eso estoy. Eso sí, no esperes respuesta al instante (también tengo una carrera que atender).',
+    '¿El costo? La primera clase son 70 €. Ahí te conozco y te llevas un mapa a tu medida, hecho por alguien que conoce el terreno. Sigamos juntos o no.',
+    'Si decides continuar, cada clase son 60 €.',
+    'Las clases tienen una duración de una hora, a veces más dependiendo de lo que estemos trabajando, debo advertirte.',
+    'Coordinamos videollamada por FaceTime o Google Meet, una vez coordinamos la fecha por email.',
+    'Las plazas 1:1 las abro por temporadas, cuando mi calendario de orquesta lo permite. Si el botón está activo, hay lugar. Si no, puedes suscribirte a mi newsletter: siempre aviso cuando las clases y formaciones abren sus puertas.',
+  ],
+
+  includesH: 'Te cuento qué incluye',
+  titleEcho: '1:1 Online Lessons',
+  priceLabel: 'La primera clase',
+  price: '70 €',
+  priceNote: 'Si decides continuar, cada clase son 60 €.',
+  priceFeatures: [
+    'Una primera clase para conocerte y escucharte, que dura lo que tenga que durar.',
+    'Tu plan de estudio y un repertorio a tu medida, en PDF.',
+    'Clases de una hora —a veces más— por FaceTime o Google Meet.',
+    'Me escribes entre clases cuando una duda te traba.',
+  ],
+  boton: {
+    texto: 'Agenda tu clase ahora',
+    href: 'mailto:info@emilserios.com?subject=Clase%20online%201%3A1',
+  },
+  pd: {
+    rotulo: 'PD',
+    text: 'En este primer encuentro te llevas una guía clara sobre cómo avanzar, y voy a encontrar un repertorio que se adapte a tu nivel, tus metas y tus gustos musicales. Te entrego todo en PDF. Es mi regalo — mi manera de que tu progreso no dependa exclusivamente de mí.',
+  },
+  pd2: {
+    rotulo: 'PD2',
+    text: 'El primer encuentro dura lo que tenga que durar. ¿Y qué significa eso? Siempre es más de una hora, así que prepara tu calendario: necesito conocerte y escucharte para poder hacer un buen mapa de estudio para ti.',
+  },
+
+  faqH: 'Preguntas frecuentes',
+  faq: [],
+};
+
+const clasesEn: Carta = {
+  metaTitle: '1:1 Online Lessons — Emilse Rios',
+  metaDesc:
+    'One-to-one online double bass lessons with Emilse Rios. In the first one you leave with your own study plan as a PDF, whether we continue or not.',
+  title: '1:1 Online Lessons',
+  subtitle: '',
+  ledeA: 'Talent doesn’t exist.',
+  ledeB: 'Or at least, not the way it was sold to you.',
+  photoAlt: 'Emilse Ríos on a tree-lined street, hugging her double bass',
+  carta: [
+    'It’s not a magic gift that some people have and others don’t.',
+    'Along my path as a teacher, I’ve come across two realities that repeat over and over:',
+    {
+      k: 'vinetas',
+      items: [
+        'Almost everyone who learns double bass on their own goes through the same thing: they don’t lack material. There are thousands of videos on social media. What they lack is direction. They practice a lot, going in circles, without knowing whether what they’re playing today has anything to do with their goal.',
+        'When an institution boxes you into a preset program, it takes years before the basic principles finally click. You get stuck on information that wasn’t designed to help you.',
+      ],
+    },
+    'There are two kinds of double bass teachers: the really good ones, and the ones who slot you into their favorite method book. “Starting today, you’re going to study _____” (Simandl, Billè, whichever they prefer…).',
+    'And progressively, you’ll get bored and spend months, years, trying to move from one position to the next.',
+    'Until finally, in the year 2078 (or later, I don’t know when you’re reading this), you make it to thumb position.',
+    { k: 'fuerte', text: 'If that’s what you’re looking for, this isn’t the place.' },
+    'In the first lesson, I get to know your journey and your goals with the instrument, your current level, and the time you actually have. With that, I put together your study plan and give it to you as a PDF.',
+    'Why do I go to that trouble, if I could just tell you in the lesson?',
+    'Because if, after the first lesson, we decide we’re not right for each other, I still want you to leave with something useful. A clear path. With me, or with whatever teacher you choose.',
+    { k: 'fuerte', text: 'You can do it too. And that shouldn’t depend on us continuing together.' },
+    'And if we continue? I don’t disappear between lessons. You write to me when a question has you stuck. That’s what I’m here for. Just don’t expect an instant reply (I have a career to look after too).',
+    'The cost? The first lesson is €70. That’s where I get to know you, and you leave with a map made to measure, by someone who knows the terrain. Whether we continue or not.',
+    'If you decide to continue, each lesson is €60.',
+    'Lessons last an hour — sometimes longer, depending on what we’re working on. Fair warning.',
+    'Once we set the date by email, we meet by video call on FaceTime or Google Meet.',
+    'I open 1:1 spots by season, when my orchestra schedule allows. If the button is active, there’s room. If not, you can subscribe to my newsletter: I always announce when lessons and programs open their doors.',
+  ],
+
+  includesH: 'What’s included',
+  titleEcho: 'Clases online 1:1',
+  priceLabel: 'The first lesson',
+  price: '€70',
+  priceNote: 'If you decide to continue, each lesson is €60.',
+  priceFeatures: [
+    'A first lesson to get to know you and listen to you, as long as it needs to be.',
+    'Your study plan and repertoire made to measure, as a PDF.',
+    'One-hour lessons — sometimes longer — on FaceTime or Google Meet.',
+    'You write to me between lessons when a question has you stuck.',
+  ],
+  boton: {
+    texto: 'Book your lesson now',
+    href: 'mailto:info@emilserios.com?subject=1%3A1%20online%20lesson',
+  },
+  pd: {
+    rotulo: 'PS',
+    text: 'In this first session, you leave with a clear guide on how to move forward, and I’ll find repertoire that fits your level, your goals, and your musical taste. I give you everything as a PDF. It’s my gift — my way of making sure your progress doesn’t depend only on me.',
+  },
+  pd2: {
+    rotulo: 'PS2',
+    text: 'The first session lasts as long as it needs to. What does that mean? It’s always more than an hour, so clear your calendar: I need to get to know you and listen to you so I can build a good study map for you.',
+  },
+
+  faqH: 'Frequently asked questions',
+  faq: [],
+};
+
 /**
  * Las cartas escritas, por el slug del producto. Un producto con carta tiene
  * página —`/formaciones/<slug>/`— y su ficha en Formaciones es un enlace, aunque
@@ -1192,6 +1566,8 @@ export const cartas: Record<string, Record<Lang, Carta>> = {
   'todo-el-diapason': { es: diapasonEs, en: diapasonEn },
   'contrabajo-desde-cero': { es: desdeCeroEs, en: desdeCeroEn },
   'tu-vibrato-como-un-cantante': { es: vibratoEs, en: vibratoEn },
+  'todas-las-escalas': { es: escalasEs, en: escalasEn },
+  'clases-online': { es: clasesEs, en: clasesEn },
 };
 
 export const tieneCarta = (slug: string): boolean => slug in cartas;

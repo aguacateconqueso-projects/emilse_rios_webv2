@@ -49,10 +49,16 @@ cortina**, de la más nueva a la más vieja.
 >      ficha con el texto de las portadas de Emi y «Leer más»; **en el
 >      teléfono las fotos toman color al pasarles el scroll**
 >      (`src/scripts/color-al-pasar.ts`, en todo el sitio); y **dos fichas
->      nuevas**: «Todas las escalas (sin aburrirte)» —su «Leer más» abre la
->      carta del diapasón (`PAGINA_DE` en `src/data/aula.ts`); foto
->      provisional, `emilse-madrid.jpg`— y «Clases online», con la foto de
->      *Sobre mí* y **sin página todavía** (Emi escribe la carta).
+>      nuevas, cada una con su carta** (el copy de Emi llegó ese mismo día):
+>      «Todas las escalas (sin aburrirte)», 87 € —foto provisional,
+>      `emilse-madrid.jpg`— y «Clases online 1:1», con la foto de *Sobre mí*.
+>      La de clases estrena tres piezas del sistema: **viñetas dentro del
+>      texto** (bloque `vinetas`), **una segunda posdata** (`pd2`) y **carta
+>      sin preguntas** (con `faq` vacía no sale la sección). Su botón,
+>      «Agenda tu clase ahora», **abre un correo a info@** con el asunto
+>      puesto («coordinamos la fecha por email»); mientras la ficha esté en
+>      «Próximamente» dice «Avísame cuando abra». El panel ya sabe editar las
+>      viñetas y la segunda posdata.
 >    - **Las cartas:** «Te cuento por qué» y «Te voy a contar una historia»
 >      bajan de la promesa a la conversación; en la membresía, «para ti» deja
 >      de ser un recuadro negro y va justo encima de «no es para ti»; en el
@@ -233,9 +239,12 @@ cortina**, de la más nueva a la más vieja.
 >     27 sep). Pone en la tabla `products` los textos de Emi, el orden 01–06 y
 >     las dos fichas nuevas. Sin esto, Formaciones sigue con los textos viejos.
 >     Es idempotente.
-> 19. [ ] **La carta de «Clases online»** (Emi escribe el texto). Hasta
->     entonces la ficha sale apagada y sin enlace. Cuando llegue: una carta
->     más en `src/data/cartas.ts` con el slug `clases-online`.
+> 19. [ ] **Los testimonios de «Clases online 1:1»**: Emi los quiere traer
+>     de la web vieja («Qué dicen mis alumnos sobre mí»). Van en
+>     `testimonios` de su carta, como en la del vibrato. Y cuando Emi abra
+>     plazas, la ficha pasa a «A la venta» en la Tienda: el botón cambia solo.
+>     Si algún día la primera clase se cobra por adelantado, se cambia el
+>     `mailto:` del botón por un enlace de pago de Stripe.
 > 20. [ ] **La foto de «Todas las escalas»**: la de hoy es provisional. Emi la
 >     cambia desde el panel → Tienda.
 >

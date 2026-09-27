@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Lang } from '../i18n/ui';
-import { catalogo, tienePagina, paginaDe, type Product, type Estado } from '../data/aula';
+import { catalogo, tienePagina, type Product, type Estado } from '../data/aula';
 import { cartas, AVISAME, type Carta } from '../data/cartas';
 
 /**
@@ -108,12 +108,7 @@ export async function leerCatalogo(): Promise<Catalogo> {
     const conPagina = new Set((pags.data ?? []).map((p) => p.slug));
     return {
       fuente: 'bd',
-      /* Con página propia o con la del producto que la contiene
-         (`PAGINA_DE`: «Todas las escalas» abre la del diapasón). */
-      fichas: (prods.data as Fila[]).map((f, i) => {
-        const destino = paginaDe(f.slug);
-        return aFicha(f, i, conPagina.has(destino) || destino in cartas);
-      }),
+      fichas: (prods.data as Fila[]).map((f, i) => aFicha(f, i, conPagina.has(f.slug) || f.slug in cartas)),
     };
   } catch (e) {
     console.error('[tienda] Supabase no contestó', e);

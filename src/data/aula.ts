@@ -188,9 +188,9 @@ const vibrato = proximo(
 );
 
 /**
- * «Todas las escalas (sin aburrirte)». Ficha propia desde el 27 sep 2026
- * —Adrián lo decidió así—, aunque se vende dentro de «Todo el diapasón»: no
- * tiene carta, y su «Leer más» lleva a la del diapasón (`PAGINA_DE`, abajo).
+ * «Todas las escalas (sin aburrirte)». Ficha y carta propias desde el 27 sep
+ * 2026, aunque también va completa dentro de «Todo el diapasón» (la carta lo
+ * dice: «no la compres dos veces»).
  *
  * ⚠️ La foto es provisional: es una de Emi con el contrabajo que no se usaba
  * en ninguna otra parte. Emi la cambia desde la Tienda cuando tenga la suya.
@@ -212,26 +212,26 @@ const escalas = proximo(
 );
 
 /**
- * Clases online, 1:1 (27 sep 2026). Con la foto de *Sobre mí*, como pidió
- * Emi. **Todavía sin página**: la carta la escribe Emi y, mientras tanto, la
- * ficha no lleva a ningún lado —la regla de siempre: nada que no funcione se
- * publica enlazado—.
+ * Clases online 1:1 (27 sep 2026). Con la foto de *Sobre mí*, como pidió
+ * Emi, y su carta en `cartas.ts`. Emi abre las plazas por temporadas: la
+ * ficha va «a la venta» en la Tienda cuando hay lugar, y entonces el botón de
+ * la carta pasa a ser «Agenda tu clase ahora».
  */
 const clases = proximo(
   5,
   'clases-online',
   clasesFoto,
   {
-    nombre: 'Clases online',
+    nombre: 'Clases online 1:1',
     resumen:
       'El talento no existe. No como te lo vendieron. No es un don mágico que algunos tienen y otros no.',
     fotoAlt: 'Emilse Ríos en una calle con árboles, abrazada a su contrabajo',
   },
   {
-    nombre: 'Online lessons',
-    /* El inglés de Emi, tal cual («el copy de Emi en inglés se respeta»). */
+    nombre: '1:1 Online Lessons',
+    /* El inglés de Emi, con su «Talent doesn’t exist» de la carta. */
     resumen:
-      'The talent doesn’t exist. Not the way they sold it to you. It’s not a magical gift that some people have and others don’t.',
+      'Talent doesn’t exist. Not the way they sold it to you. It’s not a magical gift that some people have and others don’t.',
     fotoAlt: 'Emilse Ríos on a tree-lined street, hugging her double bass',
   },
 );
@@ -279,7 +279,8 @@ const membresia: Product = {
  * El catálogo, en el orden en que se muestra. La membresía va primera.
  *
  * **Desde el 27 sep 2026 son seis fichas**: se sumaron «Todas las escalas» y
- * las clases online, y los textos pasaron a ser los de las portadas de Emi.
+ * las clases online 1:1, las dos con su carta, y los textos pasaron a ser los
+ * de las portadas de Emi.
  *
  * **Tres cursos anunciados desde el 23 sep 2026**, con nombre, texto y foto.
  * Del 21 al 23 sep hubo uno solo, y era un hueco: seis copias de «Curso N» con
@@ -294,24 +295,10 @@ const membresia: Product = {
 export const catalogo: Product[] = [membresia, diapason, escalas, desdeCero, vibrato, clases];
 
 /**
- * Las fichas que no tienen carta propia y llevan a la de otro producto. Hoy
- * una: «Todas las escalas» se vende dentro de «Todo el diapasón» y su «Leer
- * más» abre esa carta (27 sep 2026).
- */
-export const PAGINA_DE: Record<string, string> = {
-  'todas-las-escalas': 'todo-el-diapason',
-};
-
-/** El slug de la página a la que lleva una ficha: la suya o la de `PAGINA_DE`. */
-export const paginaDe = (slug: string): string => PAGINA_DE[slug] ?? slug;
-
-/**
  * Si la ficha de un producto lleva a una página: los que se venden y los que
- * todavía no pero ya tienen su carta escrita (`cartas.ts`), propia o la del
- * producto que la contiene.
+ * todavía no pero ya tienen su carta escrita (`cartas.ts`).
  */
-export const tienePagina = (p: Product): boolean =>
-  p.estado === 'venta' || tieneCarta(paginaDe(p.slug));
+export const tienePagina = (p: Product): boolean => p.estado === 'venta' || tieneCarta(p.slug);
 
 export const buscarProducto = (slug: string): Product | undefined =>
   catalogo.find((p) => p.slug === slug);

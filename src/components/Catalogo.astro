@@ -27,7 +27,7 @@
  * tiene carta **no lo son**, y se ven apagadas.
  */
 import { type Lang, useTranslations, productPath } from '../i18n/ui';
-import { entrarHref, paginaDe } from '../data/aula';
+import { entrarHref } from '../data/aula';
 import type { Ficha as FichaTienda } from '../lib/tienda';
 import MediaSlot from './MediaSlot.astro';
 
@@ -74,7 +74,7 @@ const t = useTranslations(lang);
           <li class:list={['cat__item', 'reveal', !pagina && 'is-soon']}>
             <Ficha
               class="cat__link"
-              href={pagina ? productPath(paginaDe(producto.slug), lang) : undefined}
+              href={pagina ? productPath(producto.slug, lang) : undefined}
               aria-disabled={pagina ? undefined : 'true'}
             >
               <span class="cat__media">
