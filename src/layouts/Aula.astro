@@ -19,9 +19,8 @@
 import Base from './Base.astro';
 import Boton from '../components/Boton.astro';
 import { type Lang, routePath, productPath, useTranslations } from '../i18n/ui';
-import { useAula, escritorioPath, entrarPath, salirPath, panelPath } from '../i18n/aula';
+import { useAula, escritorioPath, entrarPath, salirPath, panelPath, membresiaPath } from '../i18n/aula';
 import { isSupabaseConfigured } from '../lib/supabase';
-import { ACADEMIA } from '../data/aula';
 import '../styles/app.css';
 
 interface Props {
@@ -29,7 +28,7 @@ interface Props {
   /** Título del documento, sin el sufijo del aula. */
   title: string;
   /** Marca la opción activa de la barra. */
-  seccion?: 'escritorio' | 'curso';
+  seccion?: 'escritorio' | 'curso' | 'membresia';
   /** La dirección de ESTA pantalla en cada idioma, para el conmutador. */
   pathEs: string;
   pathEn: string;
@@ -41,12 +40,9 @@ const { lang, title, seccion = 'escritorio', pathEs, pathEn, migaja } = Astro.pr
 const a = useAula(lang);
 const t = useTranslations(lang);
 
-/**
- * La membresía sigue viviendo en `emilseriosacademy.com`, con miembros reales
- * dentro, y se muda la última, con el cambio de dominio. Mientras tanto el
- * enlace sale del sitio y lo dice con su flecha.
- */
-const membresiaHref = `${ACADEMIA}/aula/`;
+/* La membresía vive acá desde el 27 sep 2026 (hasta ese día, en
+   `emilseriosacademy.com/aula/`, con su flecha de «sale del sitio»). */
+const membresiaHref = membresiaPath(lang);
 const salirHref = salirPath(lang);
 ---
 
@@ -127,8 +123,10 @@ const salirHref = salirPath(lang);
           >
         </li>
         <li>
-          <a class="mono" href={membresiaHref} rel="noopener"
-            >{a('app.membership')}<span aria-hidden="true"> ↗</span></a
+          <a
+            class="mono"
+            href={membresiaHref}
+            aria-current={seccion === 'membresia' ? 'page' : undefined}>{a('app.membership')}</a
           >
         </li>
         <li>

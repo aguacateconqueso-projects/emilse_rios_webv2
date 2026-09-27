@@ -1,0 +1,783 @@
+---
+/**
+ * El aula de la membresía «Estudiemos Juntos»: el ejercicio de la semana con
+ * su foro, el Concepto Base del mes y el Bonus Material.
+ *
+ * **Vive acá desde el 27 sep 2026.** Hasta ese día era
+ * `emilseriosacademy.com/aula/` —`src/components/membresia/Aula.astro` de
+ * `emilse_rios_membresias`—, y se mudó el día que Adrián pidió que todo
+ * pasara en `emilserios.com`. **El comportamiento es el mismo**, con la ropa
+ * del sitio:
+ *
+ *   · tres pestañas —semana, concepto base, bonus—, con `#base` y `#bonus`
+ *     para enlazar directo a cada una;
+ *   · el ejercicio vigente es UNO, global (`exercises`, `kind = 'semana'`, en
+ *     su ventana de publicación); el concepto base igual pero mensual; el
+ *     bonus se acumula y no caduca;
+ *   · el video del idioma de la página (el otro idioma es la otra página: el
+ *     ES/EN del menú), y el PDF del bucket público «pdfs»;
+ *   · el foro de la semana (`questions` / `answers`), por idioma, que Emi
+ *     responde desde el panel → Mensajes;
+ *   · la red de seguridad: si quien entra no tiene la membresía al día, se le
+ *     pregunta a Stripe (`/api/verify-subscription`) antes de cerrarle la
+ *     puerta, por si el webhook no llegó.
+ *
+ * Lo que se quedó en la academia a propósito: el tutorial de bienvenida, que
+ * era un recorrido por la barra de allá.
+ *
+ * Quién ve qué lo decide la base de datos (las políticas de `exercises` y del
+ * foro, de las migraciones 0001–0008): forzar la puerta desde la consola
+ * enseña pestañas vacías.
+ */
+import type { Lang } from '../../i18n/ui';
+import { productPath } from '../../i18n/ui';
+import { useAula } from '../../i18n/aula';
+import Boton from '../Boton.astro';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const a = useAula(lang);
+
+/* Lo que el script pinta él, en el idioma de la página. */
+const T = {
+  lang,
+  weekNone: a('memb.weekNone'),
+  noPdf: a('memb.noPdf'),
+  pdf: a('memb.pdf'),
+  you: a('memb.you'),
+  answer: a('memb.answer'),
+  pending: a('memb.pending'),
+  forumEmpty: a('memb.forumEmpty'),
+  forumError: a('memb.forumError'),
+  postError: a('memb.postError'),
+  sending: a('memb.sending'),
+  composeBtn: a('memb.composeBtn'),
+  baseNone: a('memb.baseNone'),
+  bonusEmpty: a('memb.bonusEmpty'),
+  bonusError: a('memb.bonusError'),
+  bonusPlay: a('memb.bonusPlay'),
+  videoNoLang: a('memb.videoNoLang'),
+  videoBroken: a('memb.videoBroken'),
+  videoRepaste: a('memb.videoRepaste'),
+  billingError: a('memb.billingError'),
+};
+---
+
+<div class="app-wrap mb" data-memb>
+  <script type="application/json" data-memb-t set:html={JSON.stringify(T)} />
+
+  <header class="mb-cab">
+    <div>
+      <p class="eyebrow">{a('desk.membershipTitle')}</p>
+      <h1 class="app-h1 app-h1--sm">{a('memb.title')}</h1>
+    </div>
+    <p class="mb-cuenta">
+      {/* Solo para quien paga su membresía (Emi no la necesita). */}
+      <button class="btn-text" type="button" data-billing hidden>{a('memb.billing')}</button>
+      <a class="btn-text" href="mailto:info@emilserios.com">{a('memb.support')}</a>
+    </p>
+  </header>
+
+  {/* Para quien entra con sesión pero sin la membresía al día (una alumna de
+      un curso, por ejemplo). Quien no tiene nada lo para antes el portón. */}
+  <section class="mb-puerta" data-gate hidden>
+    <h2 class="app-h2">{a('memb.gateTitle')}</h2>
+    <p class="app-lead">{a('memb.gateLead')}</p>
+    <Boton class="boton--solid" href={productPath('estudiemos-juntos', lang)}>{a('memb.gateCta')}</Boton>
+  </section>
+
+  <div data-contenido>
+    <div class="segmento mb-tabs" role="tablist" aria-label={a('memb.tabs')}>
+      <button class="mono segmento__b" type="button" role="tab" id="tab-semana" aria-controls="p-semana" aria-selected="true" data-tab="semana">
+        {a('memb.tabWeek')}
+      </button>
+      <button class="mono segmento__b" type="button" role="tab" id="tab-base" aria-controls="p-base" aria-selected="false" tabindex="-1" data-tab="base">
+        {a('memb.tabBase')}
+      </button>
+      <button class="mono segmento__b" type="button" role="tab" id="tab-bonus" aria-controls="p-bonus" aria-selected="false" tabindex="-1" data-tab="bonus">
+        {a('memb.tabBonus')}
+      </button>
+    </div>
+
+    {/* --- El ejercicio de la semana ------------------------------------ */}
+    <section class="mb-panel" id="p-semana" role="tabpanel" aria-labelledby="tab-semana" data-panel="semana">
+      <p class="eyebrow" data-w-etiqueta>{a('memb.weekEyebrow')}</p>
+      <h2 class="app-h2 mb-h" data-w-titulo>{a('memb.checking')}</h2>
+      <p class="mono soft mb-hasta" data-w-hasta hidden>{a('memb.weekUntil')}</p>
+
+      <div data-w-cuerpo hidden>
+        <div class="mb-marco" data-w-video></div>
+        <div class="mb-desc" data-w-desc></div>
+        <p class="mb-pdf"><Boton href="#" data-w-pdf>{a('memb.pdf')}</Boton></p>
+
+        <section class="mb-foro" aria-labelledby="foro-h">
+          <p class="eyebrow">{a('memb.forumEyebrow')}</p>
+          <h3 class="app-h2" id="foro-h">{a('memb.forumH')}</h3>
+          <p class="soft mb-foro__nota">{a('memb.forumNote')}</p>
+
+          <form class="mb-foro__form" data-foro-form>
+            <label class="campo">
+              <span class="campo__t">{a('memb.composeLabel')}</span>
+              <textarea rows="3" placeholder={a('memb.composePh')} required data-foro-texto></textarea>
+              <span class="campo__ayuda">{a('memb.composeHint')}</span>
+            </label>
+            <Boton class="boton--solid" type="submit" data-foro-enviar>{a('memb.composeBtn')}</Boton>
+          </form>
+
+          <ul class="mb-hilo" role="list" data-foro-lista></ul>
+        </section>
+
+        <p class="soft mb-nota">{a('memb.weekNote')}</p>
+      </div>
+    </section>
+
+    {/* --- El Concepto Base del mes ------------------------------------- */}
+    <section class="mb-panel" id="p-base" role="tabpanel" aria-labelledby="tab-base" data-panel="base" hidden>
+      <p class="eyebrow" data-b-etiqueta>{a('memb.baseEyebrow')}</p>
+      <h2 class="app-h2 mb-h" data-b-titulo>{a('memb.checking')}</h2>
+      <div data-b-cuerpo hidden>
+        <div class="mb-marco" data-b-video></div>
+        <div class="mb-desc" data-b-desc></div>
+        <p class="mb-pdf"><Boton href="#" data-b-pdf>{a('memb.pdf')}</Boton></p>
+        <p class="soft mb-nota">{a('memb.baseNote')}</p>
+      </div>
+    </section>
+
+    {/* --- El Bonus Material -------------------------------------------- */}
+    <section class="mb-panel" id="p-bonus" role="tabpanel" aria-labelledby="tab-bonus" data-panel="bonus" hidden>
+      <p class="eyebrow">{a('memb.bonusEyebrow')}</p>
+      <h2 class="app-h2 mb-h">{a('memb.tabBonus')}</h2>
+      <p class="app-lead">{a('memb.bonusLead')}</p>
+      <p class="soft mb-estado" data-bonus-estado>{a('memb.checking')}</p>
+      <ul class="mb-bonus" role="list" data-bonus></ul>
+    </section>
+  </div>
+
+  {/* El video del bonus, en grande. Se cierra con la X, con Escape o
+      pulsando fuera. */}
+  <dialog class="dialogo mb-modal" data-modal aria-label={a('memb.tabBonus')}>
+    <div class="mb-modal__barra">
+      <button class="btn-text" type="button" data-modal-cerrar>{a('app.close')}</button>
+    </div>
+    <div class="mb-marco" data-modal-video></div>
+  </dialog>
+</div>
+
+<script>
+  import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+  import { acceso } from '../../lib/aula-acceso';
+  import { videoEmbed } from '../../lib/video';
+
+  const caja = document.querySelector<HTMLElement>('[data-memb]');
+
+  type Fila = {
+    id: string;
+    title_es: string;
+    title_en: string;
+    desc_es: string | null;
+    desc_en: string | null;
+    week_label: string | null;
+    week_label_en: string | null;
+    vimeo_url_es: string | null;
+    vimeo_url_en: string | null;
+    pdf_path_es: string | null;
+    pdf_path_en: string | null;
+  };
+
+  if (caja) {
+    const T = JSON.parse(caja.querySelector('[data-memb-t]')!.textContent!);
+    const EN = T.lang === 'en';
+    const $ = <E extends HTMLElement = HTMLElement>(s: string) => caja.querySelector<E>(s)!;
+
+    /* --- Las pestañas: funcionan aunque los datos todavía no hayan llegado. */
+    const tabs = Array.from(caja.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+    const elegir = (nombre: string, foco = false) => {
+      tabs.forEach((t) => {
+        const on = t.dataset.tab === nombre;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        $(`[data-panel="${t.dataset.tab}"]`).hidden = !on;
+        if (on && foco) t.focus();
+      });
+      history.replaceState(null, '', nombre === 'semana' ? location.pathname : `#${nombre}`);
+    };
+    tabs.forEach((t) => t.addEventListener('click', () => elegir(t.dataset.tab!)));
+    $('[role="tablist"]').addEventListener('keydown', (e) => {
+      const i = tabs.findIndex((t) => t.getAttribute('aria-selected') === 'true');
+      if (e.key === 'ArrowRight') elegir(tabs[(i + 1) % tabs.length].dataset.tab!, true);
+      if (e.key === 'ArrowLeft') elegir(tabs[(i - 1 + tabs.length) % tabs.length].dataset.tab!, true);
+    });
+    const inicial = location.hash.replace('#', '');
+    if (inicial === 'base' || inicial === 'bonus') elegir(inicial);
+
+    /* --- Lo que se pinta igual en las tres pestañas ------------------------ */
+    const texto = (f: Fila, campo: 'title' | 'desc') => (EN ? f[`${campo}_en`] : f[`${campo}_es`]) || '';
+    /* La columna histórica `week_label` es la española y `week_label_en` la
+       inglesa (migración 0008); sin inglesa, la española. */
+    const etiqueta = (f: Fila) => (EN ? f.week_label_en || f.week_label : f.week_label) || '';
+
+    function parrafos(destino: HTMLElement, t: string) {
+      destino.replaceChildren(
+        ...t
+          .split(/\n\s*\n|\n/)
+          .map((p) => p.trim())
+          .filter(Boolean)
+          .map((p) => {
+            const el = document.createElement('p');
+            el.textContent = p;
+            return el;
+          }),
+      );
+    }
+
+    /* La columna se llama `vimeo_url_*` por historia; hoy guarda Bunny. */
+    function video(marco: HTMLElement, url: string | null) {
+      const v = videoEmbed(url);
+      if (v.ok) {
+        const f = document.createElement('iframe');
+        f.src = v.src;
+        f.setAttribute('allow', v.allow);
+        f.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+        f.allowFullscreen = true;
+        marco.replaceChildren(f);
+        return;
+      }
+      const aviso = document.createElement('p');
+      aviso.className = 'mb-marco__aviso soft';
+      aviso.textContent =
+        v.reason === 'empty' ? T.videoNoLang : v.reason === 'bunny-lost' ? T.videoRepaste : T.videoBroken;
+      marco.replaceChildren(aviso);
+    }
+
+    /* El PDF, del bucket público «pdfs». Sin PDF, el botón lo dice y no lleva
+       a ninguna parte (así se sabe que este ejercicio no trae). */
+    function pdf(boton: HTMLAnchorElement, ruta: string | null) {
+      const rotulo = boton.querySelector('.boton__label') ?? boton;
+      if (ruta) {
+        boton.href = supabase.storage.from('pdfs').getPublicUrl(ruta).data.publicUrl;
+        boton.target = '_blank';
+        boton.rel = 'noopener';
+        boton.removeAttribute('aria-disabled');
+        return;
+      }
+      boton.removeAttribute('href');
+      boton.setAttribute('aria-disabled', 'true');
+      boton.classList.add('mb-pdf--no');
+      rotulo.textContent = T.noPdf;
+    }
+
+    const vigente = async (kind: 'semana' | 'base') => {
+      const ahora = new Date().toISOString();
+      const { data, error } = await supabase
+        .from('exercises')
+        .select('*')
+        .eq('kind', kind)
+        .lte('publish_at', ahora)
+        .gt('unpublish_at', ahora)
+        .order('publish_at', { ascending: false })
+        .limit(1);
+      if (error) console.error(`[membresía] no se pudo leer ${kind}`, error);
+      return (data?.[0] as Fila | undefined) ?? null;
+    };
+
+    /* --- El foro de la semana --------------------------------------------- */
+    const hace = (iso: string) => {
+      const s = Math.floor((Date.now() - Date.parse(iso)) / 1000);
+      const m = Math.floor(s / 60);
+      const h = Math.floor(s / 3600);
+      const d = Math.floor(s / 86400);
+      if (s < 60) return EN ? 'now' : 'ahora';
+      if (m < 60) return EN ? `${m} min ago` : `hace ${m} min`;
+      if (h < 24) return EN ? `${h} h ago` : `hace ${h} h`;
+      if (d === 1) return EN ? '1 day ago' : 'hace 1 día';
+      return EN ? `${d} days ago` : `hace ${d} días`;
+    };
+
+    function mensaje(q: any, uid: string | null) {
+      const li = document.createElement('li');
+      li.className = 'mb-msj';
+      const quien = document.createElement('p');
+      quien.className = 'mono soft';
+      quien.textContent = `${q.author_name || ''}${q.user_id === uid ? ` (${T.you})` : ''} · ${hace(q.created_at)}`;
+      const cuerpo = document.createElement('p');
+      cuerpo.className = 'mb-msj__txt';
+      cuerpo.textContent = q.body;
+      li.append(quien, cuerpo);
+
+      const r = q.answers?.[0];
+      const resp = document.createElement('div');
+      resp.className = r ? 'mb-msj__resp' : 'mb-msj__resp mb-msj__resp--pend';
+      if (r) {
+        const q2 = document.createElement('p');
+        q2.className = 'mono soft';
+        q2.textContent = `Emilse Rios · ${T.answer}`;
+        const t2 = document.createElement('p');
+        t2.className = 'mb-msj__txt';
+        t2.textContent = r.body;
+        resp.append(q2, t2);
+      } else {
+        resp.textContent = T.pending;
+      }
+      li.append(resp);
+      return li;
+    }
+
+    const vacio = (t: string) => {
+      const li = document.createElement('li');
+      li.className = 'soft mb-hilo__vacio';
+      li.textContent = t;
+      return li;
+    };
+
+    async function foro(ex: Fila, uid: string | null, nombre: string) {
+      const lista = $('[data-foro-lista]');
+      const CAMPOS = 'id, user_id, body, author_name, created_at, answers(id, body, created_at)';
+      const { data, error } = await supabase
+        .from('questions')
+        .select(CAMPOS)
+        .eq('exercise_id', ex.id)
+        .eq('lang', T.lang)
+        .order('created_at', { ascending: false })
+        .order('created_at', { ascending: true, foreignTable: 'answers' });
+      if (error) {
+        console.error('[membresía] foro', error);
+        lista.replaceChildren(vacio(T.forumError));
+      } else {
+        lista.replaceChildren(...(data?.length ? data.map((q) => mensaje(q, uid)) : [vacio(T.forumEmpty)]));
+      }
+
+      const form = $<HTMLFormElement>('[data-foro-form]');
+      const area = $<HTMLTextAreaElement>('[data-foro-texto]');
+      const boton = $<HTMLButtonElement>('[data-foro-enviar]');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const txt = area.value.trim();
+        if (!txt || !uid) return;
+        boton.disabled = true;
+        const { data: nueva, error: err } = await supabase
+          .from('questions')
+          .insert({ exercise_id: ex.id, user_id: uid, lang: T.lang, body: txt, author_name: nombre })
+          .select(CAMPOS)
+          .single();
+        boton.disabled = false;
+        if (err) {
+          console.error('[membresía] no se pudo publicar', err);
+          alert(T.postError);
+          return;
+        }
+        lista.querySelector('.mb-hilo__vacio')?.remove();
+        const li = mensaje(nueva, uid);
+        lista.prepend(li);
+        area.value = '';
+        li.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
+
+    /* «Nombre I.», como en la academia: nunca el correo entero. */
+    function nombreVisible(completo: string | null, email: string) {
+      const n = (completo || '').trim();
+      if (n) {
+        const partes = n.split(/\s+/);
+        return partes.length > 1 ? `${partes[0]} ${partes[1][0].toUpperCase()}.` : partes[0];
+      }
+      return email.split('@')[0] || (EN ? 'Member' : 'Miembro');
+    }
+
+    /* --- Las tres pestañas, con datos ------------------------------------- */
+    async function semana(uid: string | null, nombre: string) {
+      const ex = await vigente('semana');
+      if (!ex) {
+        $('[data-w-titulo]').textContent = T.weekNone;
+        return;
+      }
+      $('[data-w-etiqueta]').textContent = etiqueta(ex) || $('[data-w-etiqueta]').textContent;
+      $('[data-w-titulo]').textContent = texto(ex, 'title');
+      $('[data-w-hasta]').hidden = false;
+      $('[data-w-cuerpo]').hidden = false;
+      video($('[data-w-video]'), EN ? ex.vimeo_url_en : ex.vimeo_url_es);
+      parrafos($('[data-w-desc]'), texto(ex, 'desc'));
+      pdf($<HTMLAnchorElement>('[data-w-pdf]'), EN ? ex.pdf_path_en : ex.pdf_path_es);
+      await foro(ex, uid, nombre);
+    }
+
+    async function base() {
+      const b = await vigente('base');
+      if (!b) {
+        $('[data-b-titulo]').textContent = T.baseNone;
+        return;
+      }
+      $('[data-b-etiqueta]').textContent = etiqueta(b) || $('[data-b-etiqueta]').textContent;
+      $('[data-b-titulo]').textContent = texto(b, 'title');
+      $('[data-b-cuerpo]').hidden = false;
+      video($('[data-b-video]'), EN ? b.vimeo_url_en : b.vimeo_url_es);
+      parrafos($('[data-b-desc]'), texto(b, 'desc'));
+      pdf($<HTMLAnchorElement>('[data-b-pdf]'), EN ? b.pdf_path_en : b.pdf_path_es);
+    }
+
+    /* El bonus se acumula y no caduca: el más viejo primero (así el video de
+       bienvenida, si existe, queda arriba). El video se abre en grande. */
+    const modal = $<HTMLDialogElement>('[data-modal]');
+    const marcoModal = $('[data-modal-video]');
+    const cerrarModal = () => {
+      marcoModal.replaceChildren(); /* para el video */
+      if (modal.open) modal.close();
+    };
+    $('[data-modal-cerrar]').addEventListener('click', cerrarModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) cerrarModal();
+    });
+    modal.addEventListener('close', () => marcoModal.replaceChildren());
+
+    async function bonus() {
+      const estado = $('[data-bonus-estado]');
+      const lista = $('[data-bonus]');
+      const { data, error } = await supabase
+        .from('exercises')
+        .select('*')
+        .eq('kind', 'bonus')
+        .lte('publish_at', new Date().toISOString())
+        .order('publish_at', { ascending: true });
+      if (error) {
+        console.error('[membresía] bonus', error);
+        estado.textContent = T.bonusError;
+        return;
+      }
+      const filas = (data ?? []) as Fila[];
+      if (!filas.length) {
+        estado.textContent = T.bonusEmpty;
+        return;
+      }
+      estado.hidden = true;
+      lista.replaceChildren(
+        ...filas.map((b) => {
+          const li = document.createElement('li');
+          li.className = 'mb-bonus__item';
+          const url = EN ? b.vimeo_url_en : b.vimeo_url_es;
+          const ver = document.createElement('button');
+          ver.type = 'button';
+          ver.className = 'mb-bonus__ver mono';
+          ver.textContent = `▶ ${T.bonusPlay}`;
+          ver.disabled = !videoEmbed(url).ok;
+          ver.addEventListener('click', () => {
+            video(marcoModal, url);
+            modal.showModal();
+          });
+          const et = document.createElement('p');
+          et.className = 'eyebrow';
+          et.textContent = etiqueta(b);
+          const h = document.createElement('h3');
+          h.className = 'mb-bonus__h';
+          h.textContent = texto(b, 'title');
+          const d = document.createElement('p');
+          d.className = 'soft mb-bonus__d';
+          d.textContent = texto(b, 'desc');
+          li.append(ver, et, h, d);
+          return li;
+        }),
+      );
+    }
+
+    /* --- Quién entra ---------------------------------------------------- */
+    async function verificarConStripe(): Promise<boolean> {
+      try {
+        const { data } = await supabase.auth.getSession();
+        const r = await fetch('/api/verify-subscription', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${data.session?.access_token ?? ''}`,
+          },
+          body: '{}',
+        });
+        return Boolean((await r.json())?.active);
+      } catch {
+        return false;
+      }
+    }
+
+    function portal() {
+      const b = $<HTMLButtonElement>('[data-billing]');
+      b.hidden = false;
+      b.addEventListener('click', async () => {
+        b.disabled = true;
+        try {
+          const { data } = await supabase.auth.getSession();
+          const r = await fetch('/api/portal', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${data.session?.access_token ?? ''}`,
+            },
+            body: JSON.stringify({ lang: T.lang }),
+          });
+          const out = await r.json();
+          if (out?.url) location.href = out.url;
+          else alert(T.billingError);
+        } catch {
+          alert(T.billingError);
+        }
+        b.disabled = false;
+      });
+    }
+
+    if (isSupabaseConfigured) {
+      (async () => {
+        const q = await acceso();
+        if (!q.sesion) return; /* el portón del marco ya lo dice */
+
+        if (!q.membresia && !q.admin && !q.dudoso) {
+          /* Antes de cerrar la puerta, a Stripe: quizá pagó y el webhook no
+             llegó. Si sí, se recarga y entra. */
+          if (await verificarConStripe()) {
+            location.reload();
+            return;
+          }
+          $('[data-contenido]').hidden = true;
+          $('[data-gate]').hidden = false;
+          return;
+        }
+
+        if (q.membresia && !q.admin) portal();
+
+        const { data } = await supabase.auth.getSession();
+        const nombre = nombreVisible(q.nombre, data.session?.user.email ?? '');
+        await Promise.all([semana(q.uid, nombre), base(), bonus()]);
+      })().catch((e) => console.error('[membresía] no se pudo cargar', e));
+    } else {
+      $('[data-w-titulo]').textContent = T.weekNone;
+      $('[data-b-titulo]').textContent = T.baseNone;
+      $('[data-bonus-estado]').textContent = T.bonusEmpty;
+    }
+  }
+</script>
+
+<style>
+  .mb {
+    padding-top: var(--space-4);
+    padding-bottom: var(--space-12);
+  }
+
+  .mb-cab {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-4);
+  }
+
+  .mb-cuenta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+  }
+
+  .mb-puerta {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-3);
+    max-width: var(--measure);
+    margin-top: var(--space-6);
+    padding: var(--space-4);
+    border: 1px solid var(--ink);
+  }
+
+  .mb-tabs {
+    margin-top: var(--space-4);
+  }
+
+  .mb-panel {
+    max-width: 48rem; /* 768 px: la columna y el video */
+    margin-top: var(--space-6);
+  }
+
+  .mb-h {
+    margin-top: var(--space-1);
+  }
+
+  .mb-hasta {
+    margin-top: var(--space-1);
+  }
+
+  /* El marco del video: 16:9, con la regla de 1 px, como el de los cursos. */
+  .mb-marco {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    margin-top: var(--space-4);
+    overflow: hidden;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+  }
+
+  .mb-marco :global(iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .mb-marco :global(.mb-marco__aviso) {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: var(--space-3);
+    font-size: var(--text-small);
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  .mb-desc {
+    max-width: var(--measure);
+    margin-top: var(--space-4);
+  }
+
+  .mb-desc :global(p + p) {
+    margin-top: var(--space-3);
+  }
+
+  .mb-pdf {
+    margin-top: var(--space-4);
+  }
+
+  .mb-pdf :global(.mb-pdf--no) {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .mb-nota {
+    max-width: var(--measure);
+    margin-top: var(--space-6);
+    font-size: var(--text-small);
+    line-height: 1.5;
+  }
+
+  /* --- El foro ------------------------------------------------------------ */
+  .mb-foro {
+    margin-top: var(--space-8);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--rule);
+  }
+
+  .mb-foro .app-h2 {
+    margin-top: var(--space-1);
+  }
+
+  .mb-foro__nota {
+    margin-top: var(--space-1);
+    font-size: var(--text-small);
+    line-height: 1.5;
+  }
+
+  .mb-foro__form {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-2);
+    max-width: var(--measure);
+    margin-top: var(--space-4);
+  }
+
+  .mb-foro__form .campo {
+    width: 100%;
+  }
+
+  .mb-hilo {
+    display: grid;
+    gap: var(--space-2);
+    max-width: var(--measure);
+    margin: var(--space-4) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .mb-hilo :global(.mb-msj) {
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--rule);
+  }
+
+  .mb-hilo :global(.mb-msj__txt) {
+    margin-top: var(--space-1);
+    white-space: pre-wrap;
+    text-wrap: pretty;
+  }
+
+  .mb-hilo :global(.mb-msj__resp) {
+    margin-top: var(--space-2);
+    padding-left: var(--space-2);
+    border-left: 1px solid var(--ink);
+  }
+
+  .mb-hilo :global(.mb-msj__resp--pend) {
+    border-left-color: var(--rule);
+    color: var(--ink-soft);
+    font-size: var(--text-small);
+  }
+
+  /* --- El bonus ------------------------------------------------------------ */
+  .mb-estado {
+    margin-top: var(--space-3);
+  }
+
+  .mb-bonus {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: var(--space-4);
+    margin: var(--space-4) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .mb-bonus :global(.mb-bonus__item) {
+    display: grid;
+    align-content: start;
+    gap: var(--space-1);
+    padding: var(--space-3);
+    border: 1px solid var(--rule);
+  }
+
+  .mb-bonus :global(.mb-bonus__ver) {
+    justify-self: start;
+    margin-bottom: var(--space-1);
+    padding: var(--space-1) var(--space-2);
+    background: var(--ink);
+    color: var(--paper);
+    border: 0;
+    cursor: pointer;
+  }
+
+  .mb-bonus :global(.mb-bonus__ver[disabled]) {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .mb-bonus :global(.mb-bonus__h) {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 1.375rem;
+    line-height: 1.25;
+  }
+
+  .mb-bonus :global(.mb-bonus__d) {
+    font-size: var(--text-small);
+    line-height: 1.5;
+  }
+
+  /* --- El video del bonus, en grande ------------------------------------- */
+  .mb-modal {
+    width: min(64rem, calc(100vw - 2 * var(--space-3)));
+  }
+
+  .mb-modal__barra {
+    display: flex;
+    justify-content: flex-end;
+    padding: var(--space-1) var(--space-2);
+  }
+
+  .mb-modal .mb-marco {
+    margin-top: 0;
+    border: 0;
+    border-top: 1px solid var(--rule);
+  }
+</style>

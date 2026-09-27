@@ -69,9 +69,6 @@ export type Product = {
 };
 
 
-/** Dónde vive hoy la membresía. Una sola constante: al mudarla se toca acá. */
-export const ACADEMIA = 'https://emilseriosacademy.com';
-
 /**
  * La puerta del aula: el botón de la página `/aulavirtual/` y el de la cápsula
  * de la cabecera en la tienda.

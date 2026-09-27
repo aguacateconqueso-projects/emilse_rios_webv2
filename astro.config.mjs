@@ -100,6 +100,87 @@ function redireccionesConBarra() {
   };
 }
 
+/**
+ * `emilseriosacademy.com`, redirigido entero a esta casa (27 sep 2026).
+ *
+ * Ese día la membresía se mudó acá —el aula, el webhook de Stripe, la
+ * bienvenida— y Adrián pidió que todo pasara en `emilserios.com`. El dominio
+ * de la academia se pasa a ESTE proyecto de Vercel (se quita del de la
+ * academia y se añade acá), y estas rutas, que solo miran peticiones con ese
+ * `Host`, mandan cada dirección vieja a su gemela de acá. Lo que no está en la
+ * tabla va a la Home.
+ *
+ * ⚠️ **`/api/` no se redirige, a propósito.** Stripe sigue llamando al webhook
+ * en `www.emilseriosacademy.com/api/stripe-webhook` y **no sigue
+ * redirecciones**: con un 301 ahí, alguien paga y no recibe acceso. Así que
+ * esas rutas no se tocan y las contesta este mismo proyecto, que tiene el
+ * webhook desde ese día (con el mismo `STRIPE_WEBHOOK_SECRET` de la academia).
+ * El día que el endpoint se cambie en Stripe a `www.emilserios.com`, esto
+ * puede redirigir `/api/` también.
+ *
+ * Las rutas van **delante de todas**: si no, `/panel/` o `/gracias/` —que
+ * existen acá— se servirían en el dominio viejo en vez de redirigir.
+ */
+const ACADEMIA_HOSTS = ['www.emilseriosacademy.com', 'emilseriosacademy.com'];
+const ACADEMIA_A_CASA = [
+  ['/aula/en', '/en/classroom/membership/'],
+  ['/aula', '/aulavirtual/membresia/'],
+  ['/entrar/en', '/en/classroom/signin/'],
+  ['/entrar', '/aulavirtual/entrar/'],
+  ['/nueva-clave/en', '/en/classroom/new-password/'],
+  ['/nueva-clave', '/aulavirtual/nueva-clave/'],
+  ['/gracias/en', '/en/thank-you/'],
+  ['/gracias', '/gracias/'],
+  ['/salir', '/aulavirtual/salir/'],
+  ['/pasar', '/aulavirtual/entrar/'],
+  ['/panel', '/panel/'],
+  ['/en', '/en/courses/estudiemos-juntos/'],
+  ['', '/formaciones/estudiemos-juntos/'],
+];
+const CASA = 'https://www.emilserios.com';
+
+/** @returns {import('astro').AstroIntegration} */
+function laAcademiaRedirige() {
+  /** @type {URL | undefined} */
+  let raiz;
+  return {
+    name: 'la-academia-redirige',
+    hooks: {
+      'astro:config:done': ({ config }) => {
+        raiz = config.root;
+      },
+      'astro:build:done': async ({ logger }) => {
+        if (!raiz) return;
+        const fichero = new URL('.vercel/output/config.json', raiz);
+        let salida;
+        try {
+          salida = JSON.parse(await readFile(fichero, 'utf8'));
+        } catch {
+          logger.warn('No hay .vercel/output/config.json: la academia queda sin redirigir.');
+          return;
+        }
+        const escapar = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const rutas = ACADEMIA_HOSTS.flatMap((host) => {
+          const has = [{ type: 'host', value: host }];
+          return [
+            ...ACADEMIA_A_CASA.map(([de, a]) => ({
+              src: `^${escapar(de)}/?$`,
+              has,
+              headers: { Location: `${CASA}${a}` },
+              status: 301,
+            })),
+            /* Todo lo demás, menos `/api/`, a la Home. */
+            { src: '^/(?!api/).*$', has, headers: { Location: `${CASA}/` }, status: 301 },
+          ];
+        });
+        salida.routes = [...rutas, ...(salida.routes ?? [])];
+        await writeFile(fichero, JSON.stringify(salida, null, 2));
+        logger.info(`emilseriosacademy.com redirige a ${CASA} (${rutas.length} rutas).`);
+      },
+    },
+  };
+}
+
 // https://astro.build/config
 export default defineConfig({
   /**
@@ -128,7 +209,7 @@ export default defineConfig({
    */
   output: 'static',
   adapter: vercel(),
-  integrations: [redireccionesConBarra()],
+  integrations: [redireccionesConBarra(), laAcademiaRedirige()],
 
   i18n: {
     locales: ['es', 'en'],

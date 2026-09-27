@@ -29,7 +29,7 @@
  * misma pantalla de contraseña nueva. Una pieza menos que mantener.
  */
 import type { Lang } from '../../i18n/ui';
-import { useAula, clavePath, escritorioPath, entrarPath } from '../../i18n/aula';
+import { useAula, clavePath, membresiaPath, entrarPath } from '../../i18n/aula';
 import { isSupabaseConfigured } from '../../lib/supabase';
 import Boton from '../Boton.astro';
 
@@ -43,7 +43,7 @@ const a = useAula(lang);
 <section
   class="gracias"
   data-gracias
-  data-destino={escritorioPath(lang)}
+  data-destino={membresiaPath(lang)}
   data-redirect-clave={clavePath(lang)}
   data-t-going={a('thanks.going')}
   data-t-go={a('thanks.go')}

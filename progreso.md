@@ -69,9 +69,51 @@ cortina**, de la más nueva a la más vieja.
 >      mi historia con el vibrato.» en negrita; y **la ficha de precio lleva el
 >      nombre solo en el idioma de la página** (se quitó `titleEcho`).
 >
+>
+> 3. **La mudanza de la membresía, entera** (pedida por Adrián el 27 sep: «que
+>    todo pase en emilserios.com ya, desde hoy»):
+>    - **El aula** vive en `/aulavirtual/membresia/` y `/en/classroom/membership/`
+>      (`src/components/aula/Membresia.astro`): ejercicio de la semana con su
+>      foro, Concepto Base, Bonus, el portal de Stripe («Mi suscripción») y la
+>      red de seguridad que le pregunta a Stripe antes de cerrarle la puerta a
+>      alguien. El escritorio y la barra del aula ya no salen del sitio, y
+>      `/gracias/` manda directo a la membresía.
+>    - **El webhook de Stripe** vive en `/api/stripe-webhook`, con la bienvenida
+>      por Resend (el copy de Emi; los enlaces, a `emilserios.com`),
+>      `/api/verify-subscription` y `/api/portal`.
+>    - **`emilseriosacademy.com` redirige entero** (`laAcademiaRedirige()` en
+>      `astro.config.mjs`): cada dirección vieja a su gemela y lo demás a la
+>      Home. **Menos `/api/`**, que lo contesta este proyecto: así Stripe sigue
+>      llamando a la dirección vieja del webhook sin cortarse. Funciona cuando
+>      el dominio de la academia se pasa a este proyecto de Vercel.
+>    - Probado en local: la firma del webhook (200 con una firma de Stripe
+>      buena, 400 con una mala) y el aula con Supabase simulado (ejercicio,
+>      video, PDF, foro, bonus y la puerta de quien no tiene membresía).
+>
 > ⚠️ **Formaciones lee las fichas de la base de datos**, así que los textos
 > nuevos y las dos fichas **no se ven —ni en la vista previa— hasta pegar
-> `supabase/formaciones_27sep.sql` en el SQL Editor** (punto 18). Emi no había
+> `supabase/formaciones_27sep.sql` en el SQL Editor** (punto 18; hecho por
+> Adrián el 27 sep).
+>
+> **🌙 La noche del 27 sep, en este orden** (cada paso depende del anterior):
+>
+> 1. **Vercel → `emilse-rios-webv2_1` → Environment Variables (Production)**:
+>    `STRIPE_SECRET_KEY` (con el Touch ID de Emi), y copiadas del proyecto de
+>    la academia **`STRIPE_WEBHOOK_SECRET`** (el mismo `whsec_`), **`RESEND_API_KEY`**
+>    y `RESEND_FROM` si la tiene. Sin founders: esa figura ya no existe.
+> 2. Revisar la vista previa con Emi y **mergear el PR #58**: sube la cortina y
+>    entra todo lo de arriba.
+> 3. **Vercel → el proyecto de la academia → Settings → Domains**: quitar
+>    `emilseriosacademy.com` y `www.emilseriosacademy.com`. Después, en
+>    `emilse-rios-webv2_1` → Domains → añadir los dos. **Siempre después del
+>    merge**: antes, el dominio caería en un despliegue sin webhook.
+> 4. Comprobar: `www.emilseriosacademy.com/aula/` tiene que llevar a
+>    `www.emilserios.com/aulavirtual/membresia/`.
+> 5. Emi le escribe a sus miembros: el aula se mudó, se entra con el mismo
+>    correo y la misma contraseña en `emilserios.com/aulavirtual/entrar/`.
+> 6. Cuando se pueda (sin prisa): en Stripe, apuntar el endpoint del webhook a
+>    `https://www.emilserios.com/api/stripe-webhook` y poner su `whsec_` nuevo
+>    en Vercel. Emi no había
 > publicado ninguna página de ventas desde el panel (Adrián, 27 sep), así que
 > las cartas sí salen del código y los cambios se ven directo.
 
@@ -229,7 +271,8 @@ cortina**, de la más nueva a la más vieja.
 >     los siete correos cuando la serie esté, y probar también el campo del
 >     final de una carta (nuevo desde el #55). Los pasos, en **El newsletter,
 >     conectado → La primera prueba**.
-> 17. [ ] **Mudar la membresía** —*Adrián, 24 sep: «mañana la mudamos»*—:
+> 17. [x] **Mudar la membresía** —*hecha en código el 27 sep 2026, en el
+>     PR #58; los pasos de Vercel, en «La noche del 27 sep», arriba*—:
 >     las páginas de la membresía (el ejercicio de la semana y el foro) al aula
 >     de acá, el webhook de Stripe acá, las fechas de las puertas en una sola
 >     casa, el puente `/pasar/` pegado en la academia, y **recién entonces**

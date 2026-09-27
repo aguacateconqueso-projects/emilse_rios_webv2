@@ -1,0 +1,24 @@
+---
+/**
+ * The membership classroom, in English. Until 27 Sep 2026 it lived at
+ * `emilseriosacademy.com/aula/en/`, which now redirects here. See
+ * `Membresia.astro`.
+ */
+import AulaLayout from '../../../layouts/Aula.astro';
+import Membresia from '../../../components/aula/Membresia.astro';
+import { useAula, membresiaPath } from '../../../i18n/aula';
+
+const lang = 'en' as const;
+const a = useAula(lang);
+---
+
+<AulaLayout
+  lang={lang}
+  title={a('memb.title')}
+  seccion="membresia"
+  pathEs={membresiaPath('es')}
+  pathEn={membresiaPath('en')}
+  migaja={a('memb.title')}
+>
+  <Membresia lang={lang} />
+</AulaLayout>
