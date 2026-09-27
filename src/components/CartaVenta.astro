@@ -136,10 +136,14 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
     </div>
   </header>
 
-  <div class="anchor reveal" data-bloque>
-    <p class="anchor__text venta__lede">
+  {/* La promesa: lo único de la carta que se dice en grande. La segunda línea
+      es opcional desde el 27 sep 2026: en la membresía y en el vibrato era
+      «Te cuento por qué» / «Te voy a contar una historia», y eso —dijo Emi—
+      ya es la conversación, no la promesa. Bajó al primer párrafo. */}
+  <div class="venta__promesa reveal" data-bloque>
+    <p class="venta__lede">
       <span>{c.ledeA}</span>
-      <span>{c.ledeB}</span>
+      {c.ledeB && <span>{c.ledeB}</span>}
     </p>
   </div>
 
@@ -211,9 +215,10 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
       <div class="venta__ficha">
         <div class="venta__cols">
           <div class="venta__col">
-            <p class="venta__nombre">
-              {c.title} <span class="venta__eco">{c.titleEcho}</span>
-            </p>
+            {/* Solo en el idioma de la página. Hasta el 27 sep 2026 llevaba
+                al lado, en cursiva, el nombre en el otro idioma (`titleEcho`),
+                y Emi lo vio como un error: la página ya está en un idioma. */}
+            <p class="venta__nombre">{c.title}</p>
             <p class="mono soft venta__etiqueta">{c.priceLabel}</p>
             <p class="venta__precio">
               {c.price}
@@ -245,9 +250,9 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
 
   {
     c.final && (
-      <div class="anchor reveal" data-bloque>
-        <p class="anchor__text">{c.final}</p>
-      </div>
+      <p class="dicho venta__final reveal" data-bloque>
+        {c.final}
+      </p>
     )
   }
 
@@ -563,6 +568,31 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
     }
   }
 
+  /* --- La promesa -------------------------------------------------------------
+     Lo único de la carta que va en grande: centrada, en la cursiva de los
+     titulares, de 32 a 56 px. Era la «frase-ancla» del sitio; el 27 sep 2026
+     esa frase pasó a ser negrita de cuerpo en todas partes —cortaba la
+     lectura—, y la promesa se quedó con su tamaño porque va ANTES de la
+     conversación, no en medio: «la promesa en la letra más grande podría
+     funcionar» (Emi, sobre la del vibrato). */
+  .venta__promesa {
+    max-width: 65rem; /* 1040 px */
+    margin: var(--space-12) auto;
+    padding-inline: var(--space-3);
+    text-align: center;
+  }
+
+  .venta__lede {
+    max-width: 56.25rem; /* 900 px */
+    margin-inline: auto;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--text-anchor);
+    line-height: var(--leading-anchor);
+    letter-spacing: var(--tracking-section);
+    text-wrap: balance;
+  }
+
   /* La apertura son dos frases, y la segunda va debajo de la primera. */
   .venta__lede span {
     display: block;
@@ -591,24 +621,54 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
     font-style: italic;
   }
 
+  /* La «frase centrada» ya no se centra ni se agranda (27 sep 2026). Era
+     cursiva de titulares a 26–32 px en medio del texto, y Emi pidió quitarla
+     en toda la web: «corta la comunicación, es una carta, tiene que ser
+     fluida». Ahora es negrita de cuerpo, igual que la de arriba, y se queda
+     el tipo de bloque para que las páginas guardadas desde el panel sigan
+     pintándose bien. «El arco es nuestra boca, dientes y lengua» y «Volvamos,
+     ya basta…» son de estas: se dicen más fuerte, no aparte. */
   .venta__cuerpo > .venta__grito {
-    margin-block: var(--space-6);
+    font-weight: 600;
+  }
+
+  /* «La frase grande» pasa a ser **un título dentro de la carta** (27 sep
+     2026): la letra de los titulares, recta y no en cursiva, del tamaño de
+     «Te cuento qué incluye», con aire alrededor. Es lo que abre una parte
+     nueva de la carta —«Escalas. Muchos las odian. Todos las necesitamos.»,
+     que Emi quiso como título—, no una frase para gritar a mitad de un
+     párrafo. */
+  .venta__cuerpo > .venta__acento {
+    margin-block: var(--space-8) var(--space-4);
     font-family: var(--font-display);
-    font-style: italic;
     font-size: var(--text-section);
     line-height: var(--leading-section);
+    letter-spacing: var(--tracking-section);
     text-align: center;
     text-wrap: balance;
   }
 
-  .venta__cuerpo > .venta__acento {
-    margin-block: var(--space-8);
-    font-family: var(--font-display);
-    font-style: italic;
-    font-size: var(--text-anchor);
-    line-height: var(--leading-anchor);
+  /* El remate que sigue a los recuadros y cierra la carta —«Entras de cero.
+     Sales tocando…»— pasa a ser la entrada del precio (27 sep 2026). Solo en
+     la columna, entre el último recuadro y los 96 px que abren la ficha, «se
+     perdía» (Emi). Ahora va centrado y a 32 px de «Te cuento qué incluye»:
+     se lee como lo que es, lo que viene a continuación dicho en una línea. */
+  .venta__cuerpo > .venta__card + .venta__fuerte:last-child {
+    margin-bottom: 0;
     text-align: center;
     text-wrap: balance;
+  }
+
+  .row:has(.venta__card + .venta__fuerte:last-child) + .venta__incluye {
+    margin-top: var(--space-4);
+  }
+
+  /* El cierre, antes del último botón: negrita de cuerpo, centrada sobre él.
+     Hasta el 27 sep 2026 era una frase-ancla de 56 px. */
+  .venta__final {
+    margin-top: var(--space-12);
+    padding-inline: var(--space-3);
+    text-align: center;
   }
 
   /* La cita de una alumna: en cursiva de titulares, entre dos reglas, y su
@@ -644,8 +704,9 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
      párrafo más; en el teléfono la columna ya es la pantalla y no sobra nada.
 
        · lo que trae (`puntos`): borde de tinta y filas numeradas en mono;
-       · «para ti» y los que más se beneficiaron (`lista`, sí): en tinta, la
-         letra en papel —lo que la lectora tiene que reconocer como suyo—;
+       · «para ti» y los que más se beneficiaron (`lista`, sí): borde de
+         tinta, filas en tinta y «+». Fue un recuadro negro con la letra en
+         papel hasta el 27 sep 2026; Emi lo encontró demasiado invasivo;
        · «no es para ti» (`lista`, no): borde de tinta, filas en tinta
          secundaria. Dice que no, y decirlo con el mismo peso que el sí
          desequilibra la página.
@@ -737,19 +798,11 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
     color: var(--ink-soft);
   }
 
-  .venta__lista--si {
-    background: var(--ink);
-    color: var(--paper);
-  }
-
-  .venta__lista--si .venta__filas li {
-    border-top-color: var(--paper-rule);
-  }
-
-  .venta__lista--si .venta__marca {
-    color: var(--paper-soft);
-  }
-
+  /* «Para ti» ya no va en tinta (27 sep 2026). Del 24 al 27 sep fue un
+     recuadro negro con la letra en papel, y Emi lo encontró demasiado: «se me
+     olvida que venía leyendo un mensaje». Ahora es el recuadro a escuadra de
+     las otras dos, en papel; lo que lo distingue del «no» es que sus filas van
+     en tinta plena y su marca es «+». */
   .venta__lista--no .venta__filas li {
     color: var(--ink-soft);
   }
@@ -815,7 +868,6 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
     }
   }
 
-  .venta__eco,
   .venta__etiqueta,
   .venta__per,
   .venta__letra,
@@ -832,7 +884,6 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
       color: var(--paper);
     }
 
-    .venta__ficha:hover .venta__eco,
     .venta__ficha:hover .venta__etiqueta,
     .venta__ficha:hover .venta__per,
     .venta__ficha:hover .venta__letra {
@@ -861,11 +912,6 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
     font-size: var(--text-section);
     line-height: var(--leading-section);
     letter-spacing: var(--tracking-section);
-  }
-
-  .venta__eco {
-    font-style: italic;
-    color: var(--ink-soft);
   }
 
   .venta__etiqueta {

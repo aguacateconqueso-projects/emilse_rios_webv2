@@ -4,7 +4,9 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 24 de septiembre de 2026, cierre del día. **Todo
+**Última actualización:** 27 de septiembre de 2026 —la salida en vivo y las
+correcciones de Emi, en el recuadro 🧵 de abajo—. Lo que sigue es el cierre
+del 24 de septiembre. **Todo
 lo del día está en `main`, del PR #53 al #56**, y Adrián lo dio por bueno
 («perfecto, todo ok»). En una línea: los cursos en su biblioteca de Bunny
 (#53); los videos ES / EN, cada uno en su hueco, y Formaciones en
@@ -18,6 +20,52 @@ suscribió desde la Home el 24 sep y funcionó. ⚠️ **El proyecto de Vercel e
 `emilse-rios-webv2_1`**: las vistas previas buenas empiezan por
 `emilse-rios-webv21-git-…` (ver la regla de trabajo, justo abajo). El detalle de cada cosa está en las secciones que siguen a **La
 cortina**, de la más nueva a la más vieja.
+
+> **🧵 27 sep 2026: la salida en vivo, en la rama `claude/magical-keller-qtja38`.**
+> El 25 no se salió (en `main` no entró nada entre el 24 y el 27). El 27 esa
+> rama trae dos cosas en el mismo PR, y **mergearlo es salir en vivo**:
+>
+> 1. **La cortina sube** (`CORTINA_BAJADA = false`, commit `5a219e8`).
+> 2. **La tanda de correcciones de Emi** (copy y móvil), toda hecha:
+>    - **La letra de las «frases destacadas», en toda la web:** dejan de ser
+>      cursiva grande y centrada y pasan a **negrita del tamaño del cuerpo**,
+>      dentro de la columna (`.dicho` y `.sigue` en `base.css`; en las cartas,
+>      `grito` se pinta como `fuerte` y `acento` pasa a ser **título**). La
+>      promesa de arriba de cada carta sigue grande (`.venta__promesa`).
+>    - **El contrabajo del fondo, en el teléfono,** entra entero a lo ancho
+>      (antes solo se veía el borde de la madera).
+>    - ***Sobre mí*:** sin el hueco de 192 px antes de «Te cuento otra cosa»
+>      en el teléfono; las tres lecciones en viñetas a la izquierda.
+>    - **El newsletter:** el acuse de recibo es el copy de Emi, con el asunto
+>      del primer correo («El ejercicio que el 90% hace mal»), en la letra del
+>      cuerpo.
+>    - **El acceso al aula:** «¿Primera vez, o se te olvidó la clave?» justo
+>      debajo del botón y visible; la nota del equipo compartido, al fondo;
+>      «con el que te inscribiste»; «¿Estás buscando mis formaciones? Acá te
+>      las muestro.»
+>    - **Formaciones:** «¿Ya tienes una formación? El aula es por acá»; cada
+>      ficha con el texto de las portadas de Emi y «Leer más»; **en el
+>      teléfono las fotos toman color al pasarles el scroll**
+>      (`src/scripts/color-al-pasar.ts`, en todo el sitio); y **dos fichas
+>      nuevas**: «Todas las escalas (sin aburrirte)» —su «Leer más» abre la
+>      carta del diapasón (`PAGINA_DE` en `src/data/aula.ts`); foto
+>      provisional, `emilse-madrid.jpg`— y «Clases online», con la foto de
+>      *Sobre mí* y **sin página todavía** (Emi escribe la carta).
+>    - **Las cartas:** «Te cuento por qué» y «Te voy a contar una historia»
+>      bajan de la promesa a la conversación; en la membresía, «para ti» deja
+>      de ser un recuadro negro y va justo encima de «no es para ti»; en el
+>      diapasón, «Escalas. Muchos las odian. Todos las necesitamos.» es el
+>      único título y «HER-MO-SO.» va en negrita; en «Desde cero», «Entras de
+>      cero…» pasa a ser la entrada del precio; en el vibrato, «paró» →
+>      «detuvo», «best vibrato finger (el mejor dedo para vibrar)» y «Te cuento
+>      mi historia con el vibrato.» en negrita; y **la ficha de precio lleva el
+>      nombre solo en el idioma de la página** (se quitó `titleEcho`).
+>
+> ⚠️ **Formaciones lee las fichas de la base de datos**, así que los textos
+> nuevos y las dos fichas **no se ven —ni en la vista previa— hasta pegar
+> `supabase/formaciones_27sep.sql` en el SQL Editor** (punto 18). Emi no había
+> publicado ninguna página de ventas desde el panel (Adrián, 27 sep), así que
+> las cartas sí salen del código y los cambios se ven directo.
 
 > **🚧 LA CORTINA ESTÁ BAJADA desde el 23 sep 2026.** Quien entra a
 > `www.emilserios.com` —a cualquier dirección— ve solo la firma de Emi sobre
@@ -179,6 +227,15 @@ cortina**, de la más nueva a la más vieja.
 >     casa, el puente `/pasar/` pegado en la academia, y **recién entonces**
 >     redirigir `emilseriosacademy.com`. Antes de eso, redirigirla mata el
 >     webhook y deja a gente pagando sin acceso.
+> 18. [ ] **Pegar `supabase/formaciones_27sep.sql` en el SQL Editor** (Adrián,
+>     27 sep). Pone en la tabla `products` los textos de Emi, el orden 01–06 y
+>     las dos fichas nuevas. Sin esto, Formaciones sigue con los textos viejos.
+>     Es idempotente.
+> 19. [ ] **La carta de «Clases online»** (Emi escribe el texto). Hasta
+>     entonces la ficha sale apagada y sin enlace. Cuando llegue: una carta
+>     más en `src/data/cartas.ts` con el slug `clases-online`.
+> 20. [ ] **La foto de «Todas las escalas»**: la de hoy es provisional. Emi la
+>     cambia desde el panel → Tienda.
 >
 > **D. Cabos sueltos, sin prisa.**
 >

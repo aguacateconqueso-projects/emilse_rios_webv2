@@ -66,15 +66,22 @@ export type Carta = {
   metaDesc: string;
   title: string;
   subtitle: string;
-  /** La apertura grande: dos renglones. */
+  /**
+   * La promesa, en grande: uno o dos renglones. El segundo es opcional desde el
+   * 27 sep 2026 —«Te cuento por qué» es conversación, no promesa (Emi)—.
+   */
   ledeA: string;
-  ledeB: string;
+  ledeB?: string;
   photoAlt: string;
   carta: Bloque[];
 
   /* --- La ficha de precio ------------------------------------------------- */
   includesH: string;
-  /** El nombre en el otro idioma, en cursiva al lado del nombre. */
+  /**
+   * El nombre en el otro idioma. **Ya no se pinta** desde el 27 sep 2026: la
+   * ficha de precio lleva solo el nombre en el idioma de la página. Se queda
+   * porque las páginas guardadas desde el panel lo traen.
+   */
   titleEcho: string;
   priceLabel: string;
   price: string;
@@ -161,7 +168,7 @@ const diapasonEs: Carta = {
     'En realidad, son dos formaciones. Una te muestra el camino y la otra te mantiene en forma.',
     'La primera, «Todo el diapasón: De posición 1 al pulgar, ¡sin miedo!»: conoces todo el diapasón tocando obras reales con acompañamiento de piano desde el nivel uno.',
     'La segunda es mi formación completa de escalas, a la que me encanta llamar «Todas las escalas (sin aburrirte)».',
-    { k: 'grito', text: 'En esta historia te cuento por qué van juntas y por qué son necesarias:' },
+    { k: 'fuerte', text: 'En esta historia te cuento por qué van juntas y por qué son necesarias:' },
     'Hace un tiempo, uno de mis alumnos me avisó unas horas antes de su clase que quería grabarla.',
     'Sus padres habían tomado una decisión: nada de música hasta que mejorara sus calificaciones. Sin clases, sin orquesta, sin contrabajo. Esa iba a ser su última clase por tiempo indefinido.',
     'Pasé toda la mañana pensando qué darle en una hora. Nunca había estado tan molesta y triste, y a la vez con tantas ganas de contener a alguien.',
@@ -177,7 +184,7 @@ const diapasonEs: Carta = {
     'Esta guía es perfecta si estás conociendo el instrumento desde un nivel inicial o retomando después de una pausa — siempre podrás volver a ella. Y si te surge alguna duda en el camino, será bienvenida: en el aula virtual encontrarás un foro para hacer tus preguntas, y yo te acompaño en el proceso.',
     'Está diseñada para que aprendas a moverte por el diapasón de manera fluida, desde la primera posición hasta el pulgar, en tiempo récord.',
     'Como todo en la vida, la constancia va a determinar tu progreso — pero de mi parte te dejo todos los recursos para que toques con fluidez a lo largo de todo el instrumento en pocos meses.',
-    { k: 'grito', text: '¡Y sí, la posición del pulgar también!' },
+    { k: 'fuerte', text: '¡Y sí, la posición del pulgar también!' },
     'Me parece muy gracioso el miedo colectivo que hay a esta posición. Muy sinceramente te digo: todo es más fácil en ese registro.',
     'No hay que tenerle miedo a la posición del pulgar. Hay que tenerle miedo a las bañeras — esas sí que deben darte miedo. Pero esa es otra historia…',
     'El caso es que los nuevos métodos de enseñanza del contrabajo se enfocan en comenzar por ahí. No quiero aburrirte con detalles: mi meta con este curso es que disfrutes cada paso. Por eso, en cada región del diapasón tendrás una obra con acompañamiento de piano, para tocar y poner en práctica lo técnico.',
@@ -200,13 +207,16 @@ const diapasonEs: Carta = {
       k: 'fuerte',
       text: 'Y después, cuando ya sabes ubicarte en el diapasón, ahí entra la segunda formación: «Todas las escalas (sin aburrirte)».',
     },
-    { k: 'grito', text: 'Escalas. Muchos las odian. Todos las necesitamos.' },
+    /* El único título de la carta (27 sep 2026): abre la segunda formación.
+       Emi lo quiso así —«este podría ser» uno de los grandes títulos—. */
+    { k: 'acento', text: 'Escalas. Muchos las odian. Todos las necesitamos.' },
     'Seguro te ha pasado: no entender cómo debe sonar la siguiente nota, sentir que no tienes fuerza para mantenerte en posición, no poder coordinar que el arco cambie igual que la mano izquierda, no entender el beat del metrónomo.',
     'Si eres de los que piensa «¡si escucho el metrónomo, me pierdo!», tranquilo, lo vamos a resolver. La finalidad es desarrollar ritmo interno y oído armónico poco a poco, sin aburrirse (por algo se llama así la formación).',
     '¿Y cuál es la parte divertida? El acompañamiento de piano. El piano de fondo desarrolla tu oído melódico cada día: dejas de depender del afinador y tienes un metrónomo automático marcándote cada beat.',
-    /* Con guiones desde el 24 sep 2026: con puntos medios («HER·MO·SO.») se
-       veían descentrados en esta cursiva, y Adrián pidió corregirlo. */
-    { k: 'acento', text: 'HER-MO-SO.' },
+    /* En negrita de cuerpo desde el 27 sep 2026: como título grande no le
+       gustaba a Emi. Los guiones son del 24 sep (con puntos medios se veían
+       descentrados). */
+    { k: 'fuerte', text: 'HER-MO-SO.' },
     'La verdad es que todos debemos estudiar escalas — todos, sin importar el nivel. Y con piano, es muchísimo más divertido.',
     { k: 'fuerte', text: 'Tú puedes lograrlo. Solo necesitas constancia y la guía correcta.' },
     {
@@ -298,7 +308,7 @@ const diapasonEn: Carta = {
     'The truth is, it’s two programs. One shows you the way, and the other keeps you in shape.',
     'The first, “Fingerboard: from position 1 to thumb, No fear!”: you get to know the whole fingerboard by playing real pieces with piano accompaniment from level one.',
     'The second is my complete scales program, which I love calling “All the scales (without getting bored).”',
-    { k: 'grito', text: 'In this story I’ll tell you why they go together and why you need both:' },
+    { k: 'fuerte', text: 'In this story I’ll tell you why they go together and why you need both:' },
     'A while ago, one of my students let me know, a few hours before his lesson, that he wanted to record it.',
     'His parents had made a decision: no music until his grades improved. No lessons, no orchestra, no double bass. That was going to be his last lesson for who knew how long.',
     'I spent the whole morning thinking about what to give him in one hour. I had never been so angry and sad, and at the same time so eager to hold someone up.',
@@ -314,7 +324,7 @@ const diapasonEn: Carta = {
     'This guide is perfect if you’re getting to know the instrument from a beginner level or coming back after a break — you can always return to it. And if a question comes up along the way, it’s welcome: in the virtual classroom you’ll find a forum to ask your questions, and I’m with you through the process.',
     'It’s designed so you learn to move across the fingerboard fluently, from first position to thumb, in record time.',
     'Like everything in life, consistency will determine your progress — but from my side, I’m giving you all the resources you need to play fluently across the whole instrument in a few months.',
-    { k: 'grito', text: 'And yes, thumb position too!' },
+    { k: 'fuerte', text: 'And yes, thumb position too!' },
     'I find the collective fear of this position really funny. I’ll tell you very honestly: everything is easier in that register.',
     'You don’t need to be afraid of thumb position. Be afraid of bathtubs — those are what should scare you. But that’s another story…',
     'The thing is, the newer double bass teaching methods focus on starting there. I don’t want to bore you with details: my goal with this course is for you to enjoy every step. That’s why, in every region of the fingerboard, you’ll have a piece with piano accompaniment to play and put the technique into practice.',
@@ -337,13 +347,14 @@ const diapasonEn: Carta = {
       k: 'fuerte',
       text: 'And then, once you know your way around the fingerboard, the second program comes in: “All the scales (without getting bored).”',
     },
-    { k: 'grito', text: 'Scales. Many people hate them. We all need them.' },
+    { k: 'acento', text: 'Scales. Many people hate them. We all need them.' },
     'I’m sure it’s happened to you: not knowing how the next note should sound, feeling you don’t have the strength to hold the position, not being able to coordinate the bow changing at the same time as the left hand, not understanding the metronome’s beat.',
     'If you’re one of those people who thinks “if I listen to the metronome, I get lost!”, relax, we’ll sort it out. The goal is to develop inner rhythm and a harmonic ear little by little, without getting bored (there’s a reason the program has that name).',
     'And what’s the fun part? The piano accompaniment. The piano in the background develops your melodic ear every day: you stop depending on the tuner, and you have an automatic metronome marking every beat for you.',
-    /* Con guiones desde el 24 sep 2026: con puntos medios («HER·MO·SO.») se
-       veían descentrados en esta cursiva, y Adrián pidió corregirlo. */
-    { k: 'acento', text: 'HER-MO-SO.' },
+    /* En negrita de cuerpo desde el 27 sep 2026: como título grande no le
+       gustaba a Emi. Los guiones son del 24 sep (con puntos medios se veían
+       descentrados). */
+    { k: 'fuerte', text: 'HER-MO-SO.' },
     'The truth is, we all need to practice scales — all of us, whatever our level. And with piano, it’s so much more fun.',
     { k: 'fuerte', text: 'You can do it. All you need is consistency and the right guide.' },
     {
@@ -455,7 +466,7 @@ const desdeCeroEs: Carta = {
     { k: 'fuerte', text: 'La verdad, no lo puedo creer.' },
     'De donde yo vengo, la filosofía es completamente diferente. En El Sistema de Venezuela — donde crecí como músico — desde la semana uno ya estás tocando. Así sea una pieza corta, arreglada, con cuerdas al aire. No importa. Estás haciendo música. Estás en un ensamble. Estás enamorándote del instrumento antes de que nadie te diga que es difícil.',
     'Por eso, a los 3 meses, mis alumnos argentinos ya estaban haciendo un recital: para nosotros, entre compañeros, pero tocando obras, aprendiendo de una manera diferente.',
-    { k: 'grito', text: 'Porque la técnica se aprende tocando, no esperando estar listo para tocar.' },
+    { k: 'fuerte', text: 'Porque la técnica se aprende tocando, no esperando estar listo para tocar.' },
     'Esa es la razón por la cual existe esta formación: una guía clara para empezar desde cero y hacer música en semanas, no en años.',
     'Y no vas a estar solo en esto. Te acompaño durante todo el proceso.',
     'Tendremos el foro disponible mientras haces la formación: me escribes tus dudas sobre el contenido y te respondo. Y si te animas a mandarme un video tocando, bienvenido — también los reviso.',
@@ -578,7 +589,7 @@ const desdeCeroEn: Carta = {
     { k: 'fuerte', text: 'I still can’t believe it.' },
     'Where I come from, the philosophy is completely different. In Venezuela’s El Sistema — where I grew up as a musician — you’re playing from week one. Even if it’s a short arranged piece on open strings. It doesn’t matter. You’re making music. You’re in an ensemble. You’re falling in love with the instrument before anyone tells you it’s hard.',
     'That’s why, three months in, my Argentine students were already giving a recital: just for us, among classmates, but playing pieces, learning a different way.',
-    { k: 'grito', text: 'Because technique is learned by playing, not by waiting until you’re ready to play.' },
+    { k: 'fuerte', text: 'Because technique is learned by playing, not by waiting until you’re ready to play.' },
     'That’s the reason this program exists: a clear guide to start from scratch and make music in weeks, not years.',
     'And you won’t be alone in this. I’m with you through the whole process.',
     'We’ll have the forum open while you take the program: you write me your questions about the content, and I answer them. And if you feel brave enough to send me a video of yourself playing, you’re welcome to — I review those too.',
@@ -704,21 +715,26 @@ const vibratoEs: Carta = {
   subtitle: 'Encuentra tu propia voz a través del contrabajo',
   ledeA:
     'Tu vibrato es la herramienta más poderosa que tienes para expresarte a través del contrabajo.',
-  ledeB: 'Te voy a contar una historia de uno de mis contrabajistas favoritos:',
   photoAlt: 'El mar visto desde arriba, con la espuma de las olas',
   carta: [
-    'Janne Saksala, en una masterclass, paró a un estudiante justo al llegar al clímax de la «Elegía» de Bottesini y le preguntó: «¿Por qué haces ese A con tercer dedo? ¿Cuál es el mejor dedo que tienes para vibrar?». Y el chico dijo: «El 1», y tocó con uno.',
-    'Saksala lo volvió a parar y le dijo: «Prueba con el 2». Y allí estuvo un poco mejor.',
-    'Luego le dijo: «Yo, en mi partitura, anoto en las notas que quiero destacar en expresión la letra B, de best vibrato finger».',
+    /* Era el segundo renglón de la promesa hasta el 27 sep 2026. Emi: «eso ya
+       es parte de la conversa». */
+    'Te voy a contar una historia de uno de mis contrabajistas favoritos:',
+    'Janne Saksala, en una masterclass, detuvo a un estudiante justo al llegar al clímax de la «Elegía» de Bottesini y le preguntó: «¿Por qué haces ese A con tercer dedo? ¿Cuál es el mejor dedo que tienes para vibrar?». Y el chico dijo: «El 1», y tocó con uno.',
+    'Saksala lo volvió a detener y le dijo: «Prueba con el 2». Y allí estuvo un poco mejor.',
+    'Luego le dijo: «Yo, en mi partitura, anoto en las notas que quiero destacar en expresión la letra B, de best vibrato finger (el mejor dedo para vibrar)».',
     'Es decir, a él no le importa qué digitación es más cómoda para tocar el pasaje: simplemente la construye en base a llegar con dedo 2 al clímax, que es su best vibrato finger (o por lo menos lo era en ese momento), y poder dar su mejor vibrato.',
     {
       k: 'fuerte',
       text: 'Escucharlo decir eso me hizo entender por qué me gusta tanto como contrabajista, lo que lo hace tan musical: está pensando siempre en lo que quiere decir con cada frase. No en qué es lo técnicamente apropiado.',
     },
     'Por eso, cuando escuchamos diferentes versiones de la misma obra por grandes solistas, parecen totalmente diferentes. Puedes buscar en YouTube uno de los conciertos de Bottesini, escoger a 3 de tus solistas favoritos y verás cómo cada uno tiene una forma diferente de cantarlo. Y el tipo de vibrato que deciden usar en cada parte tiene mucho que ver con ello.',
-    'Te cuento mi historia con el vibrato. Si sientes que estás estancado con este tema, que tu mano se pone rígida cada vez que lo intentas, tal vez te interese.',
+    /* En negrita desde el 27 sep 2026: acá termina la historia de Saksala y
+       empieza la de Emi, y ella quería que se notara el cambio. */
+    { k: 'fuerte', text: 'Te cuento mi historia con el vibrato.' },
+    'Si sientes que estás estancado con este tema, que tu mano se pone rígida cada vez que lo intentas, tal vez te interese.',
     'Cuando yo comencé a estudiar contrabajo, vibraba como todos al inicio, porque hay que hacerlo: era un «adorno». El único problema que veía era lo difícil que era mantenerlo. Si eran notas muy largas, a la mitad ya mi mano se ponía muy tensa y rígida, y el vibrato era muy nervioso.',
-    { k: 'grito', text: 'Para qué te voy a mentir: sonaba como una cabra, jajaja.' },
+    { k: 'fuerte', text: 'Para qué te voy a mentir: sonaba como una cabra, jajaja.' },
     'Como todos mis compañeros, intentaba imitar a los grandes: escuchaba las grabaciones y me anotaba en la partitura golpes de arco y sitios donde vibrar.',
     'Pero obviamente no sonaba igual. Mi vibrato de cabra no aportaba nada a la obra.',
     'Un día, en una clase con Félix Petit, recuerdo que me dijo: «Mi niña, ¿por qué decidiste vibrar desde el inicio de la frase?». Yo le dije: «Porque así lo hace Gary Karr». Y bueno… obviamente Gary no tiene vibrato de cabra, así que era desastroso.',
@@ -728,12 +744,12 @@ const vibratoEs: Carta = {
     },
     'Y a partir de esa clase comencé a entender que el vibrato no es solo un movimiento repetitivo, que no es un adorno que se aplica a las notas largas. Y que hay infinitas formas de producirlo, como infinitas personalidades en el mundo.',
     'Y como ya sabrás, no puedes copiar la personalidad de alguien más. Se ve, se escucha y se siente falso. Con el vibrato pasa igual.',
-    { k: 'acento', text: 'Por eso hice esta formación.' },
+    { k: 'fuerte', text: 'Por eso hice esta formación.' },
     'Está diseñada para que no solo domines la técnica, sino que puedas preguntarte: ¿cómo lo haría si fuese un cantante?',
     'Un cantante tiene algo que decir. Frasea, respira, construye ideas musicales con intención. No repite el texto sin pensar: un buen cantante usa y controla cada nota intencionalmente para contar una historia.',
     'Eso es lo que vamos a hacer con el contrabajo. Que cante. Que tenga tu firma. Que cuando alguien te escuche, no escuche a Gary Karr ni a Saksala ni a tu profesor.',
     { k: 'fuerte', text: 'Te escuche a ti. Lo que tú intencionalmente quieres expresar con cada frase.' },
-    { k: 'grito', text: 'La técnica acá está al servicio de la música, no al revés.' },
+    { k: 'fuerte', text: 'La técnica acá está al servicio de la música, no al revés.' },
     {
       k: 'puntos',
       titulo: '¿Qué vas a encontrar dentro del aula virtual?',
@@ -827,9 +843,9 @@ const vibratoEn: Carta = {
   subtitle: 'Find your own voice through the double bass',
   ledeA:
     'Your vibrato is the most powerful tool you have to express yourself through the double bass.',
-  ledeB: 'Let me tell you a story about one of my favorite bassists:',
   photoAlt: 'The sea seen from above, with the foam of the waves',
   carta: [
+    'Let me tell you a story about one of my favorite bassists:',
     'Janne Saksala, in a masterclass, stopped a student right as he reached the climax of Bottesini’s “Elegy” and asked him: “Why are you playing that A with your third finger? What’s your best finger for vibrato?” The student said, “My first,” and played it with his first.',
     'Saksala stopped him again and said, “Try your second.” And it got a little better.',
     'Then he told him: “In my part, on the notes I want to bring out expressively, I write the letter B — for best vibrato finger.”',
@@ -839,9 +855,10 @@ const vibratoEn: Carta = {
       text: 'Hearing him say that made me understand why I love him so much as a bassist, what makes him so musical: he’s always thinking about what he wants to say with each phrase. Not about what’s technically appropriate.',
     },
     'That’s why, when we listen to different versions of the same piece by great soloists, they sound completely different. You can look up one of the Bottesini concertos on YouTube, pick 3 of your favorite soloists, and you’ll see how each one has a different way of singing it. And the kind of vibrato they choose for each section has a lot to do with it.',
-    'Let me tell you my story with vibrato. If you feel stuck with it, if your hand goes stiff every time you try, you might find it interesting.',
+    { k: 'fuerte', text: 'Let me tell you my story with vibrato.' },
+    'If you feel stuck with it, if your hand goes stiff every time you try, you might find it interesting.',
     'When I started playing the double bass, I vibrated like everyone does at the beginning, because you’re supposed to: it was an “ornament.” The only problem I saw was how hard it was to sustain. On very long notes, halfway through, my hand would get tense and stiff, and the vibrato was very nervous.',
-    { k: 'grito', text: 'Why lie to you: I sounded like a goat, hahaha.' },
+    { k: 'fuerte', text: 'Why lie to you: I sounded like a goat, hahaha.' },
     'Like all my classmates, I tried to imitate the greats: I listened to recordings and marked bowings and places to vibrate in my part.',
     'But obviously it didn’t sound the same. My goat vibrato added nothing to the piece.',
     'One day, in a lesson with Félix Petit, I remember he asked me: “Mi niña, why did you decide to vibrate from the start of the phrase?” I told him: “Because that’s how Gary Karr does it.” And well… obviously Gary doesn’t have a goat vibrato, so it was a disaster.',
@@ -851,12 +868,12 @@ const vibratoEn: Carta = {
     },
     'And from that lesson on, I started to understand that vibrato isn’t just a repetitive movement, that it isn’t an ornament you add to long notes. And that there are infinite ways to produce it, just like there are infinite personalities in the world.',
     'And as you probably know, you can’t copy someone else’s personality. It looks, sounds, and feels fake. Vibrato is the same.',
-    { k: 'acento', text: 'That’s why I made this program.' },
+    { k: 'fuerte', text: 'That’s why I made this program.' },
     'It’s designed so you don’t just master the technique, but can also ask yourself: how would I do this if I were a singer?',
     'A singer has something to say. They phrase, they breathe, they build musical ideas with intention. They don’t repeat the lyrics without thinking: a good singer uses and controls every note on purpose to tell a story.',
     'That’s what we’re going to do with the double bass. Make it sing. Give it your signature. So that when someone hears you, they don’t hear Gary Karr, or Saksala, or your teacher.',
     { k: 'fuerte', text: 'They hear you. What you intentionally want to express with each phrase.' },
-    { k: 'grito', text: 'Here, technique serves the music, not the other way around.' },
+    { k: 'fuerte', text: 'Here, technique serves the music, not the other way around.' },
     {
       k: 'puntos',
       titulo: 'What will you find inside the virtual classroom?',
@@ -958,9 +975,11 @@ const membresiaEs: Carta = {
   title: 'Estudiemos juntos',
   subtitle: 'La membresía',
   ledeA: 'Siete tomos de un método no te preparan para resolver problemas en el escenario.',
-  ledeB: 'Te cuento por qué.',
   photoAlt: 'Emilse Rios',
   carta: [
+    /* Hasta el 27 sep 2026 era el segundo renglón de la promesa. Emi: «es
+       parte de la conversación, no parte de la promesa». */
+    'Te cuento por qué.',
     'Llegas al ensayo. Repartieron la obra hace dos semanas y hay un pasaje que no te sale. Lo estudiaste. Lo estudiaste bastante, de hecho.',
     'Pero no puedes resolverlo. Y tus compañeros sí: tienen más experiencia, y pueden decirte «si usas más arco cuando vayas a la posición de pulgar la cuerda no se ahoga», «el truco para que se entienda el pasaje rápido es pensar que la cuerda tiene dos lados diferentes», «si anticipas la posición el pasaje te suena más conectado».',
     'Les tomó unos 20 años descubrir esos detalles, pero te los pueden decir en un momento.',
@@ -971,18 +990,18 @@ const membresiaEs: Carta = {
     'Porque no importa si estás estudiando por tu cuenta o estás en el conservatorio, la realidad que me encuentro es siempre la misma: métodos progresivos que se basan en la mano izquierda.',
     'Por cierto, te dejo el comentario de una suscriptora. Lo corté y pegué tal cual:',
     { k: 'testimonio', autor: 'Magdalena', text: 'Antes del curso veía solo un método, escalas y todo enfocado a la mano izquierda, y sinceramente lo quería mejorar porque creo que tengo una deficiencia en el arco. Me ayudó a ser más consciente en la manera de producir sonido. Antes tocaba con mucha presión y eso me hizo lesionarme; ahora entiendo mejor cómo funciona todo. Lo uso como calentamiento cada día, y luego me pongo a estudiar lo que tengo que estudiar del conservatorio' },
-    { k: 'grito', text: 'Volvamos, ya basta de que el arco sea algo secundario.' },
+    { k: 'fuerte', text: 'Volvamos, ya basta de que el arco sea algo secundario.' },
     'Entre 2012 y 2014 estuve recibiendo master class con Klaus Stoll, ex solista de la Filarmónica de Berlín.',
     'Un comentario suyo me marcó. Me lo dijo mientras yo tocaba el Dittersdorf, obsesionada con encontrar la digitación perfecta. Todo mal, jaja.',
-    { k: 'grito', text: '«El arco es nuestra boca, dientes y lengua.»' },
+    { k: 'fuerte', text: '«El arco es nuestra boca, dientes y lengua.»' },
     'Es nuestra más grande herramienta de comunicación.',
     { k: 'fuerte', text: 'Yo buscaba la respuesta en la mano izquierda. Estaba en la derecha.' },
     'Y da igual si tu meta es tocar en orquesta, eres jazzista, músico popular, o simplemente disfrutas tocar todas las suites de Bach en la sala de tu casa.',
     'Las notas las tocan todos —si estudian, claro está, jaja—, pero cómo las tocan, qué tipo de sonido tienen, cómo interpretan el pasaje: eso es 100% trabajo del arco.',
     '¿Lo has notado? Te estudias las notas una y otra vez, lo practicas, y al momento de tocar hay pitos, vibraciones que no sabes por qué pasan, el sonido es nasal, suena plano, no expresivo.',
     'No sabes cómo hacer para que suene como en la grabación que has escuchado 650 veces. Aunque las notas estén, el problema es que dejas a un lado tu principal herramienta de comunicación.',
-    { k: 'acento', text: 'El arco.' },
-    { k: 'grito', text: 'Por eso existe Estudiemos Juntos.' },
+    { k: 'fuerte', text: 'El arco.' },
+    { k: 'fuerte', text: 'Por eso existe Estudiemos Juntos.' },
     'Cada jueves te dejo un ejercicio en la plataforma. Uno. Basado en un concepto técnico que te explico una vez al mes: de dónde vienen los movimientos, la coordinación, el sonido. De dónde vienen las cosas, no cómo repetirlas.',
     'Te dejo lo que me escribió Mario, un exalumno del mundo del jazz que ahora está en la membresía:',
     { k: 'testimonio', autor: 'Mario', text: 'La plataforma es muy intuitiva, me gustan mucho los ejercicios. No siempre tengo tiempo de verlos, pero por lo menos me mantengo activo. El trabajo del arco está muy, muy bueno' },
@@ -995,6 +1014,11 @@ const membresiaEs: Carta = {
     '¿Te parece poco un ejercicio por semana? Mira lo que me escribió Laura:',
     { k: 'testimonio', autor: 'Laura', text: 'Siento que me ayudó a organizar un poco más el estudio. Como son pequeñas tareas, las puedo hacer aunque tenga poco tiempo, e igual trabajar algún objetivo' },
     'Volvamos, tienes un canal directo para escribirme. Respondo yo, no una inteligencia artificial. Esta es una membresía con acompañamiento continuo.',
+    'Y este me llegó de un papá:',
+    { k: 'testimonio', autor: 'Sergio', text: 'Está buenísimo esto, se la di a mi hijo para que vaya trabajando técnica por su cuenta, y me dijo que se entiende muy bien, que entendió por qué no hay que apretar con el pulgar, y le gustan los ejercicios' },
+    'Creo fielmente que el arco alemán es la manera más natural de tomar el arco, y gracias a eso es muchísimo más fácil dominar los golpes de arco en menos tiempo. Por eso, esta es una membresía especializada en arco alemán.',
+    /* «Para ti» va justo encima de «no es para ti» desde el 27 sep 2026 (Emi):
+       con el recuadro antes, «Y este me llegó de un papá» ya no tenía sentido. */
     { k: 'lista', tono: 'si', titulo: 'Las personas que más se han beneficiado de esta membresía son:', items: [
       'Alumnos de conservatorio enfocados en libros de métodos (el típico programa de conservatorio), donde el arco juega un papel secundario.',
       'Jazzistas que quieren incluir el arco en su repertorio, hacer solos y presentar una propuesta única para diferenciarse del resto.',
@@ -1002,9 +1026,6 @@ const membresiaEs: Carta = {
       'Contrabajistas que se sienten estancados con la técnica francesa y quieren cambiarse a arco alemán y dominarlo en poco tiempo.',
       'Personas que estudian por su cuenta y quieren una meta clara semanal para avanzar técnicamente.',
     ] },
-    'Y este me llegó de un papá:',
-    { k: 'testimonio', autor: 'Sergio', text: 'Está buenísimo esto, se la di a mi hijo para que vaya trabajando técnica por su cuenta, y me dijo que se entiende muy bien, que entendió por qué no hay que apretar con el pulgar, y le gustan los ejercicios' },
-    'Creo fielmente que el arco alemán es la manera más natural de tomar el arco, y gracias a eso es muchísimo más fácil dominar los golpes de arco en menos tiempo. Por eso, esta es una membresía especializada en arco alemán.',
     { k: 'lista', tono: 'no', titulo: 'Esta membresía NO es para ti si:', items: [
       'Buscas una biblioteca infinita de ejercicios para guardar y ver algún día. Acá no hay biblioteca, no hay archivo, no hay “lo veo después”.',
       'Necesitas preparar una meta específica: entrar a un conservatorio, ganar una audición. Para eso hacen falta clases particulares. Esto te mantiene en forma técnicamente y te da bases; no resuelve repertorio puntual.',
@@ -1062,9 +1083,9 @@ const membresiaEn: Carta = {
   title: "Let's study together",
   subtitle: 'The membership',
   ledeA: 'Seven volumes of a method won’t prepare you to solve problems on stage.',
-  ledeB: 'Let me tell you why.',
   photoAlt: 'Emilse Rios',
   carta: [
+    'Let me tell you why.',
     'You show up to rehearsal. They handed out the piece two weeks ago and there’s a passage you can’t get. You practiced it. Practiced it a lot, actually.',
     'But you can’t crack it. And the people next to you can: they’ve got more experience, and they’ll tell you things like “use more bow going into thumb position and the string won’t choke,” “the trick for making that fast passage speak is to think of the string as having two different sides,” “if you anticipate the shift the passage sounds more connected.”',
     'It took them about 20 years to figure those details out. They can hand them to you in a second.',
@@ -1075,18 +1096,18 @@ const membresiaEn: Carta = {
     'Because it doesn’t matter whether you’re practicing on your own or sitting in a conservatory, what I run into is always the same: progressive methods built around the left hand.',
     'By the way, here’s a comment from a subscriber. I copied it as-is (translated from Spanish):',
     { k: 'testimonio', autor: 'Magdalena', text: 'Before this membership, I only ever saw one method, scales, everything focused on the left hand, and honestly I wanted to improve that because I think my bow is a weak spot. It helped me become more aware of how I produce sound. I used to play with a lot of pressure and that got me injured; now I understand much better how everything works. I use it as my warm-up every day, and then I get on with whatever I have to practice for the conservatory.' },
-    { k: 'grito', text: 'Enough with the bow being an afterthought.' },
+    { k: 'fuerte', text: 'Enough with the bow being an afterthought.' },
     'Between 2012 and 2014 I took master classes with Klaus Stoll, former solo bassist of the Berlin Philharmonic.',
     'One thing he said stuck with me. He said it while I was playing the Dittersdorf, obsessed with finding the perfect fingering. All wrong, ha!',
-    { k: 'grito', text: '“The bow is our mouth, our teeth and our tongue.”' },
+    { k: 'fuerte', text: '“The bow is our mouth, our teeth and our tongue.”' },
     'It’s our single greatest tool for communicating.',
     { k: 'fuerte', text: 'I was looking for the answer in my left hand. It was in my right.' },
     'And it makes no difference whether your goal is orchestra, whether you play jazz, pop music, or you just enjoy playing all the Bach suites in your living room.',
     'Everyone plays the notes — if they practice, obviously, ha — but how they play them, what kind of sound they get, how they shape the passage: that’s 100% the bow’s work.',
     'Have you noticed? You practice the notes over and over, you drill them, and then when you play there are whistles, vibrations you can’t explain, the sound is nasal, it’s flat, there’s nothing expressive about it.',
     'You can’t figure out how to make it sound like the recording you’ve listened to 650 times. The notes are there — the problem is you’ve set aside your main tool for communicating.',
-    { k: 'acento', text: 'The bow.' },
-    { k: 'grito', text: 'That’s why Let’s Study Together exists.' },
+    { k: 'fuerte', text: 'The bow.' },
+    { k: 'fuerte', text: 'That’s why Let’s Study Together exists.' },
     'Every Thursday I leave you one exercise on the platform. One. Built on a technical concept I explain once a month: where the movements come from, the coordination, the sound. Where things come from, not how to repeat them.',
     'Here’s what Mario wrote me — a former student from the jazz world who’s now in the membership:',
     { k: 'testimonio', autor: 'Mario', text: 'The platform is really intuitive and I love the exercises. I don’t always have time to watch them, but at least I stay active. The bow work is really, really good.' },
@@ -1099,6 +1120,10 @@ const membresiaEn: Carta = {
     'Think one exercise a week isn’t enough? Here’s what Laura wrote me:',
     { k: 'testimonio', autor: 'Laura', text: 'Yes, I feel it helped me organize my practice a bit more. Since they’re small tasks, I can do them even when I’m short on time and still work toward a goal.' },
     'And guess what? You get a direct line to write to me. I answer, not an AI. This is a membership with real support behind it.',
+    'And this one came from a dad:',
+    { k: 'testimonio', autor: 'Sergio', text: 'I got it for my son so he could work on technique on his own. He told me it’s very easy to understand, that he understood why you shouldn’t squeeze with your thumb, and he likes the exercises.' },
+    'I genuinely believe German bow is the most natural way to hold a bow, and because of that the bow strokes come far faster. That’s why this membership is built around German bow.',
+    /* Junto a «no es para ti», como en el español (27 sep 2026). */
     { k: 'lista', tono: 'si', titulo: 'The people who’ve gotten the most out of this membership:', items: [
       'Conservatory students buried in method books (the standard conservatory program), where the bow plays second fiddle.',
       'Jazz players who want to bring the bow into their playing, take bow solos, and offer something nobody else in the room is doing.',
@@ -1106,9 +1131,6 @@ const membresiaEn: Carta = {
       'Bass players who feel stuck with French bow and want to switch to German and get comfortable with it fast.',
       'People practicing on their own who want one clear weekly goal to keep moving technically.',
     ] },
-    'And this one came from a dad:',
-    { k: 'testimonio', autor: 'Sergio', text: 'I got it for my son so he could work on technique on his own. He told me it’s very easy to understand, that he understood why you shouldn’t squeeze with your thumb, and he likes the exercises.' },
-    'I genuinely believe German bow is the most natural way to hold a bow, and because of that the bow strokes come far faster. That’s why this membership is built around German bow.',
     { k: 'lista', tono: 'no', titulo: 'This membership is NOT for you if:', items: [
       'You’re after an infinite library of exercises to save and watch someday. There’s no library here, no archive, no “I’ll get to it later.”',
       'You need to prepare something specific: a conservatory entrance, an audition. That calls for private lessons. This keeps you technically in shape and builds your foundation; it won’t solve a particular piece of repertoire.',

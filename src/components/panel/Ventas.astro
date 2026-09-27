@@ -143,8 +143,11 @@ const paraJs = { cartas, avisame: AVISAME };
     { v: 'parrafo', t: 'Párrafo' },
     { v: 'fuerte', t: 'Negrita' },
     { v: 'cursiva', t: 'Cursiva' },
-    { v: 'grito', t: 'Frase centrada' },
-    { v: 'acento', t: 'La frase grande' },
+    /* Desde el 27 sep 2026 la «frase centrada» ya no se centra ni se agranda
+       —Emi pidió que la carta fluya— y la «frase grande» es un título. Los
+       nombres internos se quedan para no romper las páginas guardadas. */
+    { v: 'grito', t: 'Frase destacada' },
+    { v: 'acento', t: 'Título' },
     { v: 'testimonio', t: 'Testimonio' },
     { v: 'lista-si', t: 'Lista «para ti»' },
     { v: 'lista-no', t: 'Lista «no es para ti»' },
@@ -666,12 +669,12 @@ const paraJs = { cartas, avisame: AVISAME };
         par('title', 'Título', 'linea'),
         par('subtitle', 'Debajo del título', 'linea'),
         par('ledeA', 'La apertura, primer renglón', 'texto'),
-        par('ledeB', 'La apertura, segundo renglón', 'linea', 'Sale más grande, a continuación del primero.'),
+        par('ledeB', 'La apertura, segundo renglón', 'linea', 'Opcional. Sale igual de grande, debajo del primero: solo si sigue siendo la promesa.'),
         par('photoAlt', 'Descripción de la foto', 'linea', 'Para quien no la ve: qué hay en la foto.'),
       ),
       seccion(
         'La carta',
-        'El cuerpo de la página, bloque a bloque. Párrafo: texto normal. Destacado: en la letra de los títulos. Frase centrada: en cursiva, al centro. La frase grande: la más grande de la página (una o dos por carta). Testimonio: la cita y el nombre — la presentación va en el párrafo de antes. Listas: «para ti» y «no es para ti», un punto por renglón. Lo que trae: filas, un punto por renglón.',
+        'El cuerpo de la página, bloque a bloque. Párrafo: texto normal. Negrita y Frase destacada: en negrita, del mismo tamaño que el texto, sin cortar la lectura. Cursiva: lo que se dice en otro tono. Título: abre una parte nueva de la carta, en la letra de los títulos (úsalo poco). Testimonio: la cita y el nombre — la presentación va en el párrafo de antes. Listas: «para ti» y «no es para ti», un punto por renglón. Lo que trae: filas, un punto por renglón.',
         listaBloques,
         anadir('+ Bloque al final', () => {
           m.bloques.push({ tipo: 'parrafo', es: vacioBloque(), en: vacioBloque() });
@@ -683,7 +686,7 @@ const paraJs = { cartas, avisame: AVISAME };
         'La ficha de precio',
         'La caja con el precio, lo que incluye y el botón.',
         par('includesH', 'Título encima de la ficha', 'linea', undefined, { es: 'Qué incluye', en: 'What’s included' }),
-        par('titleEcho', 'El nombre en el otro idioma', 'linea', 'Va en cursiva al lado del título.'),
+        par('titleEcho', 'El nombre en el otro idioma', 'linea', 'Ya no se ve en la página: la ficha de precio lleva solo el nombre en su idioma.'),
         par('priceLabel', 'Rótulo del precio', 'linea', undefined, { es: 'Precio', en: 'Price' }),
         par('price', 'Precio', 'linea', undefined, { es: '240 €', en: '€240' }),
         par('pricePer', 'Detrás del precio (opcional)', 'linea', '«/mes» en la membresía. Los cursos no llevan.'),
@@ -1189,11 +1192,11 @@ const paraJs = { cartas, avisame: AVISAME };
     color: var(--ink-soft);
   }
 
-  /* Cada tipo de bloque se insinúa en el editor como se verá: la negrita y
-     la cursiva en la letra del cuerpo, la frase centrada en cursiva de
-     titulares, la grande más grande. Así Emi lee su carta con el ritmo que
-     tendrá. */
-  .ventas :global(.item--fuerte textarea) {
+  /* Cada tipo de bloque se insinúa en el editor como se verá: la negrita, la
+     frase destacada y la cursiva en la letra del cuerpo, el título en la de
+     los titulares y centrado. Así Emi lee su carta con el ritmo que tendrá. */
+  .ventas :global(.item--fuerte textarea),
+  .ventas :global(.item--grito textarea) {
     font-weight: 600;
   }
 
@@ -1201,21 +1204,11 @@ const paraJs = { cartas, avisame: AVISAME };
     font-style: italic;
   }
 
-  .ventas :global(.item--grito textarea),
   .ventas :global(.item--acento textarea) {
     font-family: var(--font-display);
     font-size: 1.25rem;
     line-height: 1.3;
-  }
-
-  .ventas :global(.item--grito textarea),
-  .ventas :global(.item--acento textarea) {
-    font-style: italic;
     text-align: center;
-  }
-
-  .ventas :global(.item--acento textarea) {
-    font-size: 1.75rem;
   }
 
   .ventas :global(.item--testimonio textarea) {

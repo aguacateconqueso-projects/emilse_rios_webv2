@@ -131,7 +131,7 @@ export const aulaUi = {
     'gate.wait': 'Un momento.',
     'gate.needed': 'Esto es para quien ya entró',
     'gate.neededLead':
-      'Inicia sesión con el correo con el que compraste. Si todavía no tienes nada, la tienda está acá al lado.',
+      'Inicia sesión con el correo con el que te inscribiste. Si todavía no tienes nada, la tienda está acá al lado.',
     'gate.signin': 'Iniciar sesión',
     /* El candado de pago, desde el 22 sep 2026. El texto no acusa a nadie de
        no haber pagado: quien llega acá suele ser alguien que SÍ pagó y cuyo
@@ -147,12 +147,12 @@ export const aulaUi = {
 
     'signin.eyebrow': 'Acceso',
     'signin.title': 'Entra al aula',
-    'signin.lead': 'Con el correo con el que compraste.',
+    'signin.lead': 'Con el correo con el que te inscribiste.',
     'signin.email': 'Tu correo',
     'signin.pass': 'Tu contraseña',
     'signin.remember': 'Mantener la sesión iniciada',
     'signin.rememberHelp':
-      'En un equipo compartido, déjala sin marcar: la sesión se cierra al cerrar el navegador.',
+      'En un equipo compartido, desmarca «Mantener la sesión iniciada»: así la sesión se cierra al cerrar el navegador.',
     'signin.go': 'Entrar',
     'signin.first': '¿Primera vez, o se te olvidó la clave?',
     'signin.firstLead':
@@ -167,7 +167,7 @@ export const aulaUi = {
     'signin.broke':
       'No pudimos completar el acceso, y no es tu contraseña: es algo de nuestro lado. Vuelve a intentarlo en un momento, y si sigue igual escríbeme a info@emilserios.com.',
     'signin.noEmail': 'Escribe tu correo.',
-    'signin.store': 'Todavía no he comprado nada',
+    'signin.store': '¿Estás buscando mis formaciones? Acá te las muestro.',
     'signin.leaving': 'Cerrando tu sesión…',
 
     'pass.eyebrow': 'Tu contraseña',
@@ -343,7 +343,7 @@ export const aulaUi = {
     'gate.wait': 'One moment.',
     'gate.needed': 'This is for people who are already in',
     'gate.neededLead':
-      'Sign in with the email you bought with. If you have nothing yet, the store is right next door.',
+      'Sign in with the email you signed up with. If you have nothing yet, the store is right next door.',
     'gate.signin': 'Sign in',
     'gate.noSub': "We couldn't find anything in your name",
     'gate.noSubLead':
@@ -356,12 +356,12 @@ export const aulaUi = {
 
     'signin.eyebrow': 'Access',
     'signin.title': 'Come into the classroom',
-    'signin.lead': 'With the email you bought with.',
+    'signin.lead': 'With the email you signed up with.',
     'signin.email': 'Your email',
     'signin.pass': 'Your password',
     'signin.remember': 'Keep me signed in',
     'signin.rememberHelp':
-      'On a shared computer, leave it unticked: the session ends when you close the browser.',
+      'On a shared computer, untick “Keep me signed in”: the session will end when you close the browser.',
     'signin.go': 'Sign in',
     'signin.first': 'First time, or forgot your password?',
     'signin.firstLead':
@@ -373,7 +373,7 @@ export const aulaUi = {
     'signin.broke':
       "We couldn't complete your sign-in, and it isn't your password — something on our side went wrong. Try again in a moment, and if it keeps happening write to info@emilserios.com.",
     'signin.noEmail': 'Type your email.',
-    'signin.store': "I haven't bought anything yet",
+    'signin.store': 'Looking for my courses? Here they are.',
     'signin.leaving': 'Signing you out…',
 
     'pass.eyebrow': 'Your password',

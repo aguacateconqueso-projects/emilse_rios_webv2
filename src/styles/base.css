@@ -238,35 +238,40 @@ a:hover {
   letter-spacing: 0.04em;
 }
 
-/* --- Frase-ancla --------------------------------------------------------- */
-.anchor {
-  max-width: 65rem; /* 1040 px */
-  margin: var(--space-12) auto;
-  padding-inline: var(--space-3);
-  text-align: center;
+/* --- La frase dicha más fuerte --------------------------------------------
+   Hasta el 27 sep 2026 era la «frase-ancla»: centrada, en cursiva de titulares
+   y de 32 a 56 px, con 96 px de aire arriba y abajo. Emi pidió quitarla así en
+   toda la web: «es una carta, tiene que ser fluida», y el salto de tamaño y la
+   cursiva cortaban la lectura a mitad de conversación.
+
+   Ahora es **un párrafo más de la columna, en negrita**: la misma letra, el
+   mismo tamaño, alineada a la izquierda, a 24 px de lo que tiene alrededor
+   (`.sigue`). Se dice más fuerte, no se dice aparte. El 600 es real: la de
+   cuerpo trae el eje de peso entero (ver `astro.config.mjs`), el mismo que
+   usa la negrita de las cartas.
+
+   Cuando son varias líneas —las tres lecciones de *Sobre mí*— es una lista
+   con viñetas (lo recomendó Isra: tres como mucho, y con viñeta, no con
+   número). */
+.dicho {
+  font-weight: 600;
 }
 
-.anchor__num {
-  margin-bottom: var(--space-4);
+ul.dicho {
+  margin: 0;
+  padding-left: 1.25em;
+  list-style: disc;
 }
 
-/* Una frase-ancla puede traer varias líneas —las tres lecciones de *Sobre mí*
-   son una lista, no un párrafo—. Cada una es su propio `<p>`, y los 8 px las
-   separan lo justo para que se lean como tres frases y no como una sola
-   partida en renglones. */
-.anchor__text + .anchor__text {
+ul.dicho > li + li {
   margin-top: var(--space-1);
 }
 
-.anchor__text {
-  max-width: 56.25rem; /* 900 px */
-  margin-inline: auto;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: var(--text-anchor);
-  line-height: var(--leading-anchor);
-  letter-spacing: var(--tracking-section);
-  text-wrap: balance;
+/* Un bloque que sigue al anterior sin abrir sección: a la distancia de un
+   párrafo (24 px) y no de un bloque (96 px). Lo usan la frase dicha más
+   fuerte y los párrafos que la rodean, que son la misma conversación. */
+.sigue {
+  margin-top: var(--space-3);
 }
 
 /* ==========================================================================
@@ -293,6 +298,24 @@ a:hover {
 .no-js .reveal {
   opacity: 1;
   transform: none;
+}
+
+/* --- El color al pasar, en el teléfono (27 sep 2026) ----------------------
+   Sin cursor, la foto toma color cuando el scroll la pasa por el centro de la
+   pantalla; la clase la pone `src/scripts/color-al-pasar.ts`. El mismo medio
+   segundo largo y la misma curva que el color del `:hover`. `img.` delante
+   para ganarle al gris de `MediaSlot`, que va con su ámbito. Donde la lámina
+   de la Home anima con el scroll, la animación manda y esto no se nota. */
+@media (hover: none) {
+  img.slot__img,
+  img.plate__img {
+    transition: filter 0.6s var(--ease-reveal);
+  }
+
+  img.slot__img.a-color,
+  img.plate__img.a-color {
+    filter: grayscale(0);
+  }
 }
 
 /* ==========================================================================

@@ -175,11 +175,22 @@ const statusId = `${id}-status`;
     color: var(--ink-soft);
   }
 
-  /* El acuse de recibo reemplaza al campo, con su propia regla. */
+  /* El acuse de recibo reemplaza al campo, con su propia regla.
+
+     En la letra del cuerpo, no en mono, desde el 27 sep 2026: pasó de «Listo.
+     Revisa tu bandeja de entrada» a las cuatro frases de Emi —el asunto del
+     primer correo y dónde buscarlo—, y en versalitas de 12 px eso no se lee. */
   .subscribe__status.is-done {
     margin-top: 0;
-    padding-bottom: var(--space-1);
+    padding-bottom: var(--space-2);
     border-bottom: 1px solid var(--rule);
+    font-family: var(--font-body);
+    font-size: var(--text-small);
+    letter-spacing: normal;
+    text-transform: none;
+    line-height: 1.5;
+    color: var(--ink);
+    text-wrap: pretty;
     animation: subscribe-in 0.4s var(--ease-reveal);
   }
 

@@ -91,6 +91,37 @@ import contrabajo from '../assets/img/contrabajo.webp';
     -webkit-mask-composite: source-in;
   }
 
+  /* --- En el teléfono: el instrumento entero -------------------------------
+     La banda de la izquierda mide el 44 % del ancho, y en una pantalla vertical
+     eso son 170 px por 850 de alto: la foto, llenándola a lo alto, se quedaba
+     en el borde de la madera, sin la efe, sin el puente y sin las cuerdas. Emi
+     lo vio en un iPhone 16 y en un Xperia 1 (27 sep 2026): «no se entiende
+     como contrabajo, solo aparece una parte».
+
+     Así que en estrecho la foto va a lo ancho de la pantalla y entera: curva,
+     efe, puente y cuerdas. La banda mide lo que mide la foto (1200 × 1798) y
+     arranca un poco por debajo del menú. Sin el desvanecido lateral, que a
+     ese ancho se comía las cuerdas; en su lugar, los bordes de arriba y de
+     abajo se disuelven en el papel —a lo ancho, la foto tiene principio y
+     fin, y sin esto se veía el corte—. El revelado de arriba abajo se queda.
+     Sigue detrás del cristal y a la misma opacidad: el texto se lee igual. */
+  @media (max-width: 48rem) {
+    .backdrop__bass {
+      inset-block: auto;
+      top: 8vh;
+      width: 100%;
+      height: calc(100vw * 1798 / 1200);
+      background-size: 100% auto;
+      background-position: center top;
+      mask-image:
+        linear-gradient(to bottom, transparent 0%, #000 12%, #000 72%, transparent 100%),
+        linear-gradient(to bottom, #000 var(--bass-reveal), transparent calc(var(--bass-reveal) + 20%));
+      -webkit-mask-image:
+        linear-gradient(to bottom, transparent 0%, #000 12%, #000 72%, transparent 100%),
+        linear-gradient(to bottom, #000 var(--bass-reveal), transparent calc(var(--bass-reveal) + 20%));
+    }
+  }
+
   /* El cristal: el mismo papel del sitio, translúcido. Esquinas rectas y sin
      borde — el sistema no tiene radios ni sombras. El esmerilado lo pone la
      capa de abajo; ver el porqué en `.backdrop__bass`. */
