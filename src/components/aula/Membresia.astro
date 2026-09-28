@@ -16,8 +16,10 @@
  *     bonus se acumula y no caduca;
  *   · el video del idioma de la página (el otro idioma es la otra página: el
  *     ES/EN del menú), y el PDF del bucket público «pdfs»;
- *   · el foro de la semana (`questions` / `answers`), por idioma, que Emi
- *     responde desde el panel → Mensajes;
+ *   · las preguntas a Emi (`questions` / `answers`), que ella responde desde
+ *     el panel → Mensajes. **Privadas desde el 28 sep 2026**: cada miembro
+ *     ve solo las suyas, como en el hilo de los cursos (migración 0011);
+ *     hasta ese día era un foro que leían todos;
  *   · la red de seguridad: si quien entra no tiene la membresía al día, se le
  *     pregunta a Stripe (`/api/verify-subscription`) antes de cerrarle la
  *     puerta, por si el webhook no llegó.
@@ -46,7 +48,6 @@ const T = {
   weekNone: a('memb.weekNone'),
   noPdf: a('memb.noPdf'),
   pdf: a('memb.pdf'),
-  you: a('memb.you'),
   answer: a('memb.answer'),
   pending: a('memb.pending'),
   forumEmpty: a('memb.forumEmpty'),
@@ -111,26 +112,34 @@ const T = {
         <div class="mb-marco" data-w-video></div>
         <div class="mb-desc" data-w-desc></div>
         <p class="mb-pdf"><Boton href="#" data-w-pdf>{a('memb.pdf')}</Boton></p>
-
-        <section class="mb-foro" aria-labelledby="foro-h">
-          <p class="eyebrow">{a('memb.forumEyebrow')}</p>
-          <h3 class="app-h2" id="foro-h">{a('memb.forumH')}</h3>
-          <p class="soft mb-foro__nota">{a('memb.forumNote')}</p>
-
-          <form class="mb-foro__form" data-foro-form>
-            <label class="campo">
-              <span class="campo__t">{a('memb.composeLabel')}</span>
-              <textarea rows="3" placeholder={a('memb.composePh')} required data-foro-texto></textarea>
-              <span class="campo__ayuda">{a('memb.composeHint')}</span>
-            </label>
-            <Boton class="boton--solid" type="submit" data-foro-enviar>{a('memb.composeBtn')}</Boton>
-          </form>
-
-          <ul class="mb-hilo" role="list" data-foro-lista></ul>
-        </section>
-
         <p class="soft mb-nota">{a('memb.weekNote')}</p>
       </div>
+
+      {/*
+        Las preguntas a Emi: **privadas desde el 28 sep 2026**. Hasta ese día
+        era el foro de la semana, que leían todos los miembros; Emi lo quiso
+        1:1, como el hilo de los cursos. Cada miembro ve SOLO las suyas —de
+        todas las semanas, para que una respuesta que llega después del cambio
+        de ejercicio no se pierda— y lo decide la base de datos (migración
+        0011). Va fuera del cuerpo del ejercicio: se ve aunque esta semana
+        todavía no haya ejercicio, y entonces solo falta el campo para escribir.
+      */}
+      <section class="mb-foro" aria-labelledby="foro-h" data-foro hidden>
+        <p class="eyebrow">{a('memb.forumEyebrow')}</p>
+        <h3 class="app-h2" id="foro-h">{a('memb.forumH')}</h3>
+        <p class="soft mb-foro__nota">{a('memb.forumNote')}</p>
+
+        <form class="mb-foro__form" data-foro-form hidden>
+          <label class="campo">
+            <span class="campo__t">{a('memb.composeLabel')}</span>
+            <textarea rows="3" placeholder={a('memb.composePh')} required data-foro-texto></textarea>
+            <span class="campo__ayuda">{a('memb.composeHint')}</span>
+          </label>
+          <Boton class="boton--solid" type="submit" data-foro-enviar>{a('memb.composeBtn')}</Boton>
+        </form>
+
+        <ul class="mb-hilo" role="list" data-foro-lista></ul>
+      </section>
     </section>
 
     {/* --- El Concepto Base del mes ------------------------------------- */}
@@ -282,7 +291,7 @@ const T = {
       return (data?.[0] as Fila | undefined) ?? null;
     };
 
-    /* --- El foro de la semana --------------------------------------------- */
+    /* --- Las preguntas a Emi (privadas) ----------------------------------- */
     const hace = (iso: string) => {
       const s = Math.floor((Date.now() - Date.parse(iso)) / 1000);
       const m = Math.floor(s / 60);
@@ -295,16 +304,20 @@ const T = {
       return EN ? `${d} days ago` : `hace ${d} días`;
     };
 
-    function mensaje(q: any, uid: string | null) {
+    /* Todas son suyas, así que ya no lleva el nombre: la semana del ejercicio
+       (si todavía está en ventana; la RLS de `exercises` no enseña las
+       viejas) y cuándo la hizo. */
+    function mensaje(q: any) {
       const li = document.createElement('li');
       li.className = 'mb-msj';
-      const quien = document.createElement('p');
-      quien.className = 'mono soft';
-      quien.textContent = `${q.author_name || ''}${q.user_id === uid ? ` (${T.you})` : ''} · ${hace(q.created_at)}`;
+      const cuando = document.createElement('p');
+      cuando.className = 'mono soft';
+      const semana = q.exercises ? etiqueta(q.exercises) : '';
+      cuando.textContent = [semana, hace(q.created_at)].filter(Boolean).join(' · ');
       const cuerpo = document.createElement('p');
       cuerpo.className = 'mb-msj__txt';
       cuerpo.textContent = q.body;
-      li.append(quien, cuerpo);
+      li.append(cuando, cuerpo);
 
       const r = q.answers?.[0];
       const resp = document.createElement('div');
@@ -312,7 +325,7 @@ const T = {
       if (r) {
         const q2 = document.createElement('p');
         q2.className = 'mono soft';
-        q2.textContent = `Emilse Rios · ${T.answer}`;
+        q2.textContent = `Emi · ${T.answer}`;
         const t2 = document.createElement('p');
         t2.className = 'mb-msj__txt';
         t2.textContent = r.body;
@@ -331,24 +344,35 @@ const T = {
       return li;
     };
 
-    async function foro(ex: Fila, uid: string | null, nombre: string) {
+    /* Las preguntas de quien está dentro, y nada más. El filtro por `user_id`
+       lo pone también la base de datos (migración 0011); acá hace además que
+       Emi —que por ser admin lo ve todo— vea en esta pantalla solo las suyas
+       de prueba: las de las miembros las responde desde el panel → Mensajes.
+       Sin filtro de idioma: es su hilo, pregunte en el idioma que pregunte. */
+    async function foro(ex: Fila | null, uid: string | null, nombre: string) {
+      if (!uid) return;
+      $('[data-foro]').hidden = false;
       const lista = $('[data-foro-lista]');
-      const CAMPOS = 'id, user_id, body, author_name, created_at, answers(id, body, created_at)';
+      const CAMPOS =
+        'id, user_id, body, created_at, answers(id, body, created_at), exercises(week_label, week_label_en)';
       const { data, error } = await supabase
         .from('questions')
         .select(CAMPOS)
-        .eq('exercise_id', ex.id)
-        .eq('lang', T.lang)
+        .eq('user_id', uid)
         .order('created_at', { ascending: false })
         .order('created_at', { ascending: true, foreignTable: 'answers' });
       if (error) {
-        console.error('[membresía] foro', error);
+        console.error('[membresía] preguntas', error);
         lista.replaceChildren(vacio(T.forumError));
       } else {
-        lista.replaceChildren(...(data?.length ? data.map((q) => mensaje(q, uid)) : [vacio(T.forumEmpty)]));
+        lista.replaceChildren(...(data?.length ? data.map((q) => mensaje(q)) : [vacio(T.forumEmpty)]));
       }
 
+      /* Sin ejercicio vigente no hay a qué colgar una pregunta nueva
+         (`exercise_id` es obligatorio): se ve el hilo, pero no el campo. */
+      if (!ex) return;
       const form = $<HTMLFormElement>('[data-foro-form]');
+      form.hidden = false;
       const area = $<HTMLTextAreaElement>('[data-foro-texto]');
       const boton = $<HTMLButtonElement>('[data-foro-enviar]');
       form.addEventListener('submit', async (e) => {
@@ -368,7 +392,7 @@ const T = {
           return;
         }
         lista.querySelector('.mb-hilo__vacio')?.remove();
-        const li = mensaje(nueva, uid);
+        const li = mensaje(nueva);
         lista.prepend(li);
         area.value = '';
         li.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -390,6 +414,7 @@ const T = {
       const ex = await vigente('semana');
       if (!ex) {
         $('[data-w-titulo]').textContent = T.weekNone;
+        await foro(null, uid, nombre);
         return;
       }
       $('[data-w-etiqueta]').textContent = etiqueta(ex) || $('[data-w-etiqueta]').textContent;

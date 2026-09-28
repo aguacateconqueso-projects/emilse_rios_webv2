@@ -47,7 +47,7 @@ export const aulaUi = {
     'desk.newAnswer': 'Emi te respondió',
     'desk.membershipTitle': 'Estudiemos Juntos',
     'desk.membershipLead':
-      'El ejercicio de esta semana, el concepto del mes y el foro donde Emi responde.',
+      'El ejercicio de esta semana, el concepto del mes y tus preguntas a Emi.',
     'desk.membershipCta': 'Entrar a la membresía',
     'desk.storeTitle': '¿Quieres seguir aprendiendo?',
     'desk.storeLead': 'Mira los cursos que Emi tiene a la venta.',
@@ -68,19 +68,19 @@ export const aulaUi = {
       'Sin biblioteca. El jueves a las 00:00 este ejercicio se cierra y entra el nuevo. Trabajamos el presente: solo lo de esta semana.',
     'memb.pdf': 'Descargar el PDF',
     'memb.noPdf': 'Este ejercicio no trae PDF',
-    'memb.forumEyebrow': 'Foro de la semana',
-    'memb.forumH': 'Preguntas y respuestas',
-    'memb.forumNote': 'Respondo los viernes. Todos leen las preguntas y las respuestas.',
+    /* Privadas desde el 28 sep 2026 (antes, un foro que leían todos). */
+    'memb.forumEyebrow': 'Solo entre tú y Emi',
+    'memb.forumH': 'Tus preguntas',
+    'memb.forumNote': 'Nadie más las ve: son solo entre tú y yo. Respondo los viernes.',
     'memb.composeLabel': 'Tu pregunta',
     'memb.composePh': 'Escribe tu pregunta sobre el ejercicio de esta semana…',
-    'memb.composeHint': 'Visible para todos los miembros.',
+    'memb.composeHint': 'Solo la ven tú y Emi.',
     'memb.composeBtn': 'Publicar pregunta',
     'memb.sending': 'Publicando…',
-    'memb.you': 'tú',
     'memb.answer': 'Respuesta',
     'memb.pending': 'Emilse responderá pronto.',
-    'memb.forumEmpty': 'Aún no hay preguntas. Sé el primero en preguntar.',
-    'memb.forumError': 'No se pudo cargar el foro.',
+    'memb.forumEmpty': 'Todavía no le has preguntado nada a Emi.',
+    'memb.forumError': 'No se pudieron cargar tus preguntas.',
     'memb.postError': 'No se pudo publicar tu pregunta. Inténtalo de nuevo.',
     'memb.baseEyebrow': 'Concepto del mes',
     'memb.baseNone': 'Aún no hay Concepto Base disponible.',
@@ -95,7 +95,7 @@ export const aulaUi = {
     'memb.videoRepaste': 'Este video se guardó con el formato antiguo: hay que volver a pegar su enlace de Bunny en el panel.',
     'memb.gateTitle': 'Completa tu suscripción',
     'memb.gateLead':
-      'Suscríbete para acceder al ejercicio de la semana, el video y el foro. Cancela cuando quieras.',
+      'Suscríbete para acceder al ejercicio de la semana, el video y tus preguntas a Emi. Cancela cuando quieras.',
     'memb.gateCta': 'Ver la membresía',
     'memb.billing': 'Mi suscripción',
     'memb.billingError': 'No se pudo abrir el portal de la suscripción. Escríbeme a info@emilserios.com.',
@@ -305,7 +305,7 @@ export const aulaUi = {
     'desk.newAnswer': 'Emi answered you',
     'desk.membershipTitle': "Let's study together",
     'desk.membershipLead':
-      "This week's exercise, the month's concept and the forum where Emi answers.",
+      "This week's exercise, the month's concept and your questions to Emi.",
     'desk.membershipCta': 'Enter the membership',
     'desk.storeTitle': 'Want to keep learning?',
     'desk.storeLead': "See the courses Emi has on sale.",
@@ -324,19 +324,18 @@ export const aulaUi = {
       'No library. On Thursday at 00:00 this exercise closes and the new one comes in. We work the present: only this week’s.',
     'memb.pdf': 'Download the PDF',
     'memb.noPdf': 'This exercise has no PDF',
-    'memb.forumEyebrow': 'This week’s forum',
-    'memb.forumH': 'Questions & answers',
-    'memb.forumNote': 'I answer on Fridays. Everyone reads the questions and answers.',
+    'memb.forumEyebrow': 'Just between you and Emi',
+    'memb.forumH': 'Your questions',
+    'memb.forumNote': 'Nobody else sees them: they’re just between you and me. I answer on Fridays.',
     'memb.composeLabel': 'Your question',
     'memb.composePh': 'Write your question about this week’s exercise…',
-    'memb.composeHint': 'Visible to all members.',
+    'memb.composeHint': 'Only you and Emi can see it.',
     'memb.composeBtn': 'Post question',
     'memb.sending': 'Posting…',
-    'memb.you': 'you',
     'memb.answer': 'Answer',
     'memb.pending': 'Emilse will reply soon.',
-    'memb.forumEmpty': 'No questions yet. Be the first to ask.',
-    'memb.forumError': 'Couldn’t load the forum.',
+    'memb.forumEmpty': 'You haven’t asked Emi anything yet.',
+    'memb.forumError': 'Couldn’t load your questions.',
     'memb.postError': 'Couldn’t post your question. Try again.',
     'memb.baseEyebrow': 'Concept of the month',
     'memb.baseNone': 'No core concept available yet.',
@@ -350,7 +349,7 @@ export const aulaUi = {
     'memb.videoBroken': 'This video could not be loaded.',
     'memb.videoRepaste': 'This video was saved in the old format: its Bunny link has to be pasted again in the panel.',
     'memb.gateTitle': 'Complete your subscription',
-    'memb.gateLead': 'Subscribe to unlock this week’s exercise, the video and the forum. Cancel anytime.',
+    'memb.gateLead': 'Subscribe to unlock this week’s exercise, the video and your questions to Emi. Cancel anytime.',
     'memb.gateCta': 'See the membership',
     'memb.billing': 'My subscription',
     'memb.billingError': 'Couldn’t open the subscription portal. Write to info@emilserios.com.',
@@ -602,7 +601,7 @@ export const escritorioPath = (lang: Lang): string =>
   `${raiz[lang]}/${segmentoEscritorio[lang]}/`;
 
 /**
- * El aula de la membresía: el ejercicio de la semana con su foro, el concepto
+ * El aula de la membresía: el ejercicio de la semana con las preguntas a Emi, el concepto
  * base y el bonus. **Vive acá desde el 27 sep 2026**; hasta ese día era
  * `emilseriosacademy.com/aula/`, que ahora redirige a esta dirección.
  */

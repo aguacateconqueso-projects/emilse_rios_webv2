@@ -95,8 +95,21 @@ cortina**, de la más nueva a la más vieja.
 > `supabase/formaciones_27sep.sql` en el SQL Editor** (punto 18; hecho por
 > Adrián el 27 sep).
 >
-> **🌙 La noche del 27 sep, en este orden** (cada paso depende del anterior):
+> 4. **Las preguntas de la membresía, privadas** (28 sep, pedido de Emi): ya
+>    no es un foro que leen todos, sino 1:1 con Emi, como el hilo de los
+>    cursos. Cada miembro ve solo sus preguntas —de todas las semanas— con sus
+>    respuestas; Emi lo sigue viendo todo en el panel → Mensajes. Lo decide la
+>    base de datos: **`supabase/migrations/0011_foro_privado.sql`**, que hay que
+>    pegar en el SQL Editor (las preguntas viejas también pasan a privadas).
 >
+> **🌙 La salida (se corrió del 27 al 28 sep), en este orden** (cada paso
+> depende del anterior):
+>
+> 0. **Supabase → SQL Editor: pegar `supabase/migrations/0011_foro_privado.sql`**
+>    y darle a Run. Se puede hacer ya: las preguntas pasan a privadas al
+>    instante, también en el aula vieja de la academia. *(28 sep: el
+>    `STRIPE_WEBHOOK_SECRET` quedó con el de la academia, `RESEND_API_KEY`
+>    puesta; `RESEND_FROM` no hace falta.)*
 > 1. **Vercel → `emilse-rios-webv2_1` → Environment Variables (Production)**:
 >    `STRIPE_SECRET_KEY` (con el Touch ID de Emi), y copiadas del proyecto de
 >    la academia **`STRIPE_WEBHOOK_SECRET`** (el mismo `whsec_`), **`RESEND_API_KEY`**
