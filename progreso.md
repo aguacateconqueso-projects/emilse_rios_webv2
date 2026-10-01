@@ -4,9 +4,15 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 27 de septiembre de 2026 —la salida en vivo y las
-correcciones de Emi, en el recuadro 🧵 de abajo—. Lo que sigue es el cierre
-del 24 de septiembre. **Todo
+**Última actualización:** 1 de octubre de 2026 —**la web está en vivo**—.
+El PR #58 se mergeó el 1 oct a las 12:32: la cortina subió, entraron las
+correcciones de Emi, la membresía se mudó entera a `emilserios.com` y
+`emilseriosacademy.com` redirige acá. Adrián movió los dominios, hizo una
+compra de prueba con un cupón al 100 % y **todo funcionó** («funciona, gran
+trabajo»). Las puertas de la membresía abrieron el 1 oct y siguen abiertas
+hasta nuevo aviso. Lo que se hizo ese día, en **✅ La salida** (justo debajo
+del recuadro 🧵); lo que queda, en la lista 📋. Lo que sigue en este párrafo
+es el cierre del 24 de septiembre, y queda como historia. **Todo
 lo del día está en `main`, del PR #53 al #56**, y Adrián lo dio por bueno
 («perfecto, todo ok»). En una línea: los cursos en su biblioteca de Bunny
 (#53); los videos ES / EN, cada uno en su hueco, y Formaciones en
@@ -22,10 +28,11 @@ suscribió desde la Home el 24 sep y funcionó. ⚠️ **El proyecto de Vercel e
 cortina**, de la más nueva a la más vieja.
 
 > **🧵 27 sep 2026: la salida en vivo, en el PR #58** (rama
-> `claude/magical-keller-qtja38`). Su vista previa:
+> `claude/magical-keller-qtja38`). **Mergeado el 1 oct 2026**: todo lo de este
+> recuadro está en `main` y en `www.emilserios.com`. Su vista previa era
 > **https://emilse-rios-webv21-git-claude-aa2776-adrians-projects-594b3131.vercel.app**
 > El 25 no se salió (en `main` no entró nada entre el 24 y el 27). El PR trae
-> dos cosas, y **mergearlo es salir en vivo**:
+> estas cosas, y **mergearlo fue salir en vivo**:
 >
 > 1. **La cortina sube** (`CORTINA_BAJADA = false`, commit `5a219e8`).
 > 2. **La tanda de correcciones de Emi** (copy y móvil), toda hecha:
@@ -101,42 +108,69 @@ cortina**, de la más nueva a la más vieja.
 >    respuestas; Emi lo sigue viendo todo en el panel → Mensajes. Lo decide la
 >    base de datos: **`supabase/migrations/0011_foro_privado.sql`**, que hay que
 >    pegar en el SQL Editor (las preguntas viejas también pasan a privadas).
+>    *(Aplicada por Adrián el 1 oct 2026: salen las cinco políticas
+>    —`admin all` y `member read` en las dos tablas, y `member write` en
+>    `questions`—.)*
 >
-> **🌙 La salida (se corrió del 27 al 28 sep), en este orden** (cada paso
-> depende del anterior):
->
-> 0. **Supabase → SQL Editor: pegar `supabase/migrations/0011_foro_privado.sql`**
->    y darle a Run. Se puede hacer ya: las preguntas pasan a privadas al
->    instante, también en el aula vieja de la academia. *(28 sep: el
->    `STRIPE_WEBHOOK_SECRET` quedó con el de la academia, `RESEND_API_KEY`
->    puesta; `RESEND_FROM` no hace falta.)*
-> 1. **Vercel → `emilse-rios-webv2_1` → Environment Variables (Production)**:
->    `STRIPE_SECRET_KEY` (con el Touch ID de Emi), y copiadas del proyecto de
->    la academia **`STRIPE_WEBHOOK_SECRET`** (el mismo `whsec_`), **`RESEND_API_KEY`**
->    y `RESEND_FROM` si la tiene. Sin founders: esa figura ya no existe.
-> 2. Revisar la vista previa con Emi y **mergear el PR #58**: sube la cortina y
->    entra todo lo de arriba.
-> 3. **Vercel → el proyecto de la academia → Settings → Domains**: quitar
->    `emilseriosacademy.com` y `www.emilseriosacademy.com`. Después, en
->    `emilse-rios-webv2_1` → Domains → añadir los dos. **Siempre después del
->    merge**: antes, el dominio caería en un despliegue sin webhook.
-> 4. Comprobar: `www.emilseriosacademy.com/aula/` tiene que llevar a
->    `www.emilserios.com/aulavirtual/membresia/`.
-> 5. Emi le escribe a sus miembros: el aula se mudó, se entra con el mismo
->    correo y la misma contraseña en `emilserios.com/aulavirtual/entrar/`.
-> 6. Cuando se pueda (sin prisa): en Stripe, apuntar el endpoint del webhook a
->    `https://www.emilserios.com/api/stripe-webhook` y poner su `whsec_` nuevo
->    en Vercel. Emi no había
-> publicado ninguna página de ventas desde el panel (Adrián, 27 sep), así que
-> las cartas sí salen del código y los cambios se ven directo.
+> Emi no había publicado ninguna página de ventas desde el panel (Adrián,
+> 27 sep), así que las cartas salen del código y los cambios se ven directo.
 
-> **🚧 LA CORTINA ESTÁ BAJADA desde el 23 sep 2026.** Quien entra a
-> `www.emilserios.com` —a cualquier dirección— ve solo la firma de Emi sobre
-> negro y «Estamos trabajando en la web», y no puede hacer nada: las APIs
-> contestan 503. **Las vistas previas de los PRs y `npm run dev` siguen
-> enseñando la web de verdad**, que es donde se trabaja. Para reabrir,
-> `CORTINA_BAJADA = false` en `src/lib/cortina.ts`, en un PR. Todo en **La
-> cortina**, justo debajo de **Dónde estamos**.
+> **✅ La salida, hecha el 1 oct 2026.** Se corrió del 25 al 27, del 27 al 28,
+> y salió el 1 de octubre, el mismo día que abrían las puertas. En orden:
+>
+> 0. [x] **`0011_foro_privado.sql` en el SQL Editor** (1 oct).
+> 1. [x] **Las variables en Vercel → `emilse-rios-webv2_1` (Production)**:
+>    `STRIPE_SECRET_KEY` (con el Touch ID de Emi), `STRIPE_WEBHOOK_SECRET`
+>    —**el mismo `whsec_` del endpoint de la academia**, copiado de Stripe— y
+>    `RESEND_API_KEY` (28 sep). **`RESEND_FROM` no existe ni hace falta**: el
+>    código manda por defecto desde `info@emilseriosacademy.com`, que es el
+>    dominio verificado en Resend, con respuesta a `info@emilserios.com`
+>    (`src/lib/correo.ts`). Sin founders: esa figura ya no existe.
+> 2. [x] **PR #58 mergeado** (1 oct, 12:32): sube la cortina y entra todo lo
+>    del recuadro 🧵.
+> 3. [x] **Los dominios de la academia, movidos**: quitados del proyecto de
+>    Vercel de la academia y añadidos a `emilse-rios-webv2_1`, los dos
+>    (`emilseriosacademy.com` y `www.`) **a Production y sin redirección de
+>    Vercel**. Eso último importa: la redirección la hace el código, página
+>    por página, y Stripe **no sigue redirecciones**, así que una de Vercel
+>    rompería el webhook. No hubo que tocar el DNS: ya apuntaba a Vercel.
+>    **El proyecto de la academia no se borra todavía**: es el plan B (se le
+>    devuelven los dominios y queda como estaba).
+> 4. [x] **Comprobado**: las direcciones viejas llevan a su gemela en
+>    `emilserios.com`, y **la compra de prueba funcionó entera** (ver abajo).
+> 5. [ ] **Emi le escribe a sus miembros**: el aula se mudó, se entra con el
+>    mismo correo y la misma contraseña en `emilserios.com/aulavirtual/entrar/`
+>    (las direcciones viejas igual redirigen). Es cosa de Emi.
+> 6. [ ] **Sin prisa: el endpoint de Stripe a su casa.** Hoy Stripe sigue
+>    llamando a la dirección de la academia, que este proyecto contesta
+>    porque `/api/` no se redirige. Algún día: en Stripe, apuntar el endpoint
+>    a `https://www.emilserios.com/api/stripe-webhook` y poner su `whsec_`
+>    nuevo en Vercel (si se crea un endpoint nuevo, tiene `whsec_` propio).
+>
+> **La compra de prueba (1 oct).** En Stripe, **modo real** (no Sandbox), se
+> creó un cupón «Prueba interna 100%»: 100 %, solo el producto de la
+> membresía, *Duration: Once*, máximo 3 usos, con el código de cliente
+> **`PRUEBA100`** (el checkout acepta códigos: `allow_promotion_codes: true`
+> en `/api/checkout`; el cupón solo no se puede escribir, hace falta el
+> código). Adrián compró en incógnito desde la carta con
+> `adrianmendozam+prueba@gmail.com`: total 0,00 € (Stripe pide la tarjeta
+> igual, porque es una suscripción). Pasó todo: `/gracias/`, el correo de
+> bienvenida, crear la contraseña, entrar al aula con «Tus preguntas», el
+> webhook con 200. **Si queda viva, la suscripción de prueba se cancela**
+> (Stripe → Customers → `adrianmendozam+prueba` → Cancel → Immediately): con
+> *Once*, el mes siguiente cobraría el precio entero. Y `PRUEBA100` se archiva.
+> Para la próxima prueba, la misma receta.
+>
+> **Para reenviar un evento de Stripe y ver que el webhook contesta**, usar un
+> `invoice.paid` reciente → *Resend*: vuelve a leer la suscripción en Stripe,
+> así que no escribe nada viejo, y a quien ya es miembro no le manda otra
+> bienvenida. Un `customer.subscription.*` viejo, en cambio, sí escribiría el
+> estado de entonces.
+
+> **🎬 LA CORTINA ESTÁ SUBIDA desde el 1 oct 2026** (PR #58). Estuvo bajada
+> del 23 sep al 1 oct. Si alguna vez hay que volver a taparlo todo,
+> `CORTINA_BAJADA = true` en `src/lib/cortina.ts`, en un PR: cómo funciona,
+> en **La cortina**, justo debajo de **Dónde estamos**.
 
 > **🔗 REGLA DE TRABAJO (pedida por Adrián el 23 sep 2026): cada vez que se
 > sube un cambio, se le deja el enlace directo para verlo** —a la página
@@ -162,8 +196,9 @@ cortina**, de la más nueva a la más vieja.
 > cerrar esa sesión. Lección: **lo que se empuja a una rama con el PR ya
 > mergeado no existe**; ver **Cómo trabajamos**.
 >
-> La vista previa buena de `claude/affectionate-faraday-ddgz0m` (PR #54 a #57)
-> es:
+> La última vista previa fue la de `claude/magical-keller-qtja38` (PR #58,
+> mergeado el 1 oct): `…-git-claude-aa2776-…`. La de
+> `claude/affectionate-faraday-ddgz0m` (PR #54 a #57) era:
 >
 > **https://emilse-rios-webv21-git-claude-e5e804-adrians-projects-594b3131.vercel.app**
 >
@@ -175,7 +210,7 @@ cortina**, de la más nueva a la más vieja.
 > traer una sola fila). Vercel tarda un par de minutos en construir después
 > de cada push. Ver **La cortina → Cómo se sigue viendo la web**.
 
-> **📋 LO QUE FALTA — la lista vigente (cierre del 24 sep 2026).** Es la única
+> **📋 LO QUE FALTA — la lista vigente (cierre del 1 oct 2026).** Es la única
 > que manda: las de más abajo («cierre del 23 sep», «22 sep») quedan como
 > historia y lo que siga en pie de ellas está copiado acá. Al cerrar una
 > sesión, se tacha lo hecho y se añade lo nuevo **acá**, no en otra lista. Los
@@ -188,6 +223,16 @@ cortina**, de la más nueva a la más vieja.
 > formato en la Home, *Sobre mí* y las cartas (#55); la ficha de precio
 > arreglada y la entrada en todas las páginas (#56). **Todo mergeado; `main`
 > no tiene nada a medias.**
+>
+> **1 oct: en vivo.** El PR #58 (27 sep–1 oct) subió la cortina, metió las
+> correcciones de Emi y las dos cartas nuevas, mudó la membresía entera acá y
+> volvió privadas las preguntas de la membresía. Adrián movió los dominios de
+> la academia y la compra de prueba funcionó. Quedan sobre todo el cobro de
+> los cursos (13, cuando Emi esté lista para su lanzamiento) y **una tanda de
+> ajustes de copy y del aula que Adrián trae a la próxima sesión** (21).
+>
+> *Lo que sigue («El plan del 25 sep») queda como historia: 15, 16 y 17 ya
+> están hechos y el webhook vive acá.*
 >
 > **⏰ El plan del 25 sep (Adrián): salir en vivo ese día.** Primero la prueba
 > del panel contra el Supabase de verdad (C.12); después, juntos, **el cobro de
@@ -238,7 +283,8 @@ cortina**, de la más nueva a la más vieja.
 >     de Sergio pasa a **«Está buenísimo»**, con sus tildes; y a Laura en
 >     inglés **se le devuelve el «Yes,»**: «el copy de Emi en inglés se
 >     respeta», también cuando no calca al español.
-> 11. [ ] **La bienvenida de siete correos** en Klaviyo: *casi lista* (Adrián,
+> 11. [x] **La bienvenida de siete correos** en Klaviyo. *(Activa, Adrián,
+>     28 sep.)* Era: *casi lista* (Adrián,
 >     24 sep). Cuando exista, la Home
 >     deja de prometer «un correo de bienvenida con un video»
 >     (`src/data/home.ts`).
@@ -253,7 +299,11 @@ cortina**, de la más nueva a la más vieja.
 >     que las etiquetas ES / EN salgan bien y el plan de «+ Desde Bunny»
 >     empareje cada clase con su versión (solo se probó con una biblioteca
 >     simulada).
-> 13. [ ] **El cobro de los cursos, y que pagar dé acceso solo.** *Adrián, 24
+> 13. [ ] **El cobro de los cursos, y que pagar dé acceso solo.** *Adrián, 28
+>     sep: los precios los sube él más tarde, y **los cobros se confirman
+>     cuando Emi esté lista para su lanzamiento**.* Ya no hay que elegir dónde
+>     se da el acceso: el webhook vive acá desde el #58, así que es (b),
+>     enseñarle cursos a `src/pages/api/stripe-webhook.ts`. *Adrián, 24
 >     sep: «mañana lo resolvemos».* Mientras tanto, un curso se da a mano en
 >     Personas. Lo que pide: el precio de Stripe de
 >     cada curso (una columna en `products` o una variable), el checkout por
@@ -269,7 +319,12 @@ cortina**, de la más nueva a la más vieja.
 >     entera al entrar al aula («Emi te respondió» en su escritorio). Pide
 >     decidir desde qué dirección se mandan (la academia manda por Resend con su
 >     dominio verificado; acá habría que verificar `emilserios.com`).
-> 15. [ ] **⚠️ El 1 de octubre abren las puertas de la membresía**
+> 15. [x] **Las puertas abrieron el 1 oct 2026**, solas (`REOPENS_AT`), y
+>     **siguen abiertas hasta que Adrián diga lo contrario** (28 sep): con
+>     `CLOSES_AT` en el pasado y `REOPENS_AT` también, `doorsClosed()` da
+>     abierto para siempre. Para cerrarlas otra vez, `MEMBERSHIP_CLOSES_AT` y
+>     `MEMBERSHIP_REOPENS_AT` en Vercel (ya solo en este proyecto). Era:
+>     **⚠️ El 1 de octubre abren las puertas de la membresía**
 >     (`REOPENS_AT` en `src/lib/membership.ts`). *Adrián, 24 sep: «tenemos
 >     tiempo, mañana ya estamos en vivo con eso funcionando»*: se vende
 >     **desde acá**. Pide, antes de esa fecha: la cortina subida (16), **las
@@ -277,7 +332,8 @@ cortina**, de la más nueva a la más vieja.
 >     pagar da un 500; la lista en `docs/UNIR-LAS-DOS-CASAS.md`) y las fechas
 >     de las puertas `MEMBERSHIP_CLOSES_AT` / `MEMBERSHIP_REOPENS_AT` puestas
 >     acá. Mientras el webhook siga en la academia (17), también allá.
-> 16. [ ] **Subir la cortina** (`CORTINA_BAJADA = false` en
+> 16. [x] **Subir la cortina** —*subida el 1 oct 2026 con el PR #58*—
+>     (`CORTINA_BAJADA = false` en
 >     `src/lib/cortina.ts`, en un PR). *Adrián: «mañana la subimos» (25 sep).*
 >     **El alta al newsletter ya funciona**: Adrián se suscribió desde la Home
 >     el 24 sep. Queda, en la vista previa de ese PR: que llegue el primero de
@@ -285,14 +341,15 @@ cortina**, de la más nueva a la más vieja.
 >     final de una carta (nuevo desde el #55). Los pasos, en **El newsletter,
 >     conectado → La primera prueba**.
 > 17. [x] **Mudar la membresía** —*hecha en código el 27 sep 2026, en el
->     PR #58; los pasos de Vercel, en «La noche del 27 sep», arriba*—:
+>     PR #58, en vivo el 1 oct con los dominios movidos; ver **✅ La
+>     salida**, arriba*—:
 >     las páginas de la membresía (el ejercicio de la semana y el foro) al aula
 >     de acá, el webhook de Stripe acá, las fechas de las puertas en una sola
 >     casa, el puente `/pasar/` pegado en la academia, y **recién entonces**
 >     redirigir `emilseriosacademy.com`. Antes de eso, redirigirla mata el
 >     webhook y deja a gente pagando sin acceso.
-> 18. [ ] **Pegar `supabase/formaciones_27sep.sql` en el SQL Editor** (Adrián,
->     27 sep). Pone en la tabla `products` los textos de Emi, el orden 01–06 y
+> 18. [x] **Pegar `supabase/formaciones_27sep.sql` en el SQL Editor** (Adrián,
+>     27 sep). *(Hecho el 28 sep: «ya corrí el SQL, todo ok».)* Pone en la tabla `products` los textos de Emi, el orden 01–06 y
 >     las dos fichas nuevas. Sin esto, Formaciones sigue con los textos viejos.
 >     Es idempotente.
 > 19. [ ] **Los testimonios de «Clases online 1:1»**: Emi los quiere traer
@@ -303,6 +360,18 @@ cortina**, de la más nueva a la más vieja.
 >     `mailto:` del botón por un enlace de pago de Stripe.
 > 20. [ ] **La foto de «Todas las escalas»**: la de hoy es provisional. Emi la
 >     cambia desde el panel → Tienda.
+> 21. [ ] **Ajustes de copy y de visualización en el aula** (Adrián, 1 oct:
+>     «te voy a pedir unos cambios de copy después y quizás de visualización
+>     en el aula»). Llegan en la próxima sesión, que arranca en una rama
+>     nueva desde `main`.
+> 22. [ ] **Limpiar la prueba del 1 oct**, si no se hizo: cancelar la
+>     suscripción de `adrianmendozam+prueba@gmail.com` en Stripe
+>     (*Immediately*) y archivar el código `PRUEBA100`. Ver **✅ La salida**.
+> 23. [ ] **Sin prisa:** el endpoint del webhook de Stripe a
+>     `www.emilserios.com` (paso 6 de **✅ La salida**), y, si algún día se
+>     quiere mandar desde `@emilserios.com`, verificar ese dominio en Resend
+>     (los registros DKIM van en Cloudflare, en *DNS only*). Hoy se manda
+>     desde `info@emilseriosacademy.com`, que ya está verificado y llega.
 >
 > **D. Cabos sueltos, sin prisa.**
 >
@@ -314,8 +383,9 @@ cortina**, de la más nueva a la más vieja.
 >   impide: la redirección va antes). Desde esta sesión no se llega a
 >   `emilserios.com` ni a `vercel.app`. Y en los correos nuevos, Emi pega ya
 >   las direcciones de `/formaciones/`.
-> - [ ] Apagar la integración de WooCommerce en Klaviyo (mirando antes los
->   flujos) y decidir con Emi la doble confirmación del newsletter.
+> - [x] Apagar la integración de WooCommerce en Klaviyo (mirando antes los
+>   flujos) y decidir con Emi la doble confirmación del newsletter. *(Adrián,
+>   28 sep: «ya eso está resuelto».)*
 > - [ ] **El dominio y el correo, en las cuentas de Edu.** `emilserios.com`
 >   está registrado en la cuenta de Namecheap de Edu y `info@emilserios.com`
 >   vive en su Hostinger. *Adrián, 24 sep: Edu no hará nada sin avisar; no
@@ -490,17 +560,17 @@ pagando sin recibir acceso.
 
 | | |
 |---|---|
-| **Publicado** | Sí, en Vercel, y desde el 21 sep 2026 **en `www.emilserios.com`**. Despliega solo en cada merge a `main`. **Desde el 23 sep, tapado por la cortina** — ver **La cortina**. |
+| **Publicado** | Sí, en Vercel, y desde el 21 sep 2026 **en `www.emilserios.com`**. Despliega solo en cada merge a `main`. **En vivo desde el 1 oct 2026**: la cortina tapó la web del 23 sep al 1 oct —ver **La cortina**—. `emilseriosacademy.com` (los dos, con y sin `www`) está en este mismo proyecto de Vercel desde el 1 oct y redirige acá. |
 | **Dominio** | **Resuelto a medias.** El sitio ya vive en `www.emilserios.com` y el DNS lo sirve Cloudflare. **Falta el push del registro** a una cuenta de Namecheap de Emi: hoy el dominio sigue siendo de Edu. Ver **El dominio, y Edu → Cómo quedó**. |
 | **Páginas** | Home, Sobre mí, Formaciones —hasta el 23 sep 2026 se llamó Productos—, **las cuatro cartas de venta** (membresía y tres cursos) y el Aula Virtual —acceso directo y aula por dentro—, en español e inglés. Más `/panel/`, la consola de Emi, solo en español. **Todo en el sistema del sitio**: el aula por dentro y el panel se vistieron el 23 sep 2026 por la noche. |
 | **Identidad** | El logo de Emi, vectorizado, en cabecera, pie, entrada y favicon. |
 | **Alcance** | Desde el 31 ago 2026 esto deja de ser solo el sitio: aquí van también el aula, la membresía y los cursos. Ver **La plataforma**. |
-| **Sesión** | **Conectada y probada el 22 sep 2026**: se entra de verdad, contra el **mismo Supabase de la academia**, y el candado pide **suscripción al día**. Las variables y las Redirect URLs ya están puestas. Falta `set_admin.sql`. Ver `docs/CONECTAR-EL-AULA.md`. |
+| **Sesión** | **Conectada y probada el 22 sep 2026**: se entra de verdad, contra el **mismo Supabase de la academia**, y el candado pide **suscripción al día**. Las variables y las Redirect URLs ya están puestas, y `set_admin.sql` también (24 sep). **Desde el 1 oct la membresía vive acá**: `/aulavirtual/membresia/` y `/en/classroom/membership/`, con las preguntas 1:1 con Emi. Ver `docs/CONECTAR-EL-AULA.md`. |
 | **Cursos** | **En la base de datos desde el 23 sep 2026** (`supabase/migrations/0009_cursos.sql`, **aplicada en Supabase el 24 sep 2026**). Emi los arma sola desde `/panel/#cursos`; el aula los lee por consulta, con la RLS decidiendo. Ver **El aula y el panel de Emi**. |
 | **Tienda** | **Desde el 23 sep 2026 la maneja Emi** desde el panel: las fichas de Formaciones, sus páginas de ventas (borrador y publicada) y quién tiene qué (`0010_tienda_paginas_mensajes.sql`, **aplicada el 24 sep 2026**). Formaciones y las páginas se resuelven en el servidor con un minuto de caché, y sin la base de datos enseñan lo del código. Ver **El panel de Emi, completo**. |
-| **Cobro** | **Desde el 22 sep 2026 vive acá.** `/api/checkout` crea la sesión de Stripe, `/gracias/` recoge a quien pagó y `/api/claim-account` le crea la cuenta. El **webhook sigue en la academia**, y es correcto que siga: ver **La unión de las dos casas**. |
+| **Cobro** | **Desde el 22 sep 2026 vive acá.** `/api/checkout` crea la sesión de Stripe, `/gracias/` recoge a quien pagó y `/api/claim-account` le crea la cuenta. **El webhook también, desde el 1 oct** (`/api/stripe-webhook`, con la bienvenida por Resend): Stripe sigue llamando a la dirección de la academia, que ahora es este proyecto. Ver **✅ La salida**, arriba. Los cursos todavía no se cobran (punto 13). |
 | **Newsletter** | **Conectado desde el 22 sep 2026.** `/api/suscribir` da de alta en la lista real de Klaviyo (`SaE8Px`), con la API en su versión `2026-07-15`. `KLAVIYO_API_KEY` **puesta en Vercel el 23 sep 2026**, con los permisos Lists, Profiles y Subscriptions; **la prueba se hace al subir la cortina**, junto con la bienvenida de siete correos —ver **El newsletter, conectado → La primera prueba**—. La integración de WooCommerce de Klaviyo está muerta desde el 21 sep y **se apaga**: los cobros son de Stripe. |
-| **Lo que falta para lanzar** | **Las variables de Stripe en Vercel**, o el botón de comprar da un 500 (`KLAVIYO_API_KEY` ya está, 23 sep). Y **subir la cortina**, con la prueba del newsletter y la bienvenida de siete correos de Emi en el mismo momento. **Ojo: las puertas de la membresía abren el 1 oct.** La lista completa y en orden: **📋 LO QUE FALTA**, arriba del todo. |
+| **Lanzamiento** | **Hecho el 1 oct 2026.** Las variables de Stripe y Resend, puestas; la cortina, subida; las puertas de la membresía, abiertas hasta nuevo aviso; la compra de prueba, bien. Lo que queda: **📋 LO QUE FALTA**, arriba del todo. |
 
 **Formaciones y las páginas de ventas se resuelven en el servidor desde el 23
 sep 2026** (un minuto de caché): leen lo que Emi publica desde el panel y, si
@@ -668,6 +738,9 @@ membresía.
 ---
 
 ## La cortina
+
+> **Subida el 1 de octubre de 2026**, con el PR #58. Lo que sigue cuenta cómo
+> funciona, por si alguna vez hay que volver a bajarla.
 
 **Bajada el 23 de septiembre de 2026**, a pedido de Adrián: «tenemos que
 desconectar la web». Emi está cambiando muchas cosas a la vez —todos los
