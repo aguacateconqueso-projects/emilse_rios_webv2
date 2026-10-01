@@ -32,6 +32,7 @@ import type { Lang } from '../../i18n/ui';
 import { useAula, clavePath, membresiaPath, entrarPath } from '../../i18n/aula';
 import { isSupabaseConfigured } from '../../lib/supabase';
 import Boton from '../Boton.astro';
+import CampoClave from './CampoClave.astro';
 
 interface Props {
   lang: Lang;
@@ -73,15 +74,8 @@ const a = useAula(lang);
     <p class="soft gracias__lead">{a('thanks.lead')}</p>
 
     <form class="campos" data-form-clave novalidate>
-      <label class="campo">
-        <span class="campo__t">{a('thanks.pass')}</span>
-        <input type="password" name="clave" autocomplete="new-password" required data-clave />
-      </label>
-
-      <label class="campo">
-        <span class="campo__t">{a('thanks.repeat')}</span>
-        <input type="password" name="clave2" autocomplete="new-password" required data-clave2 />
-      </label>
+      <CampoClave lang={lang} id="gracias-clave" label={a('thanks.pass')} name="clave" autocomplete="new-password" dato="clave" />
+      <CampoClave lang={lang} id="gracias-clave-2" label={a('thanks.repeat')} name="clave2" autocomplete="new-password" dato="clave2" />
 
       <p class="error" data-error-clave hidden></p>
 

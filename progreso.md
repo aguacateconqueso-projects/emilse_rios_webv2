@@ -4,8 +4,13 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 1 de octubre de 2026 —**la web está en vivo**—.
-El PR #58 se mergeó el 1 oct a las 12:32: la cortina subió, entraron las
+**Última actualización:** 1 de octubre de 2026, por la tarde —**la web está
+en vivo**—. Esa tarde llegó la primera tanda de ajustes del aula (punto 21):
+**el aula le habla al alumno en primera persona**, **los correos de aviso de
+las preguntas** (a Emi cuando alguien pregunta, al alumno cuando Emi
+responde), **«Mostrar» en todos los campos de contraseña** y **Mensajes, una
+fila por persona**. Va en el recuadro 🧵 de abajo, el primero. Lo que sigue es
+el cierre de la mañana. El PR #58 se mergeó el 1 oct a las 12:32: la cortina subió, entraron las
 correcciones de Emi, la membresía se mudó entera a `emilserios.com` y
 `emilseriosacademy.com` redirige acá. Adrián movió los dominios, hizo una
 compra de prueba con un cupón al 100 % y **todo funcionó** («funciona, gran
@@ -26,6 +31,65 @@ suscribió desde la Home el 24 sep y funcionó. ⚠️ **El proyecto de Vercel e
 `emilse-rios-webv2_1`**: las vistas previas buenas empiezan por
 `emilse-rios-webv21-git-…` (ver la regla de trabajo, justo abajo). El detalle de cada cosa está en las secciones que siguen a **La
 cortina**, de la más nueva a la más vieja.
+
+> **🧵 1 oct 2026, por la tarde: cuatro ajustes del aula** (rama
+> `claude/fervent-edison-wbg8nb`, PR nuevo desde `main`). Pedidos de Adrián,
+> numerados como los mandó:
+>
+> 1. **No se habla de Emi en tercera persona en ningún momento.** Todo lo
+>    que el aula le dice al alumno lo dice Emi: el escritorio pasa de «Mira
+>    los cursos que Emi tiene a la venta» a **«Mira mis otros cursos»**
+>    («See my other courses»), y lo mismo en todo `src/i18n/aula.ts`:
+>    «Pregúntame», «Te respondí», «Esperando mi respuesta», «Solo entre tú y
+>    yo», «Mi respuesta», «Lo estoy preparando», «Te respondo pronto»… La
+>    etiqueta sobre cada respuesta, que decía «Emi», ahora dice «Mi
+>    respuesta». Lo que sigue diciendo «Emi» es el panel —que lo lee ella— y
+>    los textos alternativos de las fotos.
+> 2. **Los correos de las preguntas** (era el punto 14 de 📋). Cuando alguien
+>    pregunta —en la membresía o en un curso— **le llega un correo a Emi** a
+>    `info@emilserios.com` con quién, dónde (la semana, o el curso, la clase y
+>    el minuto), la pregunta y un enlace **directo a la conversación con esa
+>    persona en el panel**. Cuando Emi responde, **le llega un correo a quien
+>    preguntó**, en su idioma y en la voz de Emi («Ya te respondí… Mi
+>    respuesta te espera en el aula»), con el enlace a la membresía o al
+>    curso. Cómo está hecho, en **Los avisos por correo**, más abajo.
+> 3. **«Mostrar» / «Ocultar» en todos los campos de contraseña**: entrar,
+>    poner la contraseña nueva y `/gracias/` (las dos de cada una). Es texto
+>    y no un ojo porque el sistema de diseño no admite iconos
+>    (`src/components/acceso/CampoClave.astro`).
+> 4. **Panel → Mensajes, una fila por persona.** Ya no es la lista de todas
+>    las preguntas una detrás de otra: es la lista de quienes preguntaron algo
+>    —por defecto, solo quienes esperan respuesta, primero quien lleva más
+>    tiempo esperando; «Todas» y un buscador—. Al pulsar a alguien se abre
+>    **toda la conversación con esa persona** (membresía y cursos, lo más
+>    nuevo arriba), y se responde ahí mismo. Su dirección es
+>    `/panel/#mensajes/<id>`, la misma que lleva el correo de aviso, y la
+>    ficha de Personas enlaza ahí.
+>
+> **Lo que hay que hacer fuera del código: una sola cosa, y conviene.** Pegar
+> **`supabase/migrations/0012_avisos_por_correo.sql`** en Supabase → SQL
+> Editor (punto 24). Apunta cuándo salió cada aviso, para que **nunca salga
+> dos veces**. Sin ella los avisos salen igual, con una regla más floja (solo
+> si la pregunta o la respuesta tiene menos de diez minutos). En Vercel no
+> hay que poner nada: `RESEND_API_KEY` ya está en Production desde el 28 sep.
+> **En las vistas previas no salen correos** (la clave solo está en
+> Production): se prueban de verdad después de mergear (punto 25).
+>
+> **Cómo se probó:** con un Supabase de mentira (un servidor Node que imita
+> `/auth/v1` y `/rest/v1`) y Resend interceptado, en Chromium: Ana pregunta
+> en la membresía y en un curso → a Emi le llegan los dos correos; repetirlo
+> no manda otro; John no puede pedir el aviso de una pregunta de Ana (403); un
+> no-admin no puede pedir el de una respuesta (403); sin la 0012, una pregunta
+> nueva avisa y una de hace dos días no. En el panel: la lista con Ana sola
+> («2 sin responder»), «Todas» con las tres personas, «GOMEZ» encuentra a
+> Carla Gómez, la conversación de Ana con sus tres preguntas, responder las
+> dos → «todo respondido», la cifra de la barra se apaga y a Ana le llegan
+> los dos correos («Ya te respondí»; a John, en inglés). El enlace directo
+> `#mensajes/<id>` abre la conversación; en el teléfono, sin desbordes. Del
+> lado de Ana: «Mira mis otros cursos», «Solo entre tú y yo», «Mi respuesta»,
+> «Pregúntame». «Mostrar» cambia el campo a texto y dice «Ocultar». `npm run
+> build` bien; `astro check`, los mismos 17 errores de tipos que ya tiene
+> `main` (ninguno nuevo); cero errores en la consola.
 
 > **🧵 27 sep 2026: la salida en vivo, en el PR #58** (rama
 > `claude/magical-keller-qtja38`). **Mergeado el 1 oct 2026**: todo lo de este
@@ -311,7 +375,11 @@ cortina**, de la más nueva a la más vieja.
 >     webhook de la academia, o (b) mudar el webhook acá, que es lo que también
 >     pide la mudanza de la membresía (punto 17). `products.course_id` ya dice
 >     qué curso abre cada ficha.
-> 14. [ ] **Los correos del hilo de dudas** —el foro de cada curso, donde la
+> 14. [x] **Los correos del hilo de dudas** —*hechos el 1 oct 2026 (ver el
+>     recuadro 🧵 de esa tarde), para la membresía y para los cursos, con un
+>     copy provisional en la voz de Emi; si ella manda el suyo, se cambia en
+>     `correoPreguntaNueva()` y `correoRespuesta()` de `src/lib/correo.ts`*—.
+>     Era: el foro de cada curso, donde la
 >     alumna le pregunta a Emi desde la clase y Emi contesta desde Mensajes—:
 >     un correo a Emi cuando entra una pregunta, y uno a la alumna cuando Emi
 >     responde. *(Adrián, 24 sep: le gusta; **Emi escribe los textos** de los
@@ -360,10 +428,11 @@ cortina**, de la más nueva a la más vieja.
 >     `mailto:` del botón por un enlace de pago de Stripe.
 > 20. [ ] **La foto de «Todas las escalas»**: la de hoy es provisional. Emi la
 >     cambia desde el panel → Tienda.
-> 21. [ ] **Ajustes de copy y de visualización en el aula** (Adrián, 1 oct:
+> 21. [~] **Ajustes de copy y de visualización en el aula** (Adrián, 1 oct:
 >     «te voy a pedir unos cambios de copy después y quizás de visualización
->     en el aula»). Llegan en la próxima sesión, que arranca en una rama
->     nueva desde `main`.
+>     en el aula»). *La primera tanda, hecha esa misma tarde* (recuadro 🧵):
+>     primera persona, correos, «Mostrar» y Mensajes por persona. Si llegan
+>     más, se suman acá.
 > 22. [ ] **Limpiar la prueba del 1 oct**, si no se hizo: cancelar la
 >     suscripción de `adrianmendozam+prueba@gmail.com` en Stripe
 >     (*Immediately*) y archivar el código `PRUEBA100`. Ver **✅ La salida**.
@@ -372,6 +441,19 @@ cortina**, de la más nueva a la más vieja.
 >     quiere mandar desde `@emilserios.com`, verificar ese dominio en Resend
 >     (los registros DKIM van en Cloudflare, en *DNS only*). Hoy se manda
 >     desde `info@emilseriosacademy.com`, que ya está verificado y llega.
+> 24. [ ] **Pegar `supabase/migrations/0012_avisos_por_correo.sql` en el SQL
+>     Editor** (Adrián). Es la marca que impide que un aviso salga dos veces.
+>     Aditiva e idempotente; al final enseña las cuatro columnas nuevas. Las
+>     preguntas y respuestas de antes quedan marcadas como avisadas, así que
+>     nadie recibe correos de cosas viejas.
+> 25. [ ] **Probar los correos en vivo**, después de mergear (en las vistas
+>     previas no salen): una pregunta de prueba desde la membresía con la
+>     cuenta de prueba → el correo a `info@emilserios.com`; responderla desde
+>     el panel → el correo a la cuenta de prueba. Si no llega, buscar
+>     `[avisos]` en Vercel → Logs. **Y que Emi lea el copy de los dos
+>     correos** (es provisional): si quiere otro, se cambia en
+>     `src/lib/correo.ts`. Si prefiere el aviso en otro buzón que no sea
+>     `info@`, `AVISOS_A` en Vercel (Production).
 >
 > **D. Cabos sueltos, sin prisa.**
 >
@@ -854,6 +936,117 @@ no tenía salida a `vercel.app`:
 
 ---
 
+## Los avisos por correo, y Mensajes por persona
+
+**1 de octubre de 2026, por la tarde.** Cuatro pedidos de Adrián, el día que
+la web salió en vivo. El resumen está en el recuadro 🧵 de arriba; acá, cómo
+está hecho lo que no se ve.
+
+### Los avisos por correo
+
+**El camino.** Las preguntas y las respuestas se siguen guardando como
+siempre: directo contra Supabase desde el navegador, con la RLS decidiendo.
+Justo después de guardar, la pantalla llama a **`/api/avisos`**
+(`src/lib/avisos.ts` → `src/pages/api/avisos.ts`) y es el servidor el que
+manda el correo por Resend (`src/lib/correo.ts`). Las cuatro llamadas:
+
+| Quién | Dónde | Pide | Le llega a |
+|---|---|---|---|
+| El miembro | Membresía → «Tus preguntas» | `pregunta` · `foro` · la pregunta | Emi |
+| La alumna | Un curso → «Pregúntame» | `pregunta` · `curso` · la pregunta | Emi |
+| Emi | Panel → Mensajes, en la membresía | `respuesta` · `foro` · **la respuesta** (cada una avisa) | quien preguntó |
+| Emi | Panel → Mensajes, en un curso | `respuesta` · `curso` · la pregunta (**solo la primera vez**; cambiarla no avisa) | quien preguntó |
+
+**Por qué así y no con un *Database Webhook* de Supabase.** Se pensó: sería
+la base de datos la que avisa, aunque se cierre la pestaña. Pero pide
+configurar cuatro webhooks en el panel de Supabase, un secreto más en
+Vercel, y apunta siempre a producción, así que no se puede probar en una
+vista previa. Desde la pantalla no hace falta tocar nada fuera del código, y
+la llamada va con `keepalive`: sale aunque justo después se cambie de página.
+Si algún día se pierden avisos, el cambio es mover la llamada a un webhook y
+la ruta sirve igual.
+
+**Las reglas de la ruta**, que son la seguridad (la pantalla no lo es):
+
+- Valida el token de quien llama (`usuarioDeLaPeticion`). **Una pregunta
+  solo la puede avisar quien la hizo**; **una respuesta, solo un admin**.
+- **Nunca avisa dos veces**: antes de mandar marca la fila con
+  `update … set aviso_at = now() where aviso_at is null` (migración
+  **0012**); si no marcó nada, alguien ya avisó. Si Resend falla, quita la
+  marca. Sin la 0012 decide por la fecha: solo lo que tiene menos de diez
+  minutos.
+- Sin `RESEND_API_KEY` no manda nada y lo deja en los logs. Todo lo que pasa
+  queda en Vercel → Logs con **`[avisos]`**.
+
+**Los dos correos**, con la ropa de la bienvenida (papel, tinta, a escuadra,
+serif):
+
+- **A Emi**, siempre en español, a `info@emilserios.com` (o a `AVISOS_A`):
+  «Nueva pregunta de Ana Pérez · Membresía» — quién, con su correo; la semana
+  y el ejercicio, o el curso, la clase y el minuto; la pregunta entera; y
+  **«Responder en el panel →»**, que abre `/panel/#mensajes/<id>`. **No
+  lleva el `reply_to` del alumno a propósito**: si Emi contestara desde el
+  correo, la respuesta no quedaría en el aula.
+- **Al alumno**, en su idioma (en la membresía, el de la pregunta; en un
+  curso, el `preferred_lang` de su perfil) y en primera persona: «Ya te
+  respondí» / «I answered your question», la pregunta citada y «Ver mi
+  respuesta →», que lleva a la membresía o al curso. **No copia la
+  respuesta**: puede ser un audio o un video, y vive en el aula. Responder
+  a ese correo le llega a `info@emilserios.com`.
+
+**El copy es provisional**, escrito acá en la voz de Emi. El 24 sep se había
+quedado en que ella escribía los textos; Adrián pidió hacerlo ya. Si Emi
+manda los suyos, se cambian en `correoPreguntaNueva()` y `correoRespuesta()`.
+
+### Mensajes, una fila por persona
+
+Adrián: «aparecen todas las respondidas como una lista interminable». Hasta
+ese día la pestaña era una tarjeta por pregunta, todas seguidas, con un
+filtro de *Sin responder / Respondidas / Todas* y otro de dónde. Ahora:
+
+- **`#mensajes`**: una fila por persona, **solo quienes preguntaron algo**.
+  Por defecto *Esperan respuesta*, ordenadas por quien lleva más tiempo
+  esperando; *Todas* suma a quien está al día, con lo más reciente arriba.
+  Cada fila dice su correo, dónde preguntó (Membresía, y cada curso), cuántas
+  preguntas, cuándo fue lo último y cuántas esperan. Buscador por nombre o
+  correo, sin importar las tildes (como en Personas). El nombre es el del
+  perfil; si no tiene, el «Nombre I.» de la pregunta.
+- **`#mensajes/<id>`**: la conversación con esa persona, **todo junto, lo más
+  nuevo arriba**: lo que espera respuesta suele ser lo último que preguntó, y
+  debajo queda la historia. Las tarjetas y los campos de responder (texto en
+  la membresía; texto, video o audio en los cursos) son los de antes.
+- El filtro de dónde se fue: con una fila por persona ya no hacía falta.
+- **La regla de lo pendiente no cambió**, y es la misma de «Hoy» y de la vista
+  general: una pregunta de la membresía cuyo ejercicio ya salió del aula no
+  cuenta. Lo que sí cambió es la nota de esa tarjeta, que decía que «una
+  respuesta ahora no le llegaría»: **desde la 0011 sí le llega** —ve todas
+  sus preguntas, de cualquier semana—, y desde hoy, además, por correo.
+
+### La primera persona
+
+La regla (Adrián): **del alumno para adentro no se habla de Emi en tercera
+persona en ningún momento.** El aula es Emi hablando. Se tocó
+`src/i18n/aula.ts` entero y la etiqueta de la respuesta en la membresía
+(`Membresia.astro`, que decía «Emi · Respuesta»). La lista de lo que cambió
+está en el recuadro 🧵. Lo que sigue diciendo «Emi», y está bien: el panel
+—la herramienta es de ella y le habla de tú— y los `alt` de las fotos, que
+describen la imagen. Si aparece una frase nueva en el aula, va en primera
+persona.
+
+### «Mostrar» en las contraseñas
+
+`src/components/acceso/CampoClave.astro`: el campo de contraseña con su botón
+dentro, a la derecha, en la letra mono de los botones de texto. **Texto y no
+un ojo**: el sistema prohíbe iconos. Cambia el campo entre `password` y
+`text`, deja el cursor donde estaba, dice «Ocultar» cuando se ve, y **vuelve
+a ocultarla al enviar el formulario**, para que el gestor de contraseñas del
+navegador la siga ofreciendo guardar y no quede escrita en claro si el
+navegador recuerda lo tecleado. Esconde el ojo
+propio de Edge, para que no salgan dos. Lo usan las tres pantallas que piden
+contraseña; las cuatro frases están en `src/i18n/aula.ts` (`pass.show`…).
+
+---
+
 ## La ficha de precio rota, y la entrada en todas las páginas
 
 **24 de septiembre de 2026, más tarde esa noche.** Adrián, con el #55 ya
@@ -1174,6 +1367,11 @@ directo contra Supabase con la RLS de admin. La pestaña Cursos, cuando no
 encuentra un correo, ahora manda a crearlo en Personas.
 
 ### Mensajes
+
+> **Desde el 1 oct 2026 es una fila por persona** y, dentro, la conversación
+> entera; ver **Los avisos por correo, y Mensajes por persona**. Lo que sigue
+> es cómo era el 23 sep, y lo de las respuestas (texto, video, audio) sigue
+> igual.
 
 `/panel/#mensajes` junta las dos bandejas: **el foro de la membresía**
 (`questions` / `answers`, de la academia) y **los hilos de los cursos**
@@ -4371,12 +4569,14 @@ src/
     aula/Curso.astro               El reproductor: índice, clase, hilo de dudas.
                                    Lee el curso de Supabase; nada va en el HTML
     acceso/                        Entrar, contraseña nueva, puente, gracias
+    acceso/CampoClave.astro        El campo de contraseña con «Mostrar»
     panel/Consola.astro            El panel: portero, barra de pestañas
     panel/Hoy.astro                La portada del panel: cifras y avisos
     panel/Membresia.astro          Los ejercicios de la membresía (la de la
                                    academia, tal cual, con la ropa nueva)
     panel/Cursos.astro             El constructor de cursos (el marcado)
-    panel/Proximamente.astro       Tienda, Cartas, Personas, Mensajes
+    panel/Mensajes.astro           Una fila por persona; dentro, la
+                                   conversación entera para responder
     EmailArchive.astro             Fichas del newsletter + <dialog>. Desde el
                                    21 sep 2026 NO SE USA en ninguna página:
                                    el copy nuevo de la Home se lleva por
@@ -4426,6 +4626,10 @@ src/
   lib/aula-datos.ts      Los datos del aula (cursos, avance, dudas): Supabase
                          o la maqueta, con la misma forma
   lib/aula-acceso.ts     Quién entra, preguntado una vez por página
+  lib/correo.ts          Los correos por Resend: la bienvenida y los dos
+                         avisos de las preguntas. Solo servidor
+  lib/avisos.ts          Pide el aviso de una pregunta o una respuesta a
+                         /api/avisos. Del navegador; no lanza ni hace esperar
   lib/panel.ts           Lo que comparten las pestañas del panel
   lib/video.ts           El normalizador de Bunny, traído de la academia
   lib/bunny-idioma.ts    El idioma de un video de Bunny (ES / EN, por su
@@ -4449,6 +4653,7 @@ src/
                          aulavirtual/pasar · en/classroom/handoff (el puente)
                          api/checkout · api/claim-account (el cobro, servidor)
                          api/suscribir (el alta al newsletter, servidor)
+                         api/avisos (los correos de las preguntas, servidor)
   styles/tokens.css      Los tokens del sistema
   styles/base.css        Reset y primitivas compartidas
   styles/app.css         Las piezas de aplicación del aula y el panel
@@ -4475,6 +4680,8 @@ docs/CONECTAR-EL-AULA.md  Lo que hay que hacer FUERA del código para que el
 supabase/migrations/0009_cursos.sql  Los cursos: seis tablas, sus reglas y
                          el bucket privado «cursos». Sigue la numeración de la
                          academia (0001–0008). Solo aditiva e idempotente
+supabase/migrations/0012_avisos_por_correo.sql  Cuándo salió cada aviso
+                         por correo, para no mandarlo dos veces
 supabase/set_admin.sql   Quién es admin. NO crea nada: el esquema ya existe en
                          el Supabase de la academia. Se ejecuta DESPUÉS de que
                          cada admin haya entrado una vez

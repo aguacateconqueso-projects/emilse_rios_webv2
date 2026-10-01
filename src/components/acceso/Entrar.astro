@@ -20,6 +20,7 @@ import { routePath } from '../../i18n/ui';
 import { useAula, clavePath, escritorioPath } from '../../i18n/aula';
 import { isSupabaseConfigured } from '../../lib/supabase';
 import Boton from '../Boton.astro';
+import CampoClave from './CampoClave.astro';
 
 interface Props {
   lang: Lang;
@@ -55,10 +56,7 @@ const a = useAula(lang);
       <input type="email" name="email" autocomplete="email" required data-email />
     </label>
 
-    <label class="campo">
-      <span class="campo__t">{a('signin.pass')}</span>
-      <input type="password" name="clave" autocomplete="current-password" required data-clave />
-    </label>
+    <CampoClave lang={lang} id="entrar-clave" label={a('signin.pass')} name="clave" autocomplete="current-password" dato="clave" />
 
     <label class="casilla">
       <input type="checkbox" checked data-recordar />

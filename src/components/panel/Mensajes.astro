@@ -16,34 +16,67 @@
  *   2026). El video es un enlace de Bunny o de Vimeo, como en las clases. El
  *   audio se graba acá mismo, con el micrófono, y va al bucket privado
  *   «cursos» en `<curso>/respuestas/<alumna>/…`: solo lo oye ella (migración
- *   0010). Al leerla, en su escritorio se apaga el aviso «Emi te respondió».
+ *   0010). Al leerla, en su escritorio se apaga el aviso «Te respondí».
  *
- * Por defecto enseña lo que espera respuesta, de lo más viejo a lo más nuevo:
- * se contesta en orden. La cifra al lado de «Mensajes» en la barra es esa.
+ * **Una fila por persona, desde el 1 oct 2026** (pedido de Adrián: «aparecen
+ * todas las respondidas como una lista interminable»). Hasta ese día era una
+ * tarjeta por pregunta, todas seguidas. Ahora:
+ *
+ * - `#mensajes` es **la lista de quienes preguntaron algo**, y nadie más. Por
+ *   defecto, solo quienes esperan respuesta —primero quien lleva más tiempo
+ *   esperando—; «Todas» enseña también a quien ya está al día.
+ * - `#mensajes/<id>` es **la conversación con esa persona**: todo lo que
+ *   preguntó, en la membresía y en los cursos, con tus respuestas, de lo más
+ *   nuevo a lo más viejo. Lo que espera respuesta trae su campo abierto.
+ *
+ * Al responder, a la persona le llega un correo avisándole (`/api/avisos`); y
+ * a Emi le llega uno cada vez que alguien pregunta, con el enlace directo a
+ * esa conversación. La cifra al lado de «Mensajes» en la barra son las
+ * preguntas que esperan respuesta.
  */
 ---
 
 <div class="app-wrap pest mensajes" data-mensajes>
-  <header class="pest-cab">
-    <div>
-      <p class="eyebrow">Mensajes</p>
-      <h1 class="app-h1 pest-cab__h">Lo que te preguntan.</h1>
-    </div>
-  </header>
+  {/* --- La lista: una fila por persona ------------------------------------ */}
+  <div data-m-lista-vista>
+    <header class="pest-cab">
+      <div>
+        <p class="eyebrow">Mensajes</p>
+        <h1 class="app-h1 pest-cab__h">Lo que te preguntan.</h1>
+      </div>
+    </header>
+    <p class="mensajes__que soft">
+      Una fila por persona: solo quienes te han preguntado algo. Pulsa a alguien para ver toda la conversación
+      —la membresía y los cursos— y responder desde ahí.
+    </p>
 
-  <div class="mensajes__filtros">
-    <div class="segmento" role="tablist" aria-label="Qué enseñar" data-m-estado>
-      <button class="mono segmento__b" type="button" role="tab" data-v="pendientes" aria-selected="true">Sin responder</button>
-      <button class="mono segmento__b" type="button" role="tab" data-v="respondidas" aria-selected="false">Respondidas</button>
-      <button class="mono segmento__b" type="button" role="tab" data-v="todas" aria-selected="false">Todas</button>
+    <div class="mensajes__filtros">
+      <div class="segmento" role="tablist" aria-label="Qué enseñar" data-m-estado>
+        <button class="mono segmento__b" type="button" role="tab" data-v="pendientes" aria-selected="true">Esperan respuesta</button>
+        <button class="mono segmento__b" type="button" role="tab" data-v="todas" aria-selected="false">Todas</button>
+      </div>
+      <label class="campo mensajes__buscar">
+        <span class="visually-hidden">Buscar</span>
+        <input type="search" placeholder="Buscar por nombre o correo" data-m-buscar />
+      </label>
     </div>
-    <label class="campo mensajes__donde">
-      <span class="visually-hidden">Dónde</span>
-      <select data-m-donde>
-        <option value="todo">De todas partes</option>
-        <option value="foro">Foro de la membresía</option>
-      </select>
-    </label>
+
+    <p class="mono soft mensajes__cuenta" data-m-cuenta aria-live="polite"></p>
+    <ul class="filas" role="list" data-m-personas>
+      <li class="filas__vacio soft">Cargando…</li>
+    </ul>
+  </div>
+
+  {/* --- La conversación con una persona ------------------------------------ */}
+  <div data-m-conv hidden>
+    <a class="mono mensajes__volver" href="#mensajes">← Todas las conversaciones</a>
+    <header class="mensajes__cab">
+      <p class="eyebrow">Conversación</p>
+      <h1 class="app-h1 app-h1--sm" data-m-c-h></h1>
+      <p class="mono soft" data-m-c-sub></p>
+      <p class="mono" data-m-c-ficha></p>
+    </header>
+    <ol class="mensajes__lista" role="list" data-m-lista></ol>
   </div>
 
   <p class="aviso mensajes__aviso" data-m-sin-medios hidden>
@@ -51,18 +84,14 @@
     de datos: pegar <code>supabase/migrations/0010_tienda_paginas_mensajes.sql</code> en Supabase → SQL Editor.
     Mientras tanto, se responde con texto.
   </p>
-
-  <p class="mono soft mensajes__cuenta" data-m-cuenta aria-live="polite"></p>
-  <ol class="mensajes__lista" role="list" data-m-lista>
-    <li class="filas__vacio soft">Cargando…</li>
-  </ol>
 </div>
 
 <script>
   import type { Session } from '@supabase/supabase-js';
   import { supabase, isSupabaseConfigured } from '../../lib/supabase';
-  import { alAbrir, armarBotones, avisar, boton, el, fechaHora, hace, ocupado } from '../../lib/panel';
+  import { alAbrir, armarBotones, avisar, boton, el, fechaHora, hace, leerHash, ocupado } from '../../lib/panel';
   import { normalizeVideoUrl, videoEmbed } from '../../lib/video';
+  import { avisarPorCorreo } from '../../lib/avisos';
 
   type Msj = {
     tipo: 'foro' | 'curso';
@@ -91,11 +120,29 @@
   const raiz = document.querySelector<HTMLElement>('[data-mensajes]')!;
   const $ = <T extends HTMLElement = HTMLElement>(s: string) => raiz.querySelector<T>(s)!;
 
+  /** Una fila de la lista: alguien que preguntó, con todo lo suyo. */
+  type Persona = {
+    user_id: string;
+    quien: string;
+    correo: string | null;
+    msjs: Msj[];
+    /** Las que esperan respuesta. */
+    esperan: number;
+    /** La pregunta más vieja de las que esperan: manda en el orden. */
+    esperaDesde: number | null;
+    /** Lo último que pasó: su última pregunta o tu última respuesta. */
+    ultima: number;
+    lugares: string[];
+  };
+
   let sesion: Session | null = null;
   let todos: Msj[] = [];
-  type Estado = 'pendientes' | 'respondidas' | 'todas';
+  let personas: Persona[] = [];
+  type Estado = 'pendientes' | 'todas';
   let estado: Estado = 'pendientes';
-  let donde = 'todo';
+  let busca = '';
+  /** La persona cuya conversación está abierta (`#mensajes/<id>`), o `null`. */
+  let abierta: string | null = null;
   let conMedios = true;
   let arrancada = false;
 
@@ -113,7 +160,7 @@
 
   async function cargar() {
     const pedirCursos = (extra: string) =>
-      supabase.from('course_questions').select(CAMPOS_CURSO + extra).order('created_at', { ascending: false }).limit(500);
+      supabase.from('course_questions').select(CAMPOS_CURSO + extra).order('created_at', { ascending: false }).limit(1000);
     const [foro, primero] = await Promise.all([
       supabase
         .from('questions')
@@ -121,7 +168,7 @@
           'id, body, lang, created_at, author_name, user_id, exercises(title_es, week_label, publish_at, unpublish_at, kind), answers(id, body, created_at), profiles(email, full_name)',
         )
         .order('created_at', { ascending: false })
-        .limit(500),
+        .limit(1000),
       pedirCursos(', answer_video, answer_audio_path, answer_seen_at'),
     ]);
     let cursos = primero;
@@ -141,11 +188,11 @@
         tipo: 'foro',
         id: q.id,
         user_id: q.user_id,
-        quien: q.author_name || q.profiles?.full_name || q.profiles?.email || '(alumna)',
+        quien: q.profiles?.full_name || q.author_name || q.profiles?.email || '(sin nombre)',
         correo: q.profiles?.email ?? null,
         body: q.body,
         creada: q.created_at,
-        donde: 'Foro de la membresía',
+        donde: 'Membresía',
         detalle: [ex.week_label, ex.title_es, q.lang === 'en' ? 'en inglés' : null].filter(Boolean).join(' · '),
         donde_id: 'foro',
         respondida: Boolean(q.answers?.length),
@@ -154,15 +201,13 @@
       });
     });
     if (cursos.error) console.error('[mensajes] cursos', cursos.error);
-    const cursosVistos = new Map<string, string>();
     (cursos.data ?? []).forEach((q: any) => {
       const titulo = q.courses?.title_es || q.courses?.slug || 'Un curso';
-      cursosVistos.set(q.course_id, titulo);
       lista.push({
         tipo: 'curso',
         id: q.id,
         user_id: q.user_id,
-        quien: q.author_name || q.profiles?.full_name || q.profiles?.email || '(alumna)',
+        quien: q.profiles?.full_name || q.author_name || q.profiles?.email || '(sin nombre)',
         correo: q.profiles?.email ?? null,
         body: q.body,
         creada: q.created_at,
@@ -178,49 +223,137 @@
       });
     });
     todos = lista;
-
-    /* El selector de «dónde», con los cursos que tienen preguntas. */
-    const sel = $<HTMLSelectElement>('[data-m-donde]');
-    const antes = sel.value;
-    sel.querySelectorAll('option[data-curso]').forEach((o) => o.remove());
-    cursosVistos.forEach((t, id) => sel.append(el('option', { value: id, 'data-curso': true, text: `Curso: ${t}` })));
-    sel.value = [...sel.options].some((o) => o.value === antes) ? antes : 'todo';
-    donde = sel.value;
+    personas = agrupar(lista);
 
     document.dispatchEvent(new CustomEvent('panel:pendientes', { detail: todos.filter(espera).length }));
     pintar();
+  }
+
+  /** Las preguntas, juntadas por quien las hizo. */
+  function agrupar(lista: Msj[]): Persona[] {
+    const por = new Map<string, Persona>();
+    lista.forEach((m) => {
+      let p = por.get(m.user_id);
+      if (!p) {
+        p = { user_id: m.user_id, quien: m.quien, correo: m.correo, msjs: [], esperan: 0, esperaDesde: null, ultima: 0, lugares: [] };
+        por.set(m.user_id, p);
+      }
+      p.msjs.push(m);
+      const creada = Date.parse(m.creada);
+      if (espera(m)) {
+        p.esperan += 1;
+        p.esperaDesde = p.esperaDesde === null ? creada : Math.min(p.esperaDesde, creada);
+      }
+      const resp = m.tipo === 'foro' ? (m.respuestas ?? []).map((r) => Date.parse(r.created_at)) : m.answered_at ? [Date.parse(m.answered_at)] : [];
+      p.ultima = Math.max(p.ultima, creada, ...resp);
+      if (!p.lugares.includes(m.donde)) p.lugares.push(m.donde);
+    });
+    /* Lo más nuevo arriba dentro de cada conversación: lo que espera suele ser
+       lo último que preguntó, y debajo queda la historia. */
+    por.forEach((p) => p.msjs.sort((a, b) => Date.parse(b.creada) - Date.parse(a.creada)));
+    return [...por.values()];
   }
 
   /* ==========================================================================
      Pintar
      ========================================================================== */
 
+  const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`;
+
+  /** Lo que toque según el `#hash`: la lista, o la conversación con alguien. */
   function pintar() {
-    const ul = $('[data-m-lista]');
+    if (abierta) pintarConversacion(abierta);
+    else pintarLista();
+  }
+
+  function pintarLista() {
+    $('[data-m-lista-vista]').hidden = false;
+    $('[data-m-conv]').hidden = true;
+    const ul = $('[data-m-personas]');
     ul.textContent = '';
-    const lista = todos
-      .filter((m) => (donde === 'todo' ? true : m.donde_id === donde))
-      .filter((m) => (estado === 'todas' ? true : estado === 'pendientes' ? espera(m) : m.respondida))
-      .sort((a, b) =>
-        estado === 'pendientes' ? Date.parse(a.creada) - Date.parse(b.creada) : Date.parse(b.creada) - Date.parse(a.creada),
-      );
-    const sinResp = todos.filter(espera).length;
-    $('[data-m-cuenta]').textContent =
-      estado === 'pendientes'
-        ? lista.length
-          ? `${lista.length} ${lista.length === 1 ? 'espera' : 'esperan'} respuesta · de la más vieja a la más nueva`
-          : ''
-        : `${lista.length} ${lista.length === 1 ? 'mensaje' : 'mensajes'}${sinResp ? ` · ${sinResp} sin responder en total` : ''}`;
+
+    const sinTilde = (t: string) =>
+      t
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase();
+    const q = sinTilde(busca.trim());
+    const lista = personas
+      .filter((p) => (estado === 'todas' ? true : p.esperan > 0))
+      .filter((p) => !q || sinTilde(`${p.quien} ${p.correo ?? ''}`).includes(q))
+      /* Primero quien espera, y entre quienes esperan, quien lleva más tiempo
+         esperando: se contesta en orden. Después, lo más reciente. */
+      .sort((a, b) => {
+        if (a.esperaDesde !== null && b.esperaDesde !== null) return a.esperaDesde - b.esperaDesde;
+        if (a.esperaDesde !== null) return -1;
+        if (b.esperaDesde !== null) return 1;
+        return b.ultima - a.ultima;
+      });
+
+    const conEspera = personas.filter((p) => p.esperan > 0).length;
+    const preguntas = todos.filter(espera).length;
+    $('[data-m-cuenta]').textContent = conEspera
+      ? `${plural(conEspera, 'persona espera', 'personas esperan')} respuesta · ${plural(preguntas, 'pregunta', 'preguntas')} sin responder · ${plural(personas.length, 'persona', 'personas')} en total`
+      : `${plural(personas.length, 'persona', 'personas')} te han preguntado algo`;
+
     if (!lista.length) {
       ul.append(
         el('li', {
           class: 'filas__vacio soft',
-          text: estado === 'pendientes' ? 'Todo respondido. Nadie espera nada.' : 'No hay mensajes acá.',
+          text: q
+            ? 'Nadie con ese nombre o correo.'
+            : estado === 'pendientes'
+              ? 'Todo respondido. Nadie espera nada.'
+              : 'Todavía nadie te ha preguntado nada.',
         }),
       );
       return;
     }
-    lista.forEach((m) => ul.append(tarjeta(m)));
+    lista.forEach((p) => ul.append(filaPersona(p)));
+  }
+
+  function filaPersona(p: Persona): HTMLElement {
+    const href = `#mensajes/${p.user_id}`;
+    const datos = [
+      p.correo && p.correo !== p.quien ? p.correo : null,
+      p.lugares.join(' · '),
+      plural(p.msjs.length, 'pregunta', 'preguntas'),
+      `lo último ${hace(new Date(p.ultima).toISOString())}`,
+    ].filter(Boolean);
+    return el(
+      'li',
+      { class: 'fila' },
+      el('div', { class: 'fila__txt' }, el('a', { class: 'fila__t', href, text: p.quien }), el('p', { class: 'mono-plain soft', text: datos.join(' · ') })),
+      el('span', {
+        class: p.esperan ? 'estado estado--tinta' : 'estado',
+        text: p.esperan ? `${p.esperan} sin responder` : 'Al día',
+      }),
+      el('div', { class: 'fila__actos' }, el('a', { class: 'mono', href, text: 'Abrir →' })),
+    );
+  }
+
+  function pintarConversacion(id: string) {
+    $('[data-m-lista-vista]').hidden = true;
+    $('[data-m-conv]').hidden = false;
+    const p = personas.find((x) => x.user_id === id);
+    const ul = $('[data-m-lista]');
+    ul.textContent = '';
+    $('[data-m-c-h]').textContent = p?.quien ?? 'Sin mensajes';
+    $('[data-m-c-sub]').textContent = p
+      ? [
+          p.correo && p.correo !== p.quien ? p.correo : null,
+          plural(p.msjs.length, 'pregunta', 'preguntas'),
+          p.esperan ? `${p.esperan} sin responder` : 'todo respondido',
+        ]
+          .filter(Boolean)
+          .join(' · ')
+      : '';
+    $('[data-m-c-ficha]').replaceChildren(el('a', { href: `#personas/${id}`, text: 'Ver su ficha en Personas →' }));
+    if (!p) {
+      ul.append(el('li', { class: 'filas__vacio soft', text: 'No queda nada en esta conversación: sus preguntas se borraron.' }));
+      return;
+    }
+    p.msjs.forEach((m) => ul.append(tarjeta(m)));
     armarBotones();
   }
 
@@ -235,16 +368,10 @@
         el('p', { class: 'mono' }, m.donde, m.detalle ? el('span', { class: 'soft', text: ` · ${m.detalle}` }) : null),
         el('p', { class: 'mono soft', title: fechaHora(m.creada), text: hace(m.creada) }),
       ),
-      el(
-        'p',
-        { class: 'msj-card__quien' },
-        el('a', { href: `#personas/${m.user_id}`, text: m.quien }),
-        m.correo && m.correo !== m.quien ? el('span', { class: 'soft', text: ` · ${m.correo}` }) : null,
-      ),
       el('p', { class: 'msj-card__txt', text: m.body }),
     );
     if (m.vencida && !m.respondida)
-      li.append(el('p', { class: 'ficha-form__nota', text: 'Ese ejercicio ya no está en el aula, así que ella ya no ve el foro: una respuesta ahora no le llegaría.' }));
+      li.append(el('p', { class: 'ficha-form__nota', text: 'Ese ejercicio ya salió del aula, así que no cuenta como pendiente. Igual la ve en «Tus preguntas», y si respondes le llega el correo.' }));
 
     if (m.tipo === 'foro') {
       (m.respuestas ?? []).forEach((r) => li.append(respuestaForo(r)));
@@ -276,7 +403,7 @@
             'div',
             { class: 'msj-card__pie' },
             editar,
-            el('span', { class: 'mono soft', text: m.answer_seen_at ? `Ella la vio ${hace(m.answer_seen_at)}` : 'Todavía no la vio' }),
+            el('span', { class: 'mono soft', text: m.answer_seen_at ? `La vio ${hace(m.answer_seen_at)}` : 'Todavía no la vio' }),
             borrar,
           ),
         );
@@ -293,7 +420,7 @@
   function respuestaForo(r: { id: string; body: string; created_at: string }) {
     const quitar = el('button', { class: 'btn-text', type: 'button', text: 'Borrar' });
     quitar.addEventListener('click', async () => {
-      if (!window.confirm('¿Borrar esta respuesta? Desaparece del foro.')) return;
+      if (!window.confirm('¿Borrar esta respuesta? Deja de verla en la membresía.')) return;
       const { error } = await supabase.from('answers').delete().eq('id', r.id);
       if (error) return avisar(`No se pudo borrar: ${error.message}`);
       avisar('Respuesta borrada');
@@ -321,13 +448,19 @@
           err.hidden = false;
           return;
         }
-        const { error } = await supabase.from('answers').insert({ question_id: m.id, user_id: sesion?.user.id, body: texto });
+        const { data: nueva, error } = await supabase
+          .from('answers')
+          .insert({ question_id: m.id, user_id: sesion?.user.id, body: texto })
+          .select('id')
+          .single();
         if (error) {
           err.textContent = `No se pudo enviar: ${error.message}`;
           err.hidden = false;
           return;
         }
-        avisar('Respondida: ya la ve en el foro');
+        /* Le llega un correo avisándole que le respondiste. */
+        avisarPorCorreo('respuesta', 'foro', nueva?.id);
+        avisar('Respondida: le llega un correo avisándole');
         await cargar();
       }),
     );
@@ -335,7 +468,7 @@
       'div',
       { class: 'msj-card__comp' },
       el('div', { class: 'campo' }, ta),
-      el('p', { class: 'campo__ayuda', text: 'La ve en el foro de la membresía, debajo de su pregunta. En el foro se responde con texto.' }),
+      el('p', { class: 'campo__ayuda', text: 'La ve en «Tus preguntas» de la membresía, debajo de su pregunta, y le llega un correo avisándole. En la membresía se responde con texto.' }),
       err,
       el('div', { class: 'msj-card__comp-actos' }, enviar),
     );
@@ -491,14 +624,16 @@
         if (conMedios) {
           cambios.answer_video = enlace ? normalizeVideoUrl(enlace) : null;
           cambios.answer_audio_path = ruta;
-          /* Si la cambias, le vuelve a salir «Emi te respondió». */
+          /* Si la cambias, le vuelve a salir «Te respondí». */
           cambios.answer_seen_at = null;
         }
         const { error } = await supabase.from('course_questions').update(cambios).eq('id', m.id);
         if (error) return falla(`No se pudo guardar: ${error.message}`);
         /* El audio de antes, si se quitó o se reemplazó, se borra del bucket. */
         if (m.answer_audio_path && m.answer_audio_path !== ruta) await supabase.storage.from('cursos').remove([m.answer_audio_path]);
-        avisar(m.respondida ? 'Respuesta cambiada' : 'Respondida: la ve en el hilo del curso');
+        /* El correo sale con la primera respuesta, no cuando la cambias. */
+        if (!m.respondida) avisarPorCorreo('respuesta', 'curso', m.id);
+        avisar(m.respondida ? 'Respuesta cambiada' : 'Respondida: le llega un correo avisándole');
         await cargar();
       }),
     );
@@ -510,7 +645,7 @@
       medios,
       el('p', {
         class: 'campo__ayuda',
-        text: 'La ve en el hilo del curso, debajo de su pregunta, y en su escritorio le sale «Emi te respondió». Puedes mandar texto, video, audio o varios.',
+        text: 'La ve en el hilo del curso, debajo de su pregunta; en su escritorio le sale «Te respondí» y le llega un correo avisándole (solo la primera vez, no si la cambias). Puedes mandar texto, video, audio o varios.',
       }),
       err,
       el('div', { class: 'msj-card__comp-actos' }, enviar),
@@ -539,30 +674,47 @@
     b.addEventListener('click', () => {
       estado = b.dataset.v as Estado;
       raiz.querySelectorAll<HTMLElement>('[data-m-estado] [data-v]').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
-      pintar();
+      pintarLista();
     }),
   );
-  $<HTMLSelectElement>('[data-m-donde]').addEventListener('change', (e) => {
-    donde = (e.target as HTMLSelectElement).value;
-    pintar();
+  $<HTMLInputElement>('[data-m-buscar]').addEventListener('input', (e) => {
+    busca = (e.target as HTMLInputElement).value;
+    pintarLista();
   });
+
+  /** Lo que diga el `#hash`: `#mensajes` o `#mensajes/<id>`. */
+  function segunHash(): boolean {
+    const [pest, id] = leerHash();
+    if (pest !== 'mensajes') return false;
+    const cambia = id !== abierta;
+    abierta = id;
+    if (cambia) {
+      pintar();
+      window.scrollTo({ top: 0 });
+    }
+    return true;
+  }
 
   alAbrir('mensajes', async (s) => {
     sesion = s;
     if (!isSupabaseConfigured) {
-      const ul = $('[data-m-lista]');
+      const ul = $('[data-m-personas]');
       ul.textContent = '';
       ul.append(el('li', { class: 'filas__vacio soft', text: 'Sin conectar: no hay de dónde leer los mensajes.' }));
       return;
     }
+    abierta = leerHash()[1];
     await cargar();
     arrancada = true;
   });
 
-  /* Se relee al volver: pudo llegar algo mientras Emi estaba en otra pestaña.
-     No mientras escribe: si hay un compositor con texto, se deja como está. */
+  /* Al volver a la pestaña, o al pasar de la lista a una conversación: se
+     pinta enseguida con lo que hay y se relee por detrás —pudo llegar algo
+     mientras Emi estaba en otra parte—. No mientras escribe: si hay un campo
+     de respuesta con texto, se deja como está. */
   document.addEventListener('panel:pestana', (e) => {
     if ((e as CustomEvent).detail !== 'mensajes' || !arrancada) return;
+    if (!segunHash()) return;
     const escribiendo = Array.from(raiz.querySelectorAll<HTMLTextAreaElement>('.msj-card__comp textarea')).some((t) => t.value.trim());
     if (!escribiendo) void cargar();
   });
@@ -578,8 +730,34 @@
     margin-top: var(--space-4);
   }
 
-  .mensajes__donde {
+  .mensajes__que {
+    max-width: 44rem;
+    margin-top: var(--space-2);
+    font-size: var(--text-small);
+    line-height: 1.5;
+  }
+
+  .mensajes__buscar {
     flex: 0 1 20rem;
+  }
+
+  .mensajes__volver {
+    display: inline-block;
+    border-bottom: 0;
+    color: var(--ink-soft);
+  }
+
+  .mensajes__volver:hover {
+    color: var(--ink);
+  }
+
+  .mensajes__cab {
+    margin-top: var(--space-3);
+  }
+
+  .mensajes__cab h1,
+  .mensajes__cab .mono {
+    margin-top: var(--space-1);
   }
 
   .mensajes__aviso {
@@ -598,7 +776,7 @@
   .mensajes__lista {
     display: grid;
     gap: var(--space-3);
-    margin: var(--space-2) 0 0;
+    margin: var(--space-4) 0 0;
     padding: 0;
     list-style: none;
   }
@@ -620,13 +798,6 @@
     flex-wrap: wrap;
     justify-content: space-between;
     gap: var(--space-1) var(--space-3);
-  }
-
-  .mensajes :global(.msj-card__quien a) {
-    font-family: var(--font-display);
-    font-size: 1.375rem;
-    line-height: 1.25;
-    border-bottom: 0;
   }
 
   .mensajes :global(.msj-card__txt) {
