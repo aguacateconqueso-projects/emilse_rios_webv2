@@ -134,8 +134,10 @@ const ACADEMIA_A_CASA = [
   ['/salir', '/aulavirtual/salir/'],
   ['/pasar', '/aulavirtual/entrar/'],
   ['/panel', '/panel/'],
-  ['/en', '/en/courses/estudiemos-juntos/'],
-  ['', '/formaciones/estudiemos-juntos/'],
+  /* La carta de la membresía, en su dirección propia desde el 1 oct 2026
+     (`direccionesPropias` en `src/i18n/ui.ts`): directo, sin cadena. */
+  ['/en', '/en/programs/double-bass-membership/'],
+  ['', '/formaciones/membresia-contrabajo/'],
 ];
 const CASA = 'https://www.emilserios.com';
 
@@ -261,13 +263,29 @@ export default defineConfig({
     '/en/products/[producto]': '/en/courses/[producto]',
 
     /*
+     * La membresía tiene dirección propia desde el 1 oct 2026 (pedido de Emi):
+     * `/formaciones/membresia-contrabajo/` y
+     * `/en/programs/double-bass-membership/`. Ver `direccionesPropias` en
+     * `src/i18n/ui.ts`. Todas sus direcciones de antes van **directo** a la
+     * nueva, sin cadena: la del 24 sep (`/formaciones/estudiemos-juntos/`), la
+     * de antes (`/productos/…`) y la del aula, más abajo. Las dos primeras
+     * las redirige también la propia página de ventas, por si algún día se
+     * borran de acá. `/en/programs/` no tiene portada: lleva a los cursos.
+     */
+    '/formaciones/estudiemos-juntos': '/formaciones/membresia-contrabajo',
+    '/en/courses/estudiemos-juntos': '/en/programs/double-bass-membership',
+    '/productos/estudiemos-juntos': '/formaciones/membresia-contrabajo',
+    '/en/products/estudiemos-juntos': '/en/programs/double-bass-membership',
+    '/en/programs': '/en/courses',
+
+    /*
      * La carta de la membresía vivió en el aula del 31 ago al 9 sep 2026. Va
      * directo a su dirección de hoy, sin pasar por `/productos/`: una
      * redirección en cadena es un viaje más para quien hace clic y una pista
      * peor para Google.
      */
-    '/aulavirtual/estudiemos-juntos': '/formaciones/estudiemos-juntos',
-    '/en/classroom/estudiemos-juntos': '/en/courses/estudiemos-juntos',
+    '/aulavirtual/estudiemos-juntos': '/formaciones/membresia-contrabajo',
+    '/en/classroom/estudiemos-juntos': '/en/programs/double-bass-membership',
 
     /*
      * El escritorio de la alumna se llamaba `/panel/` y dejó de llamarse así el

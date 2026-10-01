@@ -14,11 +14,21 @@
  * patrón dinámico `/aulavirtual/[producto]` se comía páginas reales del aula
  * pedidas sin barra. Ver `astro.config.mjs` y `progreso.md`. Desde el 24 sep
  * 2026 comprueba también que `/productos/` y `/en/products/` lleven a
- * `/formaciones/` y `/en/courses/`, página por página.
+ * `/formaciones/` y `/en/courses/`, página por página. Y desde el 1 oct 2026,
+ * que cada dirección vieja de la membresía llegue **en un solo salto** a la
+ * nueva: `/formaciones/membresia-contrabajo/` y
+ * `/en/programs/double-bass-membership/`.
  *
  * «Aterrizar» es llegar a una página que contesta: un fichero del build o una
  * función —Formaciones y las páginas de ventas se resuelven en el servidor
  * desde el 23 sep 2026—.
+ *
+ * Mira también **el dominio** de la petición (las rutas con `has: host`): desde
+ * el 27 sep 2026 las primeras rutas son las de `emilseriosacademy.com`, que
+ * solo valen para ese dominio. Hasta el 1 oct 2026 el script no lo miraba y
+ * daba los 58 casos por fallidos —todo «redirigía a la Home»—. Por defecto
+ * las direcciones se piden a `www.emilserios.com`; los casos con `host`, a
+ * otro.
  *
  * Una simplificación, y es la única: una ruta con `dest` y sin `status` se da
  * por reescritura a una función (`_render`), que es lo único que el adaptador
@@ -41,9 +51,18 @@ function fichero(ruta) {
   return existsSync(indice) ? indice : null;
 }
 
+const CASA = 'www.emilserios.com';
+
+/** ¿Vale la ruta para este dominio? Solo se miran las condiciones de `host`. */
+const valeParaHost = (r, host) => !r.has || r.has.every((h) => h.type !== 'host' || h.value === host);
+
+/** Una dirección absoluta de esta casa se sigue como ruta; de otro dominio, no. */
+const local = (destino) => (destino.startsWith(`https://${CASA}/`) ? destino.slice(`https://${CASA}`.length) : destino);
+
 /** Una vuelta de enrutado: redirección, fichero, función o 404. */
-function resolver(ruta) {
+function resolver(ruta, host) {
   for (const r of antes) {
+    if (!valeParaHost(r, host)) continue;
     const m = new RegExp(r.src).exec(ruta);
     if (!m || !r.headers?.Location || !r.status) continue;
     const destino = r.headers.Location.replace(/\$(\d)/g, (_, n) => m[Number(n)] ?? '');
@@ -51,20 +70,21 @@ function resolver(ruta) {
   }
   if (fichero(ruta)) return { tipo: 'fichero', status: 200 };
   for (const r of despues) {
-    if (!r.src || !new RegExp(r.src).test(ruta)) continue;
+    if (!valeParaHost(r, host) || !r.src || !new RegExp(r.src).test(ruta)) continue;
     if (r.status === 404) return { tipo: '404', status: 404 };
     if (r.dest) return { tipo: 'función', status: 200 };
   }
   return { tipo: '404', status: 404 };
 }
 
-/** Sigue las redirecciones hasta que la dirección aterriza. */
-function recorrer(ruta) {
+/** Sigue las redirecciones hasta que la dirección aterriza. Después del
+    primer salto se está siempre en esta casa. */
+function recorrer(ruta, host = CASA) {
   const saltos = [ruta];
   for (let i = 0; i < 5; i++) {
-    const r = resolver(saltos.at(-1));
+    const r = resolver(saltos.at(-1), i === 0 ? host : CASA);
     if (r.tipo !== 'redirige') return { ...r, saltos };
-    saltos.push(r.destino);
+    saltos.push(local(r.destino));
   }
   return { tipo: 'bucle', status: 0, saltos };
 }
@@ -73,19 +93,17 @@ function recorrer(ruta) {
  * Qué se espera de cada dirección.
  *   · `llega`: termina en esa página, servida como fichero.
  *   · `queda`: NO se la lleva ninguna redirección — es una página de verdad.
+ *   · `directo`: además, llega en un solo salto, sin cadena.
  */
 const casos = [];
 const viejas = {
   // Formaciones se llamó `/productos/` (y `/en/products/`) hasta el 24 sep 2026.
   '/productos': '/formaciones/',
-  '/productos/estudiemos-juntos': '/formaciones/estudiemos-juntos/',
   '/productos/todo-el-diapason': '/formaciones/todo-el-diapason/',
   '/en/products': '/en/courses/',
-  '/en/products/estudiemos-juntos': '/en/courses/estudiemos-juntos/',
   '/en/products/todo-el-diapason': '/en/courses/todo-el-diapason/',
-  // Va directo, sin pasar por `/productos/`.
-  '/aulavirtual/estudiemos-juntos': '/formaciones/estudiemos-juntos/',
-  '/en/classroom/estudiemos-juntos': '/en/courses/estudiemos-juntos/',
+  // `/en/programs/` no tiene portada (1 oct 2026).
+  '/en/programs': '/en/courses/',
   '/aulavirtual/panel': '/aulavirtual/escritorio/',
   '/en/classroom/panel': '/en/classroom/desk/',
   // Desde el 23 sep 2026 el aula no tiene portada: se entra por el acceso.
@@ -94,6 +112,21 @@ const viejas = {
 };
 for (const [vieja, nueva] of Object.entries(viejas)) {
   casos.push({ ruta: vieja, llega: nueva }, { ruta: `${vieja}/`, llega: nueva });
+}
+// La membresía, en su dirección propia desde el 1 oct 2026: todas las de antes
+// llevan directo, en un salto.
+const MEMB_ES = '/formaciones/membresia-contrabajo/';
+const MEMB_EN = '/en/programs/double-bass-membership/';
+const membresia = {
+  '/formaciones/estudiemos-juntos': MEMB_ES,
+  '/productos/estudiemos-juntos': MEMB_ES,
+  '/aulavirtual/estudiemos-juntos': MEMB_ES,
+  '/en/courses/estudiemos-juntos': MEMB_EN,
+  '/en/products/estudiemos-juntos': MEMB_EN,
+  '/en/classroom/estudiemos-juntos': MEMB_EN,
+};
+for (const [vieja, nueva] of Object.entries(membresia)) {
+  casos.push({ ruta: vieja, llega: nueva, directo: true }, { ruta: `${vieja}/`, llega: nueva, directo: true });
 }
 const delAula = [
   'entrar', 'escritorio', 'nueva-clave', 'salir', 'pasar',
@@ -104,20 +137,32 @@ for (const pagina of delAula) {
   casos.push({ ruta: `${pagina}/`, llega: `${pagina}/` }, { ruta: pagina, queda: true });
 }
 // Las direcciones nuevas de Formaciones son páginas de verdad: nada se las lleva.
-for (const pagina of ['/formaciones/', '/formaciones/estudiemos-juntos/', '/en/courses/', '/en/courses/estudiemos-juntos/']) {
+for (const pagina of ['/formaciones/', MEMB_ES, '/formaciones/todo-el-diapason/', '/en/courses/', MEMB_EN, '/en/courses/todo-el-diapason/']) {
   casos.push({ ruta: pagina, llega: pagina });
+}
+for (const pagina of [MEMB_ES, MEMB_EN]) casos.push({ ruta: pagina.slice(0, -1), queda: true });
+
+// `emilseriosacademy.com` redirige entero (27 sep 2026): su portada, a la carta
+// de la membresía, directo; `/api/` no se toca —lo contesta este proyecto—.
+for (const host of ['www.emilseriosacademy.com', 'emilseriosacademy.com']) {
+  casos.push(
+    { ruta: '/', host, llega: MEMB_ES, directo: true },
+    { ruta: '/en', host, llega: MEMB_EN, directo: true },
+    { ruta: '/aula', host, llega: '/aulavirtual/membresia/', directo: true },
+    { ruta: '/api/stripe-webhook', host, queda: true },
+  );
 }
 
 let fallos = 0;
 for (const caso of casos) {
-  const r = recorrer(caso.ruta);
+  const r = recorrer(caso.ruta, caso.host);
   const final = r.saltos.at(-1);
   let ok;
-  if (caso.llega) ok = (r.tipo === 'fichero' || r.tipo === 'función') && final === caso.llega;
+  if (caso.llega) ok = (r.tipo === 'fichero' || r.tipo === 'función') && final === caso.llega && (!caso.directo || r.saltos.length === 2);
   else ok = r.saltos.length === 1 && r.tipo !== 'bucle';
   if (!ok) fallos++;
   const camino = r.saltos.join(' → ');
-  console.log(`${ok ? '✓' : '✗'} ${camino}  [${r.tipo} ${r.status}]`);
+  console.log(`${ok ? '✓' : '✗'} ${caso.host ? `${caso.host} ` : ''}${camino}  [${r.tipo} ${r.status}]`);
 }
 
 console.log(fallos ? `\n${fallos} de ${casos.length} fallan.` : `\nLas ${casos.length} bien.`);

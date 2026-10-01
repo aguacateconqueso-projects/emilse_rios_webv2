@@ -163,15 +163,77 @@ export function routePath(route: Route, lang: Lang): string {
 }
 
 /**
+ * Los productos que tienen **una dirección propia en cada idioma**, en vez de
+ * `/formaciones/<slug>/` y `/en/courses/<slug>/`.
+ *
+ * Pedido de Emi el 1 oct 2026, para la membresía: en español
+ * `/formaciones/membresia-contrabajo/` y en inglés
+ * `/en/programs/double-bass-membership/`. **El slug no cambia**: sigue siendo
+ * `estudiemos-juntos`, que es la identidad del producto —su fila en
+ * `products` y en `sales_pages`, la carta de `src/data/cartas.ts`, el panel—.
+ * Lo único que cambia es la dirección que se ve.
+ *
+ * Cada dirección vieja lleva a la nueva con un 301: `/formaciones/
+ * estudiemos-juntos/` y `/en/courses/estudiemos-juntos/` las redirige la
+ * propia página (`src/pages/formaciones/[producto].astro` y su gemela), y las
+ * más viejas —`/productos/…`, `/aulavirtual/…`, la academia— van directo a la
+ * nueva desde `astro.config.mjs`. **Si una de estas cambia, cambian también
+ * allá**, y `npm run audit:redirecciones` lo comprueba.
+ *
+ * Una dirección propia en inglés que no cuelgue de `/en/courses/` necesita su
+ * carpeta en `src/pages`: la de `/en/programs/` es
+ * `src/pages/en/programs/[producto].astro`.
+ */
+export const direccionesPropias: Record<string, Record<Lang, string>> = {
+  'estudiemos-juntos': {
+    es: '/formaciones/membresia-contrabajo/',
+    en: '/en/programs/double-bass-membership/',
+  },
+};
+
+/**
  * Dirección de la carta de venta de un producto.
  *
  * Cuelga de la tienda, que está afuera y no pide sesión — `/formaciones/` y
  * `/en/courses/` —, no del aula, que desde ahora pide haber pagado. El slug
  * de la sección se traduce, pero **el del producto no**: el slug es la
- * identidad del producto, la misma que llevará su fila en la base de datos y
- * la que aparecerá en el enlace que Emi pegue en un correo. Un producto, un
- * slug, en los dos idiomas.
+ * identidad del producto, la misma que lleva su fila en la base de datos.
+ * Un producto, un slug, en los dos idiomas — salvo los que tienen dirección
+ * propia (`direccionesPropias`, justo arriba).
  */
 export function productPath(slug: string, lang: Lang): string {
-  return `${routePath('products', lang)}${slug}/`;
+  return direccionesPropias[slug]?.[lang] ?? `${routePath('products', lang)}${slug}/`;
+}
+
+/**
+ * Al revés: el producto que vive en esta dirección propia, o `null`. La usan
+ * las páginas de ventas para saber qué carta pintar cuando la dirección no es
+ * el slug. Con barra final o sin ella.
+ */
+export function productoEnDireccion(pathname: string, lang: Lang): string | null {
+  const ruta = pathname.endsWith('/') ? pathname : `${pathname}/`;
+  for (const [slug, direccion] of Object.entries(direccionesPropias)) {
+    if (direccion[lang] === ruta) return slug;
+  }
+  return null;
+}
+
+/**
+ * Lo que tiene que hacer una página de ventas con la dirección que le
+ * pidieron: pintar un producto (`slug`), o mandar con un 301 a la dirección
+ * propia del producto (`redirigir`), conservando la `?query` —las campañas
+ * llevan `utm_`—. `soloPropias` es para las carpetas que solo existen por una
+ * dirección propia, como `/en/programs/`: ahí un slug cualquiera no se pinta.
+ */
+export function paginaDeVenta(
+  url: URL,
+  param: string,
+  lang: Lang,
+  soloPropias = false,
+): { slug: string } | { redirigir: string } | null {
+  const propio = productoEnDireccion(url.pathname, lang);
+  if (propio) return { slug: propio };
+  const destino = direccionesPropias[param]?.[lang];
+  if (destino) return { redirigir: `${destino}${url.search}` };
+  return soloPropias ? null : { slug: param };
 }

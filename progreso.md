@@ -4,13 +4,16 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 1 de octubre de 2026, por la tarde —**la web está
-en vivo**—. Esa tarde llegó la primera tanda de ajustes del aula (punto 21):
+**Última actualización:** 1 de octubre de 2026, al final del día —**la web
+está en vivo**—. Lo último: **la membresía cambia de dirección** (pedido de
+Emi): `/formaciones/membresia-contrabajo/` y
+`/en/programs/double-bass-membership/`, con 301 desde todas las de antes (PR
+#61, recuadro 🧵 de abajo, el primero). Antes, esa tarde, llegó la primera tanda de ajustes del aula (punto 21):
 **el aula le habla al alumno en primera persona**, **los correos de aviso de
 las preguntas** (a Emi cuando alguien pregunta, al alumno cuando Emi
 responde), **«Mostrar» en todos los campos de contraseña** y **Mensajes, una
-fila por persona**, en el **PR #60**. Va en el recuadro 🧵 de abajo, el
-primero. Lo que sigue es
+fila por persona**, en el **PR #60** (mergeado el 1 oct; Adrián: «perfecto,
+todo ok»). Va en el segundo recuadro 🧵. Lo que sigue es
 el cierre de la mañana. El PR #58 se mergeó el 1 oct a las 12:32: la cortina subió, entraron las
 correcciones de Emi, la membresía se mudó entera a `emilserios.com` y
 `emilseriosacademy.com` redirige acá. Adrián movió los dominios, hizo una
@@ -32,6 +35,38 @@ suscribió desde la Home el 24 sep y funcionó. ⚠️ **El proyecto de Vercel e
 `emilse-rios-webv2_1`**: las vistas previas buenas empiezan por
 `emilse-rios-webv21-git-…` (ver la regla de trabajo, justo abajo). El detalle de cada cosa está en las secciones que siguen a **La
 cortina**, de la más nueva a la más vieja.
+
+> **🧵 1 oct 2026, al final del día: la membresía, con dirección propia**
+> (rama `claude/fervent-edison-wbg8nb`, rearrancada desde `main` después de
+> mergear el #60; **PR #61**). Su vista previa, la misma raíz que la del #60
+> porque la rama es la misma:
+> **https://emilse-rios-webv21-git-claude-952006-adrians-projects-594b3131.vercel.app**
+> Emi va a ir cambiando cosas poco a poco y se irán ajustando. Esta es la
+> primera:
+>
+> | | Antes | Ahora |
+> |---|---|---|
+> | Español | `/formaciones/estudiemos-juntos/` | **`/formaciones/membresia-contrabajo/`** |
+> | Inglés | `/en/courses/estudiemos-juntos/` | **`/en/programs/double-bass-membership/`** |
+>
+> - **Solo cambia la dirección que se ve.** El producto sigue siendo
+>   `estudiemos-juntos` por dentro —su fila en `products` y `sales_pages`, la
+>   carta, el panel, el cobro—, así que **no hay que tocar Supabase, Stripe
+>   ni Vercel**. Lo decide `direccionesPropias` en `src/i18n/ui.ts`; ver **Las
+>   direcciones viejas → La membresía, con dirección propia**.
+> - **Todas las direcciones de antes llevan a la nueva con un 301, en un solo
+>   salto**: `/formaciones/estudiemos-juntos/`, `/productos/…`,
+>   `/aulavirtual/…`, sus gemelas inglesas y la portada de
+>   `emilseriosacademy.com`. Los enlaces que Emi ya pegó en correos y redes
+>   siguen funcionando; en los nuevos, que pegue ya las direcciones nuevas.
+> - En inglés **solo la membresía** pasa a `/en/programs/`: los cursos siguen
+>   en `/en/courses/`. `/en/programs/` a secas lleva a los cursos.
+> - El canonical, los `hreflang`, el conmutador de idioma, la ficha de
+>   Formaciones, el aula («Ver la membresía»), el panel y la vuelta del pago
+>   cancelado ya usan las nuevas.
+> - **De paso:** `npm run audit:redirecciones` estaba roto desde el #58 —no
+>   miraba el dominio de las rutas de la academia y daba todo por fallido—.
+>   Arreglado: **66 de 66**, también las de `emilseriosacademy.com`.
 
 > **🧵 1 oct 2026, por la tarde: cuatro ajustes del aula** (rama
 > `claude/fervent-edison-wbg8nb`, **PR #60**, desde `main`). Su vista previa:
@@ -262,8 +297,8 @@ cortina**, de la más nueva a la más vieja.
 > cerrar esa sesión. Lección: **lo que se empuja a una rama con el PR ya
 > mergeado no existe**; ver **Cómo trabajamos**.
 >
-> La última vista previa es la de `claude/fervent-edison-wbg8nb` (PR #60,
-> 1 oct por la tarde): `…-git-claude-952006-…`. Antes, la de
+> La última vista previa es la de `claude/fervent-edison-wbg8nb` (PR #60 y
+> PR #61, 1 oct): `…-git-claude-952006-…`. Antes, la de
 > `claude/magical-keller-qtja38` (PR #58, mergeado el 1 oct):
 > `…-git-claude-aa2776-…`. La de
 > `claude/affectionate-faraday-ddgz0m` (PR #54 a #57) era:
@@ -465,8 +500,8 @@ cortina**, de la más nueva a la más vieja.
 >   sesión):
 >   `curl -sI https://www.emilserios.com/productos/estudiemos-juntos/` y
 >   `curl -sI https://www.emilserios.com/aulavirtual/estudiemos-juntos/` tienen
->   que dar `301` hacia `/formaciones/estudiemos-juntos/` (la cortina no lo
->   impide: la redirección va antes). Desde esta sesión no se llega a
+>   que dar `301` hacia `/formaciones/membresia-contrabajo/` (desde el #61; la
+>   cortina no lo impide: la redirección va antes). Desde esta sesión no se llega a
 >   `emilserios.com` ni a `vercel.app`. Y en los correos nuevos, Emi pega ya
 >   las direcciones de `/formaciones/`.
 > - [x] Apagar la integración de WooCommerce en Klaviyo (mirando antes los
@@ -4211,6 +4246,64 @@ Formaciones desde el día anterior, pero la dirección seguía siendo
 Stripe— siguen funcionando por la redirección, pero lo limpio es ir
 cambiándolos a `/formaciones/…` cuando se toquen.
 
+### La membresía, con dirección propia
+
+**1 de octubre de 2026** (PR #61), pedido de Emi:
+
+| | Antes | Ahora |
+|---|---|---|
+| Español | `/formaciones/estudiemos-juntos/` | `/formaciones/membresia-contrabajo/` |
+| Inglés | `/en/courses/estudiemos-juntos/` | `/en/programs/double-bass-membership/` |
+
+**El slug no cambió, y es a propósito.** `estudiemos-juntos` es la identidad
+del producto: su fila en `products` y en `sales_pages`, la carta de
+`src/data/cartas.ts`, la vista previa del panel, el cobro. Cambiarlo habría
+pedido tocar la base de datos y todo lo que la lee, y además las dos
+direcciones nuevas **no comparten slug** —una por idioma—, cosa que el modelo
+de «un producto, un slug» no admite. Así que lo nuevo es una capa encima:
+
+- **`direccionesPropias`** en `src/i18n/ui.ts`: el producto que no vive en
+  `/formaciones/<slug>/`, con su dirección en cada idioma. **`productPath()`
+  la mira primero**, así que todo lo que ya usaba `productPath` —la ficha de
+  Formaciones, el canonical, los `hreflang`, el conmutador, el aula, el
+  panel— dio la dirección nueva sin tocarlo. `/api/checkout` la escribía a
+  mano y ahora usa `productPath` también.
+- **Las páginas** preguntan con `paginaDeVenta()` qué pintar: la dirección
+  propia da su producto; el slug de un producto con dirección propia
+  (`/formaciones/estudiemos-juntos/`) da un **301 a la nueva, con la `?query`**
+  —las campañas llevan `utm_`—. `src/pages/en/programs/[producto].astro` es
+  la carpeta nueva del inglés y **solo pinta direcciones propias**: un curso
+  pedido ahí es un 404, para que no exista dos veces.
+- **`astro.config.mjs`** lleva todas las de antes **directo** a la nueva, en
+  Vercel, antes de llegar a ninguna página: `/formaciones/estudiemos-juntos`,
+  `/productos/estudiemos-juntos`, `/aulavirtual/estudiemos-juntos` y sus
+  gemelas inglesas, y la portada de la academia (`ACADEMIA_A_CASA`). El 301
+  de la página es la red por si algún día se borran de ahí.
+- **`/en/programs/`** sin nada detrás no tiene portada: lleva a
+  `/en/courses/`.
+
+**Si otro producto quiere dirección propia**, es una línea en
+`direccionesPropias`, sus redirecciones en `astro.config.mjs` y sus casos en
+`scripts/redirecciones.mjs`. Si su dirección inglesa no cuelga de
+`/en/courses/` ni de `/en/programs/`, necesita también su carpeta en
+`src/pages`.
+
+**`npm run audit:redirecciones` estaba roto desde el 27 sep** (#58): desde
+ese día las primeras rutas de `config.json` son las de
+`emilseriosacademy.com`, condicionadas al dominio (`has: host`), y el script
+no miraba la condición, así que todo «redirigía a la Home» y fallaban los 58
+casos. Ahora simula el dominio de cada petición —por defecto
+`www.emilserios.com`— y comprueba también las de la academia: **66 de 66**,
+con las seis direcciones viejas de la membresía llegando **en un solo
+salto**.
+
+**Probado** en `npm run dev`: las dos nuevas dan 200 (con barra y sin ella),
+con el canonical propio y los dos `hreflang` cruzados; las viejas, 301;
+`/en/programs/estudiemos-juntos/?utm_source=x` llega a la nueva con su
+`utm_source`; `/en/programs/todo-el-diapason/` es 404; Formaciones, en los dos
+idiomas, enlaza la membresía a la nueva y los cursos siguen donde estaban.
+`npm run build` bien.
+
 ---
 
 ## Arrancar
@@ -4261,7 +4354,8 @@ Astro 7, estático, sin framework de UI. No hace falta adaptador para Vercel.
 - Este documento se actualiza **en el mismo PR** que introduce el cambio.
 - **Del posicionamiento en buscadores no se habla** (Adrián, 24 sep 2026: «no
   me lo nombres más, no nos importa»). No se propone, no va en las listas de lo
-  que falta.
+  que falta. Si lo piden ellos, se hace, sin más: el 1 oct 2026 Emi pidió
+  direcciones nuevas para la membresía (PR #61).
 
 ---
 
@@ -4647,6 +4741,9 @@ src/
                            cartas, la de la membresía incluida)
                          en/courses/index · en/courses/[producto]
                            (hasta el 24 sep 2026, en/products/)
+                         en/programs/[producto] (solo direcciones
+                           propias: la membresía en inglés, desde el
+                           1 oct 2026)
                          aulavirtual/index · en/classroom/index
                          aulavirtual/escritorio · aulavirtual/curso/[curso]
                          aulavirtual/curso/index (?c=, cursos sin ficha)
