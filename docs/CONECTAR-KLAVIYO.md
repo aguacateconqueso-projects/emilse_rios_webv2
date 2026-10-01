@@ -122,7 +122,8 @@ En el proyecto de `emilserios.com`: **Settings** → **Environment Variables**.
 | Variable | Valor | ¿Obligatoria? |
 |---|---|---|
 | `KLAVIYO_API_KEY` | la `pk_…` del paso 1 | **sí** — sin ella no se da de alta nadie |
-| `KLAVIYO_LIST_ID` | otro ID de lista | no · por defecto `SaE8Px` |
+| `KLAVIYO_LIST_ID_ES` · `KLAVIYO_LIST_ID_EN` | la lista de cada idioma (1 oct 2026) | **sí, en cuanto haya dos listas** · sin ellas, las dos van a `SaE8Px`. Ver **5** |
+| `KLAVIYO_LIST_ID` | otro ID de lista (el nombre de cuando había una sola) | no · por defecto `SaE8Px` |
 | `KLAVIYO_REVISION` | otra fecha de la API | no · por defecto `2026-07-15` |
 
 **Solo se pone la primera.** Las otras dos no se crean: sus valores buenos ya
@@ -241,6 +242,63 @@ pantalla no va nada de eso a propósito: nombra la lista y la cuenta.
 | `status: 403` | la clave vale pero le falta un permiso, casi seguro *Subscriptions* | paso 1: editar la clave |
 | `status: 400` | el cuerpo o la lista no cuadran | leer el `cuerpo` del log: dice qué campo |
 | nada con `[klaviyo]` | la petición no llegó a la función | ¿es producción con la cortina bajada? Probar en una vista previa |
+
+---
+
+## 5 · Una lista por idioma (1 oct 2026)
+
+**El problema.** Emi armó dos series de bienvenida, una en español y otra en
+inglés. Pero el sitio daba de alta a todo el mundo en la misma lista,
+`SaE8Px`, sin decir el idioma, y a todos les llegaba la serie en inglés aunque
+se suscribieran desde la web en español.
+
+**Lo que hace el sitio desde el 1 oct 2026.** Cada formulario —la Home, *Sobre
+mí*, el final de cada carta— manda el idioma de la página, y `/api/suscribir`
+da de alta en **la lista de ese idioma**. Los botones «Avísame cuando abra» y
+el aviso de puertas cerradas, que llevaban a la página alojada de Klaviyo (que
+no sabe de idiomas), ahora bajan al campo del final de la misma carta.
+
+**Por qué dos listas y no una lista con el idioma como propiedad.** En Klaviyo
+la doble confirmación —su correo y su página— es **de cada lista**: con una
+lista por idioma, cada quien confirma en su idioma. Y las campañas semanales,
+que Emi escribe en los dos idiomas, se mandan cada una a su lista.
+
+### Lo que hay que hacer en Klaviyo
+
+1. **Mirar qué dispara cada serie.** *Flows* → la serie en español →
+   *Trigger*. Lo mismo con la de inglés. Lo normal es «Added to list → …».
+2. **Que cada serie tenga su lista.** Si ya las tienen, distintas, perfecto.
+   Si las dos cuelgan de `SaE8Px` (o falta una), crear la que falte en
+   *Audience* → *Lists & Segments* → *Create List* → *List*, por ejemplo
+   «Newsletter EN», y poner cada serie a su lista: la de español a la lista
+   en español y la de inglés a la de inglés. Lo más simple, si no hay otra
+   razón: **`SaE8Px` queda como la lista en español** —es la de siempre, y el
+   newsletter se llama «Contrabajo en la Ciudad»— y la nueva es la inglesa.
+3. **La doble confirmación, en cada lista** (*Settings* → *List opt-in
+   process*): la misma decisión en las dos. Si es doble, el correo de
+   confirmación de cada lista se escribe en su idioma.
+4. **Copiar los dos IDs** (*Settings* de cada lista, seis caracteres como
+   `SaE8Px`).
+
+### Lo que hay que hacer en Vercel
+
+`KLAVIYO_LIST_ID_ES` y `KLAVIYO_LIST_ID_EN`, en **Production** (y en Preview,
+si se quiere probar en una vista previa), con esos dos IDs. Después,
+**redesplegar**: Vercel no le aplica una variable nueva a un despliegue que ya
+existe.
+
+**Hasta que estén, nada cambia:** las dos van a `SaE8Px`, como antes, y en
+los logs sale `[klaviyo] el español y el inglés van a la misma lista`.
+
+### Comprobarlo
+
+Suscribir dos correos de prueba, uno desde `www.emilserios.com` y otro desde
+`www.emilserios.com/en/`. En Klaviyo, cada uno tiene que aparecer en su lista
+(*Profiles* → el correo → *Lists*) y recibir el primer correo de su serie.
+
+**Quien ya estaba en `SaE8Px`** se queda donde está: la web no sabe en qué
+idioma se suscribió. Si Emi quiere mover a alguien, se hace a mano en
+Klaviyo.
 
 ---
 
