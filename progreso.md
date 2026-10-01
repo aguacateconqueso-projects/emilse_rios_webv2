@@ -38,8 +38,11 @@ cortina**, de la más nueva a la más vieja.
 
 > **🧵 1 oct 2026, al final del día: la membresía, con dirección propia**
 > (rama `claude/fervent-edison-wbg8nb`, rearrancada desde `main` después de
-> mergear el #60; **PR #61**). Emi va a ir cambiando cosas poco a poco y se
-> irán ajustando. Esta es la primera:
+> mergear el #60; **PR #61**). Su vista previa, la misma raíz que la del #60
+> porque la rama es la misma:
+> **https://emilse-rios-webv21-git-claude-952006-adrians-projects-594b3131.vercel.app**
+> Emi va a ir cambiando cosas poco a poco y se irán ajustando. Esta es la
+> primera:
 >
 > | | Antes | Ahora |
 > |---|---|---|
@@ -294,8 +297,8 @@ cortina**, de la más nueva a la más vieja.
 > cerrar esa sesión. Lección: **lo que se empuja a una rama con el PR ya
 > mergeado no existe**; ver **Cómo trabajamos**.
 >
-> La última vista previa es la de `claude/fervent-edison-wbg8nb` (PR #60,
-> 1 oct por la tarde): `…-git-claude-952006-…`. Antes, la de
+> La última vista previa es la de `claude/fervent-edison-wbg8nb` (PR #60 y
+> PR #61, 1 oct): `…-git-claude-952006-…`. Antes, la de
 > `claude/magical-keller-qtja38` (PR #58, mergeado el 1 oct):
 > `…-git-claude-aa2776-…`. La de
 > `claude/affectionate-faraday-ddgz0m` (PR #54 a #57) era:
