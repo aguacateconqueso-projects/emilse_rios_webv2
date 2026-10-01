@@ -24,6 +24,7 @@
  * tenía `window.Aula` en la maqueta de septiembre, ya sin `window`.
  */
 import { supabase, isSupabaseConfigured } from './supabase';
+import { avisarPorCorreo } from './avisos';
 import { cursos as cursosDeMuestra } from '../data/cursos';
 
 /* ==========================================================================
@@ -330,15 +331,21 @@ const deSupabase = {
   }): Promise<void> {
     const id = await uid();
     if (!id) throw new Error('sin sesión');
-    const { error } = await supabase.from('course_questions').insert({
-      course_id: p.curso,
-      lesson_id: p.clase,
-      user_id: id,
-      author_name: p.nombre,
-      minute_s: p.minuto,
-      body: p.texto,
-    });
+    const { data, error } = await supabase
+      .from('course_questions')
+      .insert({
+        course_id: p.curso,
+        lesson_id: p.clase,
+        user_id: id,
+        author_name: p.nombre,
+        minute_s: p.minuto,
+        body: p.texto,
+      })
+      .select('id')
+      .single();
     if (error) throw error;
+    /* Le llega un correo a Emi con la pregunta. */
+    avisarPorCorreo('pregunta', 'curso', data?.id);
   },
 
   async borrarPregunta(idPregunta: string): Promise<void> {

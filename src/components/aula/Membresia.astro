@@ -178,6 +178,7 @@ const T = {
   import { supabase, isSupabaseConfigured } from '../../lib/supabase';
   import { acceso } from '../../lib/aula-acceso';
   import { videoEmbed } from '../../lib/video';
+  import { avisarPorCorreo } from '../../lib/avisos';
 
   const caja = document.querySelector<HTMLElement>('[data-memb]');
 
@@ -325,7 +326,7 @@ const T = {
       if (r) {
         const q2 = document.createElement('p');
         q2.className = 'mono soft';
-        q2.textContent = `Emi · ${T.answer}`;
+        q2.textContent = T.answer;
         const t2 = document.createElement('p');
         t2.className = 'mb-msj__txt';
         t2.textContent = r.body;
@@ -391,6 +392,8 @@ const T = {
           alert(T.postError);
           return;
         }
+        /* Le llega un correo a Emi con la pregunta. */
+        avisarPorCorreo('pregunta', 'foro', nueva?.id);
         lista.querySelector('.mb-hilo__vacio')?.remove();
         const li = mensaje(nueva);
         lista.prepend(li);

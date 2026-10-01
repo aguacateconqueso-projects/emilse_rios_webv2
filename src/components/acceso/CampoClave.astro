@@ -1,0 +1,123 @@
+---
+/**
+ * Un campo de contraseña con «Mostrar» / «Ocultar».
+ *
+ * Pedido de Adrián el 1 oct 2026: «no te da seguridad no poder ver lo que
+ * escribes, es estándar». Lo usan las tres pantallas que piden contraseña:
+ * entrar, poner la contraseña nueva y `/gracias/`.
+ *
+ * **Es texto y no un ojo**, a propósito: el sistema de diseño no admite
+ * iconos. «Mostrar» va dentro del campo, a la derecha, en la letra mono de
+ * los botones de texto.
+ *
+ * El botón cambia el `type` del campo entre `password` y `text`, y lo vuelve a
+ * poner en `password` al enviar el formulario: así el gestor de contraseñas
+ * del navegador sigue ofreciéndose a guardarla.
+ *
+ * `dato` es el atributo `data-` que el script de cada pantalla ya buscaba
+ * (`data-clave`, `data-c1`…): el campo se sigue encontrando igual.
+ */
+import type { Lang } from '../../i18n/ui';
+import { useAula } from '../../i18n/aula';
+
+interface Props {
+  lang: Lang;
+  id: string;
+  label: string;
+  autocomplete: 'current-password' | 'new-password';
+  dato: string;
+  name?: string;
+}
+const { lang, id, label, autocomplete, dato, name } = Astro.props;
+const a = useAula(lang);
+const datos = { [`data-${dato}`]: '' };
+---
+
+<div class="campo">
+  <label class="campo__t" for={id}>{label}</label>
+  <div class="clave-caja">
+    <input id={id} type="password" name={name} autocomplete={autocomplete} required {...datos} />
+    <button
+      class="clave-caja__ver"
+      type="button"
+      aria-controls={id}
+      aria-label={a('pass.showLabel')}
+      data-ver-clave
+      data-t-ver={a('pass.show')}
+      data-t-ocultar={a('pass.hide')}
+      data-t-ver-label={a('pass.showLabel')}
+      data-t-ocultar-label={a('pass.hideLabel')}
+    >{a('pass.show')}</button>
+  </div>
+</div>
+
+<script>
+  /* Un solo oyente para todos los campos de la página: Astro incluye este
+     script una vez aunque el componente salga dos veces (`/gracias/`). */
+  const ocultar = (b: HTMLButtonElement, input: HTMLInputElement) => {
+    input.type = 'password';
+    b.textContent = b.dataset.tVer ?? '';
+    b.setAttribute('aria-label', b.dataset.tVerLabel ?? '');
+  };
+
+  document.querySelectorAll<HTMLButtonElement>('[data-ver-clave]').forEach((b) => {
+    const input = document.getElementById(b.getAttribute('aria-controls') ?? '') as HTMLInputElement | null;
+    if (!input) return;
+    b.addEventListener('click', () => {
+      if (input.type === 'password') {
+        input.type = 'text';
+        b.textContent = b.dataset.tOcultar ?? '';
+        b.setAttribute('aria-label', b.dataset.tOcultarLabel ?? '');
+      } else {
+        ocultar(b, input);
+      }
+      /* El cursor sigue donde estaba: se puede seguir escribiendo. */
+      input.focus();
+    });
+    input.form?.addEventListener('submit', () => ocultar(b, input), true);
+  });
+</script>
+
+<style>
+  .clave-caja {
+    position: relative;
+  }
+
+  /* Hueco a la derecha para «Ocultar», que es la palabra más larga. */
+  .clave-caja input {
+    padding-right: var(--space-12);
+  }
+
+  /* Edge trae su propio ojo: con el nuestro serían dos. */
+  .clave-caja input::-ms-reveal,
+  .clave-caja input::-ms-clear {
+    display: none;
+  }
+
+  .clave-caja__ver {
+    position: absolute;
+    top: 50%;
+    right: var(--space-2);
+    transform: translateY(-50%);
+    padding: 0;
+    background: none;
+    border: 0;
+    border-bottom: 1px solid var(--ink-soft);
+    font-family: var(--font-mono);
+    font-size: var(--text-mono);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    line-height: 1.4;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition:
+      color 0.2s var(--ease-reveal),
+      border-color 0.2s var(--ease-reveal);
+  }
+
+  .clave-caja__ver:hover,
+  .clave-caja__ver:focus-visible {
+    color: var(--ink);
+    border-bottom-color: var(--ink);
+  }
+</style>

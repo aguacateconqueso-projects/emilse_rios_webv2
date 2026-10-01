@@ -2,9 +2,11 @@
  * Los correos que manda el sitio, por Resend. **Solo de servidor.**
  *
  * Trasplantado de `emilse_rios_membresias` (`src/lib/email.ts`) el 27 sep
- * 2026, el día que la membresía se mudó entera a esta casa. Hoy manda uno: la
+ * 2026, el día que la membresía se mudó entera a esta casa. Manda tres: la
  * bienvenida de quien acaba de pagar la membresía, con el enlace para poner su
- * contraseña (ver `bienvenida.ts`).
+ * contraseña (ver `bienvenida.ts`), y desde el 1 oct 2026 los dos avisos de
+ * las preguntas —a Emi cuando alguien pregunta, al alumno cuando Emi
+ * responde— (ver `/api/avisos`).
  *
  * **El remitente sigue siendo `info@emilseriosacademy.com`**, y no es un
  * olvido: Resend solo manda desde un dominio verificado por DNS, y el
@@ -26,6 +28,12 @@ export const hayResend = Boolean(RESEND_API_KEY);
 
 /** El buzón real de Emi, para las respuestas. */
 export const RESPONDER_A = 'info@emilserios.com';
+
+/**
+ * Adónde le llega a Emi el aviso de una pregunta nueva. Por defecto, su buzón
+ * de siempre; si un día lo quiere en otro, `AVISOS_A` en Vercel (Production).
+ */
+export const AVISOS_A = process.env.AVISOS_A?.trim() || RESPONDER_A;
 
 /** Manda un correo. No lanza: devuelve `{ error }` si algo falla. */
 export async function mandarCorreo(o: {
@@ -146,5 +154,159 @@ ${t.sign}
 ${t.ps1}
 ${t.ps2}`;
 
+  return { subject: t.subject, html, text };
+}
+
+/* ==========================================================================
+   Los avisos de las preguntas (1 oct 2026)
+
+   Pedido de Adrián: «cuando alguien haga una pregunta, que le llegue un mail
+   a Emi, y cuando Emi responda, que le llegue un aviso a quien preguntó». Los
+   manda `/api/avisos`. Llevan la misma ropa que la bienvenida: papel, tinta,
+   a escuadra y en serif.
+
+   **El copy es provisional**, escrito acá en la voz de Emi —en primera
+   persona, como todo lo que le habla al alumno—. Si Emi manda el suyo, se
+   cambia en estas dos funciones y nada más.
+   ========================================================================== */
+
+/** Lo que escribe un alumno entra como texto, nunca como HTML. */
+const esc = (s: string) =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+/** Los párrafos de un texto largo, con sus saltos de línea. */
+const parrafos = (s: string, estilo: string) =>
+  s
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .map((p) => `<p style="${estilo}">${esc(p).replace(/\n/g, '<br />')}</p>`)
+    .join('\n          ');
+
+const recorta = (s: string, n: number) => (s.length > n ? `${s.slice(0, n).trimEnd()}…` : s);
+
+/** El marco común: la carta de papel con su rótulo arriba. */
+function carta(lang: 'es' | 'en', rotulo: string, preheader: string, cuerpo: string): string {
+  return `<!DOCTYPE html>
+<html lang="${lang}">
+<head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /></head>
+<body style="margin:0;background:#fafaf8;color:#0d0d0d;font-family:Georgia,'Times New Roman',serif;">
+  <span style="display:none;max-height:0;overflow:hidden;opacity:0;">${esc(preheader)}</span>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fafaf8;padding:32px 16px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#fafaf8;border:1px solid #0d0d0d;">
+        <tr><td style="padding:40px;">
+          <p style="margin:0 0 32px;font-family:'Courier New',monospace;letter-spacing:0.12em;text-transform:uppercase;font-size:12px;color:#5c5c5b;">${esc(rotulo)}</p>
+          ${cuerpo}
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
+const P = 'margin:0 0 16px;font-size:17px;line-height:1.6;color:#0d0d0d;';
+const CITA = 'margin:0 0 16px;font-size:17px;line-height:1.6;color:#0d0d0d;font-style:italic;';
+const DATO = "margin:0 0 4px;font-family:'Courier New',monospace;font-size:13px;line-height:1.5;color:#5c5c5b;";
+
+/**
+ * A Emi: alguien le dejó una pregunta. **Siempre en español**, como el panel.
+ * No es Emi la que habla, es el aula avisándole a ella: por eso el «te».
+ *
+ * `enlace` lleva a la conversación con esa persona en el panel
+ * (`/panel/#mensajes/<id>`), que es donde se responde. El correo no tiene
+ * `reply_to` del alumno a propósito: si Emi contestara desde el correo, la
+ * respuesta no quedaría en el aula y el alumno no la vería ahí.
+ */
+export function correoPreguntaNueva(o: {
+  nombre: string;
+  correo: string | null;
+  donde: string;
+  detalle: string[];
+  pregunta: string;
+  enlace: string;
+}): { subject: string; html: string; text: string } {
+  const quien = o.correo && o.correo !== o.nombre ? `${o.nombre} (${o.correo})` : o.nombre;
+  const subject = `Nueva pregunta de ${o.nombre} · ${o.donde}`;
+  const cuerpo = `<p style="${P}">${esc(quien)} te dejó una pregunta.</p>
+          <p style="${DATO}">${esc(o.donde)}</p>
+          ${o.detalle.map((d) => `<p style="${DATO}">${esc(d)}</p>`).join('\n          ')}
+          <div style="margin:24px 0;padding-left:16px;border-left:2px solid #0d0d0d;">
+          ${parrafos(o.pregunta, CITA)}
+          </div>
+          <p style="${P}margin-bottom:0;"><a href="${o.enlace}" style="color:#0d0d0d;text-decoration:underline;">Responder en el panel →</a></p>`;
+  const html = carta('es', 'Emilse Rios · Aviso del aula', `${o.nombre}: ${recorta(o.pregunta, 90)}`, cuerpo);
+  const text = `${quien} te dejó una pregunta.
+
+${[o.donde, ...o.detalle].join('\n')}
+
+${o.pregunta}
+
+Responder en el panel: ${o.enlace}`;
+  return { subject, html, text };
+}
+
+/**
+ * Al alumno: Emi le respondió. En su idioma y **en primera persona**: la que
+ * escribe es Emi. Cita la pregunta, para que sepa cuál, y no la respuesta: la
+ * respuesta vive en el aula —puede ser un audio o un video— y ahí se lee.
+ */
+export function correoRespuesta(
+  lang: 'es' | 'en',
+  o: { nombre: string | null; donde: 'membresia' | 'curso'; curso?: string; pregunta: string; enlace: string },
+): { subject: string; html: string; text: string } {
+  const en = lang === 'en';
+  const donde = en
+    ? o.donde === 'membresia'
+      ? 'the membership'
+      : `the course “${o.curso ?? ''}”`
+    : o.donde === 'membresia'
+      ? 'la membresía'
+      : `el curso «${o.curso ?? ''}»`;
+  const t = en
+    ? {
+        subject: 'I answered your question',
+        rotulo: o.donde === 'membresia' ? 'Emilse Rios · Membership' : 'Emilse Rios · Classroom',
+        hola: o.nombre ? `Hi, ${o.nombre}:` : 'Hi:',
+        p1: `I answered the question you left me in ${donde}:`,
+        p2: 'My answer is waiting for you in the classroom:',
+        boton: 'Read my answer',
+        p3: 'If something is still unclear, ask me right there.',
+        sign: 'Emilse',
+      }
+    : {
+        subject: 'Ya te respondí',
+        rotulo: o.donde === 'membresia' ? 'Emilse Rios · Membresía' : 'Emilse Rios · Aula',
+        hola: o.nombre ? `Hola, ${o.nombre}:` : 'Hola:',
+        p1: `Ya te respondí la pregunta que me dejaste en ${donde}:`,
+        p2: 'Mi respuesta te espera en el aula:',
+        boton: 'Ver mi respuesta',
+        p3: 'Si algo te sigue sin quedar claro, pregúntame por ahí mismo.',
+        sign: 'Emilse',
+      };
+  const cita = recorta(o.pregunta, 400);
+  const cuerpo = `<p style="${P}">${esc(t.hola)}</p>
+          <p style="${P}">${esc(t.p1)}</p>
+          <div style="margin:0 0 24px;padding-left:16px;border-left:2px solid #0d0d0d;">
+          ${parrafos(cita, CITA)}
+          </div>
+          <p style="${P}margin-bottom:8px;">${esc(t.p2)}</p>
+          <p style="${P}margin-bottom:24px;"><a href="${o.enlace}" style="color:#0d0d0d;text-decoration:underline;">${esc(t.boton)} →</a></p>
+          <p style="${P}">${esc(t.p3)}</p>
+          <p style="${P}margin-bottom:0;font-style:italic;">${t.sign}</p>`;
+  const html = carta(lang, t.rotulo, t.p1, cuerpo);
+  const text = `${t.hola}
+
+${t.p1}
+
+${cita}
+
+${t.p2}
+${o.enlace}
+
+${t.p3}
+
+${t.sign}`;
   return { subject: t.subject, html, text };
 }

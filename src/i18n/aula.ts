@@ -44,13 +44,13 @@ export const aulaUi = {
     'desk.loading': 'Cargando tus cursos…',
     'desk.error': 'No pudimos cargar tus cursos. Recarga la página en un momento.',
     'desk.draft': 'Borrador · solo lo ves tú',
-    'desk.newAnswer': 'Emi te respondió',
+    'desk.newAnswer': 'Te respondí',
     'desk.membershipTitle': 'Estudiemos Juntos',
     'desk.membershipLead':
-      'El ejercicio de esta semana, el concepto del mes y tus preguntas a Emi.',
+      'El ejercicio de esta semana, el concepto del mes y tus preguntas para mí.',
     'desk.membershipCta': 'Entrar a la membresía',
     'desk.storeTitle': '¿Quieres seguir aprendiendo?',
-    'desk.storeLead': 'Mira los cursos que Emi tiene a la venta.',
+    'desk.storeLead': 'Mira mis otros cursos.',
     'desk.storeCta': 'Ver la tienda',
 
     /* --- El aula de la membresía (27 sep 2026) ------------------------------
@@ -69,24 +69,24 @@ export const aulaUi = {
     'memb.pdf': 'Descargar el PDF',
     'memb.noPdf': 'Este ejercicio no trae PDF',
     /* Privadas desde el 28 sep 2026 (antes, un foro que leían todos). */
-    'memb.forumEyebrow': 'Solo entre tú y Emi',
+    'memb.forumEyebrow': 'Solo entre tú y yo',
     'memb.forumH': 'Tus preguntas',
     'memb.forumNote': 'Nadie más las ve: son solo entre tú y yo. Respondo los viernes.',
     'memb.composeLabel': 'Tu pregunta',
     'memb.composePh': 'Escribe tu pregunta sobre el ejercicio de esta semana…',
-    'memb.composeHint': 'Solo la ven tú y Emi.',
+    'memb.composeHint': 'Solo la vemos tú y yo.',
     'memb.composeBtn': 'Publicar pregunta',
     'memb.sending': 'Publicando…',
-    'memb.answer': 'Respuesta',
-    'memb.pending': 'Emilse responderá pronto.',
-    'memb.forumEmpty': 'Todavía no le has preguntado nada a Emi.',
+    'memb.answer': 'Mi respuesta',
+    'memb.pending': 'Te respondo pronto.',
+    'memb.forumEmpty': 'Todavía no me has preguntado nada.',
     'memb.forumError': 'No se pudieron cargar tus preguntas.',
     'memb.postError': 'No se pudo publicar tu pregunta. Inténtalo de nuevo.',
     'memb.baseEyebrow': 'Concepto del mes',
     'memb.baseNone': 'Aún no hay Concepto Base disponible.',
     'memb.baseNote': 'Uno por mes. El Concepto Base cambia cada mes; los ejercicios de la semana se apoyan en él.',
     'memb.bonusEyebrow': 'Extras',
-    'memb.bonusLead': 'Material adicional que Emilse va sumando — fuera del ritmo semanal.',
+    'memb.bonusLead': 'Material adicional que voy sumando — fuera del ritmo semanal.',
     'memb.bonusEmpty': 'Aún no hay Bonus Material.',
     'memb.bonusError': 'No se pudo cargar el Bonus Material.',
     'memb.bonusPlay': 'Ver el video',
@@ -95,7 +95,7 @@ export const aulaUi = {
     'memb.videoRepaste': 'Este video se guardó con el formato antiguo: hay que volver a pegar su enlace de Bunny en el panel.',
     'memb.gateTitle': 'Completa tu suscripción',
     'memb.gateLead':
-      'Suscríbete para acceder al ejercicio de la semana, el video y tus preguntas a Emi. Cancela cuando quieras.',
+      'Suscríbete para acceder al ejercicio de la semana, el video y tus preguntas para mí. Cancela cuando quieras.',
     'memb.gateCta': 'Ver la membresía',
     'memb.billing': 'Mi suscripción',
     'memb.billingError': 'No se pudo abrir el portal de la suscripción. Escríbeme a info@emilserios.com.',
@@ -110,10 +110,10 @@ export const aulaUi = {
     'course.enter': 'Entrar al curso',
     'course.continue': 'Continuar',
     'course.locked': 'Todavía no lo tienes',
-    'course.soon': 'Emi lo está preparando',
+    'course.soon': 'Lo estoy preparando',
     'course.empty': 'Las clases de este curso todavía no están cargadas.',
     'course.emptyLead':
-      'Emi está preparando las clases. Cuando estén publicadas, aparecen acá solas.',
+      'Estoy preparando las clases. Cuando estén publicadas, aparecen acá solas.',
     'course.loading': 'Cargando el curso…',
     'course.notFound': 'Este curso no está en tu escritorio',
     'course.notFoundLead':
@@ -142,9 +142,9 @@ export const aulaUi = {
 
     /* --- Preguntas -------------------------------------------------------- */
     'ask.open': 'Tengo una duda',
-    'ask.title': 'Pregúntale a Emi',
+    'ask.title': 'Pregúntame',
     'ask.lead':
-      'Tu pregunta llega con el curso, la clase y el minuto en el que estás. Emi te responde por acá, en este mismo hilo.',
+      'Tu pregunta me llega con el curso, la clase y el minuto en el que estás. Te respondo por acá, en este mismo hilo.',
     'ask.at': 'En el minuto',
     'ask.atOff': 'No mandar el minuto',
     'ask.label': '¿Qué se te trabó?',
@@ -152,18 +152,18 @@ export const aulaUi = {
     'ask.send': 'Enviar la pregunta',
     'ask.cancel': 'Cancelar',
     'ask.empty': 'Escribe tu pregunta antes de enviarla.',
-    'ask.sent': 'Listo. Emi la tiene.',
+    'ask.sent': 'Listo. Ya me llegó.',
     'ask.thread': 'Mis preguntas de este curso',
     'ask.threadEmpty': 'Todavía no has preguntado nada en este curso.',
-    'ask.waiting': 'Esperando a Emi',
+    'ask.waiting': 'Esperando mi respuesta',
     'ask.answered': 'Respondida',
     'ask.deleteOne': 'Retirar',
-    'ask.emi': 'Emi',
-    'ask.videoReply': 'La respuesta de Emi, en video',
-    'ask.audioReply': 'La respuesta de Emi, en audio',
+    'ask.emi': 'Mi respuesta',
+    'ask.videoReply': 'Mi respuesta, en video',
+    'ask.audioReply': 'Mi respuesta, en audio',
     'ask.failed': 'No se pudo enviar. Vuelve a intentarlo en un momento.',
     'ask.local':
-      'Maqueta: por ahora tus preguntas se guardan en este navegador. Cuando el aula esté enchufada, salen hacia Emi.',
+      'Maqueta: por ahora tus preguntas se guardan en este navegador. Cuando el aula esté enchufada, me llegan a mí.',
 
     /* --- Avisos de la maqueta --------------------------------------------- */
     'demo.badge': 'Maqueta',
@@ -187,7 +187,7 @@ export const aulaUi = {
       'Entramos con tu cuenta, pero no tiene una suscripción activa ni ningún curso. Si acabas de pagar, dale un minuto y recarga — a veces tarda un poco en llegar. Y si crees que hay un error, escríbeme a info@emilserios.com y lo miramos.',
     'gate.seeMembership': 'Ver la membresía',
     'gate.otherAccount': 'Entrar con otra cuenta',
-    'gate.adminOnly': 'Esta parte es solo de Emi',
+    'gate.adminOnly': 'Esta parte es solo mía',
     'gate.adminOnlyLead':
       'Has entrado, pero esta pantalla es el panel de control y no está a tu nombre. Tu sitio es el escritorio.',
 
@@ -227,6 +227,11 @@ export const aulaUi = {
     'pass.noLink':
       'Este enlace ya se usó o caducó. Pide uno nuevo desde la pantalla de acceso.',
     'pass.askAgain': 'Pedir otro enlace',
+    /* El botón de dentro de cada campo de contraseña (1 oct 2026). */
+    'pass.show': 'Mostrar',
+    'pass.hide': 'Ocultar',
+    'pass.showLabel': 'Mostrar la contraseña',
+    'pass.hideLabel': 'Ocultar la contraseña',
 
     /* --- El panel de Emi --------------------------------------------------- */
     'panel.title': 'Panel',
@@ -302,13 +307,13 @@ export const aulaUi = {
     'desk.loading': 'Loading your courses…',
     'desk.error': "We couldn't load your courses. Reload the page in a moment.",
     'desk.draft': 'Draft · only you can see it',
-    'desk.newAnswer': 'Emi answered you',
+    'desk.newAnswer': 'I answered you',
     'desk.membershipTitle': "Let's study together",
     'desk.membershipLead':
-      "This week's exercise, the month's concept and your questions to Emi.",
+      "This week's exercise, the month's concept and your questions for me.",
     'desk.membershipCta': 'Enter the membership',
     'desk.storeTitle': 'Want to keep learning?',
-    'desk.storeLead': "See the courses Emi has on sale.",
+    'desk.storeLead': 'See my other courses.',
     'desk.storeCta': 'See the store',
 
     'memb.title': 'Membership',
@@ -324,24 +329,24 @@ export const aulaUi = {
       'No library. On Thursday at 00:00 this exercise closes and the new one comes in. We work the present: only this week’s.',
     'memb.pdf': 'Download the PDF',
     'memb.noPdf': 'This exercise has no PDF',
-    'memb.forumEyebrow': 'Just between you and Emi',
+    'memb.forumEyebrow': 'Just between you and me',
     'memb.forumH': 'Your questions',
     'memb.forumNote': 'Nobody else sees them: they’re just between you and me. I answer on Fridays.',
     'memb.composeLabel': 'Your question',
     'memb.composePh': 'Write your question about this week’s exercise…',
-    'memb.composeHint': 'Only you and Emi can see it.',
+    'memb.composeHint': 'Only you and I can see it.',
     'memb.composeBtn': 'Post question',
     'memb.sending': 'Posting…',
-    'memb.answer': 'Answer',
-    'memb.pending': 'Emilse will reply soon.',
-    'memb.forumEmpty': 'You haven’t asked Emi anything yet.',
+    'memb.answer': 'My answer',
+    'memb.pending': 'I’ll reply soon.',
+    'memb.forumEmpty': 'You haven’t asked me anything yet.',
     'memb.forumError': 'Couldn’t load your questions.',
     'memb.postError': 'Couldn’t post your question. Try again.',
     'memb.baseEyebrow': 'Concept of the month',
     'memb.baseNone': 'No core concept available yet.',
     'memb.baseNote': 'One per month. The core concept changes each month; the weekly exercises lean on it.',
     'memb.bonusEyebrow': 'Extras',
-    'memb.bonusLead': 'Extra material Emilse adds over time — outside the weekly rhythm.',
+    'memb.bonusLead': 'Extra material I add over time — outside the weekly rhythm.',
     'memb.bonusEmpty': 'No bonus material yet.',
     'memb.bonusError': 'Couldn’t load the bonus material.',
     'memb.bonusPlay': 'Watch the video',
@@ -349,10 +354,10 @@ export const aulaUi = {
     'memb.videoBroken': 'This video could not be loaded.',
     'memb.videoRepaste': 'This video was saved in the old format: its Bunny link has to be pasted again in the panel.',
     'memb.gateTitle': 'Complete your subscription',
-    'memb.gateLead': 'Subscribe to unlock this week’s exercise, the video and your questions to Emi. Cancel anytime.',
+    'memb.gateLead': 'Subscribe to unlock this week’s exercise, the video and your questions for me. Cancel anytime.',
     'memb.gateCta': 'See the membership',
     'memb.billing': 'My subscription',
-    'memb.billingError': 'Couldn’t open the subscription portal. Write to info@emilserios.com.',
+    'memb.billingError': 'Couldn’t open the subscription portal. Write to me at info@emilserios.com.',
     'memb.support': 'Support',
 
     /* --- Estado de un curso ---------------------------------------------- */
@@ -364,10 +369,10 @@ export const aulaUi = {
     'course.enter': 'Enter the course',
     'course.continue': 'Continue',
     'course.locked': "You don't have this one yet",
-    'course.soon': 'Emi is preparing it',
+    'course.soon': 'I’m preparing it',
     'course.empty': "This course's classes aren't loaded yet.",
     'course.emptyLead':
-      'Emi is preparing the classes. Once they are published, they show up here on their own.',
+      'I’m preparing the classes. Once they are published, they show up here on their own.',
     'course.loading': 'Loading the course…',
     'course.notFound': "This course isn't on your desk",
     'course.notFoundLead':
@@ -396,9 +401,9 @@ export const aulaUi = {
 
     /* --- Preguntas -------------------------------------------------------- */
     'ask.open': 'I have a question',
-    'ask.title': 'Ask Emi',
+    'ask.title': 'Ask me',
     'ask.lead':
-      "Your question arrives with the course, the class and the minute you're on. Emi answers here, in this same thread.",
+      "Your question reaches me with the course, the class and the minute you're on. I answer you here, in this same thread.",
     'ask.at': 'At minute',
     'ask.atOff': "Don't send the minute",
     'ask.label': 'What got you stuck?',
@@ -406,18 +411,18 @@ export const aulaUi = {
     'ask.send': 'Send the question',
     'ask.cancel': 'Cancel',
     'ask.empty': 'Write your question before sending it.',
-    'ask.sent': 'Done. Emi has it.',
+    'ask.sent': 'Done. I’ve got it.',
     'ask.thread': 'My questions on this course',
     'ask.threadEmpty': "You haven't asked anything on this course yet.",
-    'ask.waiting': 'Waiting on Emi',
+    'ask.waiting': 'Waiting for my reply',
     'ask.answered': 'Answered',
     'ask.deleteOne': 'Withdraw',
-    'ask.emi': 'Emi',
-    'ask.videoReply': 'Emi’s reply, on video',
-    'ask.audioReply': 'Emi’s reply, as a voice note',
+    'ask.emi': 'My reply',
+    'ask.videoReply': 'My reply, on video',
+    'ask.audioReply': 'My reply, as a voice note',
     'ask.failed': "Couldn't send it. Try again in a moment.",
     'ask.local':
-      "Mock-up: for now your questions are stored in this browser. Once the classroom is wired up, they go out to Emi.",
+      "Mock-up: for now your questions are stored in this browser. Once the classroom is wired up, they come to me.",
 
     /* --- Avisos de la maqueta --------------------------------------------- */
     'demo.badge': 'Mock-up',
@@ -438,7 +443,7 @@ export const aulaUi = {
       "We're in with your account, but it has no active subscription and no courses. If you've just paid, give it a minute and reload — it sometimes takes a moment to come through. And if you think this is a mistake, write to info@emilserios.com and we'll look into it.",
     'gate.seeMembership': 'See the membership',
     'gate.otherAccount': 'Sign in with another account',
-    'gate.adminOnly': "This part is Emi's only",
+    'gate.adminOnly': 'This part is for me only',
     'gate.adminOnlyLead':
       "You're signed in, but this screen is the control panel and it isn't in your name. Your place is the desk.",
 
@@ -474,6 +479,10 @@ export const aulaUi = {
     'pass.save': 'Save and sign in',
     'pass.noLink': 'This link has been used already, or it expired. Ask for a new one from the sign-in screen.',
     'pass.askAgain': 'Ask for another link',
+    'pass.show': 'Show',
+    'pass.hide': 'Hide',
+    'pass.showLabel': 'Show password',
+    'pass.hideLabel': 'Hide password',
 
     /* --- El panel de Emi --------------------------------------------------- */
     'panel.title': 'Panel',

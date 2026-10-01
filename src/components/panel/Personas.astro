@@ -583,7 +583,7 @@
     /* --- Sus mensajes --------------------------------------------------------- */
     const mensajes = [
       ...(foro.error ? [] : (foro.data ?? [])).map((q: any) => ({
-        donde: 'Foro de la membresía',
+        donde: 'Membresía',
         body: q.body as string,
         cuando: q.created_at as string,
         respondida: Boolean(q.answers?.length),
@@ -621,7 +621,16 @@
       bloque(
         'Sus mensajes',
         listaMsj,
-        pendientes > 0 && el('p', { class: 'personas__ir' }, el('a', { class: 'mono', href: '#mensajes', text: `Responder ${pendientes === 1 ? 'la pendiente' : `las ${pendientes} pendientes`} en Mensajes →` })),
+        mensajes.length > 0 &&
+          el(
+            'p',
+            { class: 'personas__ir' },
+            el('a', {
+              class: 'mono',
+              href: `#mensajes/${p.id}`,
+              text: pendientes > 0 ? `Responder ${pendientes === 1 ? 'la pendiente' : `las ${pendientes} pendientes`} en Mensajes →` : 'Ver la conversación en Mensajes →',
+            }),
+          ),
       ),
     );
     armarBotones();
