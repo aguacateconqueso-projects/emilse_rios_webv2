@@ -34,8 +34,9 @@ suscribió desde la Home el 24 sep y funcionó. ⚠️ **El proyecto de Vercel e
 cortina**, de la más nueva a la más vieja.
 
 > **🧵 1 oct 2026, por la tarde: cuatro ajustes del aula** (rama
-> `claude/fervent-edison-wbg8nb`, **PR #60**, desde `main`). Pedidos de Adrián,
-> numerados como los mandó:
+> `claude/fervent-edison-wbg8nb`, **PR #60**, desde `main`). Su vista previa:
+> **https://emilse-rios-webv21-git-claude-952006-adrians-projects-594b3131.vercel.app**
+> Pedidos de Adrián, numerados como los mandó:
 >
 > 1. **No se habla de Emi en tercera persona en ningún momento.** Todo lo
 >    que el aula le dice al alumno lo dice Emi: el escritorio pasa de «Mira
@@ -261,8 +262,10 @@ cortina**, de la más nueva a la más vieja.
 > cerrar esa sesión. Lección: **lo que se empuja a una rama con el PR ya
 > mergeado no existe**; ver **Cómo trabajamos**.
 >
-> La última vista previa fue la de `claude/magical-keller-qtja38` (PR #58,
-> mergeado el 1 oct): `…-git-claude-aa2776-…`. La de
+> La última vista previa es la de `claude/fervent-edison-wbg8nb` (PR #60,
+> 1 oct por la tarde): `…-git-claude-952006-…`. Antes, la de
+> `claude/magical-keller-qtja38` (PR #58, mergeado el 1 oct):
+> `…-git-claude-aa2776-…`. La de
 > `claude/affectionate-faraday-ddgz0m` (PR #54 a #57) era:
 >
 > **https://emilse-rios-webv21-git-claude-e5e804-adrians-projects-594b3131.vercel.app**
