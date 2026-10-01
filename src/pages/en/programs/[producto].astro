@@ -1,0 +1,30 @@
+---
+/**
+ * Las páginas de ventas con dirección propia en inglés bajo `/en/programs/`.
+ *
+ * Existe desde el 1 oct 2026 por una sola: la membresía, que en inglés vive
+ * en `/en/programs/double-bass-membership/` (pedido de Emi). Los cursos
+ * siguen en `/en/courses/`. Esta carpeta **solo pinta direcciones propias**
+ * (`direccionesPropias` en `src/i18n/ui.ts`): `/en/programs/<slug>/` lleva
+ * con un 301 a la dirección propia de ese producto si la tiene, y si no es
+ * un 404 —un curso no se duplica acá—.
+ *
+ * Por lo demás es la misma página que `src/pages/en/courses/[producto].astro`:
+ * se resuelve en el servidor, con un minuto de caché en Vercel.
+ */
+import PaginaVenta from '../../../components/PaginaVenta.astro';
+import { leerPagina, CACHE_TIENDA } from '../../../lib/tienda';
+import { paginaDeVenta } from '../../../i18n/ui';
+
+export const prerender = false;
+
+const lang = 'en' as const;
+const pide = paginaDeVenta(Astro.url, Astro.params.producto ?? '', lang, true);
+if (!pide) return new Response(null, { status: 404 });
+if ('redirigir' in pide) return Astro.redirect(pide.redirigir, 301);
+const pagina = await leerPagina(pide.slug);
+if (!pagina) return new Response(null, { status: 404 });
+Astro.response.headers.set('Cache-Control', CACHE_TIENDA);
+---
+
+<PaginaVenta lang={lang} producto={pagina.ficha} c={pagina.carta[lang]} />

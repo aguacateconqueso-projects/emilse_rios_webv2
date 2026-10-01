@@ -3,12 +3,12 @@ import { stripe, currentTier, priceForTier, siteOrigin } from '../../lib/stripe'
 import { doorsClosed, REOPENS_AT, NEWSLETTER_URL, INVITE_PARAM } from '../../lib/membership';
 import { inviteValid } from '../../lib/membership-server';
 import { graciasPath } from '../../i18n/aula';
-import { routePath } from '../../i18n/ui';
+import { productPath } from '../../i18n/ui';
 
 /**
  * El checkout de la membresía. **Desde el 22 sep 2026 vive acá**, no en la
  * academia: es el primer trozo de la unión de las dos casas, y lo que hace que
- * el botón de comprar de `/formaciones/estudiemos-juntos/` deje de salir del
+ * el botón de comprar de la carta de la membresía deje de salir del
  * sitio a mitad de una compra.
  *
  * Trasplantado de `emilse_rios_membresias` (`src/pages/api/checkout.ts`). Lo
@@ -101,9 +101,13 @@ export const GET: APIRoute = async ({ request, redirect }) => {
   return redirect(sesion.url, 303);
 };
 
-/** La carta de ventas de la membresía, a donde vuelve quien cancela el pago. */
+/**
+ * La carta de ventas de la membresía, a donde vuelve quien cancela el pago.
+ * Desde el 1 oct 2026 tiene dirección propia (`/formaciones/membresia-contrabajo/`
+ * y `/en/programs/double-bass-membership/`): la da `productPath`.
+ */
 function cartaPath(lang: 'es' | 'en'): string {
-  return `${routePath('products', lang)}estudiemos-juntos/`;
+  return productPath('estudiemos-juntos', lang);
 }
 
 /**
