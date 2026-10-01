@@ -30,7 +30,11 @@ export const ui = {
     'form.label': 'Tu correo electrónico',
     'form.placeholder': 'tu@correo.com',
     'form.cta': 'Acá te suscribes',
-    'form.done': 'Listo. Revisa tu bandeja de entrada.',
+    /* El copy de Emi (27 sep 2026): ahora que el alta ocurre acá mismo, sin
+       pasar por la página de Klaviyo, esto es lo único que ve quien se
+       suscribe. El asunto es el del primer correo de la bienvenida. */
+    'form.done':
+      'Ya va en camino. Asunto: «El ejercicio que el 90% hace mal». Si no lo ves en tu bandeja, mira en spam o promociones y muévelo a tu bandeja principal. Así no te pierdes ninguno.',
     'form.error': 'Ese correo no parece válido. ¿Lo revisas?',
     'form.failed':
       'No pudimos completar la suscripción. Escríbeme a info@emilserios.com y te apunto yo.',
@@ -58,7 +62,9 @@ export const ui = {
     'products.soon': 'Próximamente',
     'products.closed': 'Cerrado por ahora',
     'products.back': 'Volver a Formaciones',
-    'products.enrolled': '¿Ya compraste? El aula es por acá',
+    'products.enrolled': '¿Ya tienes una formación? El aula es por acá',
+    /* El remate de cada ficha que lleva a su página (27 sep 2026, Emi). */
+    'products.more': 'Leer más',
 
     'footer.email': 'info@emilserios.com',
   },
@@ -84,7 +90,8 @@ export const ui = {
     'form.label': 'Your email address',
     'form.placeholder': 'your@email.com',
     'form.cta': 'Sign up here',
-    'form.done': 'Done. Check your inbox.',
+    'form.done':
+      'It’s on its way. Subject: “The exercise 90% get wrong.” If you don’t see it in your inbox, check spam or promotions and move it to your primary inbox. That way you won’t miss a single one.',
     'form.error': "That email doesn't look valid. Mind checking it?",
     'form.failed':
       "We couldn't complete the subscription. Write to info@emilserios.com and I'll add you myself.",
@@ -109,7 +116,8 @@ export const ui = {
     'products.soon': 'Coming soon',
     'products.closed': 'Closed for now',
     'products.back': 'Back to Courses',
-    'products.enrolled': 'Already bought? The classroom is this way',
+    'products.enrolled': 'Already have a course? The classroom is this way',
+    'products.more': 'Read more',
 
     'footer.email': 'info@emilserios.com',
   },

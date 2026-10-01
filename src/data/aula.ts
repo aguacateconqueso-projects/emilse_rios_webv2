@@ -4,6 +4,8 @@ import membresiaFoto from '../assets/img/emilse-membresia.jpg';
 import diapasonFoto from '../assets/img/curso-diapason.jpg';
 import desdeCeroFoto from '../assets/img/curso-desde-cero.jpg';
 import vibratoFoto from '../assets/img/curso-vibrato.jpg';
+import escalasFoto from '../assets/img/emilse-madrid.jpg';
+import clasesFoto from '../assets/img/about-me.jpg';
 import { tieneCarta } from './cartas';
 
 /**
@@ -67,9 +69,6 @@ export type Product = {
 };
 
 
-/** Dónde vive hoy la membresía. Una sola constante: al mudarla se toca acá. */
-export const ACADEMIA = 'https://emilseriosacademy.com';
-
 /**
  * La puerta del aula: el botón de la página `/aulavirtual/` y el de la cápsula
  * de la cabecera en la tienda.
@@ -130,32 +129,32 @@ const diapason = proximo(
   {
     nombre: 'Todo el diapasón',
     resumen:
-      'De posición 1 al pulgar, sin miedo. Si eres de los que piensan «ayy noo» al ver la clave de sol, esta formación es para ti. Incluye el curso completo «Todas las escalas (sin aburrirte)».',
+      'De posición 1 al pulgar, sin miedo. En realidad son dos formaciones: incluye el curso completo «Todas las escalas (sin aburrirte)». Si eres de los que piensan «ayy noo» al ver la clave de sol, esta formación es para ti.',
     fotoAlt: 'Una mano apoyada en el cuerpo de un contrabajo, en una escalinata al sol',
   },
   {
     nombre: 'Fingerboard',
     resumen:
-      'From position 1 to thumb, no fear. If you see a treble clef and think «oh no…», this program is for you. Plus the full course «All the scales (without getting bored)».',
+      'From position 1 to thumb, no fear! It’s actually two programs: it includes the full course “All the scales (without getting bored)”. If you see a treble clef and think “oh no…”, this program is for you.',
     fotoAlt: 'A hand resting on the body of a double bass, on sunlit steps',
   },
 );
 
 /** Curso 2. «Contrabajo desde cero: una guía clara y práctica para comenzar». */
 const desdeCero = proximo(
-  2,
+  3,
   'contrabajo-desde-cero',
   desdeCeroFoto,
   {
     nombre: 'Contrabajo desde cero',
     resumen:
-      'Una guía clara y práctica para comenzar. ¿Cuántos meses de ejercicios técnicos hay que aguantar antes de tocar tu primera obra? ¡Ninguno! En esta formación aprendemos haciendo música, como debe ser.',
+      'Una guía clara y práctica para comenzar. ¿Cuántos meses de ejercicios técnicos hay que aguantar antes de tocar tu primera obra? ¡Ninguno!',
     fotoAlt: 'Un contrabajo tumbado en una escalinata de piedra',
   },
   {
     nombre: 'Double bass from scratch',
     resumen:
-      'A clear and practical guide to begin. How many months of technical exercises do you have to sit through before your first piece? None! In this program, we learn by making music, the way it should be.',
+      'A clear and practical guide to begin. How many months of technical exercises do you have to sit through before your first piece? None!',
     fotoAlt: 'A double bass lying on stone steps',
   },
 );
@@ -168,20 +167,69 @@ const desdeCero = proximo(
  * donde se leen por separado—; en una sola línea se queda una.
  */
 const vibrato = proximo(
-  3,
+  4,
   'tu-vibrato-como-un-cantante',
   vibratoFoto,
   {
     nombre: 'Tu vibrato como un cantante',
     resumen:
-      'El vibrato es la herramienta más poderosa que tienes para expresarte a través del contrabajo. Encuentra tu propia voz. Te enseño cómo.',
+      'El vibrato es la herramienta más poderosa que tienes para expresarte a través del contrabajo.',
     fotoAlt: 'El mar visto desde arriba, con la espuma de las olas',
   },
   {
     nombre: 'Your vibrato, like a singer',
     resumen:
-      "Vibrato is the most powerful tool you have to express yourself through the double bass. Find your own voice. I'll show you how.",
+      'Vibrato is the most powerful tool you have to express yourself through the double bass.',
     fotoAlt: 'The sea seen from above, with the foam of the waves',
+  },
+);
+
+/**
+ * «Todas las escalas (sin aburrirte)». Ficha y carta propias desde el 27 sep
+ * 2026, aunque también va completa dentro de «Todo el diapasón» (la carta lo
+ * dice: «no la compres dos veces»).
+ *
+ * ⚠️ La foto es provisional: es una de Emi con el contrabajo que no se usaba
+ * en ninguna otra parte. Emi la cambia desde la Tienda cuando tenga la suya.
+ */
+const escalas = proximo(
+  2,
+  'todas-las-escalas',
+  escalasFoto,
+  {
+    nombre: 'Todas las escalas (sin aburrirte)',
+    resumen: 'Las escalas no son aburridas, la manera en la que las estudias, sí.',
+    fotoAlt: 'Emilse Ríos con su contrabajo delante de una puerta de madera, en Madrid',
+  },
+  {
+    nombre: 'All the scales (without getting bored)',
+    resumen: 'Scales aren’t boring. The way you study them is.',
+    fotoAlt: 'Emilse Ríos with her double bass in front of a wooden door, in Madrid',
+  },
+);
+
+/**
+ * Clases online 1:1 (27 sep 2026). Con la foto de *Sobre mí*, como pidió
+ * Emi, y su carta en `cartas.ts`. Emi abre las plazas por temporadas: la
+ * ficha va «a la venta» en la Tienda cuando hay lugar, y entonces el botón de
+ * la carta pasa a ser «Agenda tu clase ahora».
+ */
+const clases = proximo(
+  5,
+  'clases-online',
+  clasesFoto,
+  {
+    nombre: 'Clases online 1:1',
+    resumen:
+      'El talento no existe. No como te lo vendieron. No es un don mágico que algunos tienen y otros no.',
+    fotoAlt: 'Emilse Ríos en una calle con árboles, abrazada a su contrabajo',
+  },
+  {
+    nombre: '1:1 Online Lessons',
+    /* El inglés de Emi, con su «Talent doesn’t exist» de la carta. */
+    resumen:
+      'Talent doesn’t exist. Not the way they sold it to you. It’s not a magical gift that some people have and others don’t.',
+    fotoAlt: 'Emilse Ríos on a tree-lined street, hugging her double bass',
   },
 );
 
@@ -206,16 +254,16 @@ const membresia: Product = {
     es: {
       nombre: 'Estudiemos Juntos',
       resumen:
-        'La membresía. Un ejercicio nuevo cada jueves, el concepto que lo sostiene, y Emi respondiendo en el foro.',
+        'El problema no es que no tengas tiempo. Es que no sabes qué hacer con los 30 minutos que sí tienes.',
       cadencia: 'al mes',
       precio: '€65',
       fotoPie: 'Retrato de Emi con el contrabajo',
       fotoAlt: 'Emilse Ríos',
     },
     en: {
-      nombre: 'Estudiemos Juntos',
+      nombre: 'Let’s Study Together',
       resumen:
-        'The membership. A new exercise every Thursday, the concept that holds it up, and Emi answering in the forum.',
+        'The problem is not that you don’t have time. It’s that you don’t know what to do with the 30 minutes you do have.',
       cadencia: 'a month',
       precio: '€65',
       fotoPie: 'Portrait of Emi with the double bass',
@@ -227,6 +275,10 @@ const membresia: Product = {
 /**
  * El catálogo, en el orden en que se muestra. La membresía va primera.
  *
+ * **Desde el 27 sep 2026 son seis fichas**: se sumaron «Todas las escalas» y
+ * las clases online 1:1, las dos con su carta, y los textos pasaron a ser los
+ * de las portadas de Emi.
+ *
  * **Tres cursos anunciados desde el 23 sep 2026**, con nombre, texto y foto.
  * Del 21 al 23 sep hubo uno solo, y era un hueco: seis copias de «Curso N» con
  * el mismo marco vacío no anunciaban seis cursos, anunciaban que la tienda
@@ -237,7 +289,7 @@ const membresia: Product = {
  * para el curso de muestra del aula, y el que lleva la alumna de prueba en su
  * escritorio. Quitarlo de acá deja ese escritorio sin nada que enseñar.
  */
-export const catalogo: Product[] = [membresia, diapason, desdeCero, vibrato];
+export const catalogo: Product[] = [membresia, diapason, escalas, desdeCero, vibrato, clases];
 
 /**
  * Si la ficha de un producto lleva a una página: los que se venden y los que

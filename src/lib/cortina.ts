@@ -15,8 +15,12 @@
  * y sus textos, `src/data/cortina.ts`.
  *
  * **Para subirla** —reabrir la web— se pone `false` acá, en un PR, y se mergea.
+ *
+ * **Subida el 27 sep 2026**: la web sale en vivo. Se deja todo lo demás en su
+ * sitio —la página, el middleware, la variable `CORTINA`— por si algún día
+ * hace falta volver a bajarla: es poner `true` acá, en un PR.
  */
-export const CORTINA_BAJADA = true;
+export const CORTINA_BAJADA = false;
 
 /** La página que se enseña en lugar de todas las demás. */
 export const RUTA_CORTINA = '/cortina';

@@ -47,13 +47,59 @@ export const aulaUi = {
     'desk.newAnswer': 'Emi te respondió',
     'desk.membershipTitle': 'Estudiemos Juntos',
     'desk.membershipLead':
-      'El ejercicio de esta semana, el concepto del mes y el foro donde Emi responde.',
+      'El ejercicio de esta semana, el concepto del mes y tus preguntas a Emi.',
     'desk.membershipCta': 'Entrar a la membresía',
-    'desk.membershipAway':
-      'La membresía todavía vive en emilseriosacademy.com. Se muda a esta casa con el cambio de dominio, y no tienes que hacer nada.',
     'desk.storeTitle': '¿Quieres seguir aprendiendo?',
     'desk.storeLead': 'Mira los cursos que Emi tiene a la venta.',
     'desk.storeCta': 'Ver la tienda',
+
+    /* --- El aula de la membresía (27 sep 2026) ------------------------------
+       Los textos son los del aula de la academia, que se mudó ese día. */
+    'memb.title': 'Membresía',
+    'memb.tabs': 'Secciones de la membresía',
+    'memb.tabWeek': 'Ejercicio de la semana',
+    'memb.tabBase': 'Concepto Base',
+    'memb.tabBonus': 'Bonus Material',
+    'memb.checking': 'Cargando el ejercicio…',
+    'memb.weekEyebrow': 'Tu ejercicio de esta semana',
+    'memb.weekUntil': 'Disponible hasta el jueves',
+    'memb.weekNone': 'Todavía no hay ejercicio publicado esta semana. El jueves entra el nuevo.',
+    'memb.weekNote':
+      'Sin biblioteca. El jueves a las 00:00 este ejercicio se cierra y entra el nuevo. Trabajamos el presente: solo lo de esta semana.',
+    'memb.pdf': 'Descargar el PDF',
+    'memb.noPdf': 'Este ejercicio no trae PDF',
+    /* Privadas desde el 28 sep 2026 (antes, un foro que leían todos). */
+    'memb.forumEyebrow': 'Solo entre tú y Emi',
+    'memb.forumH': 'Tus preguntas',
+    'memb.forumNote': 'Nadie más las ve: son solo entre tú y yo. Respondo los viernes.',
+    'memb.composeLabel': 'Tu pregunta',
+    'memb.composePh': 'Escribe tu pregunta sobre el ejercicio de esta semana…',
+    'memb.composeHint': 'Solo la ven tú y Emi.',
+    'memb.composeBtn': 'Publicar pregunta',
+    'memb.sending': 'Publicando…',
+    'memb.answer': 'Respuesta',
+    'memb.pending': 'Emilse responderá pronto.',
+    'memb.forumEmpty': 'Todavía no le has preguntado nada a Emi.',
+    'memb.forumError': 'No se pudieron cargar tus preguntas.',
+    'memb.postError': 'No se pudo publicar tu pregunta. Inténtalo de nuevo.',
+    'memb.baseEyebrow': 'Concepto del mes',
+    'memb.baseNone': 'Aún no hay Concepto Base disponible.',
+    'memb.baseNote': 'Uno por mes. El Concepto Base cambia cada mes; los ejercicios de la semana se apoyan en él.',
+    'memb.bonusEyebrow': 'Extras',
+    'memb.bonusLead': 'Material adicional que Emilse va sumando — fuera del ritmo semanal.',
+    'memb.bonusEmpty': 'Aún no hay Bonus Material.',
+    'memb.bonusError': 'No se pudo cargar el Bonus Material.',
+    'memb.bonusPlay': 'Ver el video',
+    'memb.videoNoLang': 'Este ejercicio todavía no tiene el video en este idioma.',
+    'memb.videoBroken': 'No se pudo cargar el video.',
+    'memb.videoRepaste': 'Este video se guardó con el formato antiguo: hay que volver a pegar su enlace de Bunny en el panel.',
+    'memb.gateTitle': 'Completa tu suscripción',
+    'memb.gateLead':
+      'Suscríbete para acceder al ejercicio de la semana, el video y tus preguntas a Emi. Cancela cuando quieras.',
+    'memb.gateCta': 'Ver la membresía',
+    'memb.billing': 'Mi suscripción',
+    'memb.billingError': 'No se pudo abrir el portal de la suscripción. Escríbeme a info@emilserios.com.',
+    'memb.support': 'Soporte',
 
     /* --- Estado de un curso ---------------------------------------------- */
     'course.progress': 'de progreso',
@@ -131,7 +177,7 @@ export const aulaUi = {
     'gate.wait': 'Un momento.',
     'gate.needed': 'Esto es para quien ya entró',
     'gate.neededLead':
-      'Inicia sesión con el correo con el que compraste. Si todavía no tienes nada, la tienda está acá al lado.',
+      'Inicia sesión con el correo con el que te inscribiste. Si todavía no tienes nada, la tienda está acá al lado.',
     'gate.signin': 'Iniciar sesión',
     /* El candado de pago, desde el 22 sep 2026. El texto no acusa a nadie de
        no haber pagado: quien llega acá suele ser alguien que SÍ pagó y cuyo
@@ -147,12 +193,12 @@ export const aulaUi = {
 
     'signin.eyebrow': 'Acceso',
     'signin.title': 'Entra al aula',
-    'signin.lead': 'Con el correo con el que compraste.',
+    'signin.lead': 'Con el correo con el que te inscribiste.',
     'signin.email': 'Tu correo',
     'signin.pass': 'Tu contraseña',
     'signin.remember': 'Mantener la sesión iniciada',
     'signin.rememberHelp':
-      'En un equipo compartido, déjala sin marcar: la sesión se cierra al cerrar el navegador.',
+      'En un equipo compartido, desmarca «Mantener la sesión iniciada»: así la sesión se cierra al cerrar el navegador.',
     'signin.go': 'Entrar',
     'signin.first': '¿Primera vez, o se te olvidó la clave?',
     'signin.firstLead':
@@ -167,7 +213,7 @@ export const aulaUi = {
     'signin.broke':
       'No pudimos completar el acceso, y no es tu contraseña: es algo de nuestro lado. Vuelve a intentarlo en un momento, y si sigue igual escríbeme a info@emilserios.com.',
     'signin.noEmail': 'Escribe tu correo.',
-    'signin.store': 'Todavía no he comprado nada',
+    'signin.store': '¿Estás buscando mis formaciones? Acá te las muestro.',
     'signin.leaving': 'Cerrando tu sesión…',
 
     'pass.eyebrow': 'Tu contraseña',
@@ -259,13 +305,55 @@ export const aulaUi = {
     'desk.newAnswer': 'Emi answered you',
     'desk.membershipTitle': "Let's study together",
     'desk.membershipLead':
-      "This week's exercise, the month's concept and the forum where Emi answers.",
+      "This week's exercise, the month's concept and your questions to Emi.",
     'desk.membershipCta': 'Enter the membership',
-    'desk.membershipAway':
-      'The membership still lives at emilseriosacademy.com. It moves into this house with the domain change, and you have nothing to do.',
     'desk.storeTitle': 'Want to keep learning?',
     'desk.storeLead': "See the courses Emi has on sale.",
     'desk.storeCta': 'See the store',
+
+    'memb.title': 'Membership',
+    'memb.tabs': 'Membership sections',
+    'memb.tabWeek': 'This week’s exercise',
+    'memb.tabBase': 'Core concept',
+    'memb.tabBonus': 'Bonus material',
+    'memb.checking': 'Loading the exercise…',
+    'memb.weekEyebrow': 'Your exercise this week',
+    'memb.weekUntil': 'Available until Thursday',
+    'memb.weekNone': 'There’s no exercise published this week yet. The new one comes in on Thursday.',
+    'memb.weekNote':
+      'No library. On Thursday at 00:00 this exercise closes and the new one comes in. We work the present: only this week’s.',
+    'memb.pdf': 'Download the PDF',
+    'memb.noPdf': 'This exercise has no PDF',
+    'memb.forumEyebrow': 'Just between you and Emi',
+    'memb.forumH': 'Your questions',
+    'memb.forumNote': 'Nobody else sees them: they’re just between you and me. I answer on Fridays.',
+    'memb.composeLabel': 'Your question',
+    'memb.composePh': 'Write your question about this week’s exercise…',
+    'memb.composeHint': 'Only you and Emi can see it.',
+    'memb.composeBtn': 'Post question',
+    'memb.sending': 'Posting…',
+    'memb.answer': 'Answer',
+    'memb.pending': 'Emilse will reply soon.',
+    'memb.forumEmpty': 'You haven’t asked Emi anything yet.',
+    'memb.forumError': 'Couldn’t load your questions.',
+    'memb.postError': 'Couldn’t post your question. Try again.',
+    'memb.baseEyebrow': 'Concept of the month',
+    'memb.baseNone': 'No core concept available yet.',
+    'memb.baseNote': 'One per month. The core concept changes each month; the weekly exercises lean on it.',
+    'memb.bonusEyebrow': 'Extras',
+    'memb.bonusLead': 'Extra material Emilse adds over time — outside the weekly rhythm.',
+    'memb.bonusEmpty': 'No bonus material yet.',
+    'memb.bonusError': 'Couldn’t load the bonus material.',
+    'memb.bonusPlay': 'Watch the video',
+    'memb.videoNoLang': 'This exercise doesn’t have the video in this language yet.',
+    'memb.videoBroken': 'This video could not be loaded.',
+    'memb.videoRepaste': 'This video was saved in the old format: its Bunny link has to be pasted again in the panel.',
+    'memb.gateTitle': 'Complete your subscription',
+    'memb.gateLead': 'Subscribe to unlock this week’s exercise, the video and your questions to Emi. Cancel anytime.',
+    'memb.gateCta': 'See the membership',
+    'memb.billing': 'My subscription',
+    'memb.billingError': 'Couldn’t open the subscription portal. Write to info@emilserios.com.',
+    'memb.support': 'Support',
 
     /* --- Estado de un curso ---------------------------------------------- */
     'course.progress': 'complete',
@@ -343,7 +431,7 @@ export const aulaUi = {
     'gate.wait': 'One moment.',
     'gate.needed': 'This is for people who are already in',
     'gate.neededLead':
-      'Sign in with the email you bought with. If you have nothing yet, the store is right next door.',
+      'Sign in with the email you signed up with. If you have nothing yet, the store is right next door.',
     'gate.signin': 'Sign in',
     'gate.noSub': "We couldn't find anything in your name",
     'gate.noSubLead':
@@ -356,12 +444,12 @@ export const aulaUi = {
 
     'signin.eyebrow': 'Access',
     'signin.title': 'Come into the classroom',
-    'signin.lead': 'With the email you bought with.',
+    'signin.lead': 'With the email you signed up with.',
     'signin.email': 'Your email',
     'signin.pass': 'Your password',
     'signin.remember': 'Keep me signed in',
     'signin.rememberHelp':
-      'On a shared computer, leave it unticked: the session ends when you close the browser.',
+      'On a shared computer, untick “Keep me signed in”: the session will end when you close the browser.',
     'signin.go': 'Sign in',
     'signin.first': 'First time, or forgot your password?',
     'signin.firstLead':
@@ -373,7 +461,7 @@ export const aulaUi = {
     'signin.broke':
       "We couldn't complete your sign-in, and it isn't your password — something on our side went wrong. Try again in a moment, and if it keeps happening write to info@emilserios.com.",
     'signin.noEmail': 'Type your email.',
-    'signin.store': "I haven't bought anything yet",
+    'signin.store': 'Looking for my courses? Here they are.',
     'signin.leaving': 'Signing you out…',
 
     'pass.eyebrow': 'Your password',
@@ -457,6 +545,7 @@ const segmentoEntrar: Record<Lang, string> = { es: 'entrar', en: 'signin' };
 const segmentoClave: Record<Lang, string> = { es: 'nueva-clave', en: 'new-password' };
 const segmentoSalir: Record<Lang, string> = { es: 'salir', en: 'signout' };
 const segmentoPasar: Record<Lang, string> = { es: 'pasar', en: 'handoff' };
+const segmentoMembresia: Record<Lang, string> = { es: 'membresia', en: 'membership' };
 
 /**
  * La página de agradecimiento, donde aterriza quien acaba de pagar.
@@ -510,6 +599,13 @@ export const puertaPath = (lang: Lang): string => entrarPath(lang);
  */
 export const escritorioPath = (lang: Lang): string =>
   `${raiz[lang]}/${segmentoEscritorio[lang]}/`;
+
+/**
+ * El aula de la membresía: el ejercicio de la semana con las preguntas a Emi, el concepto
+ * base y el bonus. **Vive acá desde el 27 sep 2026**; hasta ese día era
+ * `emilseriosacademy.com/aula/`, que ahora redirige a esta dirección.
+ */
+export const membresiaPath = (lang: Lang): string => `${raiz[lang]}/${segmentoMembresia[lang]}/`;
 
 /** El reproductor de un curso. */
 export const cursoPath = (slug: string, lang: Lang): string =>

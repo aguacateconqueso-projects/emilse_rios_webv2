@@ -22,8 +22,8 @@
 import { getImage } from 'astro:assets';
 import type { Lang } from '../../i18n/ui';
 import { routePath, useTranslations } from '../../i18n/ui';
-import { useAula } from '../../i18n/aula';
-import { ACADEMIA, catalogo } from '../../data/aula';
+import { useAula, membresiaPath } from '../../i18n/aula';
+import { catalogo } from '../../data/aula';
 import Boton from '../Boton.astro';
 
 interface Props {
@@ -66,7 +66,8 @@ const paraJs = {
   },
 };
 
-const membresiaHref = `${ACADEMIA}/aula/`;
+/* Adentro desde el 27 sep 2026: la membresía se mudó de la academia. */
+const membresiaHref = membresiaPath(lang);
 ---
 
 <script type="application/json" id="escritorio-datos" set:html={JSON.stringify(paraJs)} />
@@ -122,10 +123,8 @@ const membresiaHref = `${ACADEMIA}/aula/`;
       <p class="eyebrow">{a('app.membership')}</p>
       <h2 class="app-h2 memb__h" id="memb-h">{a('desk.membershipTitle')}</h2>
       <p class="memb__lead">{a('desk.membershipLead')}</p>
-      {/* El salto de dominio se avisa, no se descubre. */}
-      <p class="memb__fuera soft">{a('desk.membershipAway')}</p>
     </div>
-    <Boton href={membresiaHref} rel="noopener">{a('desk.membershipCta')}</Boton>
+    <Boton class="boton--solid" href={membresiaHref}>{a('desk.membershipCta')}</Boton>
   </div>
 </section>
 
@@ -503,13 +502,6 @@ const membresiaHref = `${ACADEMIA}/aula/`;
   .memb__lead {
     margin-top: var(--space-1);
     max-width: var(--measure);
-  }
-
-  .memb__fuera {
-    margin-top: var(--space-2);
-    max-width: var(--measure);
-    font-size: var(--text-small);
-    line-height: 1.5;
   }
 
   /* --- Formaciones -------------------------------------------------------- */

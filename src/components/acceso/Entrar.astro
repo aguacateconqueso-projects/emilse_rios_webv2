@@ -62,10 +62,7 @@ const a = useAula(lang);
 
     <label class="casilla">
       <input type="checkbox" checked data-recordar />
-      <span>
-        {a('signin.remember')}
-        <span class="campo__ayuda soft">{a('signin.rememberHelp')}</span>
-      </span>
+      <span>{a('signin.remember')}</span>
     </label>
 
     <p class="error" data-error hidden></p>
@@ -73,8 +70,13 @@ const a = useAula(lang);
     <Boton class="boton--solid" type="submit" data-enviar>{a('signin.go')}</Boton>
   </form>
 
-  <hr class="hr" />
-
+  {/*
+    Justo debajo del botón, en la letra del cuerpo y subrayado (27 sep 2026).
+    Hasta ese día iba después de una regla, en mono de 12 px, y en el teléfono
+    quedaba al fondo: «la gente es perezosa, no lee ni busca» (Emi). Es el
+    camino de todo el que entra por primera vez, así que tiene que verse sin
+    buscarlo.
+  */}
   <details class="olvido">
     <summary>{a('signin.first')}</summary>
     <p class="soft olvido__lead">{a('signin.firstLead')}</p>
@@ -89,9 +91,15 @@ const a = useAula(lang);
     </form>
   </details>
 
+  <hr class="hr" />
+
   <p class="entrar__tienda">
     <a href={routePath('products', lang)}>{a('signin.store')}</a>
   </p>
+
+  {/* Al fondo desde el 27 sep 2026: iba pegada a la casilla y, en el
+      teléfono, ocupaba más que el enlace de la contraseña. */}
+  <p class="entrar__nota soft">{a('signin.rememberHelp')}</p>
 </section>
 
 <script>
@@ -208,12 +216,27 @@ const a = useAula(lang);
 <style>
   /* Los campos, el aviso y los errores son del marco (`styles/app.css`); acá
      solo lo que es de esta pantalla. */
+  .olvido {
+    margin-top: var(--space-4);
+  }
+
   .olvido summary {
+    display: inline;
     cursor: pointer;
-    font-family: var(--font-mono);
-    font-size: var(--text-mono);
-    letter-spacing: var(--tracking-mono);
-    text-transform: uppercase;
+    list-style: none;
+    border-bottom: 1px solid currentColor;
+  }
+
+  .olvido summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .olvido summary::after {
+    content: ' →';
+  }
+
+  .olvido[open] summary::after {
+    content: ' ↓';
   }
 
   .olvido__lead {
@@ -223,7 +246,12 @@ const a = useAula(lang);
   }
 
   .entrar__tienda {
-    margin-top: var(--space-6);
     font-size: var(--text-small);
+  }
+
+  .entrar__nota {
+    margin-top: var(--space-4);
+    font-size: 0.9375rem; /* 15 px, como las ayudas de los campos */
+    line-height: 1.45;
   }
 </style>

@@ -24,6 +24,10 @@ const entra = (n: number) => n > 0 && n < corte;
 /* La portada gasta los dos primeros peldaños —el rótulo y la entradilla— y
    los bloques de debajo siguen la escalera desde ahí. */
 const peldano = (n: number) => `--i:${n + 1}`;
+/* La frase dicha más fuerte y los párrafos de alrededor son la misma
+   conversación (27 sep 2026): van a distancia de párrafo, no de bloque. */
+const pegado = (n: number) =>
+  blocks[n].k === 'anchor' || (blocks[n].k === 'prose' && blocks[n - 1]?.k === 'anchor');
 ---
 
 {
@@ -103,7 +107,7 @@ const peldano = (n: number) => `--i:${n + 1}`;
 
       case 'prose':
         return (
-          <div class="row row--flush block">
+          <div class:list={['row row--flush', pegado(n) ? 'sigue' : 'block']}>
             <div class="row__body prose">
               {block.paras.map((para) => (
                 <p>{para}</p>
@@ -114,8 +118,10 @@ const peldano = (n: number) => `--i:${n + 1}`;
 
       case 'anchor':
         return (
-          <div class="anchor reveal">
-            <p class="anchor__text">{block.text}</p>
+          <div class="row row--flush sigue">
+            <div class="row__body prose">
+              <p class="dicho">{block.text}</p>
+            </div>
           </div>
         );
 

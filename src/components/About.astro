@@ -11,10 +11,14 @@ interface Props {
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 const { blocks } = getAboutCopy(lang);
+/* La frase dicha más fuerte y los párrafos de alrededor son la misma
+   conversación (27 sep 2026): van a distancia de párrafo, no de bloque. */
+const pegado = (n: number) =>
+  blocks[n].k === 'anchor' || (blocks[n].k === 'prose' && blocks[n - 1]?.k === 'anchor');
 ---
 
 {
-  blocks.map((block) => {
+  blocks.map((block, n) => {
     switch (block.k) {
       case 'ahero':
         return (
@@ -62,7 +66,7 @@ const { blocks } = getAboutCopy(lang);
 
       case 'prose':
         return (
-          <div class="row row--flush block reveal">
+          <div class:list={['row row--flush reveal', pegado(n) ? 'sigue' : 'block']}>
             <div class="row__body prose">
               {block.paras.map((para) => (
                 <p>{para}</p>
@@ -71,12 +75,22 @@ const { blocks } = getAboutCopy(lang);
           </div>
         );
 
+      /* Una sola frase, un párrafo en negrita. Varias —las tres lecciones—,
+         una lista con viñetas, alineada a la izquierda con el texto. */
       case 'anchor':
         return (
-          <div class="anchor reveal">
-            {(Array.isArray(block.text) ? block.text : [block.text]).map((line) => (
-              <p class="anchor__text">{line}</p>
-            ))}
+          <div class="row row--flush reveal sigue">
+            <div class="row__body prose">
+              {Array.isArray(block.text) ? (
+                <ul class="dicho">
+                  {block.text.map((line) => (
+                    <li>{line}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p class="dicho">{block.text}</p>
+              )}
+            </div>
           </div>
         );
 
@@ -162,10 +176,20 @@ const { blocks } = getAboutCopy(lang);
     border-right: 0;
   }
 
-  /* Apilado, el retrato va a lo ancho, entero, debajo del texto. */
+  /* Apilado, el retrato va a lo ancho, entero, encima del texto.
+
+     Sin aire por debajo del texto desde el 27 sep 2026, y la sección que
+     sigue a 48 px y no a 96. Emi lo vio en el teléfono: entre «No es mi caso»
+     y «Te cuento otra cosa» quedaban 192 px —los 96 de relleno de la entrada
+     más los 96 de bloque—, y es la misma conversación. En el escritorio no
+     pasa: ahí el texto va al lado del retrato y el hueco lo mide la foto. */
   @media (max-width: 55rem) {
     .ahero__text {
-      padding: var(--space-6) var(--space-3) var(--space-12);
+      padding: var(--space-6) var(--space-3) 0;
+    }
+
+    .ahero + .row {
+      margin-top: var(--space-6);
     }
 
     .ahero__media {

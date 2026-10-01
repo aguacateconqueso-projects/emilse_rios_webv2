@@ -4,7 +4,9 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 24 de septiembre de 2026, cierre del día. **Todo
+**Última actualización:** 27 de septiembre de 2026 —la salida en vivo y las
+correcciones de Emi, en el recuadro 🧵 de abajo—. Lo que sigue es el cierre
+del 24 de septiembre. **Todo
 lo del día está en `main`, del PR #53 al #56**, y Adrián lo dio por bueno
 («perfecto, todo ok»). En una línea: los cursos en su biblioteca de Bunny
 (#53); los videos ES / EN, cada uno en su hueco, y Formaciones en
@@ -18,6 +20,115 @@ suscribió desde la Home el 24 sep y funcionó. ⚠️ **El proyecto de Vercel e
 `emilse-rios-webv2_1`**: las vistas previas buenas empiezan por
 `emilse-rios-webv21-git-…` (ver la regla de trabajo, justo abajo). El detalle de cada cosa está en las secciones que siguen a **La
 cortina**, de la más nueva a la más vieja.
+
+> **🧵 27 sep 2026: la salida en vivo, en el PR #58** (rama
+> `claude/magical-keller-qtja38`). Su vista previa:
+> **https://emilse-rios-webv21-git-claude-aa2776-adrians-projects-594b3131.vercel.app**
+> El 25 no se salió (en `main` no entró nada entre el 24 y el 27). El PR trae
+> dos cosas, y **mergearlo es salir en vivo**:
+>
+> 1. **La cortina sube** (`CORTINA_BAJADA = false`, commit `5a219e8`).
+> 2. **La tanda de correcciones de Emi** (copy y móvil), toda hecha:
+>    - **La letra de las «frases destacadas», en toda la web:** dejan de ser
+>      cursiva grande y centrada y pasan a **negrita del tamaño del cuerpo**,
+>      dentro de la columna (`.dicho` y `.sigue` en `base.css`; en las cartas,
+>      `grito` se pinta como `fuerte` y `acento` pasa a ser **título**). La
+>      promesa de arriba de cada carta sigue grande (`.venta__promesa`).
+>    - **El contrabajo del fondo, en el teléfono,** entra entero a lo ancho
+>      (antes solo se veía el borde de la madera).
+>    - ***Sobre mí*:** sin el hueco de 192 px antes de «Te cuento otra cosa»
+>      en el teléfono; las tres lecciones en viñetas a la izquierda.
+>    - **El newsletter:** el acuse de recibo es el copy de Emi, con el asunto
+>      del primer correo («El ejercicio que el 90% hace mal»), en la letra del
+>      cuerpo.
+>    - **El acceso al aula:** «¿Primera vez, o se te olvidó la clave?» justo
+>      debajo del botón y visible; la nota del equipo compartido, al fondo;
+>      «con el que te inscribiste»; «¿Estás buscando mis formaciones? Acá te
+>      las muestro.»
+>    - **Formaciones:** «¿Ya tienes una formación? El aula es por acá»; cada
+>      ficha con el texto de las portadas de Emi y «Leer más»; **en el
+>      teléfono las fotos toman color al pasarles el scroll**
+>      (`src/scripts/color-al-pasar.ts`, en todo el sitio); y **dos fichas
+>      nuevas, cada una con su carta** (el copy de Emi llegó ese mismo día):
+>      «Todas las escalas (sin aburrirte)», 87 € —foto provisional,
+>      `emilse-madrid.jpg`— y «Clases online 1:1», con la foto de *Sobre mí*.
+>      La de clases estrena tres piezas del sistema: **viñetas dentro del
+>      texto** (bloque `vinetas`), **una segunda posdata** (`pd2`) y **carta
+>      sin preguntas** (con `faq` vacía no sale la sección). Su botón,
+>      «Agenda tu clase ahora», **abre un correo a info@** con el asunto
+>      puesto («coordinamos la fecha por email»); mientras la ficha esté en
+>      «Próximamente» dice «Avísame cuando abra». El panel ya sabe editar las
+>      viñetas y la segunda posdata.
+>    - **Las cartas:** «Te cuento por qué» y «Te voy a contar una historia»
+>      bajan de la promesa a la conversación; en la membresía, «para ti» deja
+>      de ser un recuadro negro y va justo encima de «no es para ti»; en el
+>      diapasón, «Escalas. Muchos las odian. Todos las necesitamos.» es el
+>      único título y «HER-MO-SO.» va en negrita; en «Desde cero», «Entras de
+>      cero…» pasa a ser la entrada del precio; en el vibrato, «paró» →
+>      «detuvo», «best vibrato finger (el mejor dedo para vibrar)» y «Te cuento
+>      mi historia con el vibrato.» en negrita; y **la ficha de precio lleva el
+>      nombre solo en el idioma de la página** (se quitó `titleEcho`).
+>
+>
+> 3. **La mudanza de la membresía, entera** (pedida por Adrián el 27 sep: «que
+>    todo pase en emilserios.com ya, desde hoy»):
+>    - **El aula** vive en `/aulavirtual/membresia/` y `/en/classroom/membership/`
+>      (`src/components/aula/Membresia.astro`): ejercicio de la semana con su
+>      foro, Concepto Base, Bonus, el portal de Stripe («Mi suscripción») y la
+>      red de seguridad que le pregunta a Stripe antes de cerrarle la puerta a
+>      alguien. El escritorio y la barra del aula ya no salen del sitio, y
+>      `/gracias/` manda directo a la membresía.
+>    - **El webhook de Stripe** vive en `/api/stripe-webhook`, con la bienvenida
+>      por Resend (el copy de Emi; los enlaces, a `emilserios.com`),
+>      `/api/verify-subscription` y `/api/portal`.
+>    - **`emilseriosacademy.com` redirige entero** (`laAcademiaRedirige()` en
+>      `astro.config.mjs`): cada dirección vieja a su gemela y lo demás a la
+>      Home. **Menos `/api/`**, que lo contesta este proyecto: así Stripe sigue
+>      llamando a la dirección vieja del webhook sin cortarse. Funciona cuando
+>      el dominio de la academia se pasa a este proyecto de Vercel.
+>    - Probado en local: la firma del webhook (200 con una firma de Stripe
+>      buena, 400 con una mala) y el aula con Supabase simulado (ejercicio,
+>      video, PDF, foro, bonus y la puerta de quien no tiene membresía).
+>
+> ⚠️ **Formaciones lee las fichas de la base de datos**, así que los textos
+> nuevos y las dos fichas **no se ven —ni en la vista previa— hasta pegar
+> `supabase/formaciones_27sep.sql` en el SQL Editor** (punto 18; hecho por
+> Adrián el 27 sep).
+>
+> 4. **Las preguntas de la membresía, privadas** (28 sep, pedido de Emi): ya
+>    no es un foro que leen todos, sino 1:1 con Emi, como el hilo de los
+>    cursos. Cada miembro ve solo sus preguntas —de todas las semanas— con sus
+>    respuestas; Emi lo sigue viendo todo en el panel → Mensajes. Lo decide la
+>    base de datos: **`supabase/migrations/0011_foro_privado.sql`**, que hay que
+>    pegar en el SQL Editor (las preguntas viejas también pasan a privadas).
+>
+> **🌙 La salida (se corrió del 27 al 28 sep), en este orden** (cada paso
+> depende del anterior):
+>
+> 0. **Supabase → SQL Editor: pegar `supabase/migrations/0011_foro_privado.sql`**
+>    y darle a Run. Se puede hacer ya: las preguntas pasan a privadas al
+>    instante, también en el aula vieja de la academia. *(28 sep: el
+>    `STRIPE_WEBHOOK_SECRET` quedó con el de la academia, `RESEND_API_KEY`
+>    puesta; `RESEND_FROM` no hace falta.)*
+> 1. **Vercel → `emilse-rios-webv2_1` → Environment Variables (Production)**:
+>    `STRIPE_SECRET_KEY` (con el Touch ID de Emi), y copiadas del proyecto de
+>    la academia **`STRIPE_WEBHOOK_SECRET`** (el mismo `whsec_`), **`RESEND_API_KEY`**
+>    y `RESEND_FROM` si la tiene. Sin founders: esa figura ya no existe.
+> 2. Revisar la vista previa con Emi y **mergear el PR #58**: sube la cortina y
+>    entra todo lo de arriba.
+> 3. **Vercel → el proyecto de la academia → Settings → Domains**: quitar
+>    `emilseriosacademy.com` y `www.emilseriosacademy.com`. Después, en
+>    `emilse-rios-webv2_1` → Domains → añadir los dos. **Siempre después del
+>    merge**: antes, el dominio caería en un despliegue sin webhook.
+> 4. Comprobar: `www.emilseriosacademy.com/aula/` tiene que llevar a
+>    `www.emilserios.com/aulavirtual/membresia/`.
+> 5. Emi le escribe a sus miembros: el aula se mudó, se entra con el mismo
+>    correo y la misma contraseña en `emilserios.com/aulavirtual/entrar/`.
+> 6. Cuando se pueda (sin prisa): en Stripe, apuntar el endpoint del webhook a
+>    `https://www.emilserios.com/api/stripe-webhook` y poner su `whsec_` nuevo
+>    en Vercel. Emi no había
+> publicado ninguna página de ventas desde el panel (Adrián, 27 sep), así que
+> las cartas sí salen del código y los cambios se ven directo.
 
 > **🚧 LA CORTINA ESTÁ BAJADA desde el 23 sep 2026.** Quien entra a
 > `www.emilserios.com` —a cualquier dirección— ve solo la firma de Emi sobre
@@ -173,12 +284,25 @@ cortina**, de la más nueva a la más vieja.
 >     los siete correos cuando la serie esté, y probar también el campo del
 >     final de una carta (nuevo desde el #55). Los pasos, en **El newsletter,
 >     conectado → La primera prueba**.
-> 17. [ ] **Mudar la membresía** —*Adrián, 24 sep: «mañana la mudamos»*—:
+> 17. [x] **Mudar la membresía** —*hecha en código el 27 sep 2026, en el
+>     PR #58; los pasos de Vercel, en «La noche del 27 sep», arriba*—:
 >     las páginas de la membresía (el ejercicio de la semana y el foro) al aula
 >     de acá, el webhook de Stripe acá, las fechas de las puertas en una sola
 >     casa, el puente `/pasar/` pegado en la academia, y **recién entonces**
 >     redirigir `emilseriosacademy.com`. Antes de eso, redirigirla mata el
 >     webhook y deja a gente pagando sin acceso.
+> 18. [ ] **Pegar `supabase/formaciones_27sep.sql` en el SQL Editor** (Adrián,
+>     27 sep). Pone en la tabla `products` los textos de Emi, el orden 01–06 y
+>     las dos fichas nuevas. Sin esto, Formaciones sigue con los textos viejos.
+>     Es idempotente.
+> 19. [ ] **Los testimonios de «Clases online 1:1»**: Emi los quiere traer
+>     de la web vieja («Qué dicen mis alumnos sobre mí»). Van en
+>     `testimonios` de su carta, como en la del vibrato. Y cuando Emi abra
+>     plazas, la ficha pasa a «A la venta» en la Tienda: el botón cambia solo.
+>     Si algún día la primera clase se cobra por adelantado, se cambia el
+>     `mailto:` del botón por un enlace de pago de Stripe.
+> 20. [ ] **La foto de «Todas las escalas»**: la de hoy es provisional. Emi la
+>     cambia desde el panel → Tienda.
 >
 > **D. Cabos sueltos, sin prisa.**
 >

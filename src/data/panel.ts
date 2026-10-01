@@ -51,6 +51,6 @@ export const secciones: Seccion[] = [
   {
     id: 'mensajes',
     titulo: 'Mensajes',
-    que: 'Las preguntas del foro de la membresía y de los cursos, para responder desde acá.',
+    que: 'Las preguntas de la membresía y de los cursos, para responder desde acá. Cada alumna ve solo las suyas.',
   },
 ];

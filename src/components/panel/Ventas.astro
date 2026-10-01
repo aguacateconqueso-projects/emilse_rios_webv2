@@ -126,7 +126,17 @@ const paraJs = { cartas, avisame: AVISAME };
      bloques de la carta, los testimonios aparte y las preguntas. Al guardar
      se vuelve a armar la `Carta` de cada idioma. */
 
-  type TipoBloque = 'parrafo' | 'fuerte' | 'cursiva' | 'grito' | 'acento' | 'testimonio' | 'lista-si' | 'lista-no' | 'puntos';
+  type TipoBloque =
+    | 'parrafo'
+    | 'fuerte'
+    | 'cursiva'
+    | 'grito'
+    | 'acento'
+    | 'testimonio'
+    | 'lista-si'
+    | 'lista-no'
+    | 'puntos'
+    | 'vinetas';
   type TxtBloque = { text: string; autor: string; titulo: string; items: string };
   type Bloq = { tipo: TipoBloque } & Par<TxtBloque>;
   type Testi = Par<{ text: string; autor: string }>;
@@ -143,12 +153,17 @@ const paraJs = { cartas, avisame: AVISAME };
     { v: 'parrafo', t: 'Párrafo' },
     { v: 'fuerte', t: 'Negrita' },
     { v: 'cursiva', t: 'Cursiva' },
-    { v: 'grito', t: 'Frase centrada' },
-    { v: 'acento', t: 'La frase grande' },
+    /* Desde el 27 sep 2026 la «frase centrada» ya no se centra ni se agranda
+       —Emi pidió que la carta fluya— y la «frase grande» es un título. Los
+       nombres internos se quedan para no romper las páginas guardadas. */
+    { v: 'grito', t: 'Frase destacada' },
+    { v: 'acento', t: 'Título' },
     { v: 'testimonio', t: 'Testimonio' },
     { v: 'lista-si', t: 'Lista «para ti»' },
     { v: 'lista-no', t: 'Lista «no es para ti»' },
     { v: 'puntos', t: 'Lo que trae' },
+    /* Desde el 27 sep 2026: una lista corta dentro del texto, sin recuadro. */
+    { v: 'vinetas', t: 'Viñetas' },
   ];
 
   const vacioBloque = (): TxtBloque => ({ text: '', autor: '', titulo: '', items: '' });
@@ -166,6 +181,7 @@ const paraJs = { cartas, avisame: AVISAME };
     if (b.k === 'lista')
       return { tipo: b.tono === 'no' ? 'lista-no' : 'lista-si', txt: { ...txt, titulo: b.titulo, items: b.items.join('\n') } };
     if (b.k === 'puntos') return { tipo: 'puntos', txt: { ...txt, titulo: b.titulo ?? '', items: b.items.join('\n') } };
+    if (b.k === 'vinetas') return { tipo: 'vinetas', txt: { ...txt, items: b.items.join('\n') } };
     return { tipo: b.k, txt: { ...txt, text: b.text } };
   }
 
@@ -179,6 +195,8 @@ const paraJs = { cartas, avisame: AVISAME };
       case 'lista-si':
       case 'lista-no':
         return { k: 'lista', tono: tipo === 'lista-no' ? 'no' : 'si', titulo: t.titulo.trim(), items: lineas(t.items) };
+      case 'vinetas':
+        return { k: 'vinetas', items: lineas(t.items) };
       case 'puntos':
         return t.titulo.trim()
           ? { k: 'puntos', titulo: t.titulo.trim(), items: lineas(t.items) }
@@ -193,7 +211,7 @@ const paraJs = { cartas, avisame: AVISAME };
     'metaTitle', 'metaDesc', 'title', 'subtitle', 'ledeA', 'ledeB', 'photoAlt',
     'includesH', 'titleEcho', 'priceLabel', 'price', 'pricePer', 'priceNote', 'priceNoteRest', 'priceFeatures', 'priceFoot',
     'boton.texto', 'boton.href', 'boton.fuera',
-    'final', 'testimonios.titulo', 'pd.rotulo', 'pd.text',
+    'final', 'testimonios.titulo', 'pd.rotulo', 'pd.text', 'pd2.rotulo', 'pd2.text',
     'faqH', 'news.pre', 'news.link',
     'puertas.closeLeadToday', 'puertas.closeLeadDay', 'puertas.payClosed',
     'puertas.closedNote', 'puertas.closedNoteNoDate', 'puertas.closedLink',
@@ -274,6 +292,7 @@ const paraJs = { cartas, avisame: AVISAME };
           items: m.testimonios.map((t) => ({ text: t[l].text.trim(), autor: t[l].autor.trim() })),
         };
       if (hay('pd.rotulo') || hay('pd.text')) c.pd = { rotulo: v('pd.rotulo'), text: v('pd.text') };
+      if (hay('pd2.rotulo') || hay('pd2.text')) c.pd2 = { rotulo: v('pd2.rotulo'), text: v('pd2.text') };
       if (hay('news.pre') || hay('news.link')) c.news = { pre: v('news.pre'), link: v('news.link') };
       if (m.puertas)
         c.puertas = {
@@ -525,6 +544,15 @@ const paraJs = { cartas, avisame: AVISAME };
           entrada(t.autor, (v) => (t.autor = v), { etiqueta: et('nombre'), ph: l === 'es' ? 'Su nombre' : 'Her name' }),
         );
         break;
+      case 'vinetas':
+        caja.append(
+          entrada(t.items, (v) => (t.items = v), {
+            largo: true,
+            etiqueta: et('viñetas'),
+            ph: l === 'es' ? 'Una viñeta por renglón (tres como mucho)' : 'One item per line (three at most)',
+          }),
+        );
+        break;
       default:
         caja.append(
           entrada(t.titulo, (v) => (t.titulo = v), {
@@ -666,12 +694,12 @@ const paraJs = { cartas, avisame: AVISAME };
         par('title', 'Título', 'linea'),
         par('subtitle', 'Debajo del título', 'linea'),
         par('ledeA', 'La apertura, primer renglón', 'texto'),
-        par('ledeB', 'La apertura, segundo renglón', 'linea', 'Sale más grande, a continuación del primero.'),
+        par('ledeB', 'La apertura, segundo renglón', 'linea', 'Opcional. Sale igual de grande, debajo del primero: solo si sigue siendo la promesa.'),
         par('photoAlt', 'Descripción de la foto', 'linea', 'Para quien no la ve: qué hay en la foto.'),
       ),
       seccion(
         'La carta',
-        'El cuerpo de la página, bloque a bloque. Párrafo: texto normal. Destacado: en la letra de los títulos. Frase centrada: en cursiva, al centro. La frase grande: la más grande de la página (una o dos por carta). Testimonio: la cita y el nombre — la presentación va en el párrafo de antes. Listas: «para ti» y «no es para ti», un punto por renglón. Lo que trae: filas, un punto por renglón.',
+        'El cuerpo de la página, bloque a bloque. Párrafo: texto normal. Negrita y Frase destacada: en negrita, del mismo tamaño que el texto, sin cortar la lectura. Cursiva: lo que se dice en otro tono. Título: abre una parte nueva de la carta, en la letra de los títulos (úsalo poco). Testimonio: la cita y el nombre — la presentación va en el párrafo de antes. Listas: «para ti» y «no es para ti», un punto por renglón. Lo que trae: filas, un punto por renglón. Viñetas: una lista corta dentro del texto, sin recuadro (tres como mucho).',
         listaBloques,
         anadir('+ Bloque al final', () => {
           m.bloques.push({ tipo: 'parrafo', es: vacioBloque(), en: vacioBloque() });
@@ -683,7 +711,7 @@ const paraJs = { cartas, avisame: AVISAME };
         'La ficha de precio',
         'La caja con el precio, lo que incluye y el botón.',
         par('includesH', 'Título encima de la ficha', 'linea', undefined, { es: 'Qué incluye', en: 'What’s included' }),
-        par('titleEcho', 'El nombre en el otro idioma', 'linea', 'Va en cursiva al lado del título.'),
+        par('titleEcho', 'El nombre en el otro idioma', 'linea', 'Ya no se ve en la página: la ficha de precio lleva solo el nombre en su idioma.'),
         par('priceLabel', 'Rótulo del precio', 'linea', undefined, { es: 'Precio', en: 'Price' }),
         par('price', 'Precio', 'linea', undefined, { es: '240 €', en: '€240' }),
         par('pricePer', 'Detrás del precio (opcional)', 'linea', '«/mes» en la membresía. Los cursos no llevan.'),
@@ -720,10 +748,12 @@ const paraJs = { cartas, avisame: AVISAME };
         }),
         par('pd.rotulo', 'La posdata: rótulo', 'linea', undefined, { es: 'P. D.', en: 'P.S.' }),
         par('pd.text', 'La posdata', 'texto'),
+        par('pd2.rotulo', 'La segunda posdata: rótulo', 'linea', 'Opcional. Va debajo de la primera.', { es: 'PD2', en: 'PS2' }),
+        par('pd2.text', 'La segunda posdata', 'texto'),
       ),
       seccion(
         'Preguntas frecuentes',
-        'Se abren al pulsarlas. Si la respuesta termina con un correo, va en su casilla: sale como enlace.',
+        'Se abren al pulsarlas. Si la respuesta termina con un correo, va en su casilla: sale como enlace. Sin ninguna pregunta, la página no lleva esta sección.',
         par('faqH', 'Título de la sección', 'linea', undefined, { es: 'Preguntas frecuentes', en: 'Frequently asked questions' }),
         listaFaq,
         anadir('+ Pregunta', () => {
@@ -1189,11 +1219,11 @@ const paraJs = { cartas, avisame: AVISAME };
     color: var(--ink-soft);
   }
 
-  /* Cada tipo de bloque se insinúa en el editor como se verá: la negrita y
-     la cursiva en la letra del cuerpo, la frase centrada en cursiva de
-     titulares, la grande más grande. Así Emi lee su carta con el ritmo que
-     tendrá. */
-  .ventas :global(.item--fuerte textarea) {
+  /* Cada tipo de bloque se insinúa en el editor como se verá: la negrita, la
+     frase destacada y la cursiva en la letra del cuerpo, el título en la de
+     los titulares y centrado. Así Emi lee su carta con el ritmo que tendrá. */
+  .ventas :global(.item--fuerte textarea),
+  .ventas :global(.item--grito textarea) {
     font-weight: 600;
   }
 
@@ -1201,21 +1231,11 @@ const paraJs = { cartas, avisame: AVISAME };
     font-style: italic;
   }
 
-  .ventas :global(.item--grito textarea),
   .ventas :global(.item--acento textarea) {
     font-family: var(--font-display);
     font-size: 1.25rem;
     line-height: 1.3;
-  }
-
-  .ventas :global(.item--grito textarea),
-  .ventas :global(.item--acento textarea) {
-    font-style: italic;
     text-align: center;
-  }
-
-  .ventas :global(.item--acento textarea) {
-    font-size: 1.75rem;
   }
 
   .ventas :global(.item--testimonio textarea) {
