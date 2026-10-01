@@ -9,7 +9,8 @@ en vivo**—. Esa tarde llegó la primera tanda de ajustes del aula (punto 21):
 **el aula le habla al alumno en primera persona**, **los correos de aviso de
 las preguntas** (a Emi cuando alguien pregunta, al alumno cuando Emi
 responde), **«Mostrar» en todos los campos de contraseña** y **Mensajes, una
-fila por persona**. Va en el recuadro 🧵 de abajo, el primero. Lo que sigue es
+fila por persona**, en el **PR #60**. Va en el recuadro 🧵 de abajo, el
+primero. Lo que sigue es
 el cierre de la mañana. El PR #58 se mergeó el 1 oct a las 12:32: la cortina subió, entraron las
 correcciones de Emi, la membresía se mudó entera a `emilserios.com` y
 `emilseriosacademy.com` redirige acá. Adrián movió los dominios, hizo una
@@ -33,7 +34,7 @@ suscribió desde la Home el 24 sep y funcionó. ⚠️ **El proyecto de Vercel e
 cortina**, de la más nueva a la más vieja.
 
 > **🧵 1 oct 2026, por la tarde: cuatro ajustes del aula** (rama
-> `claude/fervent-edison-wbg8nb`, PR nuevo desde `main`). Pedidos de Adrián,
+> `claude/fervent-edison-wbg8nb`, **PR #60**, desde `main`). Pedidos de Adrián,
 > numerados como los mandó:
 >
 > 1. **No se habla de Emi en tercera persona en ningún momento.** Todo lo
