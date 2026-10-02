@@ -59,8 +59,9 @@ cortina**, de la más nueva a la más vieja.
 > 2. **El newsletter llega a spam.** No es código: Gmail dice «Emilse Rios
 >    info@emilserios.com **a través de shared.klaviyomail.com**», es decir,
 >    Klaviyo manda con **su dominio compartido** y la firma no es de
->    `emilserios.com`. El arreglo es **un dominio de envío propio en
->    Klaviyo** (punto 27). Ver **El newsletter, en dos idiomas → El spam**.
+>    `emilserios.com`. **El dominio de envío propio ya existía**
+>    (`news.emilserios.com`) y Klaviyo lo da por roto: hay que repararlo
+>    (punto 27). Ver **El newsletter, en dos idiomas → El spam**.
 
 > **🧵 1 oct 2026, al final del día: la membresía, con dirección propia**
 > (rama `claude/fervent-edison-wbg8nb`, rearrancada desde `main` después de
@@ -528,14 +529,16 @@ cortina**, de la más nueva a la más vieja.
 >     los dos IDs, y **redesplegar**. Paso a paso en
 >     `docs/CONECTAR-KLAVIYO.md` → **5**. Probarlo con dos correos, uno
 >     desde la Home y otro desde `/en/`.
-> 27. [ ] **El dominio de envío de Klaviyo, para salir de spam** (Adrián, en
->     Klaviyo y Cloudflare). Klaviyo → configuración → *Domains* → un
->     dominio de envío propio, `send.emilserios.com`; copiar los registros
->     que da en Cloudflare **con la nube gris (DNS only)** —proxiados no
->     validan, la misma trampa que los CNAME de Hostinger—; verificar y
->     activarlo. Comprobar en Gmail → «Mostrar original»: `DKIM: PASS` con
->     `send.emilserios.com` y `DMARC: PASS`, y sin «a través de
->     shared.klaviyomail.com». Ver **El newsletter, en dos idiomas → El
+> 27. [ ] **Reparar el dominio de envío de Klaviyo, para salir de spam**
+>     (Adrián, en Klaviyo y Cloudflare). **Ya existe**: `news.emilserios.com`
+>     (Marketing, Estático), y Klaviyo lo da por **«Erróneo» — «ya no está
+>     conectado a Klaviyo»** (capturas de Adrián, 2 oct). **No se crea otro**:
+>     en Klaviyo → Configuración → Dominios → *Ver registros* del que hay,
+>     copiar cada registro en Cloudflare **con la nube gris (DNS only)** —los
+>     que falten se crean; los que estén en naranja se pasan a gris—, y
+>     volver a verificar en Klaviyo. Comprobar en Gmail → «Mostrar original»:
+>     `DKIM: PASS` con `news.emilserios.com`, `DMARC: PASS`, y sin «a través
+>     de shared.klaviyomail.com». Ver **El newsletter, en dos idiomas → El
 >     spam**.
 >
 > **D. Cabos sueltos, sin prisa.**
@@ -1069,22 +1072,37 @@ con el DMARC de `emilserios.com`—, y con un dominio que todavía no tiene
 historial de envíos, lo manda a spam. **No es algo del código ni del texto
 del correo.**
 
-**El arreglo es un dominio de envío propio en Klaviyo** (*branded sending
-domain*), punto 27 de 📋:
+**El dominio de envío propio ya existía, y está roto.** Al ir a crearlo (2 oct),
+Adrián se encontró en Klaviyo → Configuración → Dominios con
+**`news.emilserios.com`** —tipo Marketing, enrutamiento Estático— en estado
+**«Erróneo»** y el aviso **«news.emilserios.com ya no está conectado a
+Klaviyo»**. El asistente de «Añadir dominio» no le dejaba seguir con `news`
+porque ya existe. Cuando el dominio propio falla, Klaviyo vuelve a mandar
+desde el compartido, y de ahí el «a través de shared.klaviyomail.com».
 
-1. Klaviyo → la configuración de la cuenta → *Domains* → configurar un
-   dominio de envío: **`send.emilserios.com`** (un subdominio, para que la
-   reputación de los envíos masivos no se mezcle con la del correo de Emi).
-2. Klaviyo da unos pocos registros DNS. Se copian **tal cual** en Cloudflare
-   → DNS, **con la nube gris (DNS only)**. Proxiados (nube naranja) no
-   validan: es la misma trampa que los CNAME de Hostinger (ver **El dominio,
-   y Edu → Los CNAME de correo quedaron PROXIED**).
-3. Klaviyo → *Verify* y, cuando dé verde, activarlo. El DMARC de
-   `emilserios.com` ya existe (es uno de los TXT que Edu dijo que no se
-   tocaran, en gris): es contra él que se alinea la firma nueva.
+**Lo más probable es que se rompiera en la mudanza del DNS a Cloudflare**
+(21 sep): «ya no está conectado» quiere decir que estuvo conectado. Al pasar
+a Cloudflare, sus registros o no se copiaron —el escaneo automático de
+Cloudflare no encuentra subdominios como los de una firma DKIM— o se copiaron
+**proxiados**, que es justo lo que les pasó a los CNAME de Hostinger (ver **El
+dominio, y Edu → Los CNAME de correo quedaron PROXIED**). Se confirma
+comparando *Ver registros* con lo que hay en Cloudflare.
+
+**El arreglo** (punto 27 de 📋), **sin crear un dominio nuevo**:
+
+1. Klaviyo → Configuración → Dominios → `news.emilserios.com` → **Ver
+   registros**: la lista de lo que Klaviyo espera (tipo, nombre, valor).
+2. Cloudflare → `emilserios.com` → DNS → Records, registro por registro: si
+   **no está**, se crea igual (en *Name*, solo lo que va antes de
+   `.emilserios.com`); si está con **la nube naranja**, se edita y se pasa a
+   **gris (DNS only)**; si el valor no coincide, se corrige.
+3. Klaviyo → volver a verificar el dominio. Con Cloudflare suele bastar con
+   unos minutos.
 4. **Comprobar:** otra alta de prueba y, en Gmail, el correo → «Mostrar
-   original»: `DKIM: 'PASS'` con `send.emilserios.com` y `DMARC: 'PASS'`.
-   El «a través de shared.klaviyomail.com» desaparece.
+   original»: `DKIM: 'PASS'` con `news.emilserios.com` y `DMARC: 'PASS'`. El
+   «a través de shared.klaviyomail.com» desaparece. El DMARC de
+   `emilserios.com` ya existe (es uno de los TXT que Edu dijo que no se
+   tocaran, en gris): es contra él que se alinea la firma.
 
 Aun así, un dominio nuevo tarda en ganarse la confianza de Gmail: las
 primeras semanas ayuda que quien lo reciba en spam pulse «No es spam» (Adrián
