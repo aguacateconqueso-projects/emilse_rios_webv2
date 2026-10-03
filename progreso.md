@@ -529,8 +529,10 @@ cortina**, de la más nueva a la más vieja.
 >     los dos IDs, y **redesplegar**. Paso a paso en
 >     `docs/CONECTAR-KLAVIYO.md` → **5**. Probarlo con dos correos, uno
 >     desde la Home y otro desde `/en/`.
-> 27. [ ] **Reparar el dominio de envío de Klaviyo, para salir de spam**
->     (Adrián, en Klaviyo y Cloudflare). **Ya existe**: `news.emilserios.com`
+> 27. [x] **Reparar el dominio de envío de Klaviyo, para salir de spam**
+>     —*hecho por Adrián el 3 oct 2026: los DNS, activos en Klaviyo. Queda
+>     solo la comprobación de Gmail de abajo, con el próximo correo que
+>     llegue*—. (Adrián, en Klaviyo y Cloudflare). **Ya existía**: `news.emilserios.com`
 >     (Marketing, Estático), y Klaviyo lo da por **«Erróneo» — «ya no está
 >     conectado a Klaviyo»** (capturas de Adrián, 2 oct). **No se crea otro**:
 >     en Klaviyo → Configuración → Dominios → *Ver registros* del que hay,
