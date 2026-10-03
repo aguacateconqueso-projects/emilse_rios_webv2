@@ -4,8 +4,10 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 1 de octubre de 2026, al final del día —**la web
-está en vivo**—. Lo último, en el **PR #62**: **el newsletter, en dos
+**Última actualización:** 3 de octubre de 2026 —**la web está en vivo**—.
+Cerrado lo del newsletter: **cada idioma recibe su serie de bienvenida y ya
+no llega a spam** (puntos 26 y 27 de 📋, hechos por Adrián). Lo del 1 oct,
+en el **PR #62**: **el newsletter, en dos
 idiomas** —cada formulario da de alta en la lista de su idioma, y cada lista
 dispara su serie de bienvenida— y **por qué el newsletter llega a spam** (el
 dominio de envío de Klaviyo); los dos piden pasos fuera del código (puntos 26
@@ -520,7 +522,13 @@ cortina**, de la más nueva a la más vieja.
 >     correos** (es provisional): si quiere otro, se cambia en
 >     `src/lib/correo.ts`. Si prefiere el aviso en otro buzón que no sea
 >     `info@`, `AVISOS_A` en Vercel (Production).
-> 26. [ ] **El newsletter, una lista por idioma** (Emi y Adrián, en Klaviyo y
+> 26. [x] **El newsletter, una lista por idioma** —*hecho el 3 oct 2026:
+>     Adrián conectó cada serie a su lista, puso las dos variables en Vercel
+>     y lo probó, «funcionando todo». El primer correo tarda unos minutos en
+>     llegar: Klaviyo procesa el alta por detrás (la API contesta «aceptado»
+>     y la lista se actualiza después) y el flujo arranca cuando la lista
+>     cambia. Si algún día se quiere más rápido, mirar que la serie no lleve
+>     un «Retraso» antes del primer correo*—. (Emi y Adrián, en Klaviyo y
 >     Vercel; el código está desde el #62). En Klaviyo: que la serie en
 >     español cuelgue de una lista y la inglesa de otra —lo simple:
 >     `SaE8Px` para el español y una lista nueva para el inglés—, con la
@@ -530,9 +538,8 @@ cortina**, de la más nueva a la más vieja.
 >     `docs/CONECTAR-KLAVIYO.md` → **5**. Probarlo con dos correos, uno
 >     desde la Home y otro desde `/en/`.
 > 27. [x] **Reparar el dominio de envío de Klaviyo, para salir de spam**
->     —*hecho por Adrián el 3 oct 2026: los DNS, activos en Klaviyo. Queda
->     solo la comprobación de Gmail de abajo, con el próximo correo que
->     llegue*—. (Adrián, en Klaviyo y Cloudflare). **Ya existía**: `news.emilserios.com`
+>     —*hecho por Adrián el 3 oct 2026: los DNS, activos en Klaviyo, y la
+>     bienvenida de prueba **llegó a la bandeja de entrada, no a spam***—. (Adrián, en Klaviyo y Cloudflare). **Ya existía**: `news.emilserios.com`
 >     (Marketing, Estático), y Klaviyo lo da por **«Erróneo» — «ya no está
 >     conectado a Klaviyo»** (capturas de Adrián, 2 oct). **No se crea otro**:
 >     en Klaviyo → Configuración → Dominios → *Ver registros* del que hay,
