@@ -1,5 +1,5 @@
 import type { Lang } from '../i18n/ui';
-import { NEWSLETTER_URL } from '../lib/membership';
+import { NEWSLETTER_ANCLA } from '../lib/membership';
 
 /**
  * Las cartas de venta: la de la membresía y las de los cursos.
@@ -100,7 +100,7 @@ export type Carta = {
   /** La letra pequeña bajo la ficha. */
   priceFoot?: string;
 
-  /** El botón. `fuera`: abre en otra pestaña (el alta del newsletter). */
+  /** El botón. `fuera`: abre en otra pestaña. Hoy no lo usa ninguna: lo llevaba el alta del newsletter hasta el 1 oct 2026. */
   boton: { texto: string; href: string; fuera?: boolean };
 
   /** La frase grande de cierre, antes del último botón (membresía). */
@@ -132,10 +132,12 @@ export type Carta = {
 };
 
 /**
- * El alta al newsletter: la página alojada de Klaviyo. Es el botón de los
- * cursos que todavía no se venden y el pie de la membresía.
+ * El alta al newsletter: el campo del final de la misma carta. Es el botón de
+ * los cursos que todavía no se venden y el aviso de puertas cerradas de la
+ * membresía. Hasta el 1 oct 2026 era la página alojada de Klaviyo, que no
+ * sabía de idiomas: ver `NEWSLETTER_ANCLA` en `src/lib/membership.ts`.
  */
-export const NEWSLETTER = NEWSLETTER_URL;
+export const NEWSLETTER = NEWSLETTER_ANCLA;
 
 /** El pie del newsletter de las cartas que no traen el suyo. */
 export const NEWS_POR_DEFECTO: Record<Lang, { pre: string }> = {
@@ -145,8 +147,8 @@ export const NEWS_POR_DEFECTO: Record<Lang, { pre: string }> = {
 
 /** El botón de los cursos que todavía no se venden, en los dos idiomas. */
 export const AVISAME = {
-  es: { texto: 'Avísame cuando abra', href: NEWSLETTER, fuera: true },
-  en: { texto: 'Let me know when it opens', href: NEWSLETTER, fuera: true },
+  es: { texto: 'Avísame cuando abra', href: NEWSLETTER },
+  en: { texto: 'Let me know when it opens', href: NEWSLETTER },
 };
 
 /* ==========================================================================

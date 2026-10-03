@@ -41,15 +41,17 @@ export const CLOSES_AT = process.env.MEMBERSHIP_CLOSES_AT || '2026-09-02T23:59:5
 export const REOPENS_AT = process.env.MEMBERSHIP_REOPENS_AT ?? '2026-10-01T00:00:00+02:00';
 
 /**
- * Alta al newsletter (Klaviyo). Es la salida de la carta para quien llega tarde.
+ * Alta al newsletter: el campo del final de cada carta (`#suscribete-carta`,
+ * en `CartaVenta.astro`). Es la salida de la carta para quien llega tarde y el
+ * botón de los cursos que todavía no se venden.
  *
- * Sigue siendo la página alojada de Klaviyo, igual que en el original y que en
- * el resto de la tienda: el formulario propio de este sitio todavía no da de
- * alta a nadie. El día que Klaviyo esté conectado acá, este enlace pasa a ser
- * interno.
+ * **Hasta el 1 oct 2026 era la página alojada de Klaviyo**
+ * (`manage.kmail-lists.com/…&g=SaE8Px`), que da de alta siempre en la misma
+ * lista, sin idioma, y a todos les llegaba la bienvenida en inglés. El campo
+ * de la carta manda el idioma de la página, y el alta va a la lista de ese
+ * idioma (ver `src/lib/klaviyo.ts`).
  */
-export const NEWSLETTER_URL =
-  'https://manage.kmail-lists.com/subscriptions/subscribe?a=TPxGBg&g=SaE8Px';
+export const NEWSLETTER_ANCLA = '#suscribete-carta';
 
 /**
  * Nombre del parámetro del pase de invitación en la URL.

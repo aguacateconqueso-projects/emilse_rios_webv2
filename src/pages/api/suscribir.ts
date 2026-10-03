@@ -71,7 +71,11 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ error: 'email_invalido' }, 400);
   }
 
-  const r = await suscribir(email);
+  /* El idioma de la página desde la que se suscribe: decide la lista, y con
+     ella la serie de bienvenida (1 oct 2026). Sin él, español. */
+  const lang = cuerpo?.lang === 'en' ? 'en' : 'es';
+
+  const r = await suscribir(email, lang);
   if (r.ok) return json({ ok: true });
 
   /* 503 y no 500 en los dos primeros: no es que la petición estuviera mal, es

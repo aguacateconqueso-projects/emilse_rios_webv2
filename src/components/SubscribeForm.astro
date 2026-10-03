@@ -16,6 +16,8 @@ import Boton from './Boton.astro';
  * **Desde el 22 sep 2026 da de alta de verdad.** Manda el correo a
  * `/api/suscribir`, que habla con Klaviyo desde el servidor con la clave
  * privada — ver `src/lib/klaviyo.ts`. Hasta ese día no daba de alta a nadie.
+ * **Desde el 1 oct 2026 manda también el idioma de la página**: cada idioma
+ * tiene su lista en Klaviyo, y con ella su serie de bienvenida.
  *
  * Lo que decide si funciona es **`KLAVIYO_API_KEY` en Vercel**, y de ahí sale
  * `hayProveedor`. Sin ella, el comportamiento de siempre, que no se toca
@@ -78,6 +80,7 @@ const statusId = `${id}-status`;
       class="subscribe__form"
       data-subscribe
       data-endpoint={endpoint}
+      data-lang={lang}
       data-simular={simular ? 'true' : 'false'}
       data-done={t('form.done')}
       data-invalid={t('form.error')}
@@ -256,7 +259,7 @@ const statusId = `${id}-status`;
         const response = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ email: input.value.trim() }),
+          body: JSON.stringify({ email: input.value.trim(), lang: form.dataset.lang }),
         });
         if (!response.ok) throw new Error(String(response.status));
         succeed();

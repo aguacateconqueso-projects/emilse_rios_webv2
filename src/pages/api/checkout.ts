@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { stripe, currentTier, priceForTier, siteOrigin } from '../../lib/stripe';
-import { doorsClosed, REOPENS_AT, NEWSLETTER_URL, INVITE_PARAM } from '../../lib/membership';
+import { doorsClosed, REOPENS_AT, NEWSLETTER_ANCLA, INVITE_PARAM } from '../../lib/membership';
 import { inviteValid } from '../../lib/membership-server';
 import { graciasPath } from '../../i18n/aula';
 import { productPath } from '../../i18n/ui';
@@ -173,7 +173,7 @@ function respuestaCerrada(lang: 'es' | 'en', origen: string): Response {
 </style></head><body><main>
   <h1>${esc(c.title)}</h1>
   <p>${esc(c.p)}</p>
-  <a class="btn" href="${esc(NEWSLETTER_URL)}" target="_blank" rel="noopener">${esc(c.news)} →</a>
+  <a class="btn" href="${esc(`${volver}${NEWSLETTER_ANCLA}`)}">${esc(c.news)} →</a>
   <a class="back" href="${esc(volver)}">${esc(c.back)}</a>
 </main></body></html>`;
 

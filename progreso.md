@@ -5,7 +5,11 @@ membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
 **Última actualización:** 1 de octubre de 2026, al final del día —**la web
-está en vivo**—. Lo último: **la membresía cambia de dirección** (pedido de
+está en vivo**—. Lo último, en el **PR #62**: **el newsletter, en dos
+idiomas** —cada formulario da de alta en la lista de su idioma, y cada lista
+dispara su serie de bienvenida— y **por qué el newsletter llega a spam** (el
+dominio de envío de Klaviyo); los dos piden pasos fuera del código (puntos 26
+y 27 de 📋). Antes: **la membresía cambió de dirección** (pedido de
 Emi): `/formaciones/membresia-contrabajo/` y
 `/en/programs/double-bass-membership/`, con 301 desde todas las de antes (PR
 #61, recuadro 🧵 de abajo, el primero). Antes, esa tarde, llegó la primera tanda de ajustes del aula (punto 21):
@@ -35,6 +39,29 @@ suscribió desde la Home el 24 sep y funcionó. ⚠️ **El proyecto de Vercel e
 `emilse-rios-webv2_1`**: las vistas previas buenas empiezan por
 `emilse-rios-webv21-git-…` (ver la regla de trabajo, justo abajo). El detalle de cada cosa está en las secciones que siguen a **La
 cortina**, de la más nueva a la más vieja.
+
+> **🧵 1 oct 2026, de noche: el newsletter en dos idiomas, y el spam**
+> (rama `claude/fervent-edison-wbg8nb`, rearrancada desde `main` después de
+> mergear el #61; **PR #62**). Dos cosas que trajo Adrián con una captura de
+> Gmail:
+>
+> 1. **La bienvenida llegaba en inglés a todos.** Emi armó dos series de
+>    bienvenida en Klaviyo, una en español y otra en inglés, pero el sitio
+>    daba de alta a todo el mundo en la misma lista (`SaE8Px`) sin decir el
+>    idioma. **Arreglado en el código:** cada formulario manda el idioma de la
+>    página y el alta va a la lista de ese idioma (`KLAVIYO_LIST_ID_ES` /
+>    `KLAVIYO_LIST_ID_EN`). Los «Avísame cuando abra» y el aviso de puertas
+>    cerradas llevaban a la página alojada de Klaviyo, que no sabe de idiomas:
+>    ahora bajan al campo del final de la misma carta. **Falta Klaviyo y
+>    Vercel** (punto 26): que cada serie cuelgue de su lista y poner los dos
+>    IDs. **Hasta entonces no cambia nada** —las dos van a `SaE8Px`—, así que
+>    se puede mergear antes.
+> 2. **El newsletter llega a spam.** No es código: Gmail dice «Emilse Rios
+>    info@emilserios.com **a través de shared.klaviyomail.com**», es decir,
+>    Klaviyo manda con **su dominio compartido** y la firma no es de
+>    `emilserios.com`. **El dominio de envío propio ya existía**
+>    (`news.emilserios.com`) y Klaviyo lo da por roto: hay que repararlo
+>    (punto 27). Ver **El newsletter, en dos idiomas → El spam**.
 
 > **🧵 1 oct 2026, al final del día: la membresía, con dirección propia**
 > (rama `claude/fervent-edison-wbg8nb`, rearrancada desde `main` después de
@@ -493,6 +520,28 @@ cortina**, de la más nueva a la más vieja.
 >     correos** (es provisional): si quiere otro, se cambia en
 >     `src/lib/correo.ts`. Si prefiere el aviso en otro buzón que no sea
 >     `info@`, `AVISOS_A` en Vercel (Production).
+> 26. [ ] **El newsletter, una lista por idioma** (Emi y Adrián, en Klaviyo y
+>     Vercel; el código está desde el #62). En Klaviyo: que la serie en
+>     español cuelgue de una lista y la inglesa de otra —lo simple:
+>     `SaE8Px` para el español y una lista nueva para el inglés—, con la
+>     doble confirmación igual en las dos (y su correo en su idioma). En
+>     Vercel → Production: `KLAVIYO_LIST_ID_ES` y `KLAVIYO_LIST_ID_EN` con
+>     los dos IDs, y **redesplegar**. Paso a paso en
+>     `docs/CONECTAR-KLAVIYO.md` → **5**. Probarlo con dos correos, uno
+>     desde la Home y otro desde `/en/`.
+> 27. [x] **Reparar el dominio de envío de Klaviyo, para salir de spam**
+>     —*hecho por Adrián el 3 oct 2026: los DNS, activos en Klaviyo. Queda
+>     solo la comprobación de Gmail de abajo, con el próximo correo que
+>     llegue*—. (Adrián, en Klaviyo y Cloudflare). **Ya existía**: `news.emilserios.com`
+>     (Marketing, Estático), y Klaviyo lo da por **«Erróneo» — «ya no está
+>     conectado a Klaviyo»** (capturas de Adrián, 2 oct). **No se crea otro**:
+>     en Klaviyo → Configuración → Dominios → *Ver registros* del que hay,
+>     copiar cada registro en Cloudflare **con la nube gris (DNS only)** —los
+>     que falten se crean; los que estén en naranja se pasan a gris—, y
+>     volver a verificar en Klaviyo. Comprobar en Gmail → «Mostrar original»:
+>     `DKIM: PASS` con `news.emilserios.com`, `DMARC: PASS`, y sin «a través
+>     de shared.klaviyomail.com». Ver **El newsletter, en dos idiomas → El
+>     spam**.
 >
 > **D. Cabos sueltos, sin prisa.**
 >
@@ -972,6 +1021,95 @@ no tenía salida a `vercel.app`:
   `emilse-rios-webv2` y `emilse-rios-webv2_1`, así que cada PR salía con dos
   vistas previas. **El bueno es `emilse-rios-webv2_1`** (el dominio y las
   variables); el otro, sin nada, lo borra Adrián el 24 sep 2026.
+
+---
+
+## El newsletter, en dos idiomas
+
+**1 de octubre de 2026, de noche** (PR #62). Adrián se suscribió desde la web
+y le llegó el primer correo de la bienvenida: en inglés, y en spam.
+
+### Una lista por idioma
+
+Emi armó **dos series de bienvenida** en Klaviyo, una en español y otra en
+inglés. El sitio daba de alta a todo el mundo en `SaE8Px` sin decir el
+idioma, así que la serie que colgara de esa lista le llegaba a todos.
+
+- **El formulario manda el idioma de la página** (`SubscribeForm.astro`, en
+  la Home, *Sobre mí* y el final de cada carta) y `/api/suscribir` da de alta
+  en la lista de ese idioma (`src/lib/klaviyo.ts`): `KLAVIYO_LIST_ID_ES` y
+  `KLAVIYO_LIST_ID_EN` en Vercel. **Sin ellas, las dos van a `SaE8Px`**, que
+  es lo de antes, y los logs lo dicen.
+- **Los botones que llevaban a la página alojada de Klaviyo** —«Avísame
+  cuando abra» de los cursos que no se venden, el aviso de puertas cerradas
+  de la membresía y la pantalla de cierre de `/api/checkout`— ahora bajan al
+  campo del final de la carta (`#suscribete-carta`, `NEWSLETTER_ANCLA` en
+  `src/lib/membership.ts`). La página alojada da de alta siempre en una
+  lista, sin idioma; el campo de la carta, en la del idioma de la página. Y
+  nadie sale del sitio.
+- **Por qué dos listas y no una con el idioma como propiedad del perfil:** en
+  Klaviyo la doble confirmación —su correo y su página— es **de cada lista**,
+  así que con una por idioma cada quien confirma en su idioma. Y las campañas
+  semanales, que Emi escribe en los dos idiomas, van cada una a su lista.
+- **Quien ya estaba en `SaE8Px` se queda donde está**: la web no sabe en qué
+  idioma se suscribió.
+
+Lo que falta es de Klaviyo y Vercel (punto 26 de 📋), y el paso a paso está
+en `docs/CONECTAR-KLAVIYO.md` → **5**.
+
+**Probado** en `npm run dev` con Klaviyo interceptado: suscribirse en la carta
+de «Todo el diapasón» después de pulsar «Avísame cuando abra» (que baja al
+campo, sin abrir otra pestaña) → la lista en español; en la Home inglesa y en
+la carta inglesa de la membresía → la inglesa; en *Sobre mí* → la española;
+sin idioma → la española. Cero errores en la consola.
+
+### El spam
+
+La captura de Gmail lo dice en el remitente: «Emilse Rios
+info@emilserios.com **a través de shared.klaviyomail.com**». Klaviyo manda
+desde **su dominio de envío compartido**: el correo dice venir de
+`emilserios.com`, pero la firma (DKIM) es de `klaviyomail.com`. Para Gmail
+eso es un correo que no puede atar del todo a quien dice ser —no se alinea
+con el DMARC de `emilserios.com`—, y con un dominio que todavía no tiene
+historial de envíos, lo manda a spam. **No es algo del código ni del texto
+del correo.**
+
+**El dominio de envío propio ya existía, y está roto.** Al ir a crearlo (2 oct),
+Adrián se encontró en Klaviyo → Configuración → Dominios con
+**`news.emilserios.com`** —tipo Marketing, enrutamiento Estático— en estado
+**«Erróneo»** y el aviso **«news.emilserios.com ya no está conectado a
+Klaviyo»**. El asistente de «Añadir dominio» no le dejaba seguir con `news`
+porque ya existe. Cuando el dominio propio falla, Klaviyo vuelve a mandar
+desde el compartido, y de ahí el «a través de shared.klaviyomail.com».
+
+**Lo más probable es que se rompiera en la mudanza del DNS a Cloudflare**
+(21 sep): «ya no está conectado» quiere decir que estuvo conectado. Al pasar
+a Cloudflare, sus registros o no se copiaron —el escaneo automático de
+Cloudflare no encuentra subdominios como los de una firma DKIM— o se copiaron
+**proxiados**, que es justo lo que les pasó a los CNAME de Hostinger (ver **El
+dominio, y Edu → Los CNAME de correo quedaron PROXIED**). Se confirma
+comparando *Ver registros* con lo que hay en Cloudflare.
+
+**El arreglo** (punto 27 de 📋), **sin crear un dominio nuevo**:
+
+1. Klaviyo → Configuración → Dominios → `news.emilserios.com` → **Ver
+   registros**: la lista de lo que Klaviyo espera (tipo, nombre, valor).
+2. Cloudflare → `emilserios.com` → DNS → Records, registro por registro: si
+   **no está**, se crea igual (en *Name*, solo lo que va antes de
+   `.emilserios.com`); si está con **la nube naranja**, se edita y se pasa a
+   **gris (DNS only)**; si el valor no coincide, se corrige.
+3. Klaviyo → volver a verificar el dominio. Con Cloudflare suele bastar con
+   unos minutos.
+4. **Comprobar:** otra alta de prueba y, en Gmail, el correo → «Mostrar
+   original»: `DKIM: 'PASS'` con `news.emilserios.com` y `DMARC: 'PASS'`. El
+   «a través de shared.klaviyomail.com» desaparece. El DMARC de
+   `emilserios.com` ya existe (es uno de los TXT que Edu dijo que no se
+   tocaran, en gris): es contra él que se alinea la firma.
+
+Aun así, un dominio nuevo tarda en ganarse la confianza de Gmail: las
+primeras semanas ayuda que quien lo reciba en spam pulse «No es spam» (Adrián
+el primero). **Desde esta sesión no se llega al DNS de `emilserios.com`**, así
+que nada de esto se comprobó desde acá.
 
 ---
 

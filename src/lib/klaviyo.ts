@@ -37,16 +37,41 @@
 const API_KEY = process.env.KLAVIYO_API_KEY || '';
 
 /**
- * La lista a la que entra quien se suscribe.
+ * La lista a la que entra quien se suscribe, **una por idioma** desde el 1 oct
+ * 2026.
  *
- * Por defecto, **la lista real del newsletter de Emi**: es la misma `SaE8Px`
- * que lleva la página alojada de Klaviyo a la que ya mandan la carta de ventas
- * y el pie de la membresía (ver `NEWSLETTER` en `src/data/aula.ts`). No es un
- * secreto — viaja en esa URL pública— y ponerla por defecto evita el fallo más
- * caro de todos: dar de alta a gente en una lista equivocada durante semanas
- * sin que nadie lo note.
+ * Emi armó dos series de bienvenida, una en español y otra en inglés, y cada
+ * una la dispara su lista en Klaviyo («Added to list»). Hasta ese día todo el
+ * mundo entraba en la misma, `SaE8Px`, y a todos les llegaba la serie en
+ * inglés aunque se suscribieran desde la web en español. Ahora el formulario
+ * manda el idioma de la página y el alta va a la lista de ese idioma.
+ *
+ * - `KLAVIYO_LIST_ID_ES` y `KLAVIYO_LIST_ID_EN` en Vercel (Production), los
+ *   IDs de seis caracteres que da Klaviyo en Lists & Segments → la lista →
+ *   Settings. No son secretos.
+ * - **Sin ellas, las dos van a `SaE8Px`**, la lista real del newsletter (o a
+ *   `KLAVIYO_LIST_ID`, el nombre de antes): es exactamente lo de antes, así
+ *   que desplegar esto sin las variables no cambia nada. Y queda en los logs.
+ *
+ * `SaE8Px` va por defecto porque es la lista real de Emi: ponerla evita el
+ * fallo más caro de todos, dar de alta a gente en una lista que no existe
+ * durante semanas sin que nadie lo note.
  */
-const LIST_ID = process.env.KLAVIYO_LIST_ID || 'SaE8Px';
+const LISTA_DE_SIEMPRE = process.env.KLAVIYO_LIST_ID || 'SaE8Px';
+const LISTAS: Record<'es' | 'en', string> = {
+  es: process.env.KLAVIYO_LIST_ID_ES || LISTA_DE_SIEMPRE,
+  en: process.env.KLAVIYO_LIST_ID_EN || LISTA_DE_SIEMPRE,
+};
+
+/** La lista del idioma, y un aviso en los logs si los dos comparten lista. */
+function listaDe(lang: 'es' | 'en'): string {
+  if (LISTAS.es === LISTAS.en) {
+    console.warn(
+      `[klaviyo] el español y el inglés van a la misma lista (${LISTAS.es}): faltan KLAVIYO_LIST_ID_ES / KLAVIYO_LIST_ID_EN en este despliegue.`,
+    );
+  }
+  return LISTAS[lang];
+}
 
 /**
  * La versión fechada de la API. Ver el aviso de arriba.
@@ -92,7 +117,7 @@ export type Resultado =
  * eso tampoco hace falta — la respuesta al navegador es la misma en los dos
  * casos, que es lo correcto para no delatar quién está suscrito.
  */
-export async function suscribir(email: string): Promise<Resultado> {
+export async function suscribir(email: string, lang: 'es' | 'en'): Promise<Resultado> {
   if (!API_KEY) {
     /* Va a los logs para que este fallo no sea mudo: hasta el 23 sep 2026 el
        formulario ni llamaba sin clave, y en Vercel no quedaba rastro. Vercel
@@ -125,7 +150,7 @@ export async function suscribir(email: string): Promise<Resultado> {
           ],
         },
       },
-      relationships: { list: { data: { type: 'list', id: LIST_ID } } },
+      relationships: { list: { data: { type: 'list', id: listaDe(lang) } } },
     },
   };
 
@@ -158,7 +183,7 @@ export async function suscribir(email: string): Promise<Resultado> {
   console.error('[klaviyo] la API rechazó el alta', {
     status: res.status,
     revision: REVISION,
-    list: LIST_ID,
+    list: listaDe(lang),
     cuerpo: detalle.slice(0, 2000),
   });
   return { ok: false, motivo: 'rechazado', detalle: `HTTP ${res.status}` };
