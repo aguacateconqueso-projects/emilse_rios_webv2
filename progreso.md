@@ -53,6 +53,8 @@ cortina**, de la más nueva a la más vieja.
 
 > **🧵 9 oct 2026: la tanda de Emi —la preventa, el inglés, las entradas y
 > el aula—** (rama `claude/nifty-darwin-2apqzg`, desde `main`; **PR #64**).
+> Su vista previa:
+> **https://emilse-rios-webv21-git-claude-8a85ec-adrians-projects-594b3131.vercel.app**
 > Emi mandó un PDF con catorce pedidos; Adrián dio el visto bueno a todas las
 > recomendaciones («dale play»). En una línea cada uno —el detalle, en **La
 > tanda del 9 de octubre**, justo debajo de **La cortina**—:
@@ -383,8 +385,9 @@ cortina**, de la más nueva a la más vieja.
 > cerrar esa sesión. Lección: **lo que se empuja a una rama con el PR ya
 > mergeado no existe**; ver **Cómo trabajamos**.
 >
-> La última vista previa es la de `claude/fervent-edison-wbg8nb` (PR #60 y
-> PR #61, 1 oct): `…-git-claude-952006-…`. Antes, la de
+> La última vista previa es la de `claude/nifty-darwin-2apqzg` (PR #64, 9
+> oct): `…-git-claude-8a85ec-…`. Antes, la de `claude/fervent-edison-wbg8nb`
+> (PR #60 a #63, 1 oct): `…-git-claude-952006-…`. Antes, la de
 > `claude/magical-keller-qtja38` (PR #58, mergeado el 1 oct):
 > `…-git-claude-aa2776-…`. La de
 > `claude/affectionate-faraday-ddgz0m` (PR #54 a #57) era:
