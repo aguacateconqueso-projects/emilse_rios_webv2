@@ -112,7 +112,8 @@ const T = {
         <div class="mb-marco" data-w-video></div>
         <div class="mb-desc" data-w-desc></div>
         <p class="mb-pdf"><Boton href="#" data-w-pdf>{a('memb.pdf')}</Boton></p>
-        <p class="soft mb-nota">{a('memb.weekNote')}</p>
+        {/* Acá iba «Sin biblioteca. El jueves a las 00:00 este ejercicio se
+            cierra…»; Emi lo quitó el 9 oct 2026. */}
       </div>
 
       {/*
@@ -133,7 +134,6 @@ const T = {
           <label class="campo">
             <span class="campo__t">{a('memb.composeLabel')}</span>
             <textarea rows="3" placeholder={a('memb.composePh')} required data-foro-texto></textarea>
-            <span class="campo__ayuda">{a('memb.composeHint')}</span>
           </label>
           <Boton class="boton--solid" type="submit" data-foro-enviar>{a('memb.composeBtn')}</Boton>
         </form>

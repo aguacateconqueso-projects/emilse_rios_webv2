@@ -135,11 +135,28 @@ const ACADEMIA_A_CASA = [
   ['/pasar', '/aulavirtual/entrar/'],
   ['/panel', '/panel/'],
   /* La carta de la membresía, en su dirección propia desde el 1 oct 2026
-     (`direccionesPropias` en `src/i18n/ui.ts`): directo, sin cadena. */
+     (`productPath` en `src/i18n/ui.ts`): directo, sin cadena. */
   ['/en', '/en/programs/double-bass-membership/'],
   ['', '/formaciones/membresia-contrabajo/'],
 ];
 const CASA = 'https://www.emilserios.com';
+
+/**
+ * El slug en inglés de cada producto (9 oct 2026). **Tiene que decir lo mismo
+ * que `slugsIngles` en `src/i18n/ui.ts`**, que es el que manda en las
+ * páginas; acá solo sirve para que las direcciones viejas en inglés
+ * —`/en/courses/<slug>/` y `/en/products/<slug>/`— vayan directo a la nueva,
+ * sin pasar por la redirección de la página. `npm run audit:redirecciones`
+ * lo comprueba.
+ */
+const SLUGS_EN = {
+  'estudiemos-juntos': 'double-bass-membership',
+  'todo-el-diapason': 'fingerboard',
+  'todas-las-escalas': 'all-the-scales',
+  'contrabajo-desde-cero': 'double-bass-from-scratch',
+  'tu-vibrato-como-un-cantante': 'vibrato-like-a-singer',
+  'clases-online': 'online-lessons',
+};
 
 /** @returns {import('astro').AstroIntegration} */
 function laAcademiaRedirige() {
@@ -259,24 +276,40 @@ export default defineConfig({
      */
     '/productos': '/formaciones',
     '/productos/[producto]': '/formaciones/[producto]',
-    '/en/products': '/en/courses',
-    '/en/products/[producto]': '/en/courses/[producto]',
 
     /*
-     * La membresía tiene dirección propia desde el 1 oct 2026 (pedido de Emi):
-     * `/formaciones/membresia-contrabajo/` y
-     * `/en/programs/double-bass-membership/`. Ver `direccionesPropias` en
-     * `src/i18n/ui.ts`. Todas sus direcciones de antes van **directo** a la
+     * En inglés, todo bajo `/en/programs/` y con el slug en inglés desde el 9
+     * oct 2026 (pedido de Emi: «los slugs en inglés están en español, y la
+     * membresía está en /en/programs/ mientras el resto está en
+     * /en/courses/»). Antes vivió en `/en/courses/` (24 sep – 9 oct) y en
+     * `/en/products/` (hasta el 24 sep). Cada carta conocida va **directo** a
+     * su dirección nueva (`SLUGS_EN`, arriba); los patrones dinámicos recogen
+     * lo demás —una carta que Emi cree desde el panel— y la propia página
+     * termina el viaje si hace falta. Bajo `/en/courses/` y `/en/products/` ya
+     * no vive ninguna página, así que un patrón dinámico ahí no se come nada.
+     */
+    '/en/products': '/en/programs',
+    '/en/courses': '/en/programs',
+    ...Object.fromEntries(
+      Object.entries(SLUGS_EN).flatMap(([es, en]) => [
+        [`/en/courses/${es}`, `/en/programs/${en}`],
+        [`/en/products/${es}`, `/en/programs/${en}`],
+      ]),
+    ),
+    '/en/products/[producto]': '/en/programs/[producto]',
+    '/en/courses/[producto]': '/en/programs/[producto]',
+
+    /*
+     * La membresía tiene dirección propia en español desde el 1 oct 2026
+     * (pedido de Emi): `/formaciones/membresia-contrabajo/`. Ver `productPath`
+     * en `src/i18n/ui.ts`. Todas sus direcciones de antes van **directo** a la
      * nueva, sin cadena: la del 24 sep (`/formaciones/estudiemos-juntos/`), la
-     * de antes (`/productos/…`) y la del aula, más abajo. Las dos primeras
-     * las redirige también la propia página de ventas, por si algún día se
-     * borran de acá. `/en/programs/` no tiene portada: lleva a los cursos.
+     * de antes (`/productos/…`) y la del aula, más abajo. La primera la
+     * redirige también la propia página de ventas, por si algún día se borra
+     * de acá. Las inglesas salen de `SLUGS_EN`, justo arriba.
      */
     '/formaciones/estudiemos-juntos': '/formaciones/membresia-contrabajo',
-    '/en/courses/estudiemos-juntos': '/en/programs/double-bass-membership',
     '/productos/estudiemos-juntos': '/formaciones/membresia-contrabajo',
-    '/en/products/estudiemos-juntos': '/en/programs/double-bass-membership',
-    '/en/programs': '/en/courses',
 
     /*
      * La carta de la membresía vivió en el aula del 31 ago al 9 sep 2026. Va

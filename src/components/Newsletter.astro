@@ -1,0 +1,121 @@
+---
+/**
+ * La portada del newsletter: `/newsletter/` y `/en/newsletter/`.
+ *
+ * **Desde el 9 oct 2026.** Emi mandó sus primeras entradas —correos suyos,
+ * con el bloque del newsletter arriba— y quiere que estén en la web. Esta
+ * página es su índice: el nombre del newsletter, el texto de Emi de la Home,
+ * el campo para suscribirse y la lista de entradas. Cada entrada se pinta con
+ * `Entrada.astro`.
+ */
+import { type Lang, useTranslations } from '../i18n/ui';
+import { entradasDe, entradaPath } from '../lib/entradas';
+import SubscribeForm from './SubscribeForm.astro';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const entradas = await entradasDe(lang);
+---
+
+<section class="row row--flush news__head">
+  <div class="row__body">
+    <p class="mono soft">{t('news.kicker')}</p>
+    <h1 class="news__title">{t('news.title')}</h1>
+    <p class="news__lead">{t('news.lead')}</p>
+  </div>
+</section>
+
+<SubscribeForm lang={lang} id="suscribete" flush />
+
+<section class="row row--flush block" aria-labelledby="entradas-h">
+  <div class="row__body">
+    <h2 class="mono soft news__h" id="entradas-h">{t('news.entries')}</h2>
+    <ul class="news__lista" role="list">
+      {
+        entradas.map((e) => (
+          <li class="news__item">
+            <a class="news__link" href={entradaPath(e)}>
+              <span class="news__nombre">{e.data.titulo}</span>
+              <span class="news__desc soft">{e.data.descripcion}</span>
+              <span class="mono news__leer">{t('news.read')}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .news__head {
+    padding-top: var(--space-2);
+  }
+
+  .news__title {
+    margin-top: var(--space-2);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--text-hero);
+    line-height: 1;
+    letter-spacing: var(--tracking-section);
+    text-wrap: balance;
+  }
+
+  .news__lead {
+    margin-top: var(--space-4);
+    text-wrap: pretty;
+  }
+
+  .news__h {
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .news__lista {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .news__item {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  /* Cada entrada es un enlace entero, sin la regla de los enlaces de texto:
+     la regla la pone la lista. */
+  .news__link {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding-block: var(--space-4);
+    border-bottom: 0;
+  }
+
+  .news__nombre {
+    font-family: var(--font-display);
+    font-size: var(--text-section);
+    line-height: var(--leading-section);
+    letter-spacing: var(--tracking-section);
+    text-wrap: balance;
+  }
+
+  .news__desc {
+    font-size: var(--text-small);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  .news__leer {
+    margin-top: var(--space-1);
+  }
+
+  @media (hover: hover) {
+    .news__link:hover .news__leer {
+      text-decoration: underline;
+      text-underline-offset: 0.3em;
+    }
+  }
+</style>

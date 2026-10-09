@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { hayProveedor, suscribir } from '../../lib/klaviyo';
+import { hayProveedor, suscribir, marcarInteres } from '../../lib/klaviyo';
 
 /**
  * El alta al newsletter. Es a donde manda el campo «Acá te suscribes».
@@ -74,6 +74,14 @@ export const POST: APIRoute = async ({ request }) => {
   /* El idioma de la página desde la que se suscribe: decide la lista, y con
      ella la serie de bienvenida (1 oct 2026). Sin él, español. */
   const lang = cuerpo?.lang === 'en' ? 'en' : 'es';
+
+  /* La formación de «Avísame cuando abra», si viene (9 oct 2026): queda en el
+     perfil de Klaviyo. Un slug y nada más; lo demás se ignora. */
+  const interes =
+    typeof cuerpo?.interes === 'string' && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(cuerpo.interes) && cuerpo.interes.length <= 60
+      ? cuerpo.interes
+      : null;
+  if (interes && hayProveedor) await marcarInteres(email, interes);
 
   const r = await suscribir(email, lang);
   if (r.ok) return json({ ok: true });

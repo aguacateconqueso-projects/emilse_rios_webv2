@@ -5,6 +5,7 @@ import { stripe, siteOrigin } from '../../lib/stripe';
 import { supabaseAdmin, buscarOCrearUsuario } from '../../lib/supabase-admin';
 import { writeSubscriptionRow } from '../../lib/stripe-sync';
 import { enviarBienvenida } from '../../lib/bienvenida';
+import { queCompro, registrarCompra, sesionPagada } from '../../lib/compras';
 
 /**
  * El webhook de Stripe: mantiene la tabla `subscriptions` como espejo de lo
@@ -25,11 +26,17 @@ import { enviarBienvenida } from '../../lib/bienvenida';
  * `https://www.emilserios.com/api/stripe-webhook`, Stripe da un secreto nuevo
  * y se cambia acá.
  *
- * Solo le importan las suscripciones: un pago único (los cursos, cuando se
- * vendan) llega como `checkout.session.completed` con `mode: 'payment'` y se
- * ignora. Es idempotente: `writeSubscriptionRow` hace `upsert` por
+ **Y desde el 9 oct 2026, los cursos.** Un pago único llega como
+ * `checkout.session.completed` con `mode: 'payment'`: si se pagó con uno de
+ * los enlaces de `src/data/lanzamientos.ts`, abre el curso y manda el correo
+ * de la compra (`src/lib/compras.ts`); si no, se ignora, como antes. Los
+ * medios de pago que tardan en confirmarse llegan después, como
+ * `checkout.session.async_payment_succeeded`.
+ *
+ * Es idempotente: `writeSubscriptionRow` hace `upsert` por
  * `stripe_subscription_id`, así que el mismo evento dos veces —o este y
- * `/api/claim-account` a la vez— deja la misma fila.
+ * `/api/claim-account` a la vez— deja la misma fila. Lo de los cursos, igual:
+ * ver `compras.ts`.
  */
 export const prerender = false;
 
@@ -57,8 +64,19 @@ export const POST: APIRoute = async ({ request }) => {
 
   try {
     switch (evento.type) {
-      case 'checkout.session.completed': {
+      case 'checkout.session.completed':
+      case 'checkout.session.async_payment_succeeded': {
         const sesion = evento.data.object as Stripe.Checkout.Session;
+        /* Un curso (9 oct 2026). Si todavía no está pagado —una
+           transferencia—, llegará otra vez como `async_payment_succeeded`. */
+        if (sesion.mode === 'payment') {
+          if (!sesionPagada(sesion)) break;
+          const compra = await queCompro(sesion);
+          if (compra) await registrarCompra(admin, sesion, compra, origen);
+          else console.log('[stripe-webhook] pago único que no es un curso nuestro', sesion.id);
+          break;
+        }
+        if (evento.type !== 'checkout.session.completed') break;
         if (sesion.mode !== 'subscription' || !sesion.subscription) break;
         const sub = await stripe.subscriptions.retrieve(sesion.subscription as string);
         const email = sesion.customer_details?.email || sesion.customer_email || null;

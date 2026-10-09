@@ -51,7 +51,8 @@ export const ui = {
     /* --- La tienda, que está afuera y no pide nada ----------------------
        Se llamó «Productos» hasta el 23 sep 2026; desde entonces, a pedido de
        Emi, «Formaciones». Y desde el 24 sep 2026 su dirección también:
-       `/formaciones/` y `/en/courses/`. Ver `routes`, más abajo. */
+       `/formaciones/` y, desde el 9 oct, `/en/programs/`. Ver `routes`, más
+       abajo. */
     'products.title': 'Formaciones',
     'products.description':
       'Los cursos y la membresía de Emilse Ríos. Aprende contrabajo a tu ritmo, con acompañamiento de verdad.',
@@ -66,6 +67,25 @@ export const ui = {
     /* El remate de cada ficha que lleva a su página (27 sep 2026, Emi). */
     'products.more': 'Leer más',
 
+    /* --- Las entradas del newsletter (9 oct 2026) ------------------------
+       `/newsletter/`. El texto de arriba y la segunda posdata son los de Emi
+       en la Home (`src/data/home.ts`); la primera posdata es la suya,
+       reescrita «de manera natural», como pidió. */
+    'nav.newsletter': 'Newsletter',
+    'news.title': 'Contrabajo en la Ciudad',
+    'news.kicker': 'El newsletter',
+    'news.eyebrow': 'Contrabajo en la Ciudad — El newsletter',
+    'news.lead':
+      'Cada semana envío correos donde explico errores que estancan tu progreso con el contrabajo. Son tan obvios que parecen tontos, pero son tan comunes que tal vez los estés cometiendo a diario — sin saberlo.',
+    'news.entries': 'Entradas',
+    'news.read': 'Leer la entrada',
+    'news.more': 'Más entradas',
+    'news.ps1': 'PD: ¿Todavía no estás en mi newsletter? ',
+    'news.ps1Link': 'Suscríbete aquí',
+    'news.ps1End': '. Entrar es gratis, y salir también.',
+    'news.ps2':
+      'PD 2: Al suscribirte recibes un correo de bienvenida con un video. Se trata de un ejercicio donde te explico un concepto que va a cambiar tu forma de producir el sonido. El video dura 4:04 y el ejercicio seguro lo conoces — no hay contrabajista que no lo haya practicado. Pero el 90% lo hace mal, JA. Casi nadie sabe de dónde viene realmente ese movimiento, pero en ese 90% no vas a estar tú, tú no, no después de ver el video. Ya me contarás.',
+
     'footer.email': 'info@emilserios.com',
   },
   en: {
@@ -75,7 +95,9 @@ export const ui = {
     'site.name': 'Emilse Ríos',
 
     'nav.about': 'About',
-    'nav.products': 'Courses',
+    /* «Programs» desde el 9 oct 2026, como la dirección (`/en/programs/`) y
+       como dice el inglés de Emi. Hasta ese día, «Courses». */
+    'nav.products': 'Programs',
     'nav.aula': 'Virtual Classroom',
     'nav.enter': 'Enter the classroom',
     'nav.home': 'Go to the home page',
@@ -106,18 +128,34 @@ export const ui = {
       'They told her the double bass wasn\'t for her. This is the story of why they were wrong: twenty years playing and training bassists, from El Sistema to Madrid.',
 
     /* --- La tienda, que está afuera y no pide nada ---------------------- */
-    'products.title': 'Courses',
+    'products.title': 'Programs',
     'products.description':
-      "Emilse Ríos's courses and membership. Learn double bass at your own pace, with real guidance.",
+      "Emilse Ríos's programs and membership. Learn double bass at your own pace, with real guidance.",
     'products.heading': 'You can do it too',
     'products.lead':
       "Every double bass course was born from a story: a teacher who hated scales, a student who, after a year and a half, didn't know a single piece for double bass, a bassist with a goat vibrato. Come in and I'll tell you. Maybe it'll work for you too.",
     'products.close': "You don't need innate talent or a specific age. Just consistency.",
     'products.soon': 'Coming soon',
     'products.closed': 'Closed for now',
-    'products.back': 'Back to Courses',
-    'products.enrolled': 'Already have a course? The classroom is this way',
+    'products.back': 'Back to Programs',
+    'products.enrolled': 'Already have a program? The classroom is this way',
     'products.more': 'Read more',
+
+    /* --- Las entradas del newsletter (9 oct 2026) ------------------------ */
+    'nav.newsletter': 'Newsletter',
+    'news.title': 'Double Bass in the City',
+    'news.kicker': 'The newsletter',
+    'news.eyebrow': 'Double Bass in the City — The newsletter',
+    'news.lead':
+      "Every week I send out emails where I break down the mistakes that are stalling your progress on the double bass. They're so obvious they sound silly, but they're so common you might be making them every single day — without knowing it.",
+    'news.entries': 'Posts',
+    'news.read': 'Read the post',
+    'news.more': 'More posts',
+    'news.ps1': 'P.S. Not on my newsletter yet? ',
+    'news.ps1Link': 'Sign up here',
+    'news.ps1End': '. It’s free to get in, and just as free to get out.',
+    'news.ps2':
+      'P.S. 2: When you sign up you get a welcome email with a video. It’s an exercise where I explain one concept that’s going to change the way you produce sound. The video runs 4:04 and you almost certainly know the exercise — there isn’t a bass player alive who hasn’t practiced it. But 90% do it wrong, HA! Hardly anyone knows where that movement actually comes from. You won’t be in that 90% though. Not you. Not after you watch the video. You’ll have to let me know.',
 
     'footer.email': 'info@emilserios.com',
   },
@@ -133,12 +171,14 @@ export function useTranslations(lang: Lang) {
 /**
  * Las páginas del sitio y su dirección en cada idioma.
  *
- * `products` se llama «Formaciones» / «Courses» desde el 23 sep 2026, y **su
- * dirección también, desde el 24 sep 2026**: `/formaciones/` y
- * `/en/courses/` (lo pidió Adrián: que «products» no salga en los enlaces).
- * Hasta ese día fue `/productos/` y `/en/products/`, y esas direcciones siguen
- * pegadas en los correos de Emi: **las redirige `astro.config.mjs`**, la
- * portada y cada página de ventas, con un 301. Si esta línea vuelve a cambiar,
+ * `products` se llama «Formaciones» / «Programs» desde el 23 sep 2026 (en
+ * inglés fue «Courses» hasta el 9 oct 2026), y **su dirección también, desde
+ * el 24 sep 2026**: `/formaciones/` y, en inglés, `/en/programs/` desde el 9
+ * oct 2026 (pedido de Emi: todo el inglés bajo `/en/programs/`, como ya
+ * estaba la membresía). Antes fue `/productos/` y `/en/products/`, y del 24
+ * sep al 9 oct `/en/courses/`: esas direcciones siguen pegadas en correos y
+ * **las redirige `astro.config.mjs`**, la portada y cada página de ventas,
+ * con un 301. Si esta línea vuelve a cambiar,
  * las redirecciones de allá tienen que apuntar a la nueva, y
  * `npm run audit:redirecciones` lo comprueba. La clave `products` es solo el
  * nombre interno, igual que la tabla `products` de la base de datos.
@@ -149,7 +189,9 @@ export function useTranslations(lang: Lang) {
 export const routes = {
   home: { es: '/', en: '/' },
   about: { es: '/sobre-mi', en: '/about' },
-  products: { es: '/formaciones', en: '/courses' },
+  products: { es: '/formaciones', en: '/programs' },
+  /* Las entradas del newsletter, desde el 9 oct 2026. */
+  newsletter: { es: '/newsletter', en: '/newsletter' },
   aula: { es: '/aulavirtual', en: '/classroom' },
 } as const satisfies Record<string, Record<Lang, string>>;
 
@@ -163,77 +205,83 @@ export function routePath(route: Route, lang: Lang): string {
 }
 
 /**
- * Los productos que tienen **una dirección propia en cada idioma**, en vez de
- * `/formaciones/<slug>/` y `/en/courses/<slug>/`.
+ * **El slug en inglés de cada producto** (9 oct 2026, Emi: «los slugs en
+ * inglés están en español»). Las cartas en inglés viven en
+ * `/en/programs/<slug-en-inglés>/`; en español siguen en
+ * `/formaciones/<slug>/`. **El slug de verdad no cambia**: sigue siendo el
+ * español, la identidad del producto —su fila en `products` y en
+ * `sales_pages`, la carta de `src/data/cartas.ts`, el panel, el cobro—. Esto
+ * es solo la dirección que se ve.
  *
- * Pedido de Emi el 1 oct 2026, para la membresía: en español
- * `/formaciones/membresia-contrabajo/` y en inglés
- * `/en/programs/double-bass-membership/`. **El slug no cambia**: sigue siendo
- * `estudiemos-juntos`, que es la identidad del producto —su fila en
- * `products` y en `sales_pages`, la carta de `src/data/cartas.ts`, el panel—.
- * Lo único que cambia es la dirección que se ve.
- *
- * Cada dirección vieja lleva a la nueva con un 301: `/formaciones/
- * estudiemos-juntos/` y `/en/courses/estudiemos-juntos/` las redirige la
- * propia página (`src/pages/formaciones/[producto].astro` y su gemela), y las
- * más viejas —`/productos/…`, `/aulavirtual/…`, la academia— van directo a la
- * nueva desde `astro.config.mjs`. **Si una de estas cambia, cambian también
- * allá**, y `npm run audit:redirecciones` lo comprueba.
- *
- * Una dirección propia en inglés que no cuelgue de `/en/courses/` necesita su
- * carpeta en `src/pages`: la de `/en/programs/` es
- * `src/pages/en/programs/[producto].astro`.
+ * Un producto que no esté acá —uno nuevo que Emi cree desde el panel— vive en
+ * `/en/programs/<su-slug>/`. Darle uno en inglés es añadir su línea acá y sus
+ * redirecciones en `astro.config.mjs` (`SLUGS_EN`, que tiene que decir lo
+ * mismo); `npm run audit:redirecciones` lo comprueba.
  */
-export const direccionesPropias: Record<string, Record<Lang, string>> = {
-  'estudiemos-juntos': {
-    es: '/formaciones/membresia-contrabajo/',
-    en: '/en/programs/double-bass-membership/',
-  },
+export const slugsIngles: Record<string, string> = {
+  'estudiemos-juntos': 'double-bass-membership',
+  'todo-el-diapason': 'fingerboard',
+  'todas-las-escalas': 'all-the-scales',
+  'contrabajo-desde-cero': 'double-bass-from-scratch',
+  'tu-vibrato-como-un-cantante': 'vibrato-like-a-singer',
+  'clases-online': 'online-lessons',
+};
+
+/**
+ * Los productos que en español no viven en `/formaciones/<slug>/`.
+ *
+ * Pedido de Emi el 1 oct 2026, para la membresía:
+ * `/formaciones/membresia-contrabajo/` (en inglés,
+ * `/en/programs/double-bass-membership/`, que sale de `slugsIngles`). Su
+ * dirección de antes, `/formaciones/estudiemos-juntos/`, lleva a la nueva con
+ * un 301: la redirige la propia página y, antes, `astro.config.mjs`.
+ */
+const direccionesEspanol: Record<string, string> = {
+  'estudiemos-juntos': '/formaciones/membresia-contrabajo/',
 };
 
 /**
  * Dirección de la carta de venta de un producto.
  *
  * Cuelga de la tienda, que está afuera y no pide sesión — `/formaciones/` y
- * `/en/courses/` —, no del aula, que desde ahora pide haber pagado. El slug
- * de la sección se traduce, pero **el del producto no**: el slug es la
- * identidad del producto, la misma que lleva su fila en la base de datos.
- * Un producto, un slug, en los dos idiomas — salvo los que tienen dirección
- * propia (`direccionesPropias`, justo arriba).
+ * `/en/programs/` —, no del aula, que desde ahora pide haber pagado. En
+ * español, con su slug —salvo la membresía, `direccionesEspanol`—; en inglés,
+ * con su slug en inglés (`slugsIngles`).
  */
 export function productPath(slug: string, lang: Lang): string {
-  return direccionesPropias[slug]?.[lang] ?? `${routePath('products', lang)}${slug}/`;
+  if (lang === 'en') return `${routePath('products', lang)}${slugsIngles[slug] ?? slug}/`;
+  return direccionesEspanol[slug] ?? `${routePath('products', lang)}${slug}/`;
 }
 
 /**
- * Al revés: el producto que vive en esta dirección propia, o `null`. La usan
- * las páginas de ventas para saber qué carta pintar cuando la dirección no es
- * el slug. Con barra final o sin ella.
+ * Al revés: el producto que vive en esta dirección, si no es la de su slug, o
+ * `null`. La usan las páginas de ventas para saber qué carta pintar. Con
+ * barra final o sin ella.
  */
 export function productoEnDireccion(pathname: string, lang: Lang): string | null {
   const ruta = pathname.endsWith('/') ? pathname : `${pathname}/`;
-  for (const [slug, direccion] of Object.entries(direccionesPropias)) {
-    if (direccion[lang] === ruta) return slug;
+  for (const slug of new Set([...Object.keys(slugsIngles), ...Object.keys(direccionesEspanol)])) {
+    if (productPath(slug, lang) === ruta && !ruta.endsWith(`/${slug}/`)) return slug;
   }
   return null;
 }
 
 /**
  * Lo que tiene que hacer una página de ventas con la dirección que le
- * pidieron: pintar un producto (`slug`), o mandar con un 301 a la dirección
- * propia del producto (`redirigir`), conservando la `?query` —las campañas
- * llevan `utm_`—. `soloPropias` es para las carpetas que solo existen por una
- * dirección propia, como `/en/programs/`: ahí un slug cualquiera no se pinta.
+ * pidieron: pintar un producto (`slug`), o mandar con un 301 a su dirección
+ * de verdad (`redirigir`) —el slug español en `/en/programs/`, o
+ * `/formaciones/estudiemos-juntos/`—, conservando la `?query`: las campañas
+ * llevan `utm_`.
  */
 export function paginaDeVenta(
   url: URL,
   param: string,
   lang: Lang,
-  soloPropias = false,
-): { slug: string } | { redirigir: string } | null {
+): { slug: string } | { redirigir: string } {
   const propio = productoEnDireccion(url.pathname, lang);
   if (propio) return { slug: propio };
-  const destino = direccionesPropias[param]?.[lang];
-  if (destino) return { redirigir: `${destino}${url.search}` };
-  return soloPropias ? null : { slug: param };
+  const destino = productPath(param, lang);
+  const aqui = url.pathname.endsWith('/') ? url.pathname : `${url.pathname}/`;
+  if (destino !== aqui) return { redirigir: `${destino}${url.search}` };
+  return { slug: param };
 }

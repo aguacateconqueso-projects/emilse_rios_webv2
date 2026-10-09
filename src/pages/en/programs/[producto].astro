@@ -1,16 +1,20 @@
 ---
 /**
- * Las páginas de ventas con dirección propia en inglés bajo `/en/programs/`.
+ * Las páginas de ventas, en inglés: la membresía y los cursos.
  *
- * Existe desde el 1 oct 2026 por una sola: la membresía, que en inglés vive
- * en `/en/programs/double-bass-membership/` (pedido de Emi). Los cursos
- * siguen en `/en/courses/`. Esta carpeta **solo pinta direcciones propias**
- * (`direccionesPropias` en `src/i18n/ui.ts`): `/en/programs/<slug>/` lleva
- * con un 301 a la dirección propia de ese producto si la tiene, y si no es
- * un 404 —un curso no se duplica acá—.
+ * **Todas bajo `/en/programs/` y con su slug en inglés desde el 9 oct 2026**
+ * (pedido de Emi): `/en/programs/fingerboard/`, `/en/programs/
+ * double-bass-membership/`… Lo decide `slugsIngles` en `src/i18n/ui.ts`.
+ * Pedida con el slug español —`/en/programs/todo-el-diapason/`—, la página
+ * manda a la inglesa con un 301. Hasta ese día los cursos vivían en
+ * `/en/courses/<slug-español>/`, y esas direcciones las redirige
+ * `astro.config.mjs`.
  *
- * Por lo demás es la misma página que `src/pages/en/courses/[producto].astro`:
- * se resuelve en el servidor, con un minuto de caché en Vercel.
+ * **Se resuelve en el servidor desde el 23 sep 2026** (`prerender = false`),
+ * con un minuto de caché en Vercel: Emi publica desde el panel y al minuto
+ * está en la web. Si la base de datos no tiene esa página, sale la de
+ * `src/data/cartas.ts`; si no hay ninguna, o la ficha está en borrador, 404.
+ * Ver `src/lib/tienda.ts`.
  */
 import PaginaVenta from '../../../components/PaginaVenta.astro';
 import { leerPagina, CACHE_TIENDA } from '../../../lib/tienda';
@@ -19,8 +23,7 @@ import { paginaDeVenta } from '../../../i18n/ui';
 export const prerender = false;
 
 const lang = 'en' as const;
-const pide = paginaDeVenta(Astro.url, Astro.params.producto ?? '', lang, true);
-if (!pide) return new Response(null, { status: 404 });
+const pide = paginaDeVenta(Astro.url, Astro.params.producto ?? '', lang);
 if ('redirigir' in pide) return Astro.redirect(pide.redirigir, 301);
 const pagina = await leerPagina(pide.slug);
 if (!pagina) return new Response(null, { status: 404 });

@@ -33,6 +33,7 @@ const t = useTranslations(lang);
     <nav class="footer__nav mono" aria-label={t('site.name')}>
       <a class="footer__link" href={routePath('about', lang)}>{t('nav.about')}</a>
       <a class="footer__link" href={routePath('products', lang)}>{t('nav.products')}</a>
+      <a class="footer__link" href={routePath('newsletter', lang)}>{t('nav.newsletter')}</a>
       {/* Directo a la pantalla de acceso: el aula no tiene portada. */}
       <a class="footer__link" href={entrarHref[lang]}>{t('nav.aula')}</a>
       <LangSwitch lang={lang} hrefEs={hrefEs} hrefEn={hrefEn} />

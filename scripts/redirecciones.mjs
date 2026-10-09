@@ -17,7 +17,9 @@
  * `/formaciones/` y `/en/courses/`, página por página. Y desde el 1 oct 2026,
  * que cada dirección vieja de la membresía llegue **en un solo salto** a la
  * nueva: `/formaciones/membresia-contrabajo/` y
- * `/en/programs/double-bass-membership/`.
+ * `/en/programs/double-bass-membership/`. Y desde el 9 oct 2026, que todo el
+ * inglés viva en `/en/programs/` con el slug en inglés: cada carta, desde
+ * `/en/courses/` y `/en/products/`, en un salto.
  *
  * «Aterrizar» es llegar a una página que contesta: un fichero del build o una
  * función —Formaciones y las páginas de ventas se resuelven en el servidor
@@ -100,10 +102,11 @@ const viejas = {
   // Formaciones se llamó `/productos/` (y `/en/products/`) hasta el 24 sep 2026.
   '/productos': '/formaciones/',
   '/productos/todo-el-diapason': '/formaciones/todo-el-diapason/',
-  '/en/products': '/en/courses/',
-  '/en/products/todo-el-diapason': '/en/courses/todo-el-diapason/',
-  // `/en/programs/` no tiene portada (1 oct 2026).
-  '/en/programs': '/en/courses/',
+  '/en/products': '/en/programs/',
+  // Y del 24 sep al 9 oct 2026, `/en/courses/`: desde entonces, `/en/programs/`.
+  '/en/courses': '/en/programs/',
+  // Una carta que no está en `SLUGS_EN` —una nueva del panel— va igual.
+  '/en/courses/curso-nuevo': '/en/programs/curso-nuevo/',
   '/aulavirtual/panel': '/aulavirtual/escritorio/',
   '/en/classroom/panel': '/en/classroom/desk/',
   // Desde el 23 sep 2026 el aula no tiene portada: se entra por el acceso.
@@ -121,10 +124,22 @@ const membresia = {
   '/formaciones/estudiemos-juntos': MEMB_ES,
   '/productos/estudiemos-juntos': MEMB_ES,
   '/aulavirtual/estudiemos-juntos': MEMB_ES,
-  '/en/courses/estudiemos-juntos': MEMB_EN,
-  '/en/products/estudiemos-juntos': MEMB_EN,
   '/en/classroom/estudiemos-juntos': MEMB_EN,
 };
+// Los slugs en inglés (9 oct 2026): lo mismo que `slugsIngles` en
+// `src/i18n/ui.ts` y `SLUGS_EN` en `astro.config.mjs`.
+const SLUGS_EN = {
+  'estudiemos-juntos': 'double-bass-membership',
+  'todo-el-diapason': 'fingerboard',
+  'todas-las-escalas': 'all-the-scales',
+  'contrabajo-desde-cero': 'double-bass-from-scratch',
+  'tu-vibrato-como-un-cantante': 'vibrato-like-a-singer',
+  'clases-online': 'online-lessons',
+};
+for (const [es, en] of Object.entries(SLUGS_EN)) {
+  membresia[`/en/courses/${es}`] = `/en/programs/${en}/`;
+  membresia[`/en/products/${es}`] = `/en/programs/${en}/`;
+}
 for (const [vieja, nueva] of Object.entries(membresia)) {
   casos.push({ ruta: vieja, llega: nueva, directo: true }, { ruta: `${vieja}/`, llega: nueva, directo: true });
 }
@@ -137,10 +152,11 @@ for (const pagina of delAula) {
   casos.push({ ruta: `${pagina}/`, llega: `${pagina}/` }, { ruta: pagina, queda: true });
 }
 // Las direcciones nuevas de Formaciones son páginas de verdad: nada se las lleva.
-for (const pagina of ['/formaciones/', MEMB_ES, '/formaciones/todo-el-diapason/', '/en/courses/', MEMB_EN, '/en/courses/todo-el-diapason/']) {
-  casos.push({ ruta: pagina, llega: pagina });
-}
-for (const pagina of [MEMB_ES, MEMB_EN]) casos.push({ ruta: pagina.slice(0, -1), queda: true });
+const nuevas = ['/formaciones/', MEMB_ES, '/formaciones/todo-el-diapason/', '/en/programs/'].concat(
+  Object.values(SLUGS_EN).map((en) => `/en/programs/${en}/`),
+);
+for (const pagina of nuevas) casos.push({ ruta: pagina, llega: pagina });
+for (const pagina of [MEMB_ES, MEMB_EN, '/en/programs/fingerboard/']) casos.push({ ruta: pagina.slice(0, -1), queda: true });
 
 // `emilseriosacademy.com` redirige entero (27 sep 2026): su portada, a la carta
 // de la membresía, directo; `/api/` no se toca —lo contesta este proyecto—.

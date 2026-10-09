@@ -90,6 +90,11 @@ export type Carta = {
   titleEcho: string;
   priceLabel: string;
   price: string;
+  /**
+   * El precio de antes, tachado al lado del de ahora: la preventa (9 oct
+   * 2026). Lo pone `src/lib/tienda.ts` según `src/data/lanzamientos.ts`.
+   */
+  priceOld?: string;
   /** «/mes» en la membresía. Los cursos no llevan. */
   pricePer?: string;
   /** Lo que se lee bajo el precio, destacado. */
@@ -143,6 +148,15 @@ export const NEWSLETTER = NEWSLETTER_ANCLA;
 export const NEWS_POR_DEFECTO: Record<Lang, { pre: string }> = {
   es: { pre: '¿Aún no estás suscrito al newsletter?' },
   en: { pre: 'Not subscribed to the newsletter yet?' },
+};
+
+/**
+ * La frase encima del campo del final cuando el botón es «Avísame» (9 oct
+ * 2026). `{nombre}` es el título de la carta.
+ */
+export const AVISO_FORMACION: Record<Lang, string> = {
+  es: 'Déjame tu correo y te aviso cuando abra «{nombre}». Te llega también mi newsletter: cada semana, un error que estanca tu progreso con el contrabajo.',
+  en: 'Leave me your email and I’ll let you know when “{nombre}” opens. You’ll also get my newsletter: every week, one mistake that’s stalling your progress on the double bass.',
 };
 
 /** El botón de los cursos que todavía no se venden, en los dos idiomas. */
@@ -363,10 +377,9 @@ const diapasonEn: Carta = {
     'I’m sure it’s happened to you: not knowing how the next note should sound, feeling you don’t have the strength to hold the position, not being able to coordinate the bow changing at the same time as the left hand, not understanding the metronome’s beat.',
     'If you’re one of those people who thinks “if I listen to the metronome, I get lost!”, relax, we’ll sort it out. The goal is to develop inner rhythm and a harmonic ear little by little, without getting bored (there’s a reason the program has that name).',
     'And what’s the fun part? The piano accompaniment. The piano in the background develops your melodic ear every day: you stop depending on the tuner, and you have an automatic metronome marking every beat for you.',
-    /* En negrita de cuerpo desde el 27 sep 2026: como título grande no le
-       gustaba a Emi. Los guiones son del 24 sep (con puntos medios se veían
-       descentrados). */
-    { k: 'fuerte', text: 'HER-MO-SO.' },
+    /* En inglés desde el 9 oct 2026 (Emi): el «HER-MO-SO.» del español, con
+       la misma ropa —negrita de cuerpo, en sílabas—. */
+    { k: 'fuerte', text: 'BEAU-TI-FUL.' },
     'The truth is, we all need to practice scales — all of us, whatever our level. And with piano, it’s so much more fun.',
     { k: 'fuerte', text: 'You can do it. All you need is consistency and the right guide.' },
     {

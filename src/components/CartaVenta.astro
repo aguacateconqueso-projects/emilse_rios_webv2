@@ -25,8 +25,8 @@
  *   `data-bloque`, y por eso ES y EN tienen que tener los mismos bloques.
  */
 import { type Lang, useTranslations, routePath } from '../i18n/ui';
-import type { Product } from '../data/aula';
-import { type Carta, type Bloque, NEWS_POR_DEFECTO } from '../data/cartas';
+import { FOTOS_A_COLOR, type Product } from '../data/aula';
+import { type Carta, type Bloque, NEWS_POR_DEFECTO, NEWSLETTER, AVISO_FORMACION } from '../data/cartas';
 import { CLOSES_AT, REOPENS_AT, INVITE_PARAM, doorsClosed } from '../lib/membership';
 import MediaSlot from './MediaSlot.astro';
 import BotonVenta from './BotonVenta.astro';
@@ -90,6 +90,16 @@ const clase = (b: Bloque) => (typeof b === 'string' ? '' : `venta__${b.k}`);
 
 /** El newsletter del final, en todas las cartas (24 sep 2026). */
 const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
+
+/**
+ * Si el botón de la carta es «Avísame cuando abra» (un curso que todavía no
+ * se vende), el campo del final es ese aviso: lo dice con el nombre de la
+ * formación, y el alta lleva el slug para que Klaviyo guarde el interés (9 oct
+ * 2026, Emi: «¿qué pasa cuando le das al botón? Así tengo referencia de
+ * quiénes se interesan por los cursos»).
+ */
+const esAviso = producto.tipo === 'curso' && c.boton.href === NEWSLETTER;
+const newsPre = esAviso ? AVISO_FORMACION[lang as Lang].replace('{nombre}', c.title) : news.pre;
 ---
 
 {/*
@@ -132,7 +142,13 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
       </div>
     </div>
     <div class="venta__media entrada-foto">
-      <MediaSlot src={producto.foto} alt={c.photoAlt} placeholder={copia.fotoPie} width={900} />
+      <MediaSlot
+        src={producto.foto}
+        alt={c.photoAlt}
+        placeholder={copia.fotoPie}
+        width={900}
+        color={FOTOS_A_COLOR.has(producto.slug)}
+      />
     </div>
   </header>
 
@@ -231,6 +247,8 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
             <p class="venta__nombre">{c.title}</p>
             <p class="mono soft venta__etiqueta">{c.priceLabel}</p>
             <p class="venta__precio">
+              {/* La preventa: el precio de después, tachado (9 oct 2026). */}
+              {c.priceOld && <s class="venta__antes">{c.priceOld}</s>}
               {c.price}
               {c.pricePer && <span class="mono soft venta__per">{c.pricePer}</span>}
             </p>
@@ -355,10 +373,10 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
   <section class="venta__news reveal" data-bloque>
     <div class="row row--flush">
       <div class="row__body">
-        <p class="venta__news-pre">{news.pre}</p>
+        <p class="venta__news-pre">{newsPre}</p>
       </div>
     </div>
-    <SubscribeForm lang={lang} id="suscribete-carta" flush />
+    <SubscribeForm lang={lang} id="suscribete-carta" flush interes={esAviso ? producto.slug : undefined} />
   </section>
 </article>
 
@@ -924,6 +942,7 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
     }
 
     .venta__ficha:hover .venta__etiqueta,
+    .venta__ficha:hover .venta__antes,
     .venta__ficha:hover .venta__per,
     .venta__ficha:hover .venta__letra {
       color: var(--paper-soft);
@@ -961,6 +980,16 @@ const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
     font-family: var(--font-display);
     font-size: var(--text-anchor);
     line-height: 1;
+  }
+
+  /* El precio de después, tachado, en la preventa: más chico, en tinta
+     secundaria, y la raya de 1 px como las reglas del sitio. */
+  .venta__antes {
+    margin-right: var(--space-2);
+    font-size: var(--text-section);
+    color: var(--ink-soft);
+    text-decoration-thickness: 1px;
+    vertical-align: middle;
   }
 
   .venta__per {

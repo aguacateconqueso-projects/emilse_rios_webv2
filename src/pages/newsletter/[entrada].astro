@@ -1,0 +1,29 @@
+---
+/** Una entrada del newsletter (9 oct 2026). Ver `src/components/Entrada.astro`. */
+import Base from '../../layouts/Base.astro';
+import Entrada from '../../components/Entrada.astro';
+import { useTranslations } from '../../i18n/ui';
+import { entradasDe, entradaPath, gemela } from '../../lib/entradas';
+
+export async function getStaticPaths() {
+  const entradas = await entradasDe('es');
+  return entradas.map((entrada) => ({ params: { entrada: entrada.data.direccion }, props: { entrada } }));
+}
+
+const { entrada } = Astro.props;
+const lang = 'es' as const;
+const t = useTranslations(lang);
+const aqui = entradaPath(entrada);
+const otra = await gemela(entrada);
+---
+
+<Base
+  lang={lang}
+  title={`${entrada.data.titulo} · ${t('site.title')}`}
+  description={entrada.data.descripcion}
+  route="newsletter"
+  pathEs={aqui}
+  pathEn={otra}
+>
+  <Entrada entrada={entrada} />
+</Base>

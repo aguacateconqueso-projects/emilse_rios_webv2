@@ -50,8 +50,15 @@ interface Props {
    * hace falta: ahí el campo llega después de mil palabras sobre Emi.
    */
   label?: string;
+  /**
+   * La formación por la que pregunta quien se suscribe desde «Avísame cuando
+   * abra» (9 oct 2026): su slug viaja con el alta y queda en su perfil de
+   * Klaviyo (`marcarInteres` en `src/lib/klaviyo.ts`), para que Emi sepa a
+   * quién avisar cuando abra.
+   */
+  interes?: string;
 }
-const { lang, id, flush = false, label } = Astro.props;
+const { lang, id, flush = false, label, interes } = Astro.props;
 const t = useTranslations(lang);
 
 /*
@@ -81,6 +88,7 @@ const statusId = `${id}-status`;
       data-subscribe
       data-endpoint={endpoint}
       data-lang={lang}
+      data-interes={interes}
       data-simular={simular ? 'true' : 'false'}
       data-done={t('form.done')}
       data-invalid={t('form.error')}
@@ -259,7 +267,11 @@ const statusId = `${id}-status`;
         const response = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ email: input.value.trim(), lang: form.dataset.lang }),
+          body: JSON.stringify({
+            email: input.value.trim(),
+            lang: form.dataset.lang,
+            interes: form.dataset.interes || undefined,
+          }),
         });
         if (!response.ok) throw new Error(String(response.status));
         succeed();

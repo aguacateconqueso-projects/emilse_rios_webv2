@@ -27,7 +27,7 @@
  * tiene carta **no lo son**, y se ven apagadas.
  */
 import { type Lang, useTranslations, productPath } from '../i18n/ui';
-import { entrarHref } from '../data/aula';
+import { entrarHref, FOTOS_A_COLOR } from '../data/aula';
 import type { Ficha as FichaTienda } from '../lib/tienda';
 import MediaSlot from './MediaSlot.astro';
 
@@ -84,6 +84,7 @@ const t = useTranslations(lang);
                   placeholder={copia.fotoPie}
                   ratio="3 / 2"
                   width={520}
+                  color={FOTOS_A_COLOR.has(producto.slug)}
                 />
               </span>
 
@@ -96,7 +97,11 @@ const t = useTranslations(lang);
                     </span>
                   ) : (
                     <span class="soft">
-                      {producto.estado === 'cerrado' ? t('products.closed') : t('products.soon')}
+                      {/* Con fecha de apertura, la fecha (9 oct 2026): ver
+                          `src/data/lanzamientos.ts`. */}
+                      {producto.estado === 'cerrado'
+                        ? t('products.closed')
+                        : (producto.aviso?.[lang] ?? t('products.soon'))}
                     </span>
                   )
                 }

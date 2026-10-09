@@ -2,6 +2,14 @@ import { createClient } from '@supabase/supabase-js';
 import type { Lang } from '../i18n/ui';
 import { catalogo, tienePagina, type Product, type Estado } from '../data/aula';
 import { cartas, AVISAME, type Carta } from '../data/cartas';
+import {
+  lanzamientos,
+  momento,
+  avisoFicha,
+  textosLanzamiento,
+  rellenar,
+  type Lanzamiento,
+} from '../data/lanzamientos';
 
 /**
  * La tienda y sus páginas de ventas, del lado de la WEB: lo que leen
@@ -30,6 +38,11 @@ import { cartas, AVISAME, type Carta } from '../data/cartas';
 export type Ficha = Product & {
   /** Si la ficha lleva a una página de ventas. */
   conPagina: boolean;
+  /**
+   * Lo que dice la ficha en vez de «Próximamente» —«Abrimos puertas el
+   * viernes 16…»—, cuando tiene fecha de apertura (`src/data/lanzamientos.ts`).
+   */
+  aviso?: Record<Lang, string>;
 };
 
 export type Catalogo = { fuente: 'bd' | 'codigo'; fichas: Ficha[] };
@@ -46,8 +59,71 @@ function cliente() {
 
 const delCodigo = (): Catalogo => ({
   fuente: 'codigo',
-  fichas: catalogo.map((p) => ({ ...p, conPagina: tienePagina(p) })),
+  fichas: catalogo.map((p) => conLanzamiento({ ...p, conPagina: tienePagina(p) })),
 });
+
+/** Los dos enlaces de un idioma y otro, o ninguno. */
+const hayEnlaces = (e: Record<Lang, string> | undefined) => Boolean(e?.es && e?.en);
+
+/**
+ * La ficha según su lanzamiento (`src/data/lanzamientos.ts`), con la hora de
+ * ahora. **Solo toca las fichas que Emi tiene en «próximamente» o «a la
+ * venta»**: si en la Tienda dice borrador o cerrado, manda la Tienda.
+ *
+ *   · Antes de abrir (con preventa o sin ella): «próximamente», con la fecha
+ *     en vez de «Próximamente».
+ *   · Abierto y con sus enlaces de pago: «a la venta», con su precio.
+ *   · Abierto y sin enlaces todavía: como esté.
+ */
+export function conLanzamiento(ficha: Ficha, ahora = Date.now()): Ficha {
+  const l = lanzamientos[ficha.slug];
+  if (!l || (ficha.estado !== 'proximamente' && ficha.estado !== 'venta')) return ficha;
+  if (momento(l, ahora) !== 'abierto') {
+    return { ...ficha, estado: 'proximamente', aviso: { es: avisoFicha(l.abre, 'es'), en: avisoFicha(l.abre, 'en') } };
+  }
+  if (!hayEnlaces(l.venta.enlaces)) return ficha;
+  const copia = (lang: Lang) => ({
+    ...ficha.copia[lang],
+    precio: l.venta.precio[lang],
+    cadencia: textosLanzamiento[lang].cadencia,
+  });
+  return { ...ficha, estado: 'venta', copia: { es: copia('es'), en: copia('en') } };
+}
+
+/**
+ * La carta según su lanzamiento: la ficha de precio y el botón que tocan.
+ *
+ *   · Preventa: el precio de siempre tachado, el de preventa, hasta cuándo, y
+ *     el botón al enlace de preventa.
+ *   · Antes de abrir, sin preventa: la fecha bajo el precio y «Avísame».
+ *   · Abierto: la carta tal cual, con el botón al enlace de pago; sin enlace
+ *     todavía, «Avísame».
+ */
+function cartaConLanzamiento(l: Lanzamiento, carta: Record<Lang, Carta>, ahora: number): Record<Lang, Carta> {
+  const m = momento(l, ahora);
+  const una = (lang: Lang): Carta => {
+    const c = carta[lang];
+    const t = textosLanzamiento[lang];
+    if (m === 'preventa' && l.preventa) {
+      return {
+        ...c,
+        price: l.preventa.precio[lang],
+        priceOld: l.venta.precio[lang],
+        priceNote: rellenar(t.preventa, l, lang),
+        priceNoteRest: rellenar(t.preventaRest, l, lang),
+        priceFoot: rellenar(t.preventaPie, l, lang),
+        boton: { texto: t.boton, href: l.preventa.enlaces[lang] },
+      };
+    }
+    if (m === 'antes') {
+      return { ...c, priceNote: rellenar(t.antes, l, lang), priceNoteRest: '', boton: AVISAME[lang] };
+    }
+    return hayEnlaces(l.venta.enlaces)
+      ? { ...c, boton: { texto: t.boton, href: l.venta.enlaces[lang] } }
+      : { ...c, boton: AVISAME[lang] };
+  };
+  return { es: una('es'), en: una('en') };
+}
 
 type Fila = {
   slug: string;
@@ -108,7 +184,9 @@ export async function leerCatalogo(): Promise<Catalogo> {
     const conPagina = new Set((pags.data ?? []).map((p) => p.slug));
     return {
       fuente: 'bd',
-      fichas: (prods.data as Fila[]).map((f, i) => aFicha(f, i, conPagina.has(f.slug) || f.slug in cartas)),
+      fichas: (prods.data as Fila[]).map((f, i) =>
+        conLanzamiento(aFicha(f, i, conPagina.has(f.slug) || f.slug in cartas)),
+      ),
     };
   } catch (e) {
     console.error('[tienda] Supabase no contestó', e);
@@ -143,8 +221,20 @@ export async function leerPagina(
   return { ficha, carta: botonSegunEstado(ficha, carta) };
 }
 
-/** Un curso que no está a la venta lleva «Avísame cuando abra». */
-export function botonSegunEstado(ficha: Ficha, carta: Record<Lang, Carta>): Record<Lang, Carta> {
+/**
+ * Un curso que no está a la venta lleva «Avísame cuando abra». Uno con
+ * lanzamiento (`src/data/lanzamientos.ts`) lleva lo que toque a esta hora:
+ * la preventa, la fecha o el pago.
+ */
+export function botonSegunEstado(
+  ficha: Ficha,
+  carta: Record<Lang, Carta>,
+  ahora = Date.now(),
+): Record<Lang, Carta> {
+  const l = lanzamientos[ficha.slug];
+  if (l && ficha.tipo === 'curso' && ficha.estado !== 'cerrado' && ficha.estado !== 'borrador') {
+    return cartaConLanzamiento(l, carta, ahora);
+  }
   if (ficha.tipo !== 'curso' || ficha.estado === 'venta') return carta;
   return {
     es: { ...carta.es, boton: AVISAME.es },
@@ -174,10 +264,10 @@ export async function fichaParaVistaPrevia(token: string, slug: string): Promise
   const { data: perfil } = await sb.from('profiles').select('role').eq('id', u.user.id).maybeSingle();
   if (perfil?.role !== 'admin') return null;
   const { data: fila } = await sb.from('products').select('*').eq('slug', slug).maybeSingle();
-  if (fila) return aFicha(fila as Fila, 0, true);
+  if (fila) return conLanzamiento(aFicha(fila as Fila, 0, true));
   /* Sin fila —el catálogo todavía en el código—: la ficha del código. */
   const delCodigo = catalogo.find((p) => p.slug === slug);
-  return delCodigo ? { ...delCodigo, conPagina: true } : null;
+  return delCodigo ? conLanzamiento({ ...delCodigo, conPagina: true }) : null;
 }
 
 /**

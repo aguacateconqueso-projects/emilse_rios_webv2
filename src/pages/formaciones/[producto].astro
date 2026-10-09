@@ -18,8 +18,8 @@ export const prerender = false;
 
 const lang = 'es' as const;
 /* La membresía tiene dirección propia desde el 1 oct 2026: su dirección de
-   antes, con el slug, lleva a la nueva. Ver `direccionesPropias`. */
-const pide = paginaDeVenta(Astro.url, Astro.params.producto ?? '', lang)!;
+   antes, con el slug, lleva a la nueva. Ver `productPath` en `src/i18n/ui.ts`. */
+const pide = paginaDeVenta(Astro.url, Astro.params.producto ?? '', lang);
 if ('redirigir' in pide) return Astro.redirect(pide.redirigir, 301);
 const pagina = await leerPagina(pide.slug);
 if (!pagina) return new Response(null, { status: 404 });

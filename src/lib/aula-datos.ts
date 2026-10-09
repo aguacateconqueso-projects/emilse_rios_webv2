@@ -217,6 +217,28 @@ const deSupabase = {
     return (data ?? []).map(armarCurso);
   },
 
+  /**
+   * Los cursos que tiene a su nombre, publicados o no (9 oct 2026). Un curso
+   * sin publicar no se deja leer, pero su acceso sí: así el escritorio puede
+   * decir «abre el viernes 16» a quien lo compró en preventa.
+   */
+  async misAccesos(): Promise<string[]> {
+    const id = await uid();
+    if (!id) return [];
+    const { data, error } = await supabase.from('course_access').select('course_id').eq('user_id', id);
+    if (error) {
+      console.error('[aula] no se pudieron leer los accesos', error);
+      return [];
+    }
+    return (data ?? []).map((f) => f.course_id as string);
+  },
+
+  /** El slug de la ficha de la Tienda que abre este curso, o el del curso. */
+  async fichaDeCurso(c: Curso): Promise<string> {
+    const { data } = await supabase.from('products').select('slug').eq('course_id', c.id).limit(1).maybeSingle();
+    return (data?.slug as string | undefined) ?? c.slug;
+  },
+
   async curso(slug: string): Promise<Curso | null> {
     const { data, error } = await supabase
       .from('courses')
@@ -442,6 +464,14 @@ const deMaqueta = {
 
   async misCursos(): Promise<Curso[]> {
     return MUESTRA;
+  },
+
+  async misAccesos(): Promise<string[]> {
+    return [];
+  },
+
+  async fichaDeCurso(c: Curso): Promise<string> {
+    return c.slug;
   },
 
   async curso(slug: string): Promise<Curso | null> {
