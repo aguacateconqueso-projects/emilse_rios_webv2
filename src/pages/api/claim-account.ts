@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { stripe } from '../../lib/stripe';
 import { supabaseAdmin, buscarOCrearUsuario } from '../../lib/supabase-admin';
 import { writeSubscriptionRow } from '../../lib/stripe-sync';
+import { queCompro, darAcceso, sesionPagada } from '../../lib/compras';
 
 /**
  * «La contraseña al pagar» — el camino que no espera ningún correo.
@@ -23,6 +24,12 @@ import { writeSubscriptionRow } from '../../lib/stripe-sync';
  * impide quedarse con la cuenta de otra persona escribiendo su dirección. Una
  * versión que preguntara «¿este correo pagó?» sería un secuestro de cuentas con
  * pasos extra.
+ *
+ * **Desde el 9 oct 2026, también los cursos**: una sesión de pago único con
+ * uno de los enlaces de `src/data/lanzamientos.ts`. En vez de espejar una
+ * suscripción, abre el curso (`darAcceso`, lo mismo que hace el webhook), y
+ * contesta `tipo: 'curso'` para que `/gracias/` lleve al escritorio y no a
+ * la membresía. El correo de la compra lo manda el webhook, no esta ruta.
  *
  * El paso 4 es el que hace que la mudanza a medias funcione: el webhook sigue
  * viviendo en la academia y puede tardar, así que acá se escribe la misma fila
@@ -53,12 +60,12 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const sesion = await stripe.checkout.sessions.retrieve(sessionId);
 
-    /* Tiene que ser una suscripción COMPLETADA y pagada. `no_payment_required`
-       cubre los cupones al 100 % y las pruebas; `paid` es el caso normal. */
-    const completa = sesion.mode === 'subscription' && sesion.status === 'complete';
-    const pagada =
-      sesion.payment_status === 'paid' || sesion.payment_status === 'no_payment_required';
-    if (!completa || !pagada) return json({ error: 'not_paid' }, 402);
+    /* Tiene que ser una suscripción —o un curso nuestro— COMPLETADA y pagada.
+       `no_payment_required` cubre los cupones al 100 % y las pruebas; `paid`
+       es el caso normal. */
+    const compra = sesion.mode === 'payment' ? await queCompro(sesion) : null;
+    const completa = sesion.mode === 'subscription' || compra !== null;
+    if (!completa || !sesionPagada(sesion)) return json({ error: 'not_paid' }, 402);
 
     const email = (sesion.customer_details?.email || sesion.customer_email || '')
       .trim()
@@ -75,6 +82,15 @@ export const POST: APIRoute = async ({ request }) => {
     if (errClave) {
       console.error('[claim-account] no se pudo fijar la contraseña', errClave.message);
       return json({ error: 'set_password_failed', detail: errClave.message }, 500);
+    }
+
+    /* Un curso: se abre ya mismo, por si el webhook todavía no llegó. Tampoco
+       es fatal: el webhook hará lo mismo. */
+    if (compra) {
+      await darAcceso(admin, sesion, compra).catch((e) =>
+        console.error('[claim-account] no se pudo abrir el curso', e?.message || e),
+      );
+      return json({ ok: true, email, tipo: 'curso' });
     }
 
     /* Espeja la suscripción ya mismo. Nada de esto es fatal: si falla, el

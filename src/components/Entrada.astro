@@ -1,0 +1,181 @@
+---
+/**
+ * Una entrada del newsletter: `/newsletter/<direccion>/`.
+ *
+ * **Desde el 9 oct 2026**, con la forma que mandó Emi para cada una:
+ *
+ *   1. arriba, el newsletter —«Contrabajo en la Ciudad — El newsletter», su
+ *      texto y el botón para suscribirse—;
+ *   2. el título de la entrada, en grande: el que alguien escribiría en el
+ *      buscador;
+ *   3. el correo, tal cual lo escribió Emi (`src/content/entradas/`);
+ *   4. sus dos posdatas —«¿todavía no estás en mi newsletter?» y la del video
+ *      de bienvenida—, iguales en todas, y otra vez el campo;
+ *   5. las demás entradas.
+ *
+ * Los dos campos dan de alta igual que el de la Home: a la lista del idioma
+ * de la página, con su serie de bienvenida.
+ */
+import { type Lang, useTranslations, routePath } from '../i18n/ui';
+import { entradasDe, entradaPath, type Entrada } from '../lib/entradas';
+import { render } from 'astro:content';
+import SubscribeForm from './SubscribeForm.astro';
+
+interface Props {
+  entrada: Entrada;
+}
+const { entrada } = Astro.props;
+const lang: Lang = entrada.data.lang;
+const t = useTranslations(lang);
+const { Content } = await render(entrada);
+const otras = (await entradasDe(lang)).filter((e) => e.id !== entrada.id);
+---
+
+<article>
+  {/* --- El newsletter, arriba ------------------------------------------- */}
+  <header class="row row--flush post__news">
+    <div class="row__body">
+      <a class="mono soft post__eyebrow" href={routePath('newsletter', lang)}>{t('news.eyebrow')}</a>
+      <p class="post__lead">{t('news.lead')}</p>
+    </div>
+  </header>
+  <SubscribeForm lang={lang} id="suscribete-arriba" flush />
+
+  {/* --- La entrada ------------------------------------------------------ */}
+  <div class="row row--flush post__entrada">
+    <div class="row__body">
+      <h1 class="post__title">{entrada.data.titulo}</h1>
+      <div class="prose post__cuerpo">
+        <Content />
+      </div>
+    </div>
+  </div>
+
+  {/* --- Las dos posdatas, y otra vez el campo --------------------------- */}
+  <div class="row row--flush block">
+    <div class="row__body post__pd">
+      <p>
+        {t('news.ps1')}<a href="#suscribete-entrada">{t('news.ps1Link')}</a>{t('news.ps1End')}
+      </p>
+      <p>{t('news.ps2')}</p>
+    </div>
+  </div>
+  <SubscribeForm lang={lang} id="suscribete-entrada" flush />
+
+  {/* --- Las demás ------------------------------------------------------- */}
+  {
+    otras.length > 0 && (
+      <nav class="row row--flush block" aria-labelledby="mas-h">
+        <div class="row__body">
+          <h2 class="mono soft post__mas-h" id="mas-h">{t('news.more')}</h2>
+          <ul class="post__mas" role="list">
+            {otras.map((e) => (
+              <li>
+                <a class="post__otra" href={entradaPath(e)}>
+                  {e.data.titulo}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </nav>
+    )
+  }
+</article>
+
+<style>
+  .post__news {
+    padding-top: var(--space-2);
+  }
+
+  .post__lead {
+    margin-top: var(--space-2);
+    font-size: var(--text-small);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  .post__eyebrow {
+    border-bottom: 0;
+  }
+
+  /* El título, separado del bloque del newsletter por una regla. */
+  .post__entrada {
+    margin-top: var(--space-8);
+  }
+
+  .post__entrada .row__body {
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--rule);
+  }
+
+  .post__title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--text-anchor);
+    line-height: var(--leading-anchor);
+    letter-spacing: var(--tracking-section);
+    text-wrap: balance;
+  }
+
+  .post__cuerpo {
+    margin-top: var(--space-6);
+  }
+
+  /* El cuerpo viene de Markdown: las listas y las citas, con la ropa del
+     sitio. Las negritas, en la de cuerpo, como las frases destacadas. */
+  .post__cuerpo :global(ol),
+  .post__cuerpo :global(ul) {
+    margin: 0 0 var(--space-3);
+    padding-left: 1.25em;
+  }
+
+  .post__cuerpo :global(li + li) {
+    margin-top: var(--space-1);
+  }
+
+  .post__cuerpo :global(strong) {
+    font-weight: 600;
+  }
+
+  .post__pd p {
+    font-size: var(--text-small);
+    line-height: 1.5;
+    font-style: italic;
+    color: var(--ink-soft);
+    text-wrap: pretty;
+  }
+
+  .post__pd p + p {
+    margin-top: var(--space-2);
+  }
+
+  .post__pd a {
+    color: var(--ink);
+  }
+
+  .post__mas-h {
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .post__mas {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .post__mas li {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .post__otra {
+    display: block;
+    padding-block: var(--space-3);
+    border-bottom: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-section);
+    line-height: var(--leading-section);
+    text-wrap: balance;
+  }
+</style>

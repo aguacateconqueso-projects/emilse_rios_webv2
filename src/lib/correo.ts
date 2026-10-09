@@ -260,10 +260,10 @@ export function correoRespuesta(
   const donde = en
     ? o.donde === 'membresia'
       ? 'the membership'
-      : `the course “${o.curso ?? ''}”`
+      : `the program “${o.curso ?? ''}”`
     : o.donde === 'membresia'
       ? 'la membresía'
-      : `el curso «${o.curso ?? ''}»`;
+      : `la formación «${o.curso ?? ''}»`;
   const t = en
     ? {
         subject: 'I answered your question',
@@ -309,4 +309,132 @@ ${t.p3}
 
 ${t.sign}`;
   return { subject: t.subject, html, text };
+}
+
+/* ==========================================================================
+   La compra de un curso (9 oct 2026)
+
+   Pedido de Emi para la preventa de «Todo el diapasón»: «cuando alguien
+   compre, ¿qué les llega? Un email de confirmación que diga: este es el link
+   a tu aula virtual, podrás entrar el día 16 a las 23:59». Lo manda el webhook
+   de Stripe (`src/lib/compras.ts`).
+
+   **El copy es provisional**, en la voz de Emi, como los avisos. Si ella
+   manda el suyo, se cambia acá y nada más.
+   ========================================================================== */
+
+/**
+ * A quien acaba de comprar un curso: gracias, qué tiene, cuándo entra y por
+ * dónde. Si la cuenta es nueva, `clave` es el enlace de un solo uso para poner
+ * la contraseña; si ya tenía cuenta (una alumna de la membresía), entra con la
+ * de siempre.
+ */
+export function correoCompra(
+  lang: 'es' | 'en',
+  o: {
+    formacion: string;
+    /** Las que vienen dentro: «Todas las escalas», con el diapasón. */
+    incluidas: string[];
+    /** La fecha de las puertas, si todavía no abrieron: «viernes 16 de…». */
+    abre: string | null;
+    huso: string;
+    /** El enlace para poner la contraseña, si la cuenta es nueva. */
+    clave: string | null;
+    aula: string;
+  },
+): { subject: string; html: string; text: string } {
+  const en = lang === 'en';
+  const comillas = (s: string) => (en ? `“${s}”` : `«${s}»`);
+  const incl = o.incluidas.map(comillas);
+  const t = en
+    ? {
+        subject: `Your access to ${comillas(o.formacion)}`,
+        rotulo: 'Emilse Rios · Classroom',
+        p1: `Thank you for joining ${comillas(o.formacion)}!`,
+        incl: incl.length ? `It comes with ${incl.join(' and ')}, complete.` : '',
+        abre: o.abre
+          ? `I open the doors on ${o.abre} (${o.huso}). From that moment, everything will be waiting for you in your virtual classroom.`
+          : 'Everything is already waiting for you in your virtual classroom.',
+        clave: 'This is your link to create your password:',
+        claveBoton: 'Create my password',
+        claveNota: 'That access is personal — keep it safe, like your bass.',
+        aula: o.clave ? 'After that, you always come in here:' : 'You come in with your usual email and password, here:',
+        aulaBoton: 'Go to my classroom',
+        dudas: 'If a question comes up along the way, ask me from the classroom. I answer them personally.',
+        cierre: 'See you inside.',
+        sign: 'Emilse',
+        pd: 'PS: If something doesn’t work, write to info@emilserios.com and it comes straight to me. And if the password link has expired, use “First time, or forgot your password?” on the sign-in page.',
+      }
+    : {
+        subject: `Tu acceso a ${comillas(o.formacion)}`,
+        rotulo: 'Emilse Rios · Aula',
+        p1: `¡Gracias por entrar a ${comillas(o.formacion)}!`,
+        incl: incl.length ? `Con ella tienes también ${incl.join(' y ')}, completa.` : '',
+        abre: o.abre
+          ? `Abro las puertas el ${o.abre} (${o.huso}). Desde ese momento tienes todo esperándote en tu aula virtual.`
+          : 'Ya tienes todo esperándote en tu aula virtual.',
+        clave: 'Este es tu enlace para crear tu contraseña:',
+        claveBoton: 'Crear mi contraseña',
+        claveNota: 'Ese acceso es personal, cuídalo como tu contrabajo.',
+        aula: o.clave ? 'Después, entras siempre por aquí:' : 'Entras con tu correo y tu contraseña de siempre, por aquí:',
+        aulaBoton: 'Ir a mi aula',
+        dudas: 'Si te surge una duda en el camino, pregúntame desde el aula. Las respondo personalmente.',
+        cierre: 'Nos vemos dentro.',
+        sign: 'Emilse',
+        pd: 'PD: Si algo no funciona, escribe a info@emilserios.com y me llega directo a mí. Y si el enlace de la contraseña ya caducó, entra por «¿Primera vez, o se te olvidó la clave?» en la pantalla de acceso.',
+      };
+  const PD = 'margin:0;font-size:14px;line-height:1.55;color:#5c5c5b;font-style:italic;';
+  const enlace = (href: string, rotulo: string) =>
+    `<p style="${P}margin-bottom:24px;"><a href="${href}" style="color:#0d0d0d;text-decoration:underline;">${esc(rotulo)} →</a></p>`;
+  const cuerpo = [
+    `<p style="${P}">${esc(t.p1)}</p>`,
+    t.incl && `<p style="${P}">${esc(t.incl)}</p>`,
+    `<p style="${P}margin-bottom:24px;">${esc(t.abre)}</p>`,
+    o.clave && `<p style="${P}margin-bottom:8px;">${esc(t.clave)}</p>`,
+    o.clave && enlace(o.clave, t.claveBoton),
+    o.clave && `<p style="${P}margin-bottom:24px;">${esc(t.claveNota)}</p>`,
+    `<p style="${P}margin-bottom:8px;">${esc(t.aula)}</p>`,
+    enlace(o.aula, t.aulaBoton),
+    `<p style="${P}">${esc(t.dudas)}</p>`,
+    `<p style="${P}margin-bottom:4px;">${esc(t.cierre)}</p>`,
+    `<p style="${P}margin-bottom:32px;font-style:italic;">${t.sign}</p>`,
+    `<p style="${PD}">${esc(t.pd)}</p>`,
+  ]
+    .filter(Boolean)
+    .join('\n          ');
+  const html = carta(lang, t.rotulo, t.abre, cuerpo);
+  const text = [
+    t.p1,
+    t.incl,
+    t.abre,
+    o.clave ? `${t.clave}\n${o.clave}\n${t.claveNota}` : '',
+    `${t.aula}\n${o.aula}`,
+    t.dudas,
+    `${t.cierre}\n${t.sign}`,
+    t.pd,
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+  return { subject: t.subject, html, text };
+}
+
+/**
+ * A Emi: alguien pagó un curso y **no se le pudo dar el acceso solo**, porque
+ * su ficha no tiene elegido el curso del aula en la Tienda. Siempre en
+ * español, como el panel.
+ */
+export function correoCompraSinCurso(o: {
+  correo: string;
+  formacion: string;
+  fichas: string[];
+  panel: string;
+}): { subject: string; html: string; text: string } {
+  const subject = `Compra sin acceso: ${o.formacion} · ${o.correo}`;
+  const p1 = `${o.correo} pagó «${o.formacion}», pero no le pude dar el acceso: en la Tienda, la ficha no tiene elegido su curso del aula (${o.fichas.join(', ')}).`;
+  const p2 = 'Dos cosas: dale el acceso a mano en Personas, y elige el curso de esa ficha en la Tienda para que las próximas compras entren solas.';
+  const cuerpo = `<p style="${P}">${esc(p1)}</p>
+          <p style="${P}">${esc(p2)}</p>
+          <p style="${P}margin-bottom:0;"><a href="${o.panel}" style="color:#0d0d0d;text-decoration:underline;">Abrir el panel →</a></p>`;
+  const html = carta('es', 'Emilse Rios · Aviso de compra', p1, cuerpo);
+  return { subject, html, text: `${p1}\n\n${p2}\n\n${o.panel}` };
 }

@@ -297,5 +297,15 @@ export const catalogo: Product[] = [membresia, diapason, escalas, desdeCero, vib
  */
 export const tienePagina = (p: Product): boolean => p.estado === 'venta' || tieneCarta(p.slug);
 
+/**
+ * Las fichas cuya foto va **siempre a color**, en Formaciones, en su carta y
+ * en el escritorio del aula. El sistema pone las fotos en blanco y negro;
+ * esta es la excepción, con fecha: la del mar de «Tu vibrato como un
+ * cantante», que en gris «no se entiende lo que es» (Emi, 9 oct 2026). Va por
+ * la ficha, no por el fichero: si Emi sube otra foto desde la Tienda, también
+ * sale a color. Para devolverla al gris, se quita de acá.
+ */
+export const FOTOS_A_COLOR: ReadonlySet<string> = new Set(['tu-vibrato-como-un-cantante']);
+
 export const buscarProducto = (slug: string): Product | undefined =>
   catalogo.find((p) => p.slug === slug);

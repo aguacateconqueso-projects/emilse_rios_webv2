@@ -188,3 +188,46 @@ export async function suscribir(email: string, lang: 'es' | 'en'): Promise<Resul
   });
   return { ok: false, motivo: 'rechazado', detalle: `HTTP ${res.status}` };
 }
+
+/**
+ * Apunta en el perfil de Klaviyo la formación que le interesa a quien se
+ * suscribe desde «Avísame cuando abra» (9 oct 2026). Emi preguntó qué pasa con
+ * ese botón: «¿debe llegarme un aviso? Así lo invito al news y yo tengo
+ * referencia de quiénes se interesan por los cursos».
+ *
+ * Deja dos propiedades en el perfil: **`interes_<slug>` = `true`** —una por
+ * formación, así se acumulan— e `interes_ultimo` con la última. En Klaviyo,
+ * un segmento con «Properties about someone → `interes_todo-el-diapason` is
+ * true» es la lista de a quién avisar cuando abra. Va con el permiso de
+ * `profiles`, que la clave ya tiene.
+ *
+ * Usa `profile-import`, que crea el perfil o lo actualiza **sin tocar su
+ * suscripción**: el alta la sigue haciendo `suscribir()`. Nunca falla hacia
+ * fuera: si Klaviyo no lo acepta, queda en los logs y el alta sigue.
+ */
+export async function marcarInteres(email: string, slug: string): Promise<void> {
+  if (!API_KEY) return;
+  try {
+    const res = await fetch('https://a.klaviyo.com/api/profile-import', {
+      method: 'POST',
+      headers: {
+        Authorization: `Klaviyo-API-Key ${API_KEY}`,
+        revision: REVISION,
+        accept: 'application/vnd.api+json',
+        'content-type': 'application/vnd.api+json',
+      },
+      body: JSON.stringify({
+        data: {
+          type: 'profile',
+          attributes: { email, properties: { [`interes_${slug}`]: true, interes_ultimo: slug } },
+        },
+      }),
+    });
+    if (!res.ok) {
+      const detalle = await res.text().catch(() => '');
+      console.error('[klaviyo] no se pudo guardar el interés', { status: res.status, slug, cuerpo: detalle.slice(0, 1000) });
+    }
+  } catch (e: any) {
+    console.error('[klaviyo] no se pudo guardar el interés', slug, e?.message || e);
+  }
+}

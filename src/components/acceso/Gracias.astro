@@ -29,7 +29,7 @@
  * misma pantalla de contraseña nueva. Una pieza menos que mantener.
  */
 import type { Lang } from '../../i18n/ui';
-import { useAula, clavePath, membresiaPath, entrarPath } from '../../i18n/aula';
+import { useAula, clavePath, membresiaPath, entrarPath, escritorioPath } from '../../i18n/aula';
 import { isSupabaseConfigured } from '../../lib/supabase';
 import Boton from '../Boton.astro';
 import CampoClave from './CampoClave.astro';
@@ -45,6 +45,7 @@ const a = useAula(lang);
   class="gracias"
   data-gracias
   data-destino={membresiaPath(lang)}
+  data-destino-curso={escritorioPath(lang)}
   data-redirect-clave={clavePath(lang)}
   data-t-going={a('thanks.going')}
   data-t-go={a('thanks.go')}
@@ -129,6 +130,8 @@ const a = useAula(lang);
   if (caja) {
     const $ = (sel: string) => caja.querySelector(sel) as HTMLElement | null;
     const destino = caja.dataset.destino!;
+    /* Quien compró un curso (9 oct 2026) va a su escritorio, no a la membresía. */
+    const destinoCurso = caja.dataset.destinoCurso!;
     const redirectClave = caja.dataset.redirectClave!;
     const T = {
       going: caja.dataset.tGoing!,
@@ -237,7 +240,7 @@ const a = useAula(lang);
           fallo(T.signinFailed);
           return;
         }
-        location.assign(destino);
+        location.assign(data.tipo === 'curso' ? destinoCurso : destino);
       } catch (e: any) {
         fallo(T.failed + (e?.message || ''));
       }

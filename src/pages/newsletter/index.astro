@@ -1,0 +1,18 @@
+---
+/** La portada del newsletter (9 oct 2026). Ver `src/components/Newsletter.astro`. */
+import Base from '../../layouts/Base.astro';
+import Newsletter from '../../components/Newsletter.astro';
+import { useTranslations } from '../../i18n/ui';
+
+const lang = 'es' as const;
+const t = useTranslations(lang);
+---
+
+<Base
+  lang={lang}
+  title={`${t('news.title')} — ${t('news.kicker')} · Emilse Ríos`}
+  description={t('site.description')}
+  route="newsletter"
+>
+  <Newsletter lang={lang} />
+</Base>

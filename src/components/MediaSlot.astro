@@ -33,8 +33,14 @@ interface Props {
    * centro de la foto.
    */
   position?: string;
+  /**
+   * A color siempre, sin el blanco y negro del sistema. Es una excepción con
+   * nombre: la foto del mar del vibrato, que en gris no se entiende (9 oct
+   * 2026). Ver `FOTOS_A_COLOR` en `src/data/aula.ts`.
+   */
+  color?: boolean;
 }
-const { src, alt = '', placeholder, ratio, width = 800, position } = Astro.props;
+const { src, alt = '', placeholder, ratio, width = 800, position, color = false } = Astro.props;
 ---
 
 <div class="slot" style={ratio ? `aspect-ratio:${ratio}` : undefined}>
@@ -45,7 +51,7 @@ const { src, alt = '', placeholder, ratio, width = 800, position } = Astro.props
         alt={alt}
         loading="lazy"
         decoding="async"
-        class="slot__img"
+        class:list={['slot__img', color && 'slot__img--color']}
         style={position ? `object-position:${position}` : undefined}
       />
     ) : src ? (
@@ -54,7 +60,7 @@ const { src, alt = '', placeholder, ratio, width = 800, position } = Astro.props
         alt={alt}
         width={width}
         densities={[1, 2]}
-        class="slot__img"
+        class:list={['slot__img', color && 'slot__img--color']}
         style={position ? `object-position:${position}` : undefined}
       />
     ) : (
@@ -82,6 +88,10 @@ const { src, alt = '', placeholder, ratio, width = 800, position } = Astro.props
     object-fit: cover;
     /* Las fotografías van en blanco y negro. */
     filter: grayscale(1);
+  }
+
+  .slot__img--color {
+    filter: none;
   }
 
   .slot__label {

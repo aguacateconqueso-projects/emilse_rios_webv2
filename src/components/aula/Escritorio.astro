@@ -9,11 +9,18 @@
  *
  * Después, en el orden en que importan:
  *   1. **Sigue por donde ibas** — la única acción grande, porque es la que
- *      hace el 90 % de las visitas: se entra a seguir, no a explorar.
- *   2. **Mis cursos**, con su avance.
+ *      hace el 90 % de las visitas: se entra a seguir, no a explorar. **Con
+ *      el nombre de la formación en grande** y la clase debajo, chica (9 oct
+ *      2026, Emi): con la clase en grande se leía «Clase nueva» —el nombre
+ *      que el panel le pone a una clase recién creada— y no se entendía qué
+ *      era.
+ *   2. **Mis otras formaciones**, con su avance: las demás, sin la de arriba.
+ *      Si no hay otras, no sale. Las que todavía no abrieron (una preventa)
+ *      salen con la fecha —«Abre el viernes 16…»— y no se pueden retomar.
  *   3. **La membresía**, si la tiene. Sin barra de avance: es un flujo que no
  *      termina —un ejercicio nuevo cada jueves—, y una barra mentiría.
- *   4. Formaciones, para quien quiere seguir aprendiendo.
+ *   4. **Formaciones**, con «Ver todas» (9 oct 2026, Emi: «¿Quieres seguir
+ *      aprendiendo?» no le gustaba).
  *
  * **Todo lo de los cursos llega por consulta**, no va escrito en el HTML: sale
  * de Supabase con la RLS decidiendo (`src/lib/aula-datos.ts`). Lo que pinta el
@@ -21,9 +28,10 @@
  */
 import { getImage } from 'astro:assets';
 import type { Lang } from '../../i18n/ui';
-import { routePath, useTranslations } from '../../i18n/ui';
+import { routePath } from '../../i18n/ui';
 import { useAula, membresiaPath } from '../../i18n/aula';
-import { catalogo } from '../../data/aula';
+import { catalogo, FOTOS_A_COLOR } from '../../data/aula';
+import { lanzamientos, fechaPuertas } from '../../data/lanzamientos';
 import Boton from '../Boton.astro';
 
 interface Props {
@@ -31,7 +39,6 @@ interface Props {
 }
 const { lang } = Astro.props;
 const a = useAula(lang);
-const t = useTranslations(lang);
 
 /**
  * Lo que el script necesita del catálogo: el nombre y la foto de cada curso
@@ -49,9 +56,22 @@ const deCatalogo = await Promise.all(
     })),
 );
 
+/**
+ * Las formaciones que todavía no abrieron: quien las compró en preventa las
+ * ve con la fecha, y se abren solas a esa hora. Ver `src/data/lanzamientos.ts`.
+ */
+const aperturas = Object.fromEntries(
+  Object.entries(lanzamientos).map(([slug, l]) => [
+    slug,
+    { abre: l.abre, chip: a('course.opensChip').replace('{fecha}', fechaPuertas(l.abre, lang)) },
+  ]),
+);
+
 const paraJs = {
   lang,
   catalogo: deCatalogo,
+  aperturas,
+  aColor: [...FOTOS_A_COLOR],
   raiz: lang === 'es' ? '/aulavirtual/curso/' : '/en/classroom/course/',
   t: {
     clases: a('course.lessons'),
@@ -63,6 +83,9 @@ const paraJs = {
     error: a('desk.error'),
     borrador: a('desk.draft'),
     respuesta: a('desk.newAnswer'),
+    mias: a('desk.mine'),
+    otras: a('desk.mineOthers'),
+    preparando: a('course.soon'),
   },
 };
 
@@ -81,8 +104,8 @@ const membresiaHref = membresiaPath(lang);
   <div class="retomar">
     <div class="retomar__txt">
       <p class="eyebrow" id="retomar-h">{a('desk.resume')}</p>
-      <p class="retomar__curso mono" data-r-curso></p>
-      <p class="retomar__clase" data-r-clase></p>
+      <p class="retomar__curso" data-r-curso></p>
+      <p class="retomar__clase mono" data-r-clase></p>
       <p class="retomar__meta soft tnum" data-r-meta></p>
     </div>
     <Boton class="boton--solid" href="#" data-r-cta>{a('desk.resumeCta')}</Boton>
@@ -90,8 +113,8 @@ const membresiaHref = membresiaPath(lang);
 </section>
 
 {/* --- Mis cursos -------------------------------------------------------- */}
-<section class="app-wrap desk-sec" aria-labelledby="mios-h">
-  <h2 class="eyebrow desk-sec__h" id="mios-h">{a('desk.mine')}</h2>
+<section class="app-wrap desk-sec" aria-labelledby="mios-h" data-mios>
+  <h2 class="eyebrow desk-sec__h" id="mios-h" data-mios-h>{a('desk.mine')}</h2>
   <p class="soft desk-estado" data-cursos-estado role="status">{a('desk.loading')}</p>
   <ul class="fichas" role="list" data-cursos></ul>
 
@@ -110,6 +133,7 @@ const membresiaHref = membresiaPath(lang);
         <span class="ficha__nombre" data-f-nombre></span>
         <span class="ficha__resumen soft" data-f-resumen></span>
         <span class="estado ficha__estado" data-f-borrador hidden></span>
+        <span class="estado estado--tinta ficha__estado" data-f-abre hidden></span>
         <span class="estado estado--tinta ficha__estado" data-f-respuesta hidden></span>
       </a>
     </li>
@@ -132,9 +156,8 @@ const membresiaHref = membresiaPath(lang);
 <section class="app-wrap desk-sec desk-tienda" aria-labelledby="tienda-h">
   <div class="desk-tienda__txt">
     <h2 class="app-h2" id="tienda-h">{a('desk.storeTitle')}</h2>
-    <p class="soft">{a('desk.storeLead')}</p>
   </div>
-  <Boton href={routePath('products', lang)}>{t('nav.products')}</Boton>
+  <Boton href={routePath('products', lang)}>{a('desk.storeCta')}</Boton>
 </section>
 
 <script>
@@ -143,9 +166,12 @@ const membresiaHref = membresiaPath(lang);
   import { supabase } from '../../lib/supabase';
 
   type Ficha = { slug: string; nombre: string; alt: string; foto: string | null };
+  type Apertura = { abre: string; chip: string };
   const D = JSON.parse(document.getElementById('escritorio-datos')!.textContent!) as {
     lang: 'es' | 'en';
     catalogo: Ficha[];
+    aperturas: Record<string, Apertura>;
+    aColor: string[];
     raiz: string;
     t: Record<string, string>;
   };
@@ -178,6 +204,14 @@ const membresiaHref = membresiaPath(lang);
     tienda.find((f) => f.slug === c.slug) ??
     D.catalogo.find((f) => f.slug === c.slug);
 
+  /* ¿Todavía no abrió? (9 oct 2026: la preventa.) Se mira por la ficha de la
+     Tienda que abre el curso. Emi lo ve igual —con la fecha— pero entra. */
+  const aperturaDe = (c: Curso): Apertura | null => {
+    const slug = fichaDe(c)?.slug;
+    const ap = slug ? D.aperturas[slug] : undefined;
+    return ap && Date.now() < Date.parse(ap.abre) ? ap : null;
+  };
+
   const nombreDe = (c: Curso) =>
     (lang === 'en' ? c.title_en || c.title_es : c.title_es || c.title_en) || fichaDe(c)?.nombre || c.slug;
 
@@ -190,31 +224,44 @@ const membresiaHref = membresiaPath(lang);
     (conPagina.includes(slug) ? `${D.raiz}${slug}/` : `${D.raiz}?c=${encodeURIComponent(slug)}`) +
     (clase ? `#${clase}` : '');
 
-  /* --- Mis cursos ---------------------------------------------------------- */
+  /* --- Mis (otras) formaciones ---------------------------------------------- */
+  function ficha(): HTMLElement {
+    const molde = $<HTMLTemplateElement>('[data-ficha]')!;
+    return molde.content.firstElementChild!.cloneNode(true) as HTMLElement;
+  }
+
+  function ponerFoto(li: HTMLElement, f: Ficha | undefined, nombre: string) {
+    const img = $<HTMLImageElement>('[data-f-img]', li)!;
+    const hueco = $('[data-f-hueco]', li)!;
+    if (f?.foto) {
+      img.src = f.foto;
+      img.alt = f.alt;
+      /* La foto del mar, siempre a color (`FOTOS_A_COLOR`). */
+      img.classList.toggle('ficha__img--color', D.aColor.includes(f.slug));
+      hueco.remove();
+    } else {
+      img.remove();
+      hueco.textContent = nombre;
+    }
+  }
+
+  function chip(li: HTMLElement, sel: string, texto: string) {
+    const el = $(sel, li)!;
+    el.textContent = texto;
+    el.hidden = false;
+  }
+
   function pintarCursos(cursos: Curso[], avance: Record<string, Avance>, admin: boolean, nuevas: Set<string>) {
     const lista = $('[data-cursos]')!;
-    const molde = $<HTMLTemplateElement>('[data-ficha]')!;
-    lista.textContent = '';
-
     cursos.forEach((c) => {
       const clases = clasesDe(c);
       const hechas = clases.filter((l) => avance[l.id]?.hecho).length;
       const pct = clases.length ? Math.round((hechas / clases.length) * 100) : 0;
       const duracion = clases.reduce((s, l) => s + (l.duration_s ?? 0), 0);
-      const ficha = fichaDe(c);
 
-      const li = molde.content.firstElementChild!.cloneNode(true) as HTMLElement;
+      const li = ficha();
       $<HTMLAnchorElement>('[data-f-link]', li)!.href = hrefCurso(c.slug);
-      const img = $<HTMLImageElement>('[data-f-img]', li)!;
-      const hueco = $('[data-f-hueco]', li)!;
-      if (ficha?.foto) {
-        img.src = ficha.foto;
-        img.alt = ficha.alt;
-        hueco.remove();
-      } else {
-        img.remove();
-        hueco.textContent = nombreDe(c);
-      }
+      ponerFoto(li, fichaDe(c), nombreDe(c));
       $('[data-f-pct]', li)!.textContent = `${pct} %`;
       const cifras = [`${clases.length} ${t.clases}`];
       if (duracion > 0) cifras.push(reloj(duracion));
@@ -225,17 +272,38 @@ const membresiaHref = membresiaPath(lang);
       const r = $('[data-f-resumen]', li)!;
       if (resumen) r.textContent = resumen;
       else r.remove();
-      if (admin && !c.published) {
-        const b = $('[data-f-borrador]', li)!;
-        b.textContent = t.borrador;
-        b.hidden = false;
-      }
+      if (admin && !c.published) chip(li, '[data-f-borrador]', t.borrador);
+      const ap = aperturaDe(c);
+      if (ap) chip(li, '[data-f-abre]', ap.chip);
       /* Emi respondió algo que todavía no leyó: se apaga al abrir el hilo. */
-      if (nuevas.has(c.id)) {
-        const n = $('[data-f-respuesta]', li)!;
-        n.textContent = t.respuesta;
-        n.hidden = false;
-      }
+      if (nuevas.has(c.id)) chip(li, '[data-f-respuesta]', t.respuesta);
+      lista.appendChild(li);
+    });
+  }
+
+  /**
+   * Las formaciones que tiene y que todavía no se pueden ver: compradas en
+   * preventa con el curso sin publicar, o a su nombre mientras Emi lo prepara.
+   * La base de datos no deja leer un curso sin publicar, así que salen de la
+   * ficha de la Tienda que lo abre: su nombre, su foto y la fecha —o «Lo
+   * estoy preparando»—. No son un enlace: todavía no hay nada que abrir.
+   */
+  function pintarPorAbrir(ids: string[]) {
+    const lista = $('[data-cursos]')!;
+    ids.forEach((id) => {
+      const f = tienda.find((x) => x.course_id === id);
+      if (!f) return;
+      const li = ficha();
+      const link = $<HTMLAnchorElement>('[data-f-link]', li)!;
+      link.removeAttribute('href');
+      link.setAttribute('aria-disabled', 'true');
+      ponerFoto(li, f, f.nombre);
+      $('[data-f-nombre]', li)!.textContent = f.nombre;
+      li.querySelector('.ficha__meta')?.remove();
+      li.querySelector('.ficha__meter')?.remove();
+      $('[data-f-resumen]', li)!.remove();
+      const ap = D.aperturas[f.slug];
+      chip(li, '[data-f-abre]', ap && Date.now() < Date.parse(ap.abre) ? ap.chip : t.preparando);
       lista.appendChild(li);
     });
   }
@@ -244,8 +312,9 @@ const membresiaHref = membresiaPath(lang);
      La clase tocada más recientemente, de cualquier curso. Si ya está vista,
      la SIGUIENTE sin ver: volver a ponerle la que acaba de terminar no ayuda.
      Sin nada tocado, la primera clase del primer curso, y el botón dice
-     «empezar» en vez de «continuar». */
-  function pintarRetomar(cursos: Curso[], avance: Record<string, Avance>) {
+     «empezar» en vez de «continuar». Las formaciones que todavía no abrieron
+     no se retoman. Devuelve la formación que puso arriba. */
+  function pintarRetomar(cursos: Curso[], avance: Record<string, Avance>): Curso | undefined {
     const caja = $('[data-retomar]')!;
     let mejor: { c: Curso; id: string; ts: number } | null = null;
     cursos.forEach((c) =>
@@ -271,7 +340,7 @@ const membresiaHref = membresiaPath(lang);
       clase = curso ? clasesDe(curso)[0] : undefined;
       empezar = true;
     }
-    if (!curso || !clase) return;
+    if (!curso || !clase) return undefined;
 
     $('[data-r-curso]', caja)!.textContent = nombreDe(curso);
     $('[data-r-clase]', caja)!.textContent = tituloClase(clase);
@@ -287,6 +356,7 @@ const membresiaHref = membresiaPath(lang);
     cta.href = hrefCurso(curso.slug, clase.id);
     cta.querySelector('.boton__label')!.textContent = empezar ? t.empezar : t.continuar;
     caja.hidden = false;
+    return curso;
   }
 
   (async () => {
@@ -297,16 +367,31 @@ const membresiaHref = membresiaPath(lang);
 
       $('[data-membresia]')!.hidden = !(quien.membresia || quien.admin || datos.modo === 'maqueta');
 
-      const [cursos, avance, nuevas] = await Promise.all([
+      const [cursos, avance, nuevas, accesos] = await Promise.all([
         datos.misCursos(),
         datos.avance(),
         datos.respuestasNuevas(),
+        datos.misAccesos(),
         leerTienda(),
       ]);
-      pintarCursos(cursos, avance, quien.admin, nuevas);
-      pintarRetomar(cursos, avance);
-      estado.textContent = cursos.length ? '' : t.vacio;
-      estado.hidden = cursos.length > 0;
+      /* Emi entra a todo; las alumnas, a lo que ya abrió. */
+      const abiertos = quien.admin ? cursos : cursos.filter((c) => !aperturaDe(c));
+      const arriba = pintarRetomar(abiertos, avance);
+      const otros = cursos.filter((c) => c !== arriba);
+      const visibles = new Set(cursos.map((c) => c.id));
+      const porAbrir = accesos.filter((id) => !visibles.has(id));
+
+      $('[data-cursos]')!.textContent = '';
+      pintarCursos(otros, avance, quien.admin, nuevas);
+      pintarPorAbrir(porAbrir);
+
+      const hay = $('[data-cursos]')!.children.length > 0;
+      /* Con una formación arriba, la lista es «Mis otras formaciones», y si no
+         hay otras, no sale. Sin nada arriba, «Mis formaciones». */
+      $('[data-mios-h]')!.textContent = arriba ? t.otras : t.mias;
+      $('[data-mios]')!.hidden = Boolean(arriba) && !hay;
+      estado.textContent = hay || arriba ? '' : t.vacio;
+      estado.hidden = hay || Boolean(arriba);
       document.dispatchEvent(new CustomEvent('botones:nuevos'));
     } catch (e) {
       console.error('[escritorio]', e);
@@ -358,17 +443,18 @@ const membresiaHref = membresiaPath(lang);
     min-width: 0;
   }
 
+  /* La formación, en grande; la clase, debajo y chica (9 oct 2026). */
   .retomar__curso {
     margin-top: var(--space-3);
-  }
-
-  .retomar__clase {
-    margin-top: var(--space-1);
     font-family: var(--font-display);
     font-size: var(--text-anchor);
     line-height: var(--leading-anchor);
     letter-spacing: var(--tracking-section);
     text-wrap: balance;
+  }
+
+  .retomar__clase {
+    margin-top: var(--space-2);
   }
 
   .retomar__meta {
@@ -406,6 +492,10 @@ const membresiaHref = membresiaPath(lang);
     }
   }
 
+  :global(.ficha__link[aria-disabled]) {
+    cursor: default;
+  }
+
   :global(.ficha__link) {
     display: flex;
     flex-direction: column;
@@ -431,6 +521,10 @@ const membresiaHref = membresiaPath(lang);
     transition:
       filter 0.5s var(--ease-reveal),
       transform 0.5s var(--ease-reveal);
+  }
+
+  :global(.ficha__img--color) {
+    filter: none;
   }
 
   @media (hover: hover) {

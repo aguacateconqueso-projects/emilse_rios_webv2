@@ -4,8 +4,17 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 3 de octubre de 2026 —**la web está en vivo**—.
-Cerrado lo del newsletter: **cada idioma recibe su serie de bienvenida y ya
+**Última actualización:** 9 de octubre de 2026 —**la web está en vivo**—.
+**La tanda de correcciones de Emi del 9 oct** (un PDF con catorce pedidos):
+**la preventa de «Todo el diapasón»** —195 € con los 240 € tachados hasta el
+viernes 16 de octubre a las 23:59, cuando abren las puertas—, **pagar con
+los enlaces de Stripe de Emi ya da acceso solo** y manda un correo, el aula
+enseña la formación cerrada hasta esa hora, **todo el inglés bajo
+`/en/programs/` con slugs en inglés**, **las tres primeras entradas del
+newsletter** en `/newsletter/`, «Avísame» que guarda en Klaviyo qué
+formación interesa, y el copy del aula y de *Sobre mí*. Va en el recuadro 🧵
+de abajo, el primero, y lo que le toca a Adrián en 📋 (puntos 28 a 37).
+Antes, el 3 oct, se cerró lo del newsletter: **cada idioma recibe su serie de bienvenida y ya
 no llega a spam** (puntos 26 y 27 de 📋, hechos por Adrián). Lo del 1 oct,
 en el **PR #62**: **el newsletter, en dos
 idiomas** —cada formulario da de alta en la lista de su idioma, y cada lista
@@ -41,6 +50,56 @@ suscribió desde la Home el 24 sep y funcionó. ⚠️ **El proyecto de Vercel e
 `emilse-rios-webv2_1`**: las vistas previas buenas empiezan por
 `emilse-rios-webv21-git-…` (ver la regla de trabajo, justo abajo). El detalle de cada cosa está en las secciones que siguen a **La
 cortina**, de la más nueva a la más vieja.
+
+> **🧵 9 oct 2026: la tanda de Emi —la preventa, el inglés, las entradas y
+> el aula—** (rama `claude/nifty-darwin-2apqzg`, desde `main`; **PR #64**).
+> Su vista previa:
+> **https://emilse-rios-webv21-git-claude-8a85ec-adrians-projects-594b3131.vercel.app**
+> Emi mandó un PDF con catorce pedidos; Adrián dio el visto bueno a todas las
+> recomendaciones («dale play»). En una línea cada uno —el detalle, en **La
+> tanda del 9 de octubre**, justo debajo de **La cortina**—:
+>
+> 1. **La preventa del diapasón**: en la ficha de precio, ~~240 €~~ **195 €**
+>    hasta el **viernes 16 oct a las 23:59** (hora de Madrid), con el botón al
+>    enlace de pago de Emi en cada idioma. A esa hora cambia sola.
+> 2. **«Todas las escalas»** dice la fecha de apertura, sin precio especial,
+>    con «Avísame».
+> 3. **Pagar da acceso solo y llega un correo**: el webhook reconoce el
+>    enlace de pago, crea la cuenta si hace falta, abre el diapasón **y las
+>    escalas** (las trae dentro) y manda «Tu acceso a…» con el enlace al aula,
+>    la fecha y, si la cuenta es nueva, el de la contraseña.
+> 4. **Todo el inglés bajo `/en/programs/`, con slugs en inglés**
+>    (`/en/programs/fingerboard/`…), 301 desde `/en/courses/` y
+>    `/en/products/`. El menú en inglés dice **Programs**.
+> 5. **Membresía**: fuera «Sin biblioteca…».
+> 6. **Membresía**: «¿Tienes preguntas?» — «Este es nuestro chat 1:1. Las
+>    respondo personalmente, pero ten paciencia: podría demorar unas horas.»
+>    (y lo mismo, en corto, en el hilo de los cursos).
+> 7. **La foto del mar del vibrato, siempre a color** (excepción con nombre).
+> 8. **Formaciones**: «Abrimos puertas el viernes 16 de octubre a las 23:59»
+>    en vez de «Próximamente», en el diapasón y las escalas.
+> 9. **Escritorio**: la formación en grande arriba —la clase, chica,
+>    debajo— y «Mis otras formaciones». «Clase nueva» era el nombre que el
+>    panel le pone a una clase recién creada: **Emi tiene que renombrarla**.
+> 10. **Escritorio**: «Formaciones» y «Ver todas». Y en todo el aula,
+>     «formación» en vez de «curso» («program» en inglés).
+> 11. ***About* en inglés**: las orquestas y las instituciones con su nombre
+>     en español.
+> 12. **«HER-MO-SO.»** en inglés: **«BEAU-TI-FUL.»**, con la misma ropa.
+> 13. **«Avísame cuando abra»**: el campo dice «te aviso cuando abra
+>     "X"», da de alta en el newsletter como siempre **y guarda en Klaviyo la
+>     formación que le interesa** (`interes_<slug>` en el perfil).
+> 14. **Las tres entradas del newsletter**, en `/newsletter/` y
+>     `/en/newsletter/`, con «Newsletter» en el menú: el bloque del newsletter
+>     arriba, el título pensado para el buscador, el correo de Emi, sus dos
+>     posdatas y otro campo al final. **Las tres en los dos idiomas**: las
+>     traducciones son nuestras (`traducida: true`) y conviene que Emi las lea.
+>
+> **Lo que le toca a Adrián, antes del 16** (puntos 28 a 37 de 📋): los
+> **enlaces de 240 €** —sin ellos, al acabar la preventa el diapasón vuelve a
+> «Avísame»—, la redirección de Stripe a `/gracias/`, que Emi **publique los
+> dos cursos y los ate a su ficha en la Tienda**, una compra de prueba
+> después de mergear, y **desactivar los enlaces de 195 € el 17**.
 
 > **🧵 1 oct 2026, de noche: el newsletter en dos idiomas, y el spam**
 > (rama `claude/fervent-edison-wbg8nb`, rearrancada desde `main` después de
@@ -326,8 +385,9 @@ cortina**, de la más nueva a la más vieja.
 > cerrar esa sesión. Lección: **lo que se empuja a una rama con el PR ya
 > mergeado no existe**; ver **Cómo trabajamos**.
 >
-> La última vista previa es la de `claude/fervent-edison-wbg8nb` (PR #60 y
-> PR #61, 1 oct): `…-git-claude-952006-…`. Antes, la de
+> La última vista previa es la de `claude/nifty-darwin-2apqzg` (PR #64, 9
+> oct): `…-git-claude-8a85ec-…`. Antes, la de `claude/fervent-edison-wbg8nb`
+> (PR #60 a #63, 1 oct): `…-git-claude-952006-…`. Antes, la de
 > `claude/magical-keller-qtja38` (PR #58, mergeado el 1 oct):
 > `…-git-claude-aa2776-…`. La de
 > `claude/affectionate-faraday-ddgz0m` (PR #54 a #57) era:
@@ -342,7 +402,7 @@ cortina**, de la más nueva a la más vieja.
 > traer una sola fila). Vercel tarda un par de minutos en construir después
 > de cada push. Ver **La cortina → Cómo se sigue viendo la web**.
 
-> **📋 LO QUE FALTA — la lista vigente (cierre del 1 oct 2026).** Es la única
+> **📋 LO QUE FALTA — la lista vigente (cierre del 9 oct 2026).** Es la única
 > que manda: las de más abajo («cierre del 23 sep», «22 sep») quedan como
 > historia y lo que siga en pie de ellas está copiado acá. Al cerrar una
 > sesión, se tacha lo hecho y se añade lo nuevo **acá**, no en otra lista. Los
@@ -431,7 +491,11 @@ cortina**, de la más nueva a la más vieja.
 >     que las etiquetas ES / EN salgan bien y el plan de «+ Desde Bunny»
 >     empareje cada clase con su versión (solo se probó con una biblioteca
 >     simulada).
-> 13. [ ] **El cobro de los cursos, y que pagar dé acceso solo.** *Adrián, 28
+> 13. [~] *(9 oct 2026: **hecho para los cursos con enlace de pago de Stripe**
+>     —los de `src/data/lanzamientos.ts`—: el webhook da el acceso y manda el
+>     correo. Ver **La tanda del 9 de octubre → La preventa**. Lo que sigue
+>     abajo queda para un checkout propio, si algún día hace falta.)*
+>     **El cobro de los cursos, y que pagar dé acceso solo.** *Adrián, 28
 >     sep: los precios los sube él más tarde, y **los cobros se confirman
 >     cuando Emi esté lista para su lanzamiento**.* Ya no hay que elegir dónde
 >     se da el acceso: el webhook vive acá desde el #58, así que es (b),
@@ -496,7 +560,9 @@ cortina**, de la más nueva a la más vieja.
 >     `mailto:` del botón por un enlace de pago de Stripe.
 > 20. [ ] **La foto de «Todas las escalas»**: la de hoy es provisional. Emi la
 >     cambia desde el panel → Tienda.
-> 21. [~] **Ajustes de copy y de visualización en el aula** (Adrián, 1 oct:
+> 21. [~] *(9 oct: la segunda tanda, la de Emi —«Sin biblioteca», «¿Tienes
+>     preguntas?», el escritorio, «formación»—, hecha en el PR #64.)*
+>     **Ajustes de copy y de visualización en el aula** (Adrián, 1 oct:
 >     «te voy a pedir unos cambios de copy después y quizás de visualización
 >     en el aula»). *La primera tanda, hecha esa misma tarde* (recuadro 🧵):
 >     primera persona, correos, «Mostrar» y Mensajes por persona. Si llegan
@@ -549,6 +615,61 @@ cortina**, de la más nueva a la más vieja.
 >     `DKIM: PASS` con `news.emilserios.com`, `DMARC: PASS`, y sin «a través
 >     de shared.klaviyomail.com». Ver **El newsletter, en dos idiomas → El
 >     spam**.
+>
+> **E. La preventa de octubre (9 oct 2026) — antes del viernes 16 a las
+> 23:59.** Todo en **La tanda del 9 de octubre**.
+>
+> 28. [ ] **Mergear el PR #64** y mirarlo en vivo: Formaciones con la fecha,
+>     la ficha de precio del diapasón con 240 € tachado y 195 €, y el botón
+>     que lleva al enlace de Stripe de cada idioma.
+> 29. [ ] **⚠️ Los dos enlaces de pago de 240 € del diapasón** (ES y EN), y
+>     si «Todas las escalas» se vende sola desde el 16, **sus dos de 87 €**.
+>     Se pegan en `src/data/lanzamientos.ts` (`venta.enlaces`), en un PR.
+>     **Sin ellos, a las 23:59 del 16 el diapasón vuelve a «Avísame»** en vez
+>     de venderse a 240 €: el código no inventa un enlace.
+> 30. [ ] **Los dos cursos, en el panel** (Emi): «Todo el diapasón» y «Todas
+>     las escalas» **cargados, publicados** y, en **Tienda → cada ficha →
+>     curso del aula**, atados a su curso. Pagar abre el curso que diga esa
+>     columna; si una ficha no tiene curso, el pago entra igual pero el
+>     acceso no, y a Emi le llega un correo «Compra sin acceso» para darlo a
+>     mano en Personas. Publicados antes del 16 no se ven antes: el aula los
+>     enseña cerrados, con la fecha, hasta las 23:59.
+> 31. [ ] **Stripe → cada enlace de pago (los dos de 195 € y los de 240 €) →
+>     After payment → «Don't show confirmation page» → redirigir a**
+>     `https://www.emilserios.com/gracias/?session_id={CHECKOUT_SESSION_ID}`
+>     (los de español) y
+>     `https://www.emilserios.com/en/thank-you/?session_id={CHECKOUT_SESSION_ID}`
+>     (los de inglés). Así quien paga pone su contraseña ahí mismo y entra,
+>     como en la membresía. **Sin esto también funciona**: Stripe enseña su
+>     página de gracias y todo va por el correo.
+> 32. [ ] **Comprobar que el webhook de Stripe escucha
+>     `checkout.session.completed`** (ya lo hace, por la membresía) y, si
+>     los enlaces aceptan transferencias u otros pagos que tardan, añadir
+>     **`checkout.session.async_payment_succeeded`**. Stripe → Developers →
+>     Webhooks → el endpoint de siempre.
+> 33. [ ] **Una compra de prueba después de mergear** (en las vistas previas
+>     no salen correos): un cupón al 100 % —en el enlace hay que activar
+>     «Allow promotion codes»— o una compra de verdad que luego se reembolsa.
+>     Tiene que llegar «Tu acceso a «Todo el diapasón»» y, en el aula, verse
+>     la formación cerrada con la fecha. Si no, buscar `[compras]` y
+>     `[stripe-webhook]` en Vercel → Logs.
+> 34. [ ] **⚠️ El sábado 17: desactivar los dos enlaces de 195 € en Stripe.**
+>     Un enlace de pago no caduca solo; quien lo tenga guardado seguiría
+>     pagando 195 € y el webhook le daría acceso igual.
+> 35. [ ] **Que Emi renombre «Clase nueva»** en Panel → Cursos: es el nombre
+>     que el panel le pone a una clase recién creada, y era lo que se leía
+>     en «Sigue por donde ibas».
+> 36. [ ] **Que Emi lea lo que se tradujo acá**: las tres entradas del
+>     newsletter en el idioma que no escribió (`traducida: true` en
+>     `src/content/entradas/`), los títulos de las tres, el texto de
+>     «Avísame» (`AVISO_FORMACION` en `src/data/cartas.ts`) y el correo de la
+>     compra (`correoCompra()` en `src/lib/correo.ts`). Y una duda de la
+>     entrada 3: «eso es bueno y no tanto, ¿je?» quedó tal cual; si era
+>     «¿eh?», es una letra.
+> 37. [ ] **En Klaviyo, un segmento por formación** para avisar cuando abra:
+>     «Properties about someone → `interes_todas-las-escalas` is true» (o
+>     `interes_contrabajo-desde-cero`, etc.). Lo escribe «Avísame» desde el
+>     9 oct; las altas de antes no lo tienen.
 >
 > **D. Cabos sueltos, sin prisa.**
 >
@@ -745,13 +866,18 @@ pagando sin recibir acceso.
 | **Sesión** | **Conectada y probada el 22 sep 2026**: se entra de verdad, contra el **mismo Supabase de la academia**, y el candado pide **suscripción al día**. Las variables y las Redirect URLs ya están puestas, y `set_admin.sql` también (24 sep). **Desde el 1 oct la membresía vive acá**: `/aulavirtual/membresia/` y `/en/classroom/membership/`, con las preguntas 1:1 con Emi. Ver `docs/CONECTAR-EL-AULA.md`. |
 | **Cursos** | **En la base de datos desde el 23 sep 2026** (`supabase/migrations/0009_cursos.sql`, **aplicada en Supabase el 24 sep 2026**). Emi los arma sola desde `/panel/#cursos`; el aula los lee por consulta, con la RLS decidiendo. Ver **El aula y el panel de Emi**. |
 | **Tienda** | **Desde el 23 sep 2026 la maneja Emi** desde el panel: las fichas de Formaciones, sus páginas de ventas (borrador y publicada) y quién tiene qué (`0010_tienda_paginas_mensajes.sql`, **aplicada el 24 sep 2026**). Formaciones y las páginas se resuelven en el servidor con un minuto de caché, y sin la base de datos enseñan lo del código. Ver **El panel de Emi, completo**. |
-| **Cobro** | **Desde el 22 sep 2026 vive acá.** `/api/checkout` crea la sesión de Stripe, `/gracias/` recoge a quien pagó y `/api/claim-account` le crea la cuenta. **El webhook también, desde el 1 oct** (`/api/stripe-webhook`, con la bienvenida por Resend): Stripe sigue llamando a la dirección de la academia, que ahora es este proyecto. Ver **✅ La salida**, arriba. Los cursos todavía no se cobran (punto 13). |
+| **Cobro** | **Los cursos, desde el 9 oct 2026**: con los enlaces de pago de Stripe de `src/data/lanzamientos.ts`, el webhook da el acceso y manda el correo de la compra (ver **La tanda del 9 de octubre**). **La membresía, desde el 22 sep 2026 vive acá.** `/api/checkout` crea la sesión de Stripe, `/gracias/` recoge a quien pagó y `/api/claim-account` le crea la cuenta. **El webhook también, desde el 1 oct** (`/api/stripe-webhook`, con la bienvenida por Resend): Stripe sigue llamando a la dirección de la academia, que ahora es este proyecto. Ver **✅ La salida**, arriba. Los cursos todavía no se cobran (punto 13). |
 | **Newsletter** | **Conectado desde el 22 sep 2026.** `/api/suscribir` da de alta en la lista real de Klaviyo (`SaE8Px`), con la API en su versión `2026-07-15`. `KLAVIYO_API_KEY` **puesta en Vercel el 23 sep 2026**, con los permisos Lists, Profiles y Subscriptions; **la prueba se hace al subir la cortina**, junto con la bienvenida de siete correos —ver **El newsletter, conectado → La primera prueba**—. La integración de WooCommerce de Klaviyo está muerta desde el 21 sep y **se apaga**: los cobros son de Stripe. |
 | **Lanzamiento** | **Hecho el 1 oct 2026.** Las variables de Stripe y Resend, puestas; la cortina, subida; las puertas de la membresía, abiertas hasta nuevo aviso; la compra de prueba, bien. Lo que queda: **📋 LO QUE FALTA**, arriba del todo. |
 
 **Formaciones y las páginas de ventas se resuelven en el servidor desde el 23
 sep 2026** (un minuto de caché): leen lo que Emi publica desde el panel y, si
 no hay nada, lo del código. Ver **El panel de Emi, completo**.
+
+**Desde el 9 oct 2026 el inglés de Formaciones vive en `/en/programs/`, con
+slugs en inglés** (`/en/programs/fingerboard/`…), y hay **`/newsletter/` y
+`/en/newsletter/`** con las entradas: ver **La tanda del 9 de octubre**. La
+lista de abajo es la de antes de ese día.
 
 Rutas vivas: `/` · `/en/` · `/sobre-mi/` · `/en/about/` · `/formaciones/` ·
 `/en/courses/` · `/formaciones/estudiemos-juntos/` ·
@@ -1030,6 +1156,226 @@ no tenía salida a `vercel.app`:
   variables); el otro, sin nada, lo borra Adrián el 24 sep 2026.
 
 ---
+
+## La tanda del 9 de octubre
+
+**9 de octubre de 2026** (PR #64). Emi mandó un PDF con catorce pedidos;
+Adrián los leyó con la sesión, se aclararon las dudas con recomendaciones y
+dio el «play» a todas. Van en un solo PR.
+
+### La preventa, y el cobro de los cursos
+
+**Lo que pidió Emi:** «Todo el diapasón» y «Todas las escalas» abren el
+**viernes 16 de octubre a las 23:59**. En la ficha de precio del diapasón,
+**240 € tachado y 195 €** solo en preventa, hasta esa hora; ese día abren las
+puertas y el precio sube. Las escalas dicen la fecha, sin precio distinto. Y
+«cuando alguien compre, ¿qué les llega? Un email que diga: este es el link a
+tu aula virtual, podrás entrar el día 16 a las 23:59». Mandó dos enlaces de
+pago de Stripe de 195 €, uno por idioma.
+
+**Todo sale de un fichero: `src/data/lanzamientos.ts`.** Por cada ficha, la
+hora de las puertas (`abre`, con la zona de Madrid), la preventa (precio y
+enlaces) y la venta de después (precio y enlaces), más las fichas que trae
+dentro (`incluye`: el diapasón trae las escalas). **Todo cambia solo con la
+hora**, sin que nadie toque nada esa noche:
+
+| | Antes del 16, 23:59 | Después |
+|---|---|---|
+| Formaciones, diapasón y escalas | «Abrimos puertas el viernes 16 de octubre a las 23:59» | «a la venta» con su precio, si hay enlaces; si no, «Próximamente» |
+| Carta del diapasón | ~~240 €~~ **195 €**, «Precio de preventa hasta…», la letra pequeña de cuándo se entra, botón «Acá te unes» al enlace de 195 € | la carta de siempre (240 €) con el botón al enlace de 240 €; **sin enlace, «Avísame»** |
+| Carta de las escalas | 87 €, «Abrimos puertas el…», «Avísame» | el botón al enlace de 87 €; sin enlace, «Avísame» |
+| El aula, quien compró | la formación en su escritorio con «Abre el viernes 16…»; al entrar, «Abro las puertas el…» | abierta. Si tiene la página abierta a esa hora, se recarga sola |
+
+Lo hace `conLanzamiento()` y `botonSegunEstado()` en `src/lib/tienda.ts`
+—**solo con las fichas que la Tienda tiene en «próximamente» o «a la
+venta»**: borrador y cerrado mandan sobre la fecha—, y en el aula
+`Escritorio.astro` y `Curso.astro`. Las páginas de la tienda tienen un minuto
+de caché, así que el cambio de las 23:59 puede tardar un par de minutos en
+verse. **Emi entra siempre**, con un aviso de cuándo lo verán las alumnas.
+
+**Pagar da acceso solo** (`src/lib/compras.ts`). Los enlaces de Emi son
+*Payment Links* de Stripe (`buy.stripe.com`). Cuando alguien paga con uno,
+el webhook (`/api/stripe-webhook`, `checkout.session.completed` con
+`mode: 'payment'`) le pregunta a Stripe **la dirección del enlace** con el que
+se pagó y la busca en `lanzamientos.ts`: **en Stripe no hay que configurar
+nada** para esto, y un enlace que no esté ahí no da acceso a nada. Después:
+
+1. encuentra o crea la cuenta con el correo **del pago**;
+2. abre en `course_access` (`source = 'stripe'`) **el curso que la Tienda
+   dice que abre cada ficha** (`products.course_id`) —la del diapasón y la de
+   las escalas—. El código no sabe de cursos: lo dice la Tienda;
+3. manda **«Tu acceso a «Todo el diapasón»»** (`correoCompra()` en
+   `src/lib/correo.ts`, en el idioma del enlace y en la voz de Emi): gracias,
+   que trae «Todas las escalas», **«Abro las puertas el viernes 16 de octubre a
+   las 23:59 (hora de España)»** si todavía no abrió, el enlace al aula y, si
+   la cuenta es nueva, el de poner la contraseña. **El copy es provisional.**
+   Sale **una sola vez**: queda marcado en el pago de Stripe
+   (`metadata.correo_compra`), así que si Stripe reenvía el evento no se
+   repite.
+
+Si una ficha **no tiene curso elegido en la Tienda**, el pago entra, la
+compradora recibe su correo y **a Emi le llega «Compra sin acceso»** con quién
+y qué, para darlo a mano en Personas. Los pagos que tardan (una
+transferencia) se abren cuando Stripe manda
+`checkout.session.async_payment_succeeded`.
+
+**`/gracias/` también sabe de cursos.** Si en Stripe cada enlace redirige a
+`/gracias/?session_id={CHECKOUT_SESSION_ID}` (punto 31 de 📋), quien paga
+pone su contraseña ahí mismo y entra a su escritorio —no a la membresía—:
+`/api/claim-account` acepta ahora una sesión de pago único con un enlace de
+`lanzamientos.ts` y abre los cursos igual que el webhook. Sin la redirección,
+Stripe enseña su página de gracias y todo va por el correo.
+
+**Si quien compra ya tenía cuenta** (una alumna de la membresía), no se le
+crea otra: le llega el correo sin el enlace de la contraseña («entras con tu
+correo y tu contraseña de siempre»).
+
+⚠️ **Tres cosas que no hace solo:** no inventa los enlaces de 240 € (punto
+29), no desactiva los de 195 € al acabar la preventa (punto 34) y no publica
+los cursos (punto 30).
+
+### El aula
+
+- **Membresía:** fuera «Sin biblioteca. El jueves a las 00:00 este ejercicio
+  se cierra…». «Tus preguntas» pasa a **«¿Tienes preguntas?»**, con el copy
+  de Emi: «Este es nuestro chat 1:1. Las respondo personalmente, pero ten
+  paciencia: podría demorar unas horas.» Salió «Respondo los viernes» y el
+  «Solo la vemos tú y yo» de debajo del campo, que repetía el rótulo. En el
+  hilo de los cursos, lo mismo en corto.
+- **El escritorio:** «Sigue por donde ibas» con **el nombre de la formación
+  en grande** —la última que abrió— y la clase debajo, chica. Emi no entendía
+  «Clase nueva»: era el título de una clase recién creada en el panel, que
+  salía en grande. Debajo, **«Mis otras formaciones»**, sin la de arriba (si
+  no hay otras, no sale). Al final, **«Formaciones»** con **«Ver todas»**, en
+  vez de «¿Quieres seguir aprendiendo?».
+- **«Formación», no «curso»**, en todo lo que el aula le dice a la alumna
+  («Mis formaciones», «Entrar a la formación»…). En inglés, **«program»**,
+  como el menú. Lo que lee Emi —el panel, los avisos de borrador— sigue
+  diciendo «curso».
+- **Las formaciones compradas que todavía no se pueden ver** —sin publicar,
+  o antes de abrir— salen en el escritorio con su foto y «Abre el…» o «Lo
+  estoy preparando», sin enlace. La base de datos no deja leer un curso sin
+  publicar, pero sí el acceso: `misAccesos()` en `src/lib/aula-datos.ts`.
+
+### El inglés, todo bajo `/en/programs/`
+
+Pedido de Emi: «los slugs en inglés están en español, y la membresía está en
+`/en/programs/` mientras el resto está en `/en/courses/`». Ahora:
+
+| | Antes | Ahora |
+|---|---|---|
+| Formaciones | `/en/courses/` | **`/en/programs/`** |
+| Todo el diapasón | `/en/courses/todo-el-diapason/` | `/en/programs/fingerboard/` |
+| Todas las escalas | `/en/courses/todas-las-escalas/` | `/en/programs/all-the-scales/` |
+| Desde cero | `/en/courses/contrabajo-desde-cero/` | `/en/programs/double-bass-from-scratch/` |
+| Vibrato | `/en/courses/tu-vibrato-como-un-cantante/` | `/en/programs/vibrato-like-a-singer/` |
+| Clases 1:1 | `/en/courses/clases-online/` | `/en/programs/online-lessons/` |
+| Membresía | `/en/programs/double-bass-membership/` | igual |
+
+- **Manda `slugsIngles` en `src/i18n/ui.ts`**, y `productPath()` la usa: el
+  menú, las fichas, el canonical, los `hreflang`, el conmutador, el aula y el
+  panel dan la nueva sin tocarlos. `direccionesPropias` desapareció: lo único
+  que queda de ella es la membresía en español
+  (`/formaciones/membresia-contrabajo/`). **El slug de verdad sigue siendo el
+  español** —la base de datos, las cartas, el cobro—.
+- **Todas las de antes, con un 301 directo** (`SLUGS_EN` en
+  `astro.config.mjs`, que tiene que decir lo mismo que `slugsIngles`), desde
+  `/en/courses/…` y desde `/en/products/…`. Una carta que Emi cree desde el
+  panel vive en `/en/programs/<su-slug>/` y también redirige. Pedida con el
+  slug español —`/en/programs/todo-el-diapason/`—, la página manda a la
+  inglesa conservando la `?query`.
+- **El menú en inglés dice «Programs»**, como la dirección y como el inglés de
+  Emi («this program is for you»).
+- `npm run audit:redirecciones`: **91 de 91**.
+
+### Las entradas del newsletter
+
+Emi mandó **tres correos suyos para publicar en la web**, cada uno con su
+forma: arriba, «Double Bass in the City — The newsletter», su texto y el botón
+para suscribirse; el título de la entrada en grande, «ajustado a lo que la
+gente podría escribir en la búsqueda»; el correo; y dos posdatas —«¿todavía no
+estás en mi newsletter?», que pidió reescribir «de manera natural», y la del
+video de bienvenida—.
+
+- **`/newsletter/` y `/en/newsletter/`**: la portada con el newsletter y la
+  lista, y una página por entrada (`src/components/Newsletter.astro` y
+  `Entrada.astro`). **«Newsletter» en el menú y en el pie.**
+- **Las tres, en los dos idiomas.** La 1 llegó en inglés y la 2 y la 3 en
+  español; **las traducciones son nuestras** y llevan `traducida: true`. Las
+  posdatas en español son el texto de Emi de la Home; la primera, reescrita.
+- **Los títulos:** «How to Build Left-Hand Strength on the Double Bass» /
+  «Cómo ganar fuerza en la mano izquierda en el contrabajo»; «Tipos de vibrato
+  en el contrabajo: cómo saber dónde y cómo vibrar»; «El error más común al
+  aprender vibrato en el contrabajo» —y sus gemelos—.
+- **El texto es el de Emi**, con dos retoques: «sing up» y «get uot» de la
+  posdata, y los signos de apertura que faltaban («¡Este ejercicio es para
+  ayer!!!»). «¿je?» se quedó como estaba (punto 36). En la 2, «los videos del
+  curso» enlaza a la carta del vibrato.
+- **Viven en `src/content/entradas/`**, un Markdown por entrada y por idioma.
+  Reemplazan a la colección `correos` —el archivo de la Home con tres correos
+  de muestra que nunca se publicaron— y a `EmailArchive.astro`, que no usaba
+  nadie desde el 21 sep. Ver **Recetas → Publicar una entrada del
+  newsletter**.
+
+### «Avísame cuando abra»
+
+Emi preguntó: «¿qué pasa cuando le das al botón? ¿Debe llegarme un aviso? Así
+lo invito al news y yo tengo referencia de quiénes se interesan por los
+cursos. ¿A dónde lleva ese botón?». **Lleva al campo del newsletter del
+final de la misma carta** (desde el 1 oct) y da de alta en la lista de su
+idioma, con su serie de bienvenida. Lo nuevo:
+
+- encima del campo dice **«Déjame tu correo y te aviso cuando abra
+  «Todas las escalas (sin aburrirte)»»** (`AVISO_FORMACION` en
+  `src/data/cartas.ts`);
+- **el perfil de Klaviyo guarda la formación**: `interes_<slug>` = `true` (se
+  acumulan) e `interes_ultimo` (`marcarInteres()` en `src/lib/klaviyo.ts`,
+  con el permiso de `profiles` que la clave ya tiene). Para avisar cuando
+  abra, un segmento en Klaviyo con esa propiedad (punto 37). **No llega un
+  correo a Emi por cada persona**: con Klaviyo lo ve todo junto.
+
+### Lo suelto
+
+- ***About* en inglés:** «Sinfónica de Maracaibo», «Orquesta Sinfónica Simón
+  Bolívar», «Sinfónica Municipal de Avellaneda», «Banda Sinfónica de la Ciudad
+  de Buenos Aires», y también las instituciones (Academia Latinoamericana de
+  Contrabajo, Conservatorio Simón Bolívar, Universidad Nacional Experimental
+  de las Artes, Programa de Orquestas para la Equidad). La Filarmónica de
+  Berlín, en la carta de la membresía, sigue en inglés.
+- **«HER-MO-SO.»** en la carta inglesa del diapasón: **«BEAU-TI-FUL.»**,
+  negrita de cuerpo, en sílabas.
+- **La foto del mar, a color**, en Formaciones, en su carta y en el escritorio
+  (`FOTOS_A_COLOR` en `src/data/aula.ts`): en blanco y negro «no se entiende
+  lo que es». Va por la ficha: si Emi sube otra foto desde la Tienda, también
+  sale a color. Es una enmienda al sistema de diseño.
+
+### Cómo se probó
+
+- **El cobro, con Stripe, Supabase y Resend simulados** (un servidor Node que
+  imita `/rest/v1` y `/auth/v1`, y el cliente de Stripe con sus llamadas
+  cambiadas): una compra nueva en español crea la cuenta, abre los dos cursos
+  y manda el correo con la fecha y la contraseña; **el mismo evento otra vez
+  no manda otro**; una cuenta que ya existía recibe el correo en inglés sin
+  contraseña; un enlace ajeno no da nada; un pago que tarda no abre nada
+  hasta `async_payment_succeeded`; una ficha sin curso avisa a Emi; **la
+  membresía sigue igual** (su fila y su bienvenida); `/gracias/` con un curso
+  pone la contraseña y contesta `tipo: 'curso'`; con un pago ajeno, 402; una
+  firma mala, 400. **Diez de diez.**
+- **«Avísame»**, con Klaviyo simulado: guarda el interés y da de alta en la
+  lista de su idioma; un alta normal no toca el perfil; un interés raro se
+  ignora.
+- **En Chromium**, con `astro dev`: Formaciones en los dos idiomas con la
+  fecha; la ficha de precio del diapasón (tachado, preventa, letra pequeña,
+  botón al enlace de cada idioma); las escalas con la fecha y «Avísame»; la
+  foto del mar a color; los canonical y `hreflang`; el *About*; las tres
+  entradas y la portada; el escritorio y el curso cerrados; la membresía. **Y
+  con el reloj del servidor y del navegador en el 17 de octubre**: el
+  diapasón vuelve a «Avísame» (no hay enlaces de 240 € todavía), el escritorio
+  pone la formación arriba y el curso se abre. En el teléfono, sin desbordes.
+  Cero errores en la consola.
+- `npm run build` bien; `npm run audit:redirecciones`, 91 de 91; `astro
+  check`, 13 errores de tipos, todos de antes (`main` tiene 17: se fueron los
+  de `EmailArchive.astro`).
 
 ## El newsletter, en dos idiomas
 
@@ -4425,13 +4771,25 @@ de «un producto, un slug» no admite. Así que lo nuevo es una capa encima:
   gemelas inglesas, y la portada de la academia (`ACADEMIA_A_CASA`). El 301
   de la página es la red por si algún día se borran de ahí.
 - **`/en/programs/`** sin nada detrás no tiene portada: lleva a
-  `/en/courses/`.
+  `/en/courses/`. *(Hasta el 9 oct 2026: desde ese día `/en/programs/` es
+  Formaciones en inglés y `/en/courses/` redirige ahí. Ver **El inglés,
+  todo bajo `/en/programs/`**, justo abajo.)*
 
 **Si otro producto quiere dirección propia**, es una línea en
 `direccionesPropias`, sus redirecciones en `astro.config.mjs` y sus casos en
-`scripts/redirecciones.mjs`. Si su dirección inglesa no cuelga de
-`/en/courses/` ni de `/en/programs/`, necesita también su carpeta en
-`src/pages`.
+`scripts/redirecciones.mjs`. *(Desde el 9 oct 2026, en inglés lo decide
+`slugsIngles`; en español, `direccionesEspanol`, los dos en
+`src/i18n/ui.ts`.)*
+
+### El inglés, todo bajo `/en/programs/`
+
+**9 de octubre de 2026** (PR #64), pedido de Emi: Formaciones en inglés y
+todas sus cartas pasan a `/en/programs/`, con el slug en inglés
+(`/en/programs/fingerboard/`), y `/en/courses/…` y `/en/products/…` redirigen
+con un 301 directo. La tabla y el cómo, en **La tanda del 9 de octubre → El
+inglés, todo bajo `/en/programs/`**. Para darle slug en inglés a una carta
+nueva: su línea en `slugsIngles` (`src/i18n/ui.ts`), la misma en `SLUGS_EN`
+(`astro.config.mjs`) y en `scripts/redirecciones.mjs`.
 
 **`npm run audit:redirecciones` estaba roto desde el 27 sep** (#58): desde
 ese día las primeras rutas de `config.json` son las de
@@ -4527,7 +4885,14 @@ componentes**: si hace falta uno nuevo, se añade como token.
 
 El sistema es de Emi y se puede cambiar. Lo que no se puede es cambiarlo sin
 dejar constancia, porque si no la tabla de arriba deja de ser fiable. Hasta hoy
-se ha tocado dieciséis veces:
+se ha tocado diecisiete veces:
+
+- **9 oct 2026 · Una foto a color, con nombre.** Las fotografías van en blanco
+  y negro; la del mar de «Tu vibrato como un cantante» no: en gris «no se
+  entiende lo que es» (Emi). Va siempre a color en Formaciones, en su carta y
+  en el escritorio del aula. Es por ficha y no por fichero —`FOTOS_A_COLOR`
+  en `src/data/aula.ts`, y `color` en `MediaSlot.astro`—, y no abre la
+  puerta a más: otra foto a color es otra enmienda.
 
 - **24 sep 2026 · Toda página tiene entrada, y no suma una animación.** Lo pidió
   Adrián (ver **La ficha de precio rota, y la entrada en todas las páginas**).
@@ -4820,16 +5185,19 @@ src/
     panel/Cursos.astro             El constructor de cursos (el marcado)
     panel/Mensajes.astro           Una fila por persona; dentro, la
                                    conversación entera para responder
-    EmailArchive.astro             Fichas del newsletter + <dialog>. Desde el
-                                   21 sep 2026 NO SE USA en ninguna página:
-                                   el copy nuevo de la Home se lleva por
-                                   delante «Correos anteriores». Se guarda
-                                   entero, con su colección, para cuando Emi
-                                   lo quiera de vuelta
+    Newsletter.astro               La portada del newsletter (9 oct 2026)
+    Entrada.astro                  Una entrada del newsletter: el bloque del
+                                   newsletter, el correo, las dos posdatas
     SubscribeForm.astro            Campo de suscripción
     MediaSlot.astro                Hueco de imagen
-  content/correos/       Un .md por correo y por idioma
-  content.config.ts      Esquema del archivo del newsletter
+  content/entradas/      Las entradas del newsletter, un .md por entrada
+                         y por idioma (9 oct 2026; antes, content/correos/,
+                         tres de muestra que nunca se publicaron)
+  content.config.ts      Esquema de las entradas
+  data/lanzamientos.ts   Cuándo abre cada curso, la preventa y los enlaces
+                         de pago de Stripe (9 oct 2026)
+  lib/compras.ts         De un pago de Stripe al acceso y el correo
+  lib/entradas.ts        Las entradas, por idioma, y su gemela
   data/home.ts           Textos de la Home (es / en)
   data/about.ts          Textos de Sobre mí (es / en). Cinco tipos de bloque:
                          entrada con foto, prosa, frase-ancla —que admite
@@ -4884,11 +5252,12 @@ src/
                          formaciones/index · formaciones/[producto]
                            (hasta el 24 sep 2026, productos/; todas las
                            cartas, la de la membresía incluida)
-                         en/courses/index · en/courses/[producto]
-                           (hasta el 24 sep 2026, en/products/)
-                         en/programs/[producto] (solo direcciones
-                           propias: la membresía en inglés, desde el
-                           1 oct 2026)
+                         en/programs/index · en/programs/[producto]
+                           (desde el 9 oct 2026, con slugs en inglés;
+                           antes en/courses/, y hasta el 24 sep
+                           en/products/)
+                         newsletter/index · newsletter/[entrada] y sus
+                           gemelas en/newsletter/ (9 oct 2026)
                          aulavirtual/index · en/classroom/index
                          aulavirtual/escritorio · aulavirtual/curso/[curso]
                          aulavirtual/curso/index (?c=, cursos sin ficha)
@@ -4944,31 +5313,46 @@ scripts/redirecciones.mjs  Recorre las direcciones viejas contra la salida de
 
 ## Recetas
 
-### Publicar un correo del newsletter
+### Publicar una entrada del newsletter
 
-Dejar caer dos ficheros en `src/content/correos/`, `043.es.md` y `043.en.md`:
+Dejar caer dos ficheros en `src/content/entradas/`, uno por idioma, con el
+mismo `par` (9 oct 2026):
 
 ```markdown
 ---
-numero: 43
 lang: es
-etiqueta: "N.º 43"
-asunto: El asunto del correo
-adelanto: La línea que se lee en la ficha, antes de abrirlo…
+par: mi-entrada
+orden: 4
+direccion: lo-que-alguien-buscaria-en-google
+titulo: El título, tal cual lo buscaría alguien
+descripcion: Una línea: la de la portada del newsletter y la del buscador.
 ---
 
-El cuerpo, en Markdown.
+El correo, en Markdown. Las listas con `1.` o `-`, la negrita con `**…**`,
+una cita con `*«…»*`. Al final, la firma: `Un abrazo,<br />` y `Emilse`.
 ```
 
-No hay que tocar código. Se ordenan solos de mayor a menor. Quitar
-`borrador: true` de los tres actuales cuando lleguen los correos de verdad.
+Y su gemelo `lang: en` con su `direccion` en inglés (si es traducción
+nuestra, `traducida: true`). **No hay que tocar código**: la portada la lista
+por `orden`, la página sale en `/newsletter/<direccion>/` y el conmutador de
+idioma lleva a la gemela. Las dos posdatas y los dos campos del newsletter
+los pone la página: no van en el fichero.
 
-⚠️ **Hoy no se ven en ninguna parte.** El copy nuevo de la Home (21 sep 2026)
-se llevó por delante «Correos anteriores», que era la única ficha que los
-sacaba. La colección, el esquema y `EmailArchive.astro` siguen enteros y
-funcionando: devolverlos a la página es añadir un bloque a `data/home.ts` y su
-`case` en `Home.astro`. Hasta que eso pase, dejar correos ahí es escribir para
-un cajón.
+### Abrir un curso con fecha, y preventa
+
+Todo en `src/data/lanzamientos.ts` (9 oct 2026), en un PR:
+
+1. Su línea en `lanzamientos`, con el slug de su ficha: `abre` (ISO con la
+   zona de Madrid: `+02:00` en verano, `+01:00` en invierno), la `venta` con
+   su precio y sus dos enlaces de pago de Stripe, y, si hay preventa, la
+   `preventa` con los suyos. `incluye`, si trae otra ficha dentro.
+2. En la Tienda, la ficha en «próximamente» y **con su curso del aula
+   elegido**: es lo que abre pagar.
+3. En el panel, el curso publicado. Antes de la fecha las alumnas lo ven
+   cerrado; a la hora, se abre solo.
+4. Al acabar la preventa, **desactivar sus enlaces en Stripe**.
+
+Un enlace vacío es un enlace que no existe: ahí sale «Avísame».
 
 ### Poner un curso a la venta
 
@@ -5365,7 +5749,9 @@ cursos, acceso— viven en **La plataforma**, más arriba, y no se repiten acá.
 - **La tienda vive en `/formaciones/` y las cartas cuelgan de ella**, en
   `/formaciones/<slug>/` (hasta el 24 sep 2026, `/productos/`). Un solo
   recorrido: catálogo, producto, comprar. El slug de la sección se traduce
-  —`/en/courses/`— pero **el del producto no**:
+  —`/en/programs/` desde el 9 oct 2026— y, **desde ese día, el del producto
+  en inglés también** (`slugsIngles`, pedido de Emi); lo de abajo vale para
+  la identidad, que sigue siendo el slug español:
   el slug es la identidad del producto, la misma que llevará su fila en la base
   de datos y la que Emi pegue en un correo. Un producto, un slug, dos idiomas.
   La membresía es `estudiemos-juntos`, que es su nombre, no `membresia`.

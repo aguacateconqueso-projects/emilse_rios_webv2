@@ -23,12 +23,19 @@
  * Y el avance y las dudas se guardan en la base de datos, atados a la persona,
  * no en el navegador: siguen ahí al cambiar de equipo.
  *
+ * 5. **Una formación que todavía no abrió se ve cerrada, con su fecha** (9 oct
+ *    2026: la preventa de «Todo el diapasón»). Quien la compró antes de
+ *    tiempo ya la tiene a su nombre; a la hora de `src/data/lanzamientos.ts`
+ *    se abre sola —si tiene la página abierta, se recarga—. Emi entra igual,
+ *    con un aviso.
+ *
  * ⚠️ **Esta pantalla necesita JavaScript**, y es de las pocas del proyecto que
  * lo necesitan: un reproductor que recuerda el minuto es una aplicación.
  */
 import type { Lang } from '../../i18n/ui';
 import { useAula, escritorioPath, panelPath } from '../../i18n/aula';
 import { catalogo } from '../../data/aula';
+import { lanzamientos, fechaPuertas, HUSO } from '../../data/lanzamientos';
 import Boton from '../Boton.astro';
 
 interface Props {
@@ -43,9 +50,25 @@ interface Props {
 const { lang, slug } = Astro.props;
 const a = useAula(lang);
 
+/** Las formaciones que todavía no abrieron, con sus textos ya rellenos. */
+const llenar = (texto: string, abre: string) =>
+  texto.replace('{fecha}', fechaPuertas(abre, lang)).replace('{huso}', HUSO[lang as Lang]);
+const aperturas = Object.fromEntries(
+  Object.entries(lanzamientos).map(([s, l]) => [
+    s,
+    {
+      abre: l.abre,
+      titulo: llenar(a('course.opensTitle'), l.abre),
+      lead: llenar(a('course.opensLead'), l.abre),
+      admin: llenar(a('course.opensAdmin'), l.abre),
+    },
+  ]),
+);
+
 const paraJs = {
   lang,
   slug: slug ?? null,
+  aperturas,
   nombres: Object.fromEntries(
     catalogo.filter((p) => p.tipo === 'curso').map((p) => [p.slug, p.copia[lang].nombre]),
   ),
@@ -94,6 +117,14 @@ const paraJs = {
     <Boton href={escritorioPath(lang)}>{a('app.backDesk')}</Boton>
   </section>
 
+  {/* Todavía no abrió (9 oct 2026): la fecha, y de vuelta al escritorio. */}
+  <section class="app-wrap curso-estado" data-c-cerrado hidden>
+    <p class="eyebrow" data-c-cerrado-nombre></p>
+    <h1 class="app-h1 app-h1--sm" data-c-cerrado-h></h1>
+    <p class="app-lead curso-estado__lead" data-c-cerrado-lead></p>
+    <Boton href={escritorioPath(lang)}>{a('app.backDesk')}</Boton>
+  </section>
+
   <section class="app-wrap curso-estado" data-c-vacio hidden>
     <p class="eyebrow" data-c-vacio-nombre></p>
     <h1 class="app-h1 app-h1--sm">{a('course.empty')}</h1>
@@ -109,6 +140,7 @@ const paraJs = {
         {a('course.draft')}
         <a href={panelPath() + '#cursos'}>{a('course.editInPanel')}</a>
       </p>
+      <p class="aviso cabeza__borrador" data-c-abre hidden></p>
       <div class="cabeza__barra">
         <div class="meter"><span class="meter__fill" data-c-fill></span></div>
         <p class="mono soft tnum cabeza__cifras" data-c-cifras></p>
@@ -222,6 +254,7 @@ const paraJs = {
   const D = JSON.parse(document.getElementById('curso-datos')!.textContent!) as {
     lang: 'es' | 'en';
     slug: string | null;
+    aperturas: Record<string, { abre: string; titulo: string; lead: string; admin: string }>;
     nombres: Record<string, string>;
     panel: string;
     t: Record<string, string>;
@@ -814,6 +847,23 @@ const paraJs = {
       arreglarIdioma(slug);
       const nombre = tx(curso.title_es, curso.title_en) || D.nombres[curso.slug] || curso.slug;
       document.title = document.title.replace(/^[^·]+/, `${nombre} `);
+
+      /* ¿Ya abrió? Si no, la fecha —a Emi, solo como aviso—, y a esa hora la
+         página se recarga sola para quien la tenga abierta. */
+      const ap = D.aperturas[await datos.fichaDeCurso(curso)];
+      const falta = ap ? Date.parse(ap.abre) - Date.now() : 0;
+      if (ap && falta > 0) {
+        if (falta < 2 ** 31 - 1) setTimeout(() => location.reload(), falta + 2000);
+        if (!quien.admin) {
+          $('[data-c-cerrado-nombre]').textContent = nombre;
+          $('[data-c-cerrado-h]').textContent = ap.titulo;
+          $('[data-c-cerrado-lead]').textContent = ap.lead;
+          $('[data-c-cerrado]').hidden = false;
+          return;
+        }
+        $('[data-c-abre]').textContent = ap.admin;
+        $('[data-c-abre]').hidden = false;
+      }
 
       CLASES = [];
       curso.unidades.forEach((u) =>

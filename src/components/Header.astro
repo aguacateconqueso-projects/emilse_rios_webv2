@@ -106,6 +106,12 @@ const entrar = entrarHref[lang];
             href={routePath('products', lang)}
             aria-current={route === 'products' ? 'page' : undefined}>{t('nav.products')}</a
           >
+          {/* Las entradas del newsletter, desde el 9 oct 2026. */}
+          <a
+            class="menu__item"
+            href={routePath('newsletter', lang)}
+            aria-current={route === 'newsletter' ? 'page' : undefined}>{t('nav.newsletter')}</a
+          >
           <a
             class="menu__item"
             href={entrar}

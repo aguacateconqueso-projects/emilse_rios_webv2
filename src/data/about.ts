@@ -159,14 +159,17 @@ const en: AboutCopy = {
         'Consistency without the right approach gets you nowhere.',
       ],
     },
+    /* Las orquestas, las bandas y las instituciones, con su nombre en español
+       también en inglés (9 oct 2026, Emi): son nombres propios. La Filarmónica
+       de Berlín, en la carta de la membresía, sí va en inglés. */
     {
       k: 'prose',
       paras: [
         'How do I know?',
-        'Because seven years after that first «no», I became the first woman bassist to play as a soloist and in the section of the Maracaibo Symphony, in my hometown. And I ended up teaching at the conservatory that turned me down in the first place. Life has a way of coming back around.',
-        'For five years running I was invited on international tours with the Simón Bolívar Symphony Orchestra, under Gustavo Dudamel and conductors like Claudio Abbado.',
-        "And I was teaching the whole time: the Latin American Double Bass Academy, the Simón Bolívar Conservatory, the National Experimental University of the Arts, plus ten years training children's and youth orchestras in El Sistema.",
-        'Later, in Argentina, the Universidad Católica Argentina and the Orchestras for Equity Program.',
+        'Because seven years after that first «no», I became the first woman bassist to play as a soloist and in the section of the Sinfónica de Maracaibo, in my hometown. And I ended up teaching at the conservatory that turned me down in the first place. Life has a way of coming back around.',
+        'For five years running I was invited on international tours with the Orquesta Sinfónica Simón Bolívar, under Gustavo Dudamel and conductors like Claudio Abbado.',
+        "And I was teaching the whole time: the Academia Latinoamericana de Contrabajo, the Conservatorio Simón Bolívar, the Universidad Nacional Experimental de las Artes, plus ten years training children's and youth orchestras in El Sistema.",
+        'Later, in Argentina, the Universidad Católica Argentina and the Programa de Orquestas para la Equidad.',
       ],
     },
     {
@@ -174,7 +177,7 @@ const en: AboutCopy = {
       paras: [
         'And now?',
         "In 2025 I took another leap into the unknown — that's what it felt like in my body, anyway.",
-        "I resigned from the permanent positions I'd won by audition in Argentina — assistant principal at the Avellaneda Municipal Symphony and bassist with the Buenos Aires City Symphonic Band — to travel, play, and see the world (a bit more of it).",
+        "I resigned from the permanent positions I'd won by audition in Argentina — assistant principal at the Sinfónica Municipal de Avellaneda and bassist with the Banda Sinfónica de la Ciudad de Buenos Aires — to travel, play, and see the world (a bit more of it).",
         "Still doing that today. I'm based in Madrid, with an online academy where I train bass players all over the world.",
         'If someone ever told you it was wrong without telling you how to fix it, I think you and I are going to get along. I write every week and tell you those details.',
         "At the academy I also open 1:1 lessons in seasons, courses, and a membership. But I don't open them to the general public — I share them with my community only. This is the way in.",
