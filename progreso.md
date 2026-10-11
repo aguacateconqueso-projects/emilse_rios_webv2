@@ -4,7 +4,11 @@ Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 9 de octubre de 2026 —**la web está en vivo**—.
+**Última actualización:** 11 de octubre de 2026 —**la web está en vivo**—.
+**Los enlaces de después de la preventa, puestos** (PR #65): 240 € el
+diapasón y 87 € las escalas, desde el viernes 16 a las 23:59 (punto 29 de
+📋). Queda pendiente el SEO que pidió Emi —ver **El pedido de SEO de Emi**, en
+📋—. Lo que sigue es el 9 oct.
 **La tanda de correcciones de Emi del 9 oct** (un PDF con catorce pedidos):
 **la preventa de «Todo el diapasón»** —195 € con los 240 € tachados hasta el
 viernes 16 de octubre a las 23:59, cuando abren las puertas—, **pagar con
@@ -622,7 +626,12 @@ cortina**, de la más nueva a la más vieja.
 > 28. [ ] **Mergear el PR #64** y mirarlo en vivo: Formaciones con la fecha,
 >     la ficha de precio del diapasón con 240 € tachado y 195 €, y el botón
 >     que lleva al enlace de Stripe de cada idioma.
-> 29. [ ] **⚠️ Los dos enlaces de pago de 240 € del diapasón** (ES y EN), y
+> 29. [x] *(Hecho el 11 oct 2026, PR #65: Adrián pasó los cuatro —240 € del
+>     diapasón y 87 € de las escalas, «precio final, definitivo», en los dos
+>     idiomas— y están en `src/data/lanzamientos.ts`. Desde el 16 a las 23:59
+>     el diapasón se vende a 240 € y las escalas a 87 €; hasta entonces, la
+>     preventa del diapasón y «Avísame» en las escalas.)*
+>     **⚠️ Los dos enlaces de pago de 240 € del diapasón** (ES y EN), y
 >     si «Todas las escalas» se vende sola desde el 16, **sus dos de 87 €**.
 >     Se pegan en `src/data/lanzamientos.ts` (`venta.enlaces`), en un PR.
 >     **Sin ellos, a las 23:59 del 16 el diapasón vuelve a «Avísame»** en vez
@@ -670,6 +679,19 @@ cortina**, de la más nueva a la más vieja.
 >     «Properties about someone → `interes_todas-las-escalas` is true» (o
 >     `interes_contrabajo-desde-cero`, etc.). Lo escribe «Avísame» desde el
 >     9 oct; las altas de antes no lo tienen.
+>
+> **F. El pedido de SEO de Emi (11 oct 2026, sin empezar).** Emi mandó, desde
+> su Claude, un documento de SEO: `sitemap.xml`, `robots.txt`, una 404 con
+> la ropa del sitio, «Emilse Rios» sin tilde en todo el sitio, datos
+> estructurados (Person, WebSite, Course/Product/Service con precios),
+> títulos y descripciones nuevos para las 18 páginas, `og:image` y `alt`, y
+> una sección «Algunos newsletters pasados» en `/newsletters/` con editor en
+> el panel. Las direcciones en inglés ya estaban (PR #64). **Su punto de los
+> newsletters choca con lo que pidió el PDF del 9 oct** —`/newsletter/` en el
+> menú, el bloque del newsletter arriba de cada entrada—: Adrián se lo pasó a
+> Emi para que decida, y queda en espera. Del resto faltaba confirmar: la
+> foto `emilse-rios-contrabajo-og.jpg` (1200×630; no llegó) y que los
+> títulos del código manden sobre los de «Págs. de ventas».
 >
 > **D. Cabos sueltos, sin prisa.**
 >
