@@ -101,8 +101,10 @@ cortina**, de la más nueva a la más vieja.
 >    H1), el H1, la lista y, en cada entrada, la fecha, el correo, la firma,
 >    las posdatas, el formulario otra vez y «Sigue leyendo». **Las seis del
 >    anexo** de su documento (3 en cada idioma). **«Newsletter» sale del menú
->    y del pie**: se llega por un enlace al final del inicio. Las direcciones
->    del 9 oct (`/newsletter/…`) llevan a las nuevas con un 301.
+>    y del pie**: se llega por el enlace «Leer los newsletters pasados» al
+>    final del inicio, y cada entrada de la lista dice «Leer el newsletter →»
+>    (textos de Adrián, el mismo día). Las direcciones del 9 oct
+>    (`/newsletter/…`) llevan a las nuevas con un 301.
 > 9. **Panel → Newsletters pasados**: la lista, «Nueva entrada» y las
 >    casillas de su documento (título, cuerpo con negrita, cursiva, listas y
 >    enlaces —se puede pegar desde el correo—, firma, PD, PD2, PD3, «Sigue
@@ -1352,13 +1354,17 @@ el menú).
 
 - **Dónde:** `/newsletters/` y `/en/newsletters/`; cada entrada en
   `/newsletters/<slug>/`. **Solo se llega desde el final del inicio**: un
-  enlace de texto, «Algunos newsletters pasados» / «Some past newsletters»
-  (bloque `pasados` en `src/data/home.ts`), y desde Google. **Ni en el menú
+  enlace de texto, **«Leer los newsletters pasados» / «Read past
+  newsletters»** (bloque `pasados` en `src/data/home.ts`), y desde Google. El
+  documento decía «Algunos newsletters pasados»; **Adrián pidió este texto**
+  el mismo 11 oct, después de ver la vista previa. **Ni en el menú
   ni en el pie.** Las seis direcciones del 9 oct y las portadas llevan a las
   nuevas con un 301 directo (`NEWSLETTERS_VIEJOS` en `astro.config.mjs`);
   cualquier otra de `/newsletter/…` va a la misma en `/newsletters/`.
 - **El índice** (`IndiceNewsletters.astro`): el bloque del newsletter de la
-  Home, el H1, y la lista —título, extracto, «Leer más →»—, la más reciente
+  Home, el H1, y la lista —título, extracto y **«Leer el newsletter →»**
+  («Read the newsletter →»; el documento decía «Leer más», Adrián lo cambió;
+  es el mismo texto en «Sigue leyendo», `nl.leer` en `src/i18n/ui.ts`)—, la más reciente
   primero, sin fotos. **Una lista, no un carrusel** (lo pidió así). A partir
   de 10, «Ver más» lleva a `/newsletters/pagina/2/` (`/en/newsletters/page/2/`):
   direcciones de verdad, para que Google llegue a todas.

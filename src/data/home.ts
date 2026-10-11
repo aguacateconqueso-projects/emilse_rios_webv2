@@ -18,7 +18,9 @@ export type Block =
    * El enlace a los newsletters pasados, al final de todo (11 oct 2026,
    * pedido de SEO de Emi): **es el único enlace a esa sección** en todo el
    * sitio —ni en el menú ni en el pie—, y va como texto porque Google lee el
-   * texto y no un ícono.
+   * texto y no un ícono. El texto, «Leer los newsletters pasados», lo
+   * cambió Adrián ese mismo día (el documento decía «Algunos newsletters
+   * pasados», que sigue siendo el H1 de la página).
    */
   | { k: 'pasados'; text: string };
 
@@ -81,7 +83,7 @@ const es: HomeCopy = {
     },
     { k: 'form', id: 'suscribete-2' },
     { k: 'fine', text: 'Suscribirse es gratis, darse de baja también.' },
-    { k: 'pasados', text: 'Algunos newsletters pasados' },
+    { k: 'pasados', text: 'Leer los newsletters pasados' },
   ],
 };
 
@@ -141,7 +143,7 @@ const en: HomeCopy = {
     },
     { k: 'form', id: 'suscribete-2' },
     { k: 'fine', text: 'Signing up is free. So is unsubscribing.' },
-    { k: 'pasados', text: 'Some past newsletters' },
+    { k: 'pasados', text: 'Read past newsletters' },
   ],
 };
 

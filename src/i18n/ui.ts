@@ -71,7 +71,8 @@ export const ui = {
        `/newsletters/`. El bloque del newsletter de arriba es el de la Home
        (`src/data/home.ts`); las posdatas las escribe Emi en cada entrada. */
     'nl.h1': 'Algunos newsletters pasados',
-    'nl.leer': 'Leer más',
+    /* «Leer el newsletter» y no «Leer más» (Adrián, 11 oct 2026). */
+    'nl.leer': 'Leer el newsletter',
     'nl.sigue': 'Sigue leyendo',
     'nl.verMas': 'Ver más',
     'nl.pagina': 'Página',
@@ -136,7 +137,7 @@ export const ui = {
 
     /* --- Los newsletters pasados (11 oct 2026) --------------------------- */
     'nl.h1': 'Some past newsletters',
-    'nl.leer': 'Read more',
+    'nl.leer': 'Read the newsletter',
     'nl.sigue': 'Keep reading',
     'nl.verMas': 'See more',
     'nl.pagina': 'Page',
