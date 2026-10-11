@@ -1,20 +1,18 @@
 ---
 import Base from '../../layouts/Base.astro';
 import About from '../../components/About.astro';
-import { useTranslations } from '../../i18n/ui';
-import { getAboutCopy } from '../../data/about';
+import { metaPaginas } from '../../data/seo';
 
 const lang = 'en' as const;
-const t = useTranslations(lang);
-const { title } = getAboutCopy(lang);
 ---
 
 <Base
   lang={lang}
-  title={`${title} · ${t('site.title')}`}
-  description={t('about.description')}
+  title={metaPaginas[lang].about.title}
+  description={metaPaginas[lang].about.description}
   route="about"
   entrada={false}
+  ogImagen
 >
   <About lang={lang} />
 </Base>

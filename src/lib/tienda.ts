@@ -10,6 +10,14 @@ import {
   rellenar,
   type Lanzamiento,
 } from '../data/lanzamientos';
+import { ALT_MEMBRESIA } from '../data/seo';
+
+/**
+ * «Emilse Rios», sin tilde, en todo lo que viene de la base de datos (11 oct
+ * 2026, pedido de SEO de Emi): lo que se importó o escribió en el panel antes
+ * de ese día lo lleva con tilde, y se corrige al leerlo.
+ */
+const sinTilde = <T>(x: T): T => JSON.parse(JSON.stringify(x).replaceAll('Emilse Ríos', 'Emilse Rios'));
 
 /**
  * La tienda y sus páginas de ventas, del lado de la WEB: lo que leen
@@ -50,7 +58,8 @@ export type Catalogo = { fuente: 'bd' | 'codigo'; fichas: Ficha[] };
 const limpiarUrl = (bruta: string | undefined) =>
   bruta?.trim().replace(/\/+$/, '').replace(/\/(rest|auth|storage|realtime)\/v1$/, '');
 
-function cliente() {
+/** El cliente de Supabase del servidor con la clave `anon`, o `null` sin conexión. */
+export function cliente() {
   const url = limpiarUrl(process.env.PUBLIC_SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL);
   const anon = (process.env.PUBLIC_SUPABASE_ANON_KEY || import.meta.env.PUBLIC_SUPABASE_ANON_KEY)?.trim();
   if (!url || !anon) return null;
@@ -152,7 +161,11 @@ export function aFicha(f: Fila, i: number, conPagina: boolean): Ficha {
       precio: (l === 'en' ? f.precio_en || f.precio_es : f.precio_es) ?? '',
       cadencia: (l === 'en' ? f.cadencia_en || f.cadencia_es : f.cadencia_es) ?? '',
       fotoPie: nombre,
-      fotoAlt: (l === 'en' ? f.foto_alt_en || f.foto_alt_es : f.foto_alt_es) ?? '',
+      /* La de la membresía, la del pedido de SEO (11 oct 2026). */
+      fotoAlt:
+        f.slug === 'estudiemos-juntos'
+          ? ALT_MEMBRESIA[l]
+          : ((l === 'en' ? f.foto_alt_en || f.foto_alt_es : f.foto_alt_es) ?? ''),
     };
   };
   return {
@@ -161,7 +174,7 @@ export function aFicha(f: Fila, i: number, conPagina: boolean): Ficha {
     estado: f.estado,
     num: f.num || String(i + 1).padStart(2, '0'),
     foto: f.foto_url || undefined,
-    copia: { es: copia('es'), en: copia('en') },
+    copia: sinTilde({ es: copia('es'), en: copia('en') }),
     conPagina,
   };
 }
@@ -214,7 +227,7 @@ export async function leerPagina(
   if (fuente === 'bd') {
     const sb = cliente();
     const r = await sb?.from('sales_pages').select('carta').eq('slug', slug).maybeSingle();
-    if (r?.data?.carta?.es && r.data.carta.en) carta = r.data.carta as Record<Lang, Carta>;
+    if (r?.data?.carta?.es && r.data.carta.en) carta = sinTilde(r.data.carta as Record<Lang, Carta>);
   }
   carta ??= cartas[slug];
   if (!carta) return null;
@@ -243,6 +256,27 @@ export function botonSegunEstado(
 }
 
 /**
+ * Un cliente de Supabase **con el token de quien pide**, solo si es Emi (un
+ * admin); si no, `null`. Lo usan las vistas previas del panel —la de las
+ * páginas de ventas y la de los newsletters—: primero se valida el token,
+ * después el rol se lee del perfil propio, con la RLS decidiendo igual que en
+ * el panel.
+ */
+export async function clienteDeAdmin(token: string) {
+  const url = limpiarUrl(process.env.PUBLIC_SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL);
+  const anon = (process.env.PUBLIC_SUPABASE_ANON_KEY || import.meta.env.PUBLIC_SUPABASE_ANON_KEY)?.trim();
+  if (!url || !anon || !token) return null;
+  const sb = createClient(url, anon, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: { headers: { Authorization: `Bearer ${token}` } },
+  });
+  const { data: u, error } = await sb.auth.getUser(token);
+  if (error || !u.user) return null;
+  const { data: perfil } = await sb.from('profiles').select('role').eq('id', u.user.id).maybeSingle();
+  return perfil?.role === 'admin' ? sb : null;
+}
+
+/**
  * La ficha de un producto para la VISTA PREVIA del panel, o `null` si quien
  * la pide no es Emi.
  *
@@ -252,17 +286,9 @@ export function botonSegunEstado(
  * puede estar en borrador: la RLS se la deja ver—.
  */
 export async function fichaParaVistaPrevia(token: string, slug: string): Promise<Ficha | null> {
-  const url = limpiarUrl(process.env.PUBLIC_SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL);
-  const anon = (process.env.PUBLIC_SUPABASE_ANON_KEY || import.meta.env.PUBLIC_SUPABASE_ANON_KEY)?.trim();
-  if (!url || !anon || !token || !slug) return null;
-  const sb = createClient(url, anon, {
-    auth: { persistSession: false, autoRefreshToken: false },
-    global: { headers: { Authorization: `Bearer ${token}` } },
-  });
-  const { data: u, error } = await sb.auth.getUser(token);
-  if (error || !u.user) return null;
-  const { data: perfil } = await sb.from('profiles').select('role').eq('id', u.user.id).maybeSingle();
-  if (perfil?.role !== 'admin') return null;
+  if (!slug) return null;
+  const sb = await clienteDeAdmin(token);
+  if (!sb) return null;
   const { data: fila } = await sb.from('products').select('*').eq('slug', slug).maybeSingle();
   if (fila) return conLanzamiento(aFicha(fila as Fila, 0, true));
   /* Sin fila —el catálogo todavía en el código—: la ficha del código. */

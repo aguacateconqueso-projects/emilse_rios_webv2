@@ -1,0 +1,36 @@
+---
+/**
+ * Una página del índice de los newsletters pasados, con su `<head>`: la usan
+ * `/newsletters/`, `/newsletters/pagina/<n>/` y las mismas en inglés. La
+ * página decide antes si existe (404) —ver `pagina()` en
+ * `src/lib/newsletters.ts`—; esto solo la pinta.
+ */
+import Base from '../layouts/Base.astro';
+import IndiceNewsletters from './IndiceNewsletters.astro';
+import { type Lang, useTranslations } from '../i18n/ui';
+import { type Newsletter, indicePath } from '../data/newsletters';
+
+interface Props {
+  lang: Lang;
+  numero: number;
+  entradas: Newsletter[];
+  hayMas: boolean;
+}
+const { lang, numero, entradas, hayMas } = Astro.props as Props;
+const t = useTranslations(lang);
+const title =
+  numero > 1 ? `${t('nl.h1')} · ${t('nl.pagina')} ${numero} · ${t('site.title')}` : t('nl.indiceTitle');
+---
+
+<Base
+  lang={lang}
+  title={title}
+  description={t('nl.indiceDesc')}
+  route="newsletters"
+  pathEs={lang === 'es' ? indicePath('es', numero) : indicePath('es')}
+  pathEn={lang === 'en' ? indicePath('en', numero) : indicePath('en')}
+  sinGemela={numero > 1}
+  ogImagen
+>
+  <IndiceNewsletters lang={lang} entradas={entradas} numero={numero} hayMas={hayMas} />
+</Base>

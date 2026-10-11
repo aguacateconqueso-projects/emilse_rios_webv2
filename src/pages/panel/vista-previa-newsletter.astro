@@ -1,0 +1,88 @@
+---
+/**
+ * La vista previa de un newsletter pasado, desde el panel (pestaña
+ * Newsletters pasados → «Vista previa»).
+ *
+ * Pinta lo que Emi tiene en el editor —guardado o no— exactamente como lo
+ * pintará la web al publicarlo: la misma `EntradaNewsletter`, con su «Sigue
+ * leyendo» de verdad. Arriba, un aviso fijo de que es un borrador.
+ *
+ * Como la de las páginas de ventas (`vista-previa.astro`): llega por POST con
+ * el texto y el token de la sesión, que se valida contra Supabase antes de
+ * pintar nada. Sin token de admin no se pinta.
+ */
+import Base from '../../layouts/Base.astro';
+import EntradaNewsletter from '../../components/EntradaNewsletter.astro';
+import { clienteDeAdmin } from '../../lib/tienda';
+import { leerNewsletters, sigueLeyendo, tituloGoogle, descripcion } from '../../lib/newsletters';
+import { type Newsletter, FIRMA, hoyEnMadrid } from '../../data/newsletters';
+
+export const prerender = false;
+
+if (Astro.request.method !== 'POST') return Astro.redirect('/panel/#newsletters');
+
+const form = await Astro.request.formData();
+const token = String(form.get('token') ?? '');
+let d: Record<string, any> | null = null;
+try {
+  d = JSON.parse(String(form.get('datos') ?? ''));
+} catch {
+  d = null;
+}
+
+const admin = d && typeof d === 'object' ? await clienteDeAdmin(token) : null;
+if (!admin || !d) {
+  return new Response('Esta vista previa solo se abre desde el panel, con la sesión de Emi.', {
+    status: 403,
+    headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' },
+  });
+}
+
+const texto = (v: unknown) => (typeof v === 'string' ? v : '');
+const n: Newsletter = {
+  id: texto(d.id) || 'vista-previa',
+  lang: d.lang === 'en' ? 'en' : 'es',
+  slug: texto(d.slug) || 'vista-previa',
+  titulo: texto(d.titulo) || 'Sin título',
+  cuerpo: texto(d.cuerpo),
+  firma: typeof d.firma === 'string' ? d.firma : FIRMA,
+  pd: texto(d.pd),
+  pd2: texto(d.pd2),
+  pd3: texto(d.pd3),
+  relacionadas: Array.isArray(d.relacionadas) ? d.relacionadas.map(String) : [],
+  traduccion: null,
+  titulo_google: texto(d.titulo_google),
+  meta: texto(d.meta),
+  extracto: texto(d.extracto),
+  fecha: /^\d{4}-\d{2}-\d{2}$/.test(texto(d.fecha)) ? texto(d.fecha) : hoyEnMadrid(),
+  slugs_anteriores: [],
+};
+
+const { todas } = await leerNewsletters();
+const siguientes = sigueLeyendo(n, [n, ...todas.filter((x) => x.id !== n.id)]);
+
+Astro.response.headers.set('Cache-Control', 'no-store');
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+---
+
+<Base lang={n.lang} title={tituloGoogle(n)} description={descripcion(n)} route="newsletters" noindex>
+  <p class="mono borrador-aviso" role="status">
+    Vista previa del borrador · así se verá al publicarla · no la ve nadie más
+  </p>
+  <EntradaNewsletter entrada={n} siguientes={siguientes} />
+</Base>
+
+<style>
+  /* El mismo aviso que la vista previa de las páginas de ventas. */
+  .borrador-aviso {
+    position: sticky;
+    top: var(--space-1);
+    z-index: 40;
+    max-width: var(--width-text);
+    margin: 0 auto var(--space-3);
+    padding: var(--space-1) var(--space-2);
+    background: var(--ink);
+    color: var(--paper);
+    text-align: center;
+  }
+</style>

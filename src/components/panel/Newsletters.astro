@@ -1,0 +1,1331 @@
+---
+/**
+ * Pestaña Newsletters pasados — las entradas de `/newsletters/`.
+ *
+ * **11 de octubre de 2026, el pedido de SEO de Emi** (punto 5.4): «Emi
+ * publica las entradas sola desde su panel, rellenando casillas». Una lista
+ * con el botón «Nueva entrada» y, en cada entrada, las casillas del documento
+ * en su orden: primero el contenido (idioma, título, cuerpo, firma, las tres
+ * posdatas, «Sigue leyendo» y la traducción) y aparte, más abajo, lo que lee
+ * Google (título y descripción con contador, slug, extracto y fecha).
+ *
+ * **Borrador y publicada, separadas**, como las páginas de ventas (migración
+ * 0013): lo que Emi escribe se guarda solo en `newsletter_drafts`, que la web
+ * no ve; «Publicar» lo copia a `newsletters` y en un minuto está en la web (y
+ * en el sitemap). «Vista previa» abre la página tal como quedará, con lo que
+ * haya en el editor aunque no esté guardado.
+ *
+ * **El cuerpo es un editor de texto enriquecido básico**: párrafos, negrita,
+ * cursiva, listas y enlaces, sin tamaños, fuentes ni colores. Al pegar desde
+ * el correo se quedan los párrafos, las negritas, las listas y los enlaces, y
+ * se va todo lo demás (`limpiarNodo`, abajo). La web vuelve a limpiarlo al
+ * pintarlo (`limpiarHtml` en `src/data/newsletters.ts`).
+ *
+ * Lo automático: el slug sale del título y el extracto del cuerpo hasta que
+ * Emi los toca; si cambia el slug de una entrada publicada, la base de datos
+ * apunta el viejo y la página lo lleva al nuevo con un 301.
+ */
+import Boton from '../Boton.astro';
+import {
+  FIRMA,
+  POSDATAS,
+  MARCA_PD,
+  TOPE_TITULO,
+  TOPE_META,
+  TOPE_EXTRACTO,
+  SLUGS_RESERVADOS,
+} from '../../data/newsletters';
+
+const paraJs = { firma: FIRMA, posdatas: POSDATAS, marcas: MARCA_PD, reservados: SLUGS_RESERVADOS };
+const pds = [
+  { k: 'pd', t: 'PD', ayuda: 'Viene escrita. La palabra «aquí» lleva al formulario de abajo.' },
+  { k: 'pd2', t: 'PD2', ayuda: 'Viene escrita.' },
+  { k: 'pd3', t: 'PD3', ayuda: 'Opcional. Si la dejas vacía, no sale.' },
+];
+---
+
+<script type="application/json" id="nls-datos" set:html={JSON.stringify(paraJs)} />
+
+<div class="app-wrap pest nls" data-nls>
+  {/* --- La lista --------------------------------------------------------- */}
+  <div data-n-lista-vista>
+    <header class="pest-cab">
+      <div>
+        <p class="eyebrow">Newsletters pasados</p>
+        <h1 class="app-h1 pest-cab__h">Tus correos, para que Google los encuentre.</h1>
+      </div>
+      <Boton class="boton--solid boton--sm" href="#newsletters/nueva">Nueva entrada</Boton>
+    </header>
+
+    <p class="aviso nls__aviso" data-n-falta hidden>
+      <b>Falta un paso</b> — La base de datos todavía no tiene los newsletters: hay que pegar
+      <code>supabase/migrations/0013_newsletters.sql</code> en Supabase → SQL Editor, una vez. Mientras
+      tanto, la web enseña las tres primeras entradas, las escritas en el código.
+    </p>
+    <p class="ficha-form__nota nls__aviso">
+      Cada entrada es un correo tuyo en la web, en <code>/newsletters/</code> (en inglés,
+      <code>/en/newsletters/</code>), con el bloque del newsletter arriba y el formulario abajo. Se llega
+      desde el final del inicio y desde Google. Al publicar, en un minuto está en la web.
+    </p>
+
+    <ul class="filas" role="list" data-n-lista>
+      <li class="filas__vacio soft">Cargando…</li>
+    </ul>
+  </div>
+
+  {/* --- El editor ------------------------------------------------------------ */}
+  <div class="editor" data-n-editor hidden>
+    <a class="mono editor__volver" href="#newsletters">← Todas las entradas</a>
+    <header class="editor__cab">
+      <p class="eyebrow" data-n-e-eyebrow>Newsletter pasado</p>
+      <h1 class="app-h1 app-h1--sm" data-n-e-h></h1>
+      <p class="mono soft" data-n-e-dir></p>
+    </header>
+
+    <p class="ficha-form__nota editor__origen" data-n-e-origen></p>
+
+    <form class="nls__form" data-n-form novalidate>
+      <section class="nls__sec">
+        <h2 class="app-h2">Contenido</h2>
+
+        <fieldset class="campo nls__idioma">
+          <legend class="campo__t">Idioma</legend>
+          <label class="casilla"><input type="radio" name="lang" value="es" /><span>Español · sale en <code>/newsletters/</code></span></label>
+          <label class="casilla"><input type="radio" name="lang" value="en" /><span>English · sale en <code>/en/newsletters/</code></span></label>
+        </fieldset>
+
+        <label class="campo">
+          <span class="campo__t">Título de la entrada</span>
+          <input name="titulo" type="text" autocomplete="off" />
+          <span class="campo__ayuda">El título grande de la página. Una línea.</span>
+        </label>
+
+        <div class="campo">
+          <span class="campo__t" id="nls-cuerpo-t">Cuerpo</span>
+          <div class="rico" data-rico="cuerpo" data-etiqueta="nls-cuerpo-t"></div>
+          <span class="campo__ayuda">
+            El correo. Puedes pegarlo desde tu correo: se quedan los párrafos, las negritas, las cursivas,
+            las listas y los enlaces, y se va el resto del formato. Para un enlace, selecciona el texto y
+            toca «Enlace».
+          </span>
+        </div>
+
+        <label class="campo">
+          <span class="campo__t">Firma</span>
+          <textarea name="firma" rows="2"></textarea>
+          <span class="campo__ayuda">«Un abrazo,» va siempre en español, también en las entradas en inglés.</span>
+        </label>
+
+        {
+          pds.map((pd) => (
+            <div class="campo">
+              <span class="campo__t" id={`nls-${pd.k}-t`} data-n-marca={pd.k}>
+                {pd.t}
+              </span>
+              <div class="rico rico--linea" data-rico={pd.k} data-etiqueta={`nls-${pd.k}-t`} />
+              <span class="campo__ayuda">{pd.ayuda}</span>
+            </div>
+          ))
+        }
+
+        <fieldset class="campo">
+          <legend class="campo__t">Sigue leyendo</legend>
+          <div class="nls__elegir" data-n-relacionadas></div>
+          <span class="campo__ayuda">
+            Elige 2 o 3 entradas del mismo idioma: salen al final, debajo del formulario. Si no eliges
+            ninguna, salen las más recientes.
+          </span>
+        </fieldset>
+
+        <label class="campo">
+          <span class="campo__t">Traducción vinculada</span>
+          <select name="traduccion" data-n-traduccion></select>
+          <span class="campo__ayuda" data-n-traduccion-ayuda>
+            La misma entrada en el otro idioma. Con ella, el botón ES/EN lleva de una a la otra y Google
+            sabe que son la misma.
+          </span>
+        </label>
+      </section>
+
+      <section class="nls__sec">
+        <h2 class="app-h2">Para Google</h2>
+        <p class="nls__sec-nota soft">
+          Esto no se ve en la página: es lo que lee Google y lo que sale en el buscador.
+        </p>
+
+        <label class="campo">
+          <span class="campo__t">Título para Google <span class="nls__cuenta" data-n-cuenta="titulo_google"></span></span>
+          <input name="titulo_google" type="text" autocomplete="off" />
+          <span class="campo__ayuda">Ideal: {TOPE_TITULO} caracteres o menos. Si lo dejas vacío, usa el título de la entrada.</span>
+        </label>
+
+        <label class="campo">
+          <span class="campo__t">Meta descripción <span class="nls__cuenta" data-n-cuenta="meta"></span></span>
+          <textarea name="meta" rows="3"></textarea>
+          <span class="campo__ayuda">Ideal: {TOPE_META} caracteres o menos. Lo que sale debajo del título en Google.</span>
+        </label>
+
+        <label class="campo">
+          <span class="campo__t">Slug</span>
+          <input name="slug" type="text" autocomplete="off" spellcheck="false" />
+          <span class="campo__ayuda" data-n-slug-ayuda></span>
+        </label>
+
+        <label class="campo">
+          <span class="campo__t">Extracto para el índice <span class="nls__cuenta" data-n-cuenta="extracto"></span></span>
+          <textarea name="extracto" rows="3"></textarea>
+          <span class="campo__ayuda">
+            Lo que sale debajo del título en la lista de entradas. Se rellena solo con el principio del
+            cuerpo ({TOPE_EXTRACTO} letras); puedes cambiarlo. Si lo vacías, vuelve a rellenarse solo.
+          </span>
+        </label>
+
+        <label class="campo">
+          <span class="campo__t">Fecha de publicación</span>
+          <input name="fecha" type="date" />
+          <span class="campo__ayuda">La que se ve debajo del título. Ordena la lista: la más reciente arriba.</span>
+        </label>
+      </section>
+    </form>
+
+    {/* La barra de abajo: siempre a mano. */}
+    <div class="editor__barra">
+      <p class="mono soft editor__estado" data-n-e-estado aria-live="polite"></p>
+      <div class="editor__actos">
+        <button class="btn-text" type="button" data-n-e-borrar>Borrar la entrada</button>
+        <button class="btn-text" type="button" data-n-e-descartar hidden>Descartar el borrador</button>
+        <button class="btn-text" type="button" data-n-e-previa>Vista previa ↗</button>
+        <span data-n-e-guardar></span>
+        <span data-n-e-publicar></span>
+      </div>
+    </div>
+    <ul class="error editor__errores" data-n-e-errores hidden></ul>
+  </div>
+</div>
+
+<script>
+  import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+  import { alAbrir, armarBotones, avisar, boton, el, faltaTabla, fechaHora, hace, leerHash, ocupado } from '../../lib/panel';
+  import {
+    type Newsletter,
+    TOPE_TITULO,
+    TOPE_META,
+    TOPE_EXTRACTO,
+    SLUG_RE,
+    aSlug,
+    extractoDe,
+    escAtributo,
+    fechaLegible,
+    hoyEnMadrid,
+    hrefSeguro,
+    limpiarHtml,
+    newsletterPath,
+    textoPlano,
+  } from '../../data/newsletters';
+
+  type Lang = 'es' | 'en';
+  const D = JSON.parse(document.getElementById('nls-datos')!.textContent!) as {
+    firma: string;
+    posdatas: Record<Lang, { pd: string; pd2: string }>;
+    marcas: Record<Lang, [string, string, string]>;
+    reservados: string[];
+  };
+  const raiz = document.querySelector<HTMLElement>('[data-nls]')!;
+  const $ = <T extends HTMLElement = HTMLElement>(s: string) => raiz.querySelector<T>(s)!;
+  const form = $<HTMLFormElement>('[data-n-form]');
+  const campo = <T extends HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(n: string) =>
+    form.elements.namedItem(n) as T;
+
+  /** Lo que se edita: la entrada sin lo que pone la base de datos, y dos marcas. */
+  type Datos = Omit<Newsletter, 'slugs_anteriores' | 'published_at' | 'created_at'> & {
+    /** Emi tocó el slug: deja de salir solo del título. */
+    slugManual: boolean;
+    /** Emi tocó el extracto: deja de salir solo del cuerpo. */
+    extractoManual: boolean;
+  };
+  type Publicada = Pick<
+    Newsletter,
+    'id' | 'lang' | 'slug' | 'titulo' | 'fecha' | 'traduccion' | 'published_at' | 'created_at' | 'slugs_anteriores'
+  >;
+
+  /* ==========================================================================
+     El texto enriquecido
+     ==========================================================================
+     Un `contenteditable` con cinco botones. Lo que entra —tecleado o pegado—
+     se pasa por `limpiarNodo`, que se queda con párrafos, saltos, negrita,
+     cursiva, listas y enlaces. Lo pegado se limpia antes de entrar; lo
+     tecleado se limpia al leerlo, sin tocar lo que Emi está viendo. */
+
+  const BLOQUES = new Set(
+    'P DIV H1 H2 H3 H4 H5 H6 BLOCKQUOTE SECTION ARTICLE HEADER FOOTER ASIDE MAIN NAV PRE TABLE THEAD TBODY TFOOT TR TD TH FIGURE FIGCAPTION ADDRESS DL DT DD CENTER FORM FIELDSET HR LI'.split(
+      ' ',
+    ),
+  );
+  const FUERA = new Set(
+    'SCRIPT STYLE META LINK TITLE HEAD IMG PICTURE VIDEO AUDIO IFRAME OBJECT EMBED SVG CANVAS TEMPLATE NOSCRIPT BUTTON INPUT SELECT TEXTAREA O:P'.split(
+      ' ',
+    ),
+  );
+  const escHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const recortar = (s: string) => s.replace(/^(\s|<br>)+|(\s|<br>)+$/g, '');
+  const tieneBloques = (e: Element) => Boolean(e.querySelector([...BLOQUES, 'UL', 'OL'].join(',')));
+
+  /** Un trozo en línea: texto, saltos, negrita, cursiva y enlaces. */
+  function enLinea(n: Node): string {
+    if (n.nodeType === Node.TEXT_NODE) return escHtml((n.textContent ?? '').replace(/[\s ]+/g, ' '));
+    if (n.nodeType !== Node.ELEMENT_NODE) return '';
+    const e = n as HTMLElement;
+    const tag = e.tagName.toUpperCase();
+    if (FUERA.has(tag)) return '';
+    if (tag === 'BR') return '<br>';
+    let r = Array.from(e.childNodes).map(enLinea).join('');
+    if (!recortar(r)) return r;
+    const st = (e.getAttribute('style') ?? '').toLowerCase();
+    const sinPeso = /font-weight\s*:\s*(normal|[1-4]00)\b/.test(st);
+    const negrita = tag === 'STRONG' || (tag === 'B' && !sinPeso) || /font-weight\s*:\s*(bold|bolder|[6-9]00)\b/.test(st);
+    const cursiva = tag === 'EM' || tag === 'I' || /font-style\s*:\s*italic/.test(st);
+    if (cursiva) r = `<em>${r}</em>`;
+    if (negrita) r = `<strong>${r}</strong>`;
+    if (tag === 'A') {
+      const h = hrefSeguro(e.getAttribute('href'));
+      if (h) r = `<a href="${escAtributo(h)}">${r}</a>`;
+    }
+    return r;
+  }
+
+  /** Todo un trozo de HTML, en párrafos y listas. Con `linea`, en una línea. */
+  function limpiarNodo(raizN: Node, linea: boolean): string {
+    const out: string[] = [];
+    let actual = '';
+    const cerrar = () => {
+      const t = recortar(actual);
+      if (t) out.push(`<p>${t}</p>`);
+      actual = '';
+    };
+    const lista = (e: Element) => {
+      const items: string[] = [];
+      const recoger = (l: Element) => {
+        for (const c of Array.from(l.children)) {
+          if (c.tagName === 'UL' || c.tagName === 'OL') recoger(c);
+          if (c.tagName !== 'LI') continue;
+          const copia = c.cloneNode(true) as Element;
+          copia.querySelectorAll('ul, ol').forEach((x) => x.remove());
+          const t = recortar(enLinea(copia));
+          if (t) items.push(t);
+          for (const sub of Array.from(c.children)) if (sub.tagName === 'UL' || sub.tagName === 'OL') recoger(sub);
+        }
+      };
+      recoger(e);
+      const tag = e.tagName.toLowerCase();
+      if (items.length) out.push(`<${tag}>${items.map((i) => `<li>${i}</li>`).join('')}</${tag}>`);
+    };
+    const andar = (n: Node) => {
+      if (n.nodeType === Node.TEXT_NODE) {
+        actual += enLinea(n);
+        return;
+      }
+      if (n.nodeType !== Node.ELEMENT_NODE) return;
+      const e = n as HTMLElement;
+      const tag = e.tagName.toUpperCase();
+      if (FUERA.has(tag)) return;
+      if (tag === 'UL' || tag === 'OL') {
+        cerrar();
+        if (linea) e.querySelectorAll('li').forEach((li) => ((actual += enLinea(li)), cerrar()));
+        else lista(e);
+        return;
+      }
+      if (tag === 'BR') {
+        /* Dos saltos seguidos son un párrafo nuevo (así pega el correo). */
+        if (actual.endsWith('<br>')) {
+          actual = actual.slice(0, -4);
+          cerrar();
+        } else actual += '<br>';
+        return;
+      }
+      if (BLOQUES.has(tag)) {
+        cerrar();
+        e.childNodes.forEach(andar);
+        cerrar();
+        return;
+      }
+      if (tieneBloques(e)) {
+        e.childNodes.forEach(andar);
+        return;
+      }
+      actual += enLinea(e);
+    };
+    raizN.childNodes.forEach(andar);
+    cerrar();
+    const html = linea ? out.map((p) => p.slice(3, -4)).join('<br>') : out.join('');
+    return limpiarHtml(html, linea).replace(/<\/strong><strong>|<\/em><em>/g, '');
+  }
+
+  /** Texto plano pegado: los renglones en blanco separan párrafos. */
+  const textoAHtml = (t: string, linea: boolean) => {
+    const parrafos = t
+      .replace(/\r\n?/g, '\n')
+      .split(/\n\s*\n/)
+      .map((p) => escHtml(p.trim()).replace(/\n/g, '<br>'))
+      .filter(Boolean);
+    return linea ? parrafos.join('<br>') : parrafos.map((p) => `<p>${p}</p>`).join('');
+  };
+
+  type Rico = { area: HTMLElement; poner: (html: string) => void; leer: () => string };
+
+  function armarRico(caja: HTMLElement, linea: boolean, alCambiar: (html: string) => void): Rico {
+    const etiqueta = caja.dataset.etiqueta;
+    const barra = el('div', { class: 'rico__barra', role: 'toolbar', 'aria-label': 'Formato' });
+    const area = el('div', {
+      class: 'rico__area',
+      contenteditable: 'true',
+      role: 'textbox',
+      'aria-multiline': linea ? 'false' : 'true',
+      'aria-labelledby': etiqueta,
+      spellcheck: 'true',
+    });
+    const leer = () => limpiarNodo(area, linea);
+    const cambio = () => alCambiar(leer());
+    const mandos: [string, () => void][] = [
+      ['Negrita', () => document.execCommand('bold')],
+      ['Cursiva', () => document.execCommand('italic')],
+      ...(linea
+        ? []
+        : ([
+            ['Lista', () => document.execCommand('insertUnorderedList')],
+            ['Lista numerada', () => document.execCommand('insertOrderedList')],
+          ] as [string, () => void][])),
+      [
+        'Enlace',
+        () => {
+          const sel = window.getSelection();
+          if (!sel || sel.isCollapsed || !area.contains(sel.anchorNode)) {
+            avisar('Primero selecciona el texto del enlace');
+            return;
+          }
+          const rango = sel.getRangeAt(0);
+          const dir = window.prompt(
+            '¿A dónde lleva el enlace?\n\nUna dirección (https://…), una página del sitio (/formaciones/…) o #suscribete para el formulario de abajo.',
+            'https://',
+          );
+          if (dir === null) return;
+          const h = hrefSeguro(dir);
+          if (!h || h === 'https://') {
+            avisar('Esa dirección no vale: empieza por https://, por / o por #');
+            return;
+          }
+          area.focus();
+          sel.removeAllRanges();
+          sel.addRange(rango);
+          document.execCommand('createLink', false, h);
+        },
+      ],
+      ['Quitar enlace', () => document.execCommand('unlink')],
+    ];
+    for (const [t, hacer] of mandos) {
+      const b = el('button', { type: 'button', class: 'rico__b mono', text: t });
+      /* Sin robarle la selección al texto. */
+      b.addEventListener('mousedown', (e) => e.preventDefault());
+      b.addEventListener('click', () => {
+        area.focus();
+        hacer();
+        cambio();
+      });
+      barra.append(b);
+    }
+    area.addEventListener('input', cambio);
+    area.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const dt = e.clipboardData;
+      if (!dt) return;
+      const html = dt.getData('text/html');
+      const limpio = html
+        ? limpiarNodo(new DOMParser().parseFromString(html, 'text/html').body, linea)
+        : textoAHtml(dt.getData('text/plain'), linea);
+      if (limpio) document.execCommand('insertHTML', false, limpio);
+      cambio();
+    });
+    if (linea) {
+      area.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        document.execCommand('insertLineBreak');
+      });
+    }
+    caja.append(barra, area);
+    return {
+      area,
+      leer,
+      poner: (html: string) => {
+        const limpio = limpiarHtml(html, linea);
+        area.innerHTML = limpio || (linea ? '' : '<p><br></p>');
+      },
+    };
+  }
+
+  /* ==========================================================================
+     La lista
+     ========================================================================== */
+
+  let publicadas = new Map<string, Publicada>();
+  let borradores = new Map<string, { datos: Datos; updated_at: string }>();
+  let arrancada = false;
+
+  const cuando = (iso: string) => {
+    const h = hace(iso);
+    return h === 'ahora' ? 'hace un momento' : /^(hace|ayer)/.test(h) ? h : `el ${h}`;
+  };
+
+  function estadoDe(id: string): { t: string; cls: string } {
+    const pub = publicadas.get(id);
+    const bor = borradores.get(id);
+    if (pub && bor && Date.parse(bor.updated_at) > Date.parse(pub.published_at ?? '')) {
+      return { t: 'Cambios sin publicar', cls: 'estado estado--tinta' };
+    }
+    if (pub) return { t: 'Publicada', cls: 'estado estado--vivo' };
+    return { t: 'Borrador', cls: 'estado' };
+  }
+
+  async function cargarLista(): Promise<boolean> {
+    const [pub, bor] = await Promise.all([
+      supabase
+        .from('newsletters')
+        .select('id, lang, slug, titulo, fecha, traduccion, published_at, created_at, slugs_anteriores'),
+      supabase.from('newsletter_drafts').select('id, datos, updated_at'),
+    ]);
+    const ul = $('[data-n-lista]');
+    ul.textContent = '';
+    const error = pub.error ?? bor.error;
+    if (error) {
+      if (faltaTabla(error.message)) $('[data-n-falta]').hidden = false;
+      else ul.append(el('li', { class: 'filas__vacio', text: `No se pudo cargar: ${error.message}` }));
+      return false;
+    }
+    $('[data-n-falta]').hidden = true;
+    publicadas = new Map((pub.data as Publicada[]).map((p) => [p.id, p]));
+    borradores = new Map((bor.data ?? []).map((b) => [b.id as string, { datos: b.datos as Datos, updated_at: b.updated_at }]));
+
+    const ids = [...new Set([...publicadas.keys(), ...borradores.keys()])];
+    const vista = (id: string) => {
+      const b = borradores.get(id)?.datos;
+      const p = publicadas.get(id);
+      return {
+        id,
+        lang: (b?.lang ?? p?.lang ?? 'es') as Lang,
+        titulo: b?.titulo || p?.titulo || 'Sin título',
+        fecha: b?.fecha || p?.fecha || '',
+        creada: p?.created_at ?? borradores.get(id)?.updated_at ?? '',
+        slug: p?.slug ?? b?.slug ?? '',
+      };
+    };
+    const filas = ids.map(vista).sort((a, b) => b.fecha.localeCompare(a.fecha) || b.creada.localeCompare(a.creada));
+    if (!filas.length) {
+      ul.append(el('li', { class: 'filas__vacio soft', text: 'Todavía no hay ninguna. Empieza con «Nueva entrada».' }));
+      return true;
+    }
+    for (const f of filas) {
+      const e = estadoDe(f.id);
+      const pub = publicadas.get(f.id);
+      const detalle = [
+        f.lang.toUpperCase(),
+        pub ? newsletterPath(pub) : f.slug ? `${newsletterPath({ lang: f.lang, slug: f.slug })} (sin publicar)` : null,
+        f.fecha ? fechaLegible(f.fecha, 'es') : null,
+      ].filter(Boolean);
+      ul.append(
+        el(
+          'li',
+          { class: 'fila' },
+          el(
+            'div',
+            { class: 'fila__txt' },
+            el('a', { class: 'fila__t', href: `#newsletters/${f.id}`, text: f.titulo }),
+            el('p', { class: 'mono soft', text: detalle.join(' · ') }),
+          ),
+          el('span', { class: e.cls, text: e.t }),
+          el(
+            'div',
+            { class: 'fila__actos' },
+            pub && el('a', { class: 'mono', href: newsletterPath(pub), target: '_blank', rel: 'noopener', text: 'Ver ↗' }),
+            el('a', { class: 'mono nls__escribir', href: `#newsletters/${f.id}`, text: 'Escribir →' }),
+          ),
+        ),
+      );
+    }
+    return true;
+  }
+
+  /* ==========================================================================
+     El editor
+     ========================================================================== */
+
+  let modelo: Datos | null = null;
+  /** Una entrada que todavía no se guardó nunca: su `id` ya está decidido. */
+  let nueva = false;
+  let reloj: number | undefined;
+  let guardando: Promise<void> | null = null;
+  let sucio = false;
+  const estadoEl = $('[data-n-e-estado]');
+
+  const ricos: Record<'cuerpo' | 'pd' | 'pd2' | 'pd3', Rico> = {} as never;
+  raiz.querySelectorAll<HTMLElement>('[data-rico]').forEach((caja) => {
+    const k = caja.dataset.rico as keyof typeof ricos;
+    ricos[k] = armarRico(caja, k !== 'cuerpo', (html) => {
+      if (!modelo) return;
+      modelo[k] = html;
+      if (k === 'cuerpo' && !modelo.extractoManual) {
+        modelo.extracto = extractoDe(html);
+        campo<HTMLTextAreaElement>('extracto').value = modelo.extracto;
+        contar();
+      }
+      tocado();
+    });
+  });
+
+  function datosNuevos(id: string, lang: Lang = 'es'): Datos {
+    return {
+      id,
+      lang,
+      slug: '',
+      titulo: '',
+      cuerpo: '',
+      firma: D.firma,
+      pd: D.posdatas[lang].pd,
+      pd2: D.posdatas[lang].pd2,
+      pd3: '',
+      relacionadas: [],
+      traduccion: null,
+      titulo_google: '',
+      meta: '',
+      extracto: '',
+      fecha: hoyEnMadrid(),
+      slugManual: false,
+      extractoManual: false,
+    };
+  }
+
+  /** Lo de una fila publicada, como datos del editor. */
+  const deFila = (f: Record<string, any>): Datos => ({
+    id: f.id,
+    lang: f.lang,
+    slug: f.slug ?? '',
+    titulo: f.titulo ?? '',
+    cuerpo: f.cuerpo ?? '',
+    firma: f.firma ?? '',
+    pd: f.pd ?? '',
+    pd2: f.pd2 ?? '',
+    pd3: f.pd3 ?? '',
+    relacionadas: f.relacionadas ?? [],
+    traduccion: f.traduccion ?? null,
+    titulo_google: f.titulo_google ?? '',
+    meta: f.meta ?? '',
+    extracto: f.extracto ?? '',
+    fecha: String(f.fecha ?? '').slice(0, 10),
+    slugManual: true,
+    extractoManual: Boolean(f.extracto) && f.extracto !== extractoDe(f.cuerpo ?? ''),
+  });
+
+  /* --- Contadores, slug y selectores ---------------------------------------- */
+
+  function contar() {
+    if (!modelo) return;
+    const pon = (k: string, n: number, tope: number, nota = '') => {
+      const c = $(`[data-n-cuenta="${k}"]`);
+      c.textContent = `${n} / ${tope}${n > tope ? ' · más de lo ideal' : ''}${nota}`;
+      c.classList.toggle('nls__cuenta--pasa', n > tope);
+    };
+    const tg = modelo.titulo_google.trim();
+    pon('titulo_google', (tg || modelo.titulo).length, TOPE_TITULO, tg ? '' : ' · el de la entrada');
+    pon('meta', modelo.meta.trim().length, TOPE_META);
+    pon('extracto', modelo.extracto.trim().length, TOPE_EXTRACTO);
+  }
+
+  function pintarSlug() {
+    if (!modelo) return;
+    const ayuda = $('[data-n-slug-ayuda]');
+    const pub = publicadas.get(modelo.id);
+    const dir = modelo.slug ? `emilserios.com${newsletterPath(modelo)}` : 'emilserios.com/…';
+    const partes = [`La dirección: ${dir}`];
+    if (!pub && !modelo.slugManual) partes.push('Sale sola del título; puedes cambiarla. Minúsculas, sin acentos, con guiones.');
+    if (pub && (pub.slug !== modelo.slug || pub.lang !== modelo.lang)) {
+      partes.push(`Al publicar, la de antes (${newsletterPath(pub)}) lleva a esta con un 301.`);
+    }
+    ayuda.textContent = partes.join(' · ');
+    $('[data-n-e-dir]').textContent = modelo.slug ? newsletterPath(modelo) : '';
+  }
+
+  /** Las demás entradas publicadas, para elegir. */
+  const otrasPublicadas = () => [...publicadas.values()].filter((p) => p.id !== modelo?.id);
+
+  function pintarRelacionadas() {
+    if (!modelo) return;
+    const m = modelo;
+    const caja = $('[data-n-relacionadas]');
+    caja.textContent = '';
+    const mismas = otrasPublicadas()
+      .filter((p) => p.lang === m.lang)
+      .sort((a, b) => b.fecha.localeCompare(a.fecha) || (b.created_at ?? '').localeCompare(a.created_at ?? ''));
+    m.relacionadas = m.relacionadas.filter((id) => mismas.some((p) => p.id === id));
+    if (!mismas.length) {
+      caja.append(el('p', { class: 'soft nls__vacio', text: 'Todavía no hay otras entradas publicadas en este idioma.' }));
+      return;
+    }
+    const lleno = () => m.relacionadas.length >= 3;
+    const casillas: HTMLInputElement[] = [];
+    for (const p of mismas) {
+      const c = el('input', { type: 'checkbox', value: p.id });
+      c.checked = m.relacionadas.includes(p.id);
+      c.addEventListener('change', () => {
+        m.relacionadas = c.checked ? [...m.relacionadas, p.id] : m.relacionadas.filter((x) => x !== p.id);
+        casillas.forEach((x) => (x.disabled = !x.checked && lleno()));
+        tocado();
+      });
+      casillas.push(c);
+      caja.append(el('label', { class: 'casilla' }, c, el('span', { text: p.titulo })));
+    }
+    casillas.forEach((x) => (x.disabled = !x.checked && lleno()));
+  }
+
+  function pintarTraduccion() {
+    if (!modelo) return;
+    const m = modelo;
+    const sel = campo<HTMLSelectElement>('traduccion');
+    sel.textContent = '';
+    const otro: Lang = m.lang === 'es' ? 'en' : 'es';
+    const opciones = otrasPublicadas().filter((p) => p.lang === otro);
+    if (m.traduccion && !opciones.some((p) => p.id === m.traduccion)) m.traduccion = null;
+    /* Si la dejó vacía pero otra entrada la eligió a ella, ya están vinculadas. */
+    const desde = !m.traduccion ? opciones.find((p) => p.traduccion === m.id) : undefined;
+    sel.append(el('option', { value: '', text: desde ? `— La vinculó «${desde.titulo}» —` : '— Ninguna —' }));
+    for (const p of opciones) {
+      const o = el('option', { value: p.id, text: `${p.lang.toUpperCase()} · ${p.titulo}` });
+      o.selected = p.id === m.traduccion;
+      sel.append(o);
+    }
+    sel.disabled = !opciones.length;
+  }
+
+  function pintarMarcas() {
+    if (!modelo) return;
+    (['pd', 'pd2', 'pd3'] as const).forEach((k, i) => {
+      $(`[data-n-marca="${k}"]`).textContent = D.marcas[modelo!.lang][i].replace(':', '');
+    });
+  }
+
+  /** Del modelo a las casillas. */
+  function pintarEditor() {
+    if (!modelo) return;
+    const m = modelo;
+    form.querySelectorAll<HTMLInputElement>('input[name="lang"]').forEach((r) => (r.checked = r.value === m.lang));
+    for (const k of ['titulo', 'firma', 'titulo_google', 'meta', 'slug', 'extracto', 'fecha'] as const) {
+      campo<HTMLInputElement>(k).value = m[k];
+    }
+    ricos.cuerpo.poner(m.cuerpo);
+    ricos.pd.poner(m.pd);
+    ricos.pd2.poner(m.pd2);
+    ricos.pd3.poner(m.pd3);
+    $('[data-n-e-h]').textContent = m.titulo || 'Entrada nueva';
+    pintarMarcas();
+    pintarRelacionadas();
+    pintarTraduccion();
+    pintarSlug();
+    contar();
+  }
+
+  /* --- De las casillas al modelo ---------------------------------------------- */
+
+  form.addEventListener('input', (e) => {
+    if (!modelo) return;
+    const m = modelo;
+    const t = e.target as HTMLInputElement;
+    if (!t.name || t.name === 'traduccion') return;
+    if (t.name === 'lang') return;
+    const v = t.value;
+    switch (t.name) {
+      case 'titulo':
+        m.titulo = v;
+        $('[data-n-e-h]').textContent = v || 'Entrada nueva';
+        if (!m.slugManual && !publicadas.has(m.id)) {
+          m.slug = aSlug(v);
+          campo<HTMLInputElement>('slug').value = m.slug;
+        }
+        break;
+      case 'slug':
+        m.slug = v.trim();
+        m.slugManual = Boolean(m.slug);
+        if (!m.slug && !publicadas.has(m.id)) m.slug = aSlug(m.titulo);
+        break;
+      case 'extracto':
+        m.extracto = v;
+        m.extractoManual = Boolean(v.trim());
+        break;
+      case 'firma':
+      case 'titulo_google':
+      case 'meta':
+      case 'fecha':
+        m[t.name] = v;
+        break;
+      default:
+        return;
+    }
+    pintarSlug();
+    contar();
+    tocado();
+  });
+
+  /* El slug, limpio al salir de la casilla. Y el extracto, de vuelta si lo vació. */
+  campo<HTMLInputElement>('slug').addEventListener('change', () => {
+    if (!modelo) return;
+    modelo.slug = aSlug(modelo.slug);
+    campo<HTMLInputElement>('slug').value = modelo.slug;
+    pintarSlug();
+    tocado();
+  });
+  campo<HTMLTextAreaElement>('extracto').addEventListener('change', () => {
+    if (!modelo || modelo.extractoManual) return;
+    modelo.extracto = extractoDe(modelo.cuerpo);
+    campo<HTMLTextAreaElement>('extracto').value = modelo.extracto;
+    contar();
+    tocado();
+  });
+
+  form.addEventListener('change', (e) => {
+    if (!modelo) return;
+    const m = modelo;
+    const t = e.target as HTMLInputElement;
+    if (t.name === 'traduccion') {
+      m.traduccion = t.value || null;
+      tocado();
+    } else if (t.name === 'lang' && t.checked && t.value !== m.lang) {
+      const antes = m.lang;
+      const ahora = t.value as Lang;
+      m.lang = ahora;
+      /* Las posdatas que siguen como vinieron, en el idioma nuevo. */
+      if (m.pd === D.posdatas[antes].pd) m.pd = D.posdatas[ahora].pd;
+      if (m.pd2 === D.posdatas[antes].pd2) m.pd2 = D.posdatas[ahora].pd2;
+      ricos.pd.poner(m.pd);
+      ricos.pd2.poner(m.pd2);
+      m.relacionadas = [];
+      m.traduccion = null;
+      pintarMarcas();
+      pintarRelacionadas();
+      pintarTraduccion();
+      pintarSlug();
+      tocado();
+    }
+  });
+  form.addEventListener('submit', (e) => e.preventDefault());
+
+  /* --- Guardar solo --------------------------------------------------------- */
+
+  function tocado() {
+    sucio = true;
+    estadoEl.textContent = 'Sin guardar…';
+    window.clearTimeout(reloj);
+    reloj = window.setTimeout(() => void guardar(), 2500);
+  }
+
+  async function guardar(): Promise<boolean> {
+    window.clearTimeout(reloj);
+    if (guardando) await guardando;
+    if (!sucio || !modelo) return true;
+    sucio = false;
+    const datos = structuredClone(modelo);
+    let ok = true;
+    guardando = (async () => {
+      estadoEl.textContent = 'Guardando…';
+      const { data, error } = await supabase
+        .from('newsletter_drafts')
+        .upsert({ id: datos.id, datos }, { onConflict: 'id' })
+        .select('updated_at')
+        .single();
+      if (error) {
+        ok = false;
+        sucio = true;
+        estadoEl.textContent = `No se pudo guardar: ${error.message}`;
+        return;
+      }
+      borradores.set(datos.id, { datos, updated_at: data.updated_at });
+      if (nueva && modelo?.id === datos.id) {
+        nueva = false;
+        history.replaceState(null, '', `#newsletters/${datos.id}`);
+      }
+      pintarEstado();
+    })();
+    await guardando;
+    guardando = null;
+    return ok;
+  }
+
+  function pintarEstado() {
+    if (!modelo) return;
+    const pub = publicadas.get(modelo.id);
+    const bor = borradores.get(modelo.id);
+    const pendiente = Boolean(pub && bor && Date.parse(bor.updated_at) > Date.parse(pub.published_at ?? ''));
+    const partes: string[] = [];
+    if (bor) partes.push(`Borrador guardado ${cuando(bor.updated_at)}`);
+    if (pub) partes.push(pendiente ? `publicada ${cuando(pub.published_at!)}, con cambios sin publicar` : `publicada ${cuando(pub.published_at!)}, al día`);
+    else partes.push(nueva && !bor ? 'nueva, sin guardar' : 'todavía sin publicar');
+    const txt = partes.join(' · ');
+    estadoEl.textContent = txt.charAt(0).toUpperCase() + txt.slice(1);
+    $('[data-n-e-descartar]').hidden = !(pub && bor);
+    $('[data-n-e-eyebrow]').textContent = pub ? 'Newsletter pasado · publicado' : 'Newsletter pasado · borrador';
+  }
+
+  window.addEventListener('beforeunload', (e) => {
+    if (sucio || guardando) e.preventDefault();
+  });
+
+  /* --- Abrir una entrada ---------------------------------------------------- */
+
+  async function abrirEditor(id: string | null) {
+    $('[data-n-lista-vista]').hidden = true;
+    $('[data-n-editor]').hidden = false;
+    $('[data-n-e-errores]').hidden = true;
+    window.scrollTo({ top: 0 });
+    sucio = false;
+    window.clearTimeout(reloj);
+
+    if (!id) {
+      nueva = true;
+      modelo = datosNuevos(crypto.randomUUID());
+      $('[data-n-e-origen]').textContent =
+        'Entrada nueva. Lo que escribas se guarda solo como borrador, unos segundos después de dejar de escribir; la entrada no existe en la web hasta que publiques.';
+      pintarEditor();
+      pintarEstado();
+      return;
+    }
+
+    nueva = false;
+    modelo = null;
+    $('[data-n-e-h]').textContent = 'Cargando…';
+    const [bor, pub] = await Promise.all([
+      supabase.from('newsletter_drafts').select('datos, updated_at').eq('id', id).maybeSingle(),
+      supabase.from('newsletters').select('*').eq('id', id).maybeSingle(),
+    ]);
+    if (bor.error || pub.error) {
+      $('[data-n-e-h]').textContent = 'No se pudo abrir';
+      $('[data-n-e-origen]').textContent = (bor.error ?? pub.error)!.message;
+      return;
+    }
+    if (!bor.data && !pub.data) {
+      avisar('Esa entrada ya no existe');
+      location.hash = '#newsletters';
+      return;
+    }
+    if (pub.data) publicadas.set(id, pub.data as Publicada);
+    else publicadas.delete(id);
+    if (bor.data) borradores.set(id, { datos: bor.data.datos as Datos, updated_at: bor.data.updated_at });
+    else borradores.delete(id);
+
+    if (bor.data) {
+      modelo = { ...datosNuevos(id), ...(bor.data.datos as Datos), id };
+      $('[data-n-e-origen]').textContent = pub.data
+        ? `Estás en el borrador (guardado el ${fechaHora(bor.data.updated_at)}). La web enseña la versión publicada el ${fechaHora(pub.data.published_at)} hasta que publiques.`
+        : `Estás en el borrador (guardado el ${fechaHora(bor.data.updated_at)}). La entrada no existe en la web hasta que publiques.`;
+    } else {
+      modelo = deFila(pub.data!);
+      $('[data-n-e-origen]').textContent = `Es la entrada que está en la web, publicada el ${fechaHora(pub.data!.published_at)}. Lo que cambies se guarda como borrador; la web no cambia hasta que publiques.`;
+    }
+    pintarEditor();
+    pintarEstado();
+  }
+
+  function cerrarEditor() {
+    modelo = null;
+    nueva = false;
+    $('[data-n-editor]').hidden = true;
+    $('[data-n-lista-vista]').hidden = false;
+  }
+
+  /* --- Publicar ---------------------------------------------------------------- */
+
+  function revisar(m: Datos): string[] {
+    const faltas: string[] = [];
+    if (!m.titulo.trim()) faltas.push('Falta el título de la entrada.');
+    if (!textoPlano(m.cuerpo)) faltas.push('El cuerpo está vacío.');
+    if (!m.slug) faltas.push('Falta el slug.');
+    else if (!SLUG_RE.test(m.slug)) faltas.push('El slug solo lleva minúsculas sin acentos, números y guiones.');
+    else if (D.reservados.includes(m.slug)) faltas.push(`El slug no puede ser «${m.slug}»: es la palabra de las páginas del índice.`);
+    else {
+      const otra = otrasPublicadas().find((p) => p.lang === m.lang && p.slug === m.slug);
+      if (otra) faltas.push(`Ya hay otra entrada con ese slug: «${otra.titulo}».`);
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(m.fecha)) faltas.push('Falta la fecha de publicación.');
+    return faltas;
+  }
+
+  const guardarB = boton('Guardar borrador', { chico: true, flecha: false });
+  const publicarB = boton('Publicar', { solido: true, chico: true });
+  $('[data-n-e-guardar]').replaceWith(guardarB);
+  $('[data-n-e-publicar]').replaceWith(publicarB);
+  armarBotones();
+
+  guardarB.addEventListener('click', () =>
+    ocupado(guardarB, 'Guardando…', async () => {
+      sucio = true;
+      if (await guardar()) avisar('Borrador guardado');
+    }),
+  );
+
+  publicarB.addEventListener('click', async () => {
+    if (!modelo) return;
+    const m = modelo;
+    const errores = $('[data-n-e-errores]');
+    const faltas = revisar(m);
+    errores.textContent = '';
+    if (faltas.length) {
+      faltas.forEach((f) => errores.append(el('li', { text: f })));
+      errores.hidden = false;
+      errores.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      return;
+    }
+    errores.hidden = true;
+    if (!window.confirm(`¿Publicar «${m.titulo}»?\n\nEn un minuto la ve todo el mundo en ${newsletterPath(m)}.`)) return;
+    await ocupado(publicarB, 'Publicando…', async () => {
+      sucio = true;
+      if (!(await guardar())) return;
+      const fila = {
+        id: m.id,
+        lang: m.lang,
+        slug: m.slug,
+        titulo: m.titulo.trim(),
+        cuerpo: m.cuerpo,
+        firma: m.firma,
+        pd: m.pd,
+        pd2: m.pd2,
+        pd3: m.pd3,
+        relacionadas: m.relacionadas.slice(0, 3),
+        traduccion: m.traduccion,
+        titulo_google: m.titulo_google.trim(),
+        meta: m.meta.trim(),
+        extracto: m.extracto.trim() || extractoDe(m.cuerpo),
+        fecha: m.fecha,
+      };
+      const { data, error } = await supabase
+        .from('newsletters')
+        .upsert(fila, { onConflict: 'id' })
+        .select('id, lang, slug, titulo, fecha, traduccion, published_at, created_at, slugs_anteriores')
+        .single();
+      if (error) {
+        avisar(
+          /duplicate key|unique/i.test(error.message)
+            ? 'No se pudo publicar: ya hay otra entrada con ese slug'
+            : `No se pudo publicar: ${error.message}`,
+        );
+        return;
+      }
+      publicadas.set(m.id, data as Publicada);
+      /* Publicada: el borrador ya no hace falta. */
+      const borrado = await supabase.from('newsletter_drafts').delete().eq('id', m.id);
+      if (!borrado.error) borradores.delete(m.id);
+      /* La traducción, de vuelta: si la otra no tiene ninguna, queda vinculada a esta. */
+      if (m.traduccion) {
+        const otra = publicadas.get(m.traduccion);
+        if (otra && !otra.traduccion) {
+          const r = await supabase.from('newsletters').update({ traduccion: m.id }).eq('id', otra.id);
+          if (!r.error) otra.traduccion = m.id;
+        }
+      }
+      pintarSlug();
+      pintarEstado();
+      avisar('Publicada: en un minuto está en la web');
+    });
+  });
+
+  $('[data-n-e-descartar]').addEventListener('click', async () => {
+    if (!modelo) return;
+    if (!window.confirm('¿Descartar el borrador?\n\nSe pierden los cambios sin publicar y el editor vuelve a la versión que está en la web.')) return;
+    window.clearTimeout(reloj);
+    sucio = false;
+    const id = modelo.id;
+    const { error } = await supabase.from('newsletter_drafts').delete().eq('id', id);
+    if (error) return avisar(`No se pudo descartar: ${error.message}`);
+    borradores.delete(id);
+    avisar('Borrador descartado');
+    await abrirEditor(id);
+  });
+
+  $('[data-n-e-borrar]').addEventListener('click', async () => {
+    if (!modelo) return;
+    const m = modelo;
+    const enLaWeb = publicadas.has(m.id);
+    const aviso = enLaWeb
+      ? `¿Borrar «${m.titulo || 'esta entrada'}»?\n\nSe quita de la web y del panel, y su dirección pasa a dar «esta página no existe». No se puede deshacer.`
+      : `¿Borrar el borrador «${m.titulo || 'sin título'}»?\n\nNo se puede deshacer.`;
+    if (!window.confirm(aviso)) return;
+    window.clearTimeout(reloj);
+    sucio = false;
+    const [a, b] = await Promise.all([
+      supabase.from('newsletters').delete().eq('id', m.id),
+      supabase.from('newsletter_drafts').delete().eq('id', m.id),
+    ]);
+    if (a.error || b.error) return avisar(`No se pudo borrar: ${(a.error ?? b.error)!.message}`);
+    publicadas.delete(m.id);
+    borradores.delete(m.id);
+    avisar('Entrada borrada');
+    location.hash = '#newsletters';
+  });
+
+  /* --- La vista previa --------------------------------------------------------
+     Como la de las páginas de ventas: un formulario que se envía a una pestaña
+     nueva, con el token en el cuerpo y no en la dirección. */
+  $('[data-n-e-previa]').addEventListener('click', async () => {
+    if (!modelo) return;
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) return avisar('La sesión caducó: vuelve a entrar');
+    const f = el('form', { method: 'post', action: '/panel/vista-previa-newsletter/', target: '_blank', hidden: true });
+    const poner = (name: string, value: string) => {
+      const i = el('input', { type: 'hidden', name });
+      i.value = value;
+      f.append(i);
+    };
+    poner('token', session.access_token);
+    poner('datos', JSON.stringify(modelo));
+    document.body.append(f);
+    f.submit();
+    f.remove();
+  });
+
+  /* ==========================================================================
+     Qué se enseña: la lista o una entrada (`#newsletters/<id>`, `#newsletters/nueva`)
+     ========================================================================== */
+
+  async function segunHash() {
+    const [p, id] = leerHash();
+    if (p !== 'newsletters') {
+      if (sucio) void guardar();
+      return;
+    }
+    if (id === 'nueva') {
+      if (sucio) await guardar();
+      if (!publicadas.size && !borradores.size) await cargarLista();
+      await abrirEditor(null);
+    } else if (id && id !== modelo?.id) {
+      if (sucio) await guardar();
+      if (!publicadas.size && !borradores.size) await cargarLista();
+      await abrirEditor(id);
+    } else if (!id) {
+      if (sucio) await guardar();
+      cerrarEditor();
+      await cargarLista();
+    }
+  }
+
+  alAbrir('newsletters', async () => {
+    if (!isSupabaseConfigured) {
+      const ul = $('[data-n-lista]');
+      ul.textContent = '';
+      ul.append(el('li', { class: 'filas__vacio soft', text: 'Sin conectar: no hay de dónde leer las entradas.' }));
+      return;
+    }
+    const ok = await cargarLista();
+    arrancada = true;
+    if (ok) await segunHash();
+  });
+
+  document.addEventListener('panel:pestana', () => {
+    if (arrancada) void segunHash();
+  });
+</script>
+
+<style>
+  .nls__aviso {
+    margin-top: var(--space-4);
+    max-width: 48rem;
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+  }
+
+  .nls :global(.nls__escribir) {
+    color: var(--ink);
+  }
+
+  /* --- El editor ----------------------------------------------------------- */
+  .editor__volver {
+    display: inline-block;
+    border-bottom: 0;
+    color: var(--ink-soft);
+  }
+
+  .editor__volver:hover {
+    color: var(--ink);
+  }
+
+  .editor__cab {
+    margin-top: var(--space-3);
+  }
+
+  .editor__cab h1,
+  .editor__cab .mono {
+    margin-top: var(--space-1);
+  }
+
+  .editor__origen {
+    margin-top: var(--space-3);
+    max-width: 48rem;
+  }
+
+  .nls__form {
+    max-width: 48rem;
+  }
+
+  .nls__sec {
+    display: grid;
+    gap: var(--space-4);
+    padding: var(--space-6) 0 var(--space-4);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .nls__sec-nota {
+    margin-top: calc(var(--space-3) * -1);
+    font-size: var(--text-small);
+    line-height: 1.5;
+  }
+
+  fieldset.campo {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  fieldset.campo legend {
+    padding: 0;
+    margin-bottom: var(--space-1);
+  }
+
+  .nls__idioma .casilla + .casilla,
+  .nls :global(.nls__elegir .casilla + .casilla) {
+    margin-top: var(--space-1);
+  }
+
+  .nls :global(.nls__vacio) {
+    font-size: var(--text-small);
+  }
+
+  .nls__cuenta {
+    margin-left: var(--space-1);
+    color: var(--ink-soft);
+    text-transform: none;
+  }
+
+  .nls :global(.nls__cuenta--pasa) {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .campo textarea[name='firma'] {
+    min-height: 0;
+  }
+
+  /* --- El texto enriquecido -------------------------------------------------
+     Se ve como se leerá: la letra del cuerpo, los párrafos separados y las
+     listas con su sangría. Sin tamaños ni colores que elegir. */
+  .nls :global(.rico) {
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    transition: border-color 0.2s var(--ease-reveal);
+  }
+
+  .nls :global(.rico:focus-within) {
+    border-color: var(--ink);
+  }
+
+  .nls :global(.rico__barra) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-2);
+    padding: var(--space-1) var(--space-2);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .nls :global(.rico__b) {
+    padding: 0;
+    background: none;
+    border: 0;
+    border-bottom: 1px solid transparent;
+    font-size: var(--text-mono);
+    letter-spacing: var(--tracking-mono);
+    text-transform: uppercase;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+
+  .nls :global(.rico__b:hover) {
+    color: var(--ink);
+    border-bottom-color: currentColor;
+  }
+
+  .nls :global(.rico__area) {
+    min-height: 16rem;
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-small);
+    line-height: 1.6;
+    outline: none;
+  }
+
+  .nls :global(.rico--linea .rico__area) {
+    min-height: 3rem;
+  }
+
+  .nls :global(.rico__area p + p),
+  .nls :global(.rico__area p + ul),
+  .nls :global(.rico__area p + ol),
+  .nls :global(.rico__area ul + p),
+  .nls :global(.rico__area ol + p) {
+    margin-top: var(--space-2);
+  }
+
+  .nls :global(.rico__area ul),
+  .nls :global(.rico__area ol) {
+    margin: var(--space-1) 0 0;
+    padding-left: 1.25em;
+  }
+
+  .nls :global(.rico__area strong),
+  .nls :global(.rico__area b) {
+    font-weight: 600;
+  }
+
+  .nls :global(.rico__area a) {
+    border-bottom: 1px solid var(--ink);
+  }
+
+  /* --- La barra de abajo --------------------------------------------------- */
+  .editor__barra {
+    position: sticky;
+    bottom: 0;
+    z-index: 30;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-3);
+    margin-top: var(--space-4);
+    padding: var(--space-2) 0;
+    background: var(--paper);
+    border-top: 1px solid var(--ink);
+  }
+
+  .editor__estado {
+    min-width: 0;
+  }
+
+  .editor__actos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  .editor__errores {
+    margin: var(--space-2) 0 0;
+    padding-left: var(--space-3);
+  }
+</style>

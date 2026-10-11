@@ -13,7 +13,16 @@ export type Block =
   | { k: 'anchor'; text: string }
   | { k: 'form'; id: string }
   /** La letra pequeña que cierra la página, debajo del último formulario. */
-  | { k: 'fine'; text: string };
+  | { k: 'fine'; text: string }
+  /**
+   * El enlace a los newsletters pasados, al final de todo (11 oct 2026,
+   * pedido de SEO de Emi): **es el único enlace a esa sección** en todo el
+   * sitio —ni en el menú ni en el pie—, y va como texto porque Google lee el
+   * texto y no un ícono. El texto, «Leer los newsletters pasados», lo
+   * cambió Adrián ese mismo día (el documento decía «Algunos newsletters
+   * pasados», que sigue siendo el H1 de la página).
+   */
+  | { k: 'pasados'; text: string };
 
 export type HomeCopy = { blocks: Block[] };
 
@@ -40,8 +49,9 @@ const es: HomeCopy = {
     { k: 'form', id: 'suscribete' },
     {
       k: 'plate',
-      caption: 'Emilse Ríos — Madrid',
-      alt: 'Emilse Ríos sonriendo en una calle de Madrid, sosteniendo su contrabajo en horizontal delante de un portal de madera',
+      caption: 'Emilse Rios — Madrid',
+      /* El alt del pedido de SEO de Emi (11 oct 2026). */
+      alt: 'Emilse Rios con su contrabajo en una calle de Madrid',
     },
     { k: 'h2', text: 'Quiero contarte por qué traje este newsletter al mundo' },
     {
@@ -73,6 +83,7 @@ const es: HomeCopy = {
     },
     { k: 'form', id: 'suscribete-2' },
     { k: 'fine', text: 'Suscribirse es gratis, darse de baja también.' },
+    { k: 'pasados', text: 'Leer los newsletters pasados' },
   ],
 };
 
@@ -99,8 +110,8 @@ const en: HomeCopy = {
     { k: 'form', id: 'suscribete' },
     {
       k: 'plate',
-      caption: 'Emilse Ríos — Madrid',
-      alt: 'Emilse Ríos smiling on a street in Madrid, holding her double bass sideways in front of a wooden doorway',
+      caption: 'Emilse Rios — Madrid',
+      alt: 'Emilse Rios with her double bass on a street in Madrid',
     },
     { k: 'h2', text: 'Let me tell you why I brought this newsletter into the world' },
     {
@@ -132,6 +143,7 @@ const en: HomeCopy = {
     },
     { k: 'form', id: 'suscribete-2' },
     { k: 'fine', text: 'Signing up is free. So is unsubscribing.' },
+    { k: 'pasados', text: 'Read past newsletters' },
   ],
 };
 

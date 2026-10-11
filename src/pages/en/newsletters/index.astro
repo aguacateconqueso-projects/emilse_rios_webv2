@@ -1,0 +1,18 @@
+---
+/**
+ * Los newsletters pasados, la primera página del índice (11 oct 2026, pedido
+ * de SEO de Emi). En el servidor, con un minuto de caché: Emi publica desde el
+ * panel y al minuto está. Ver `src/components/IndiceNewsletters.astro`.
+ */
+import PaginaNewsletters from '../../../components/PaginaNewsletters.astro';
+import { leerNewsletters, pagina, CACHE_NEWSLETTERS } from '../../../lib/newsletters';
+
+export const prerender = false;
+
+const lang = 'en' as const;
+const { todas } = await leerNewsletters();
+const p = pagina(todas, lang, 1)!;
+Astro.response.headers.set('Cache-Control', CACHE_NEWSLETTERS);
+---
+
+<PaginaNewsletters lang={lang} numero={1} entradas={p.entradas} hayMas={p.hayMas} />

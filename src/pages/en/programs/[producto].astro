@@ -17,6 +17,7 @@
  * Ver `src/lib/tienda.ts`.
  */
 import PaginaVenta from '../../../components/PaginaVenta.astro';
+import Perdida from '../../../components/Perdida.astro';
 import { leerPagina, CACHE_TIENDA } from '../../../lib/tienda';
 import { paginaDeVenta } from '../../../i18n/ui';
 
@@ -26,8 +27,9 @@ const lang = 'en' as const;
 const pide = paginaDeVenta(Astro.url, Astro.params.producto ?? '', lang);
 if ('redirigir' in pide) return Astro.redirect(pide.redirigir, 301);
 const pagina = await leerPagina(pide.slug);
-if (!pagina) return new Response(null, { status: 404 });
+/* Sin carta, la 404 del sitio, con su ropa (11 oct 2026). */
+if (!pagina) Astro.response.status = 404;
 Astro.response.headers.set('Cache-Control', CACHE_TIENDA);
 ---
 
-<PaginaVenta lang={lang} producto={pagina.ficha} c={pagina.carta[lang]} />
+{pagina ? <PaginaVenta lang={lang} producto={pagina.ficha} c={pagina.carta[lang]} /> : <Perdida />}

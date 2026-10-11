@@ -106,12 +106,8 @@ const entrar = entrarHref[lang];
             href={routePath('products', lang)}
             aria-current={route === 'products' ? 'page' : undefined}>{t('nav.products')}</a
           >
-          {/* Las entradas del newsletter, desde el 9 oct 2026. */}
-          <a
-            class="menu__item"
-            href={routePath('newsletter', lang)}
-            aria-current={route === 'newsletter' ? 'page' : undefined}>{t('nav.newsletter')}</a
-          >
+          {/* Sin «Newsletter» desde el 11 oct 2026 (pedido de SEO de Emi): los
+              newsletters pasados se enlazan solo desde el final del inicio. */}
           <a
             class="menu__item"
             href={entrar}

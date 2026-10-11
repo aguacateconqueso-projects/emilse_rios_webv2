@@ -19,7 +19,8 @@
  * nueva: `/formaciones/membresia-contrabajo/` y
  * `/en/programs/double-bass-membership/`. Y desde el 9 oct 2026, que todo el
  * inglés viva en `/en/programs/` con el slug en inglés: cada carta, desde
- * `/en/courses/` y `/en/products/`, en un salto.
+ * `/en/courses/` y `/en/products/`, en un salto. Y desde el 11 oct 2026, que
+ * los newsletters de `/newsletter/` lleguen a `/newsletters/`, en un salto.
  *
  * «Aterrizar» es llegar a una página que contesta: un fichero del build o una
  * función —Formaciones y las páginas de ventas se resuelven en el servidor
@@ -157,6 +158,26 @@ const nuevas = ['/formaciones/', MEMB_ES, '/formaciones/todo-el-diapason/', '/en
 );
 for (const pagina of nuevas) casos.push({ ruta: pagina, llega: pagina });
 for (const pagina of [MEMB_ES, MEMB_EN, '/en/programs/fingerboard/']) casos.push({ ruta: pagina.slice(0, -1), queda: true });
+
+// Los newsletters pasados (11 oct 2026): de `/newsletter/` a `/newsletters/`,
+// cada entrada conocida directo a su dirección nueva. Lo mismo que
+// `NEWSLETTERS_VIEJOS` en `astro.config.mjs`. Las nuevas son páginas de verdad.
+const newsletters = {
+  '/newsletter': '/newsletters/',
+  '/en/newsletter': '/en/newsletters/',
+  '/newsletter/como-ganar-fuerza-en-la-mano-izquierda-contrabajo': '/newsletters/fuerza-mano-izquierda-contrabajo/',
+  '/newsletter/tipos-de-vibrato-en-el-contrabajo': '/newsletters/como-usar-vibrato-contrabajo/',
+  '/newsletter/error-mas-comun-al-aprender-vibrato-contrabajo': '/newsletters/vibrato-contrabajo-mano-tensa/',
+  '/en/newsletter/how-to-build-left-hand-strength-double-bass': '/en/newsletters/left-hand-strength-double-bass/',
+  '/en/newsletter/types-of-vibrato-on-the-double-bass': '/en/newsletters/how-to-use-vibrato-double-bass/',
+  '/en/newsletter/most-common-vibrato-mistake-double-bass': '/en/newsletters/double-bass-vibrato-tense-hand/',
+};
+for (const [vieja, nueva] of Object.entries(newsletters)) {
+  casos.push({ ruta: vieja, llega: nueva, directo: true }, { ruta: `${vieja}/`, llega: nueva, directo: true });
+  casos.push({ ruta: nueva, llega: nueva });
+}
+// Una que no está en la tabla —una entrada nueva— va igual, a la misma dirección.
+casos.push({ ruta: '/newsletter/otra-entrada/', llega: '/newsletters/otra-entrada/' });
 
 // `emilseriosacademy.com` redirige entero (27 sep 2026): su portada, a la carta
 // de la membresía, directo; `/api/` no se toca —lo contesta este proyecto—.

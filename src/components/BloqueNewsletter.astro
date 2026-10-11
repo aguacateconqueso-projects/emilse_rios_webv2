@@ -1,0 +1,72 @@
+---
+/**
+ * El bloque fijo del newsletter, arriba de los newsletters pasados: el índice
+ * (`/newsletters/`) y cada entrada (punto 5.3 del pedido de SEO de Emi, 11 oct
+ * 2026).
+ *
+ * **Es la portada de la Home**, con el mismo texto —sale de `src/data/home.ts`,
+ * así que si Emi lo cambia allá cambia acá— y el mismo formulario de Klaviyo,
+ * con la misma ropa (copiada de `Home.astro`). Una sola diferencia, a pedido:
+ * «Contrabajo en la Ciudad» se ve igual que en la Home **pero no es un H1**.
+ * El único H1 de estas páginas es el suyo: el título de la entrada, o
+ * «Algunos newsletters pasados» en el índice.
+ *
+ * Sin la escalera de entrada de la Home al volver: estas páginas entran con la
+ * general del sitio (`Base.astro`).
+ */
+import type { Lang } from '../i18n/ui';
+import { getHomeCopy } from '../data/home';
+import SubscribeForm from './SubscribeForm.astro';
+
+interface Props {
+  lang: Lang;
+  /** El `id` del formulario: el ancla `#suscribete` es la del de abajo. */
+  id: string;
+}
+const { lang, id } = Astro.props as Props;
+const hero = getHomeCopy(lang).blocks.find((b) => b.k === 'hero');
+---
+
+{
+  hero && hero.k === 'hero' && (
+    <section class="hero">
+      <p class="hero__title">{hero.title}</p>
+      <p class="mono soft hero__eyebrow">{hero.eyebrow}</p>
+      <p class="hero__lead">{hero.lead}</p>
+    </section>
+  )
+}
+<SubscribeForm lang={lang} id={id} flush />
+
+<style>
+  /* Las de la portada de la Home (`Home.astro`), tal cual. */
+  .hero {
+    max-width: var(--width-wide);
+    margin-inline: auto;
+    padding-block-start: var(--space-8);
+    padding-inline: var(--space-3);
+    text-align: center;
+  }
+
+  .hero__title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--text-hero);
+    line-height: var(--leading-hero);
+    letter-spacing: var(--tracking-hero);
+    text-wrap: balance;
+  }
+
+  .hero__eyebrow {
+    margin-top: var(--space-3);
+  }
+
+  .hero__lead {
+    max-width: var(--measure);
+    margin-top: var(--space-4);
+    margin-inline: auto;
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    text-wrap: balance;
+  }
+</style>

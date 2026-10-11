@@ -1,0 +1,54 @@
+---
+/**
+ * La página que no existe (11 oct 2026, pedido de SEO de Emi): hasta ese día
+ * era la 404 de Astro, de fondo oscuro y fuera de la marca. Ahora es una
+ * página del sitio, con su menú y su pie: una línea y el enlace al inicio.
+ *
+ * ⚠️ **El texto es provisional**: lo redacta Emi. Se cambia acá y nada más.
+ * Es una sola página para los dos idiomas —no sabe desde dónde llegó cada
+ * quien—, así que dice el español en grande y el inglés debajo.
+ *
+ * Es un componente porque la usan dos: `src/pages/404.astro` (lo que no
+ * existe) y las páginas de ventas del servidor, cuando piden una carta que no
+ * hay —Astro no deja reescribir de una página del servidor a una estática—.
+ */
+import Base from '../layouts/Base.astro';
+---
+
+<Base lang="es" title="Esta página no existe · Emilse Rios" description="Esta página no existe." noindex>
+  <section class="row row--flush perdida">
+    <div class="row__body">
+      <p class="mono soft">404</p>
+      <h1 class="perdida__h">Esta página no existe. O ya no existe.</h1>
+      <p class="perdida__ir"><a href="/">Volver al inicio</a></p>
+      <p class="perdida__en soft" lang="en">
+        This page doesn’t exist, or it doesn’t anymore. <a href="/en/">Back to the home page</a>
+      </p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .perdida {
+    padding-block: var(--space-12);
+  }
+
+  .perdida__h {
+    margin-top: var(--space-2);
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--text-anchor);
+    line-height: var(--leading-anchor);
+    letter-spacing: var(--tracking-section);
+    text-wrap: balance;
+  }
+
+  .perdida__ir {
+    margin-top: var(--space-4);
+  }
+
+  .perdida__en {
+    margin-top: var(--space-6);
+    font-size: var(--text-small);
+  }
+</style>

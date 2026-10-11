@@ -151,18 +151,16 @@ export const NEWS_POR_DEFECTO: Record<Lang, { pre: string }> = {
 };
 
 /**
- * La frase encima del campo del final cuando el botón es «Avísame» (9 oct
- * 2026). `{nombre}` es el título de la carta.
+ * El botón de los cursos que todavía no se venden, en los dos idiomas: baja
+ * al campo del newsletter del final de la carta, que es **una suscripción
+ * normal**, sin etiquetas ni listas aparte. Hasta el 11 oct 2026 decía
+ * «Avísame cuando abra» y guardaba en Klaviyo la formación que interesaba;
+ * el pedido de SEO de Emi lo cambió por esto. La misma frase va encima del
+ * campo.
  */
-export const AVISO_FORMACION: Record<Lang, string> = {
-  es: 'Déjame tu correo y te aviso cuando abra «{nombre}». Te llega también mi newsletter: cada semana, un error que estanca tu progreso con el contrabajo.',
-  en: 'Leave me your email and I’ll let you know when “{nombre}” opens. You’ll also get my newsletter: every week, one mistake that’s stalling your progress on the double bass.',
-};
-
-/** El botón de los cursos que todavía no se venden, en los dos idiomas. */
 export const AVISAME = {
-  es: { texto: 'Avísame cuando abra', href: NEWSLETTER },
-  en: { texto: 'Let me know when it opens', href: NEWSLETTER },
+  es: { texto: 'Suscríbete a mi newsletter y entérate cuando abra', href: NEWSLETTER },
+  en: { texto: 'Subscribe to my newsletter and find out when it opens', href: NEWSLETTER },
 };
 
 /* ==========================================================================
@@ -1000,7 +998,7 @@ const membresiaEs: Carta = {
   title: 'Estudiemos juntos',
   subtitle: 'La membresía',
   ledeA: 'Siete tomos de un método no te preparan para resolver problemas en el escenario.',
-  photoAlt: 'Emilse Rios',
+  photoAlt: 'Emilse Rios, profesora de contrabajo',
   carta: [
     /* Hasta el 27 sep 2026 era el segundo renglón de la promesa. Emi: «es
        parte de la conversación, no parte de la promesa». */
@@ -1108,7 +1106,7 @@ const membresiaEn: Carta = {
   title: "Let's study together",
   subtitle: 'The membership',
   ledeA: 'Seven volumes of a method won’t prepare you to solve problems on stage.',
-  photoAlt: 'Emilse Rios',
+  photoAlt: 'Emilse Rios, double bass teacher',
   carta: [
     'Let me tell you why.',
     'You show up to rehearsal. They handed out the piece two weeks ago and there’s a passage you can’t get. You practiced it. Practiced it a lot, actually.',
@@ -1228,7 +1226,7 @@ const escalasEs: Carta = {
   title: 'Todas las escalas (sin aburrirte)',
   subtitle: 'Las escalas no son aburridas, la manera en la que las estudias, sí.',
   ledeA: 'Una profesora de contrabajo que odiaba las escalas.',
-  photoAlt: 'Emilse Ríos con su contrabajo delante de una puerta de madera, en Madrid',
+  photoAlt: 'Emilse Rios con su contrabajo delante de una puerta de madera, en Madrid',
   carta: [
     'En esta historia te cuento cómo hice las paces con ellas — y cómo tú también puedes.',
     'Sinceramente, siempre odié las escalas.',
@@ -1328,7 +1326,7 @@ const escalasEn: Carta = {
   title: 'All the scales (without getting bored)',
   subtitle: 'Scales aren’t boring. The way you study them is.',
   ledeA: 'A double bass teacher who hated scales.',
-  photoAlt: 'Emilse Ríos with her double bass in front of a wooden door, in Madrid',
+  photoAlt: 'Emilse Rios with her double bass in front of a wooden door, in Madrid',
   carta: [
     'In this story I’ll tell you how I made peace with them — and how you can too.',
     'Honestly, I always hated scales.',
@@ -1453,7 +1451,7 @@ const clasesEs: Carta = {
   subtitle: '',
   ledeA: 'El talento no existe.',
   ledeB: 'O al menos, no como te lo vendieron.',
-  photoAlt: 'Emilse Ríos en una calle con árboles, abrazada a su contrabajo',
+  photoAlt: 'Emilse Rios en una calle con árboles, abrazada a su contrabajo',
   carta: [
     'No es un don mágico que algunos tienen y otros no.',
     'En mi camino como docente me he encontrado con dos realidades que se repiten una y otra vez:',
@@ -1516,7 +1514,7 @@ const clasesEn: Carta = {
   subtitle: '',
   ledeA: 'Talent doesn’t exist.',
   ledeB: 'Or at least, not the way it was sold to you.',
-  photoAlt: 'Emilse Ríos on a tree-lined street, hugging her double bass',
+  photoAlt: 'Emilse Rios on a tree-lined street, hugging her double bass',
   carta: [
     'It’s not a magic gift that some people have and others don’t.',
     'Along my path as a teacher, I’ve come across two realities that repeat over and over:',
