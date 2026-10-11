@@ -1,0 +1,56 @@
+---
+/**
+ * Un newsletter pasado (11 oct 2026, pedido de SEO de Emi). En el servidor,
+ * con un minuto de caché. Una dirección que la entrada tuvo antes lleva a la
+ * de ahora con un 301; una que no es de nadie, la 404. Ver
+ * `src/components/EntradaNewsletter.astro`.
+ */
+import Base from '../../../layouts/Base.astro';
+import type { Lang } from '../../../i18n/ui';
+import EntradaNewsletter from '../../../components/EntradaNewsletter.astro';
+import Perdida from '../../../components/Perdida.astro';
+import { indicePath, newsletterPath } from '../../../data/newsletters';
+import {
+  leerNewsletters,
+  buscar,
+  gemela,
+  sigueLeyendo,
+  tituloGoogle,
+  descripcion,
+  datosEntrada,
+  CACHE_NEWSLETTERS,
+} from '../../../lib/newsletters';
+
+export const prerender = false;
+
+const lang = 'en' as Lang;
+const { todas } = await leerNewsletters();
+const hallada = buscar(todas, lang, Astro.params.slug ?? '');
+if (hallada && 'redirigir' in hallada) return Astro.redirect(hallada.redirigir, 301);
+const n = hallada?.entrada ?? null;
+if (!n) Astro.response.status = 404;
+Astro.response.headers.set('Cache-Control', CACHE_NEWSLETTERS);
+const otra = n ? gemela(n, todas) : null;
+const aqui = n ? newsletterPath(n) : '';
+---
+
+{
+  n ? (
+    <Base
+      lang={lang}
+      title={tituloGoogle(n)}
+      description={descripcion(n)}
+      route="newsletters"
+      pathEs={lang === 'es' ? aqui : otra ? newsletterPath(otra) : indicePath('es')}
+      pathEn={lang === 'en' ? aqui : otra ? newsletterPath(otra) : indicePath('en')}
+      sinGemela={!otra}
+      ogImagen
+      ogTipo="article"
+      jsonLd={[datosEntrada(n)]}
+    >
+      <EntradaNewsletter entrada={n} siguientes={sigueLeyendo(n, todas)} />
+    </Base>
+  ) : (
+    <Perdida />
+  )
+}

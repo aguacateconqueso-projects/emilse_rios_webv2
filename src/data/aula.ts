@@ -199,12 +199,12 @@ const escalas = proximo(
   {
     nombre: 'Todas las escalas (sin aburrirte)',
     resumen: 'Las escalas no son aburridas, la manera en la que las estudias, sí.',
-    fotoAlt: 'Emilse Ríos con su contrabajo delante de una puerta de madera, en Madrid',
+    fotoAlt: 'Emilse Rios con su contrabajo delante de una puerta de madera, en Madrid',
   },
   {
     nombre: 'All the scales (without getting bored)',
     resumen: 'Scales aren’t boring. The way you study them is.',
-    fotoAlt: 'Emilse Ríos with her double bass in front of a wooden door, in Madrid',
+    fotoAlt: 'Emilse Rios with her double bass in front of a wooden door, in Madrid',
   },
 );
 
@@ -222,14 +222,14 @@ const clases = proximo(
     nombre: 'Clases online 1:1',
     resumen:
       'El talento no existe. No como te lo vendieron. No es un don mágico que algunos tienen y otros no.',
-    fotoAlt: 'Emilse Ríos en una calle con árboles, abrazada a su contrabajo',
+    fotoAlt: 'Emilse Rios en una calle con árboles, abrazada a su contrabajo',
   },
   {
     nombre: '1:1 Online Lessons',
     /* El inglés de Emi, con su «Talent doesn’t exist» de la carta. */
     resumen:
       'Talent doesn’t exist. Not the way they sold it to you. It’s not a magical gift that some people have and others don’t.',
-    fotoAlt: 'Emilse Ríos on a tree-lined street, hugging her double bass',
+    fotoAlt: 'Emilse Rios on a tree-lined street, hugging her double bass',
   },
 );
 
@@ -258,7 +258,7 @@ const membresia: Product = {
       cadencia: 'al mes',
       precio: '€65',
       fotoPie: 'Retrato de Emi con el contrabajo',
-      fotoAlt: 'Emilse Ríos',
+      fotoAlt: 'Emilse Rios, profesora de contrabajo',
     },
     en: {
       nombre: 'Let’s Study Together',
@@ -267,7 +267,7 @@ const membresia: Product = {
       cadencia: 'a month',
       precio: '€65',
       fotoPie: 'Portrait of Emi with the double bass',
-      fotoAlt: 'Emilse Ríos',
+      fotoAlt: 'Emilse Rios, double bass teacher',
     },
   },
 };

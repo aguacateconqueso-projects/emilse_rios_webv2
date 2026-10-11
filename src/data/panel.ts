@@ -11,8 +11,10 @@
  * Solo en español: el panel lo usan dos personas y las dos hablan español.
  */
 export type Seccion = {
-  id: 'hoy' | 'membresia' | 'cursos' | 'tienda' | 'ventas' | 'personas' | 'mensajes';
+  id: 'hoy' | 'membresia' | 'cursos' | 'tienda' | 'ventas' | 'newsletters' | 'personas' | 'mensajes';
   titulo: string;
+  /** El rótulo en la barra, si el título no cabe (la barra no da para más). */
+  pestana?: string;
   /** Lo que hace, en una línea. La tarjeta de la vista general. */
   que: string;
 };
@@ -42,6 +44,13 @@ export const secciones: Seccion[] = [
     id: 'ventas',
     titulo: 'Págs. de ventas',
     que: 'Redacta la página de ventas de cada formación, bloque a bloque y en los dos idiomas.',
+  },
+  /* Desde el 11 oct 2026 (pedido de SEO de Emi, punto 5.4). */
+  {
+    id: 'newsletters',
+    titulo: 'Newsletters pasados',
+    pestana: 'Newsletters',
+    que: 'Tus correos publicados en la web, para que Google los encuentre: escribe, mira la vista previa y publica.',
   },
   {
     id: 'personas',

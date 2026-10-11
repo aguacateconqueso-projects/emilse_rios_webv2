@@ -5,6 +5,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Intro from '../components/Intro.astro';
 import Backdrop from '../components/Backdrop.astro';
+import { OG_IMAGEN, WEBSITE_ID, PERSONA_ID, persona, sitioWeb } from '../data/seo';
 import '../styles/tokens.css';
 import '../styles/base.css';
 
@@ -41,6 +42,27 @@ interface Props {
    * vestirse con este mismo marco.
    */
   noindex?: boolean;
+  /**
+   * La imagen al compartir del sitio (`emilse-rios-contrabajo-og.jpg`): la
+   * llevan Inicio, Sobre mí, Formaciones y el newsletter (pedido de SEO de
+   * Emi, 11 oct 2026). Las cartas ponen la suya por el slot `head`.
+   */
+  ogImagen?: boolean;
+  /**
+   * Más datos para Google, además de los que van siempre —Emi (`Person`), la
+   * página (`WebPage`) y, en el inicio, el sitio (`WebSite`)—: la formación
+   * de una carta, sus preguntas, una entrada del newsletter. Van todos en un
+   * solo `@graph`.
+   */
+  jsonLd?: Record<string, unknown>[];
+  /**
+   * Sin gemela en el otro idioma: el `hreflang` solo de la propia página. Lo
+   * llevan los newsletters pasados sin traducción vinculada; su conmutador de
+   * idioma va al índice del otro idioma, que no es la misma página.
+   */
+  sinGemela?: boolean;
+  /** `article` en los newsletters pasados; `website` en lo demás. */
+  ogTipo?: 'website' | 'article';
 }
 const {
   lang,
@@ -53,7 +75,11 @@ const {
   backdrop = false,
   entrada = true,
   noindex = false,
-} = Astro.props;
+  ogImagen = false,
+  jsonLd = [],
+  sinGemela = false,
+  ogTipo = 'website',
+} = Astro.props as Props;
 const t = useTranslations(lang);
 
 const hrefEs = pathEs ?? routePath(route, 'es');
@@ -62,6 +88,33 @@ const hrefEn = pathEn ?? routePath(route, 'en');
 const canonical = new URL(lang === 'en' ? hrefEn : hrefEs, Astro.site);
 const altEs = new URL(hrefEs, Astro.site);
 const altEn = new URL(hrefEn, Astro.site);
+
+/* Los datos para Google (11 oct 2026). Emi es la misma `Person` en todas las
+   páginas, con un único `@id`; cada página es un `WebPage` con el mismo nombre
+   que su `<title>`; y el inicio dice además qué sitio es (`WebSite`). Ver
+   `src/data/seo.ts`. Las páginas fuera de los buscadores no llevan nada. */
+const esInicio = route === 'home' && !pathEs && !pathEn;
+const grafo = noindex
+  ? null
+  : {
+      '@context': 'https://schema.org',
+      '@graph': [
+        persona(lang),
+        ...(esInicio ? [sitioWeb] : []),
+        {
+          '@type': 'WebPage',
+          '@id': `${canonical.href}#webpage`,
+          url: canonical.href,
+          name: title,
+          description,
+          inLanguage: lang,
+          isPartOf: { '@id': WEBSITE_ID },
+          about: { '@id': PERSONA_ID },
+          ...(ogImagen ? { primaryImageOfPage: OG_IMAGEN.url } : {}),
+        },
+        ...jsonLd,
+      ],
+    };
 ---
 
 <!doctype html>
@@ -75,17 +128,36 @@ const altEn = new URL(hrefEn, Astro.site);
     {/* La «E» del logo de Emi, recortada de la propia firma. */}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="canonical" href={canonical} />
-    <link rel="alternate" hreflang="es" href={altEs} />
-    <link rel="alternate" hreflang="en" href={altEn} />
-    <link rel="alternate" hreflang="x-default" href={altEs} />
+    {
+      sinGemela ? (
+        <link rel="alternate" hreflang={lang} href={canonical} />
+      ) : (
+        <>
+          <link rel="alternate" hreflang="es" href={altEs} />
+          <link rel="alternate" hreflang="en" href={altEn} />
+          <link rel="alternate" hreflang="x-default" href={altEs} />
+        </>
+      )
+    }
 
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogTipo} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:locale" content={lang === 'en' ? 'en_US' : 'es_ES'} />
     <meta property="og:site_name" content={t('site.title')} />
     <meta name="twitter:card" content="summary_large_image" />
+    {
+      ogImagen && (
+        <>
+          <meta property="og:image" content={OG_IMAGEN.url} />
+          <meta property="og:image:width" content={String(OG_IMAGEN.ancho)} />
+          <meta property="og:image:height" content={String(OG_IMAGEN.alto)} />
+          <meta property="og:image:alt" content={OG_IMAGEN.alt[lang]} />
+        </>
+      )
+    }
+    {grafo && <script type="application/ld+json" is:inline set:html={JSON.stringify(grafo)} />}
 
     {/*
       Sin `preload`: el atributo precarga *todas* las variantes de la familia

@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import { type Lang, useTranslations } from '../i18n/ui';
 import { getHomeCopy } from '../data/home';
+import { indicePath } from '../data/newsletters';
 import SubscribeForm from './SubscribeForm.astro';
 import emilseHero from '../assets/img/emilse-hero.jpg';
 
@@ -139,6 +140,17 @@ const pegado = (n: number) =>
           <div class="row row--flush fine">
             <div class="row__body">
               <p class="mono soft">{block.text}</p>
+            </div>
+          </div>
+        );
+
+      case 'pasados':
+        return (
+          <div class="row row--flush pasados">
+            <div class="row__body">
+              <p>
+                <a href={indicePath(lang)}>{block.text}</a>
+              </p>
             </div>
           </div>
         );
@@ -381,5 +393,14 @@ const pegado = (n: number) =>
      pone los 128 de separación por su cuenta. */
   .fine {
     margin-top: var(--space-1);
+  }
+
+  /* --- Los newsletters pasados ---------------------------------------------
+     El enlace del final (11 oct 2026): el único camino a `/newsletters/` en
+     todo el sitio. Un enlace de texto con la regla de siempre, en la misma
+     rejilla que la letra pequeña de encima, y separado de ella lo justo para
+     no leerse como parte del formulario. */
+  .pasados {
+    margin-top: var(--space-6);
   }
 </style>

@@ -108,6 +108,24 @@ import { secciones } from '../../data/panel';
         vivo('ventas', `${plural(publicadas.size, 'publicada', 'publicadas')}${pendientes ? ` · ${n(pendientes)} con cambios sin publicar` : ''}`);
       }),
 
+      /* Newsletters pasados: publicados y borradores. */
+      Promise.all([
+        supabase.from('newsletters').select('id, lang, published_at'),
+        supabase.from('newsletter_drafts').select('id, updated_at'),
+      ]).then(([pub, borr]) => {
+        if (pub.error || borr.error) return vivo('newsletters', 'Falta la migración de los newsletters');
+        const publicadas = new Map((pub.data ?? []).map((p) => [p.id, Date.parse(p.published_at)]));
+        const es = (pub.data ?? []).filter((p) => p.lang === 'es').length;
+        const pendientes = (borr.data ?? []).filter((b) => {
+          const p = publicadas.get(b.id);
+          return !p || Date.parse(b.updated_at) > p;
+        }).length;
+        vivo(
+          'newsletters',
+          `${plural(publicadas.size, 'publicada', 'publicadas')} (${n(es)} ES · ${n(publicadas.size - es)} EN)${pendientes ? ` · ${plural(pendientes, 'borrador', 'borradores')}` : ''}`,
+        );
+      }),
+
       /* Personas: cuentas y membresías activas. */
       Promise.all([
         supabase.from('profiles').select('id', { count: 'exact', head: true }),

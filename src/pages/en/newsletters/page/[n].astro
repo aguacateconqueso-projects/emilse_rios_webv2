@@ -1,0 +1,25 @@
+---
+/**
+ * Las páginas siguientes del índice de los newsletters pasados, de 10 en 10:
+ * `/en/newsletters/page/2/`. Una dirección de verdad por página, no un
+ * scroll infinito: así Google llega a todas siguiendo enlaces. La 1 es el
+ * índice; una que no existe, la 404.
+ */
+import PaginaNewsletters from '../../../../components/PaginaNewsletters.astro';
+import Perdida from '../../../../components/Perdida.astro';
+import { indicePath } from '../../../../data/newsletters';
+import { leerNewsletters, pagina, CACHE_NEWSLETTERS } from '../../../../lib/newsletters';
+
+export const prerender = false;
+
+const lang = 'en' as const;
+const crudo = Astro.params.n ?? '';
+const numero = /^[1-9]\d*$/.test(crudo) ? Number(crudo) : NaN;
+if (numero === 1) return Astro.redirect(indicePath(lang), 301);
+const { todas } = await leerNewsletters();
+const p = pagina(todas, lang, numero);
+if (!p) Astro.response.status = 404;
+Astro.response.headers.set('Cache-Control', CACHE_NEWSLETTERS);
+---
+
+{p ? <PaginaNewsletters lang={lang} numero={numero} entradas={p.entradas} hayMas={p.hayMas} /> : <Perdida />}

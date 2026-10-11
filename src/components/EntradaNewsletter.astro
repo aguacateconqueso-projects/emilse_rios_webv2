@@ -1,0 +1,214 @@
+---
+/**
+ * Un newsletter pasado: `/newsletters/<slug>/` y `/en/newsletters/<slug>/`.
+ *
+ * **La plantilla del pedido de SEO de Emi** (11 oct 2026, punto 5.3), siempre
+ * en este orden:
+ *
+ *   1. el bloque fijo del newsletter —el de la Home, sin H1—;
+ *   2. el título de la entrada: el único H1 de la página;
+ *   3. la fecha, pequeña;
+ *   4. el correo, la firma y las posdatas (PD, PD2 y, si la hay, PD3);
+ *   5. el formulario otra vez, con el ancla `#suscribete` —la del «aquí» de
+ *      la primera posdata— y la línea de la Home debajo;
+ *   6. «Sigue leyendo»: 2 o 3 entradas.
+ *
+ * Sin fotos, sin comentarios, sin barra lateral y sin botones para compartir.
+ * Lo que escribe Emi pasa por `limpiarHtml` (`src/data/newsletters.ts`).
+ * La usan la página de cada entrada y la vista previa del panel.
+ */
+import { useTranslations } from '../i18n/ui';
+import { getHomeCopy } from '../data/home';
+import { type Newsletter, ANCLA, MARCA_PD, fechaLegible, newsletterPath } from '../data/newsletters';
+import { html } from '../lib/newsletters';
+import BloqueNewsletter from './BloqueNewsletter.astro';
+import SubscribeForm from './SubscribeForm.astro';
+
+interface Props {
+  entrada: Newsletter;
+  /** Las de «Sigue leyendo», ya elegidas. */
+  siguientes: Newsletter[];
+}
+const { entrada: n, siguientes } = Astro.props as Props;
+const lang = n.lang;
+const t = useTranslations(lang);
+const fino = getHomeCopy(lang).blocks.find((b) => b.k === 'fine');
+const firma = n.firma.split('\n').map((l) => l.trim()).filter(Boolean);
+const posdatas = [n.pd, n.pd2, n.pd3]
+  .map((pd, i) => ({ marca: MARCA_PD[lang][i], html: html.linea(pd) }))
+  .filter((pd) => pd.html);
+---
+
+<article>
+  <BloqueNewsletter lang={lang} id="suscribete-arriba" />
+
+  <div class="row row--flush post__entrada">
+    <div class="row__body">
+      <h1 class="post__title">{n.titulo}</h1>
+      <p class="mono soft post__fecha"><time datetime={n.fecha}>{fechaLegible(n.fecha, lang)}</time></p>
+      <div class="prose post__cuerpo">
+        <Fragment set:html={html.cuerpo(n)} />
+        {
+          firma.length > 0 && (
+            <p class="post__firma">
+              {firma.map((linea, i) => (i ? [<br />, linea] : linea))}
+            </p>
+          )
+        }
+      </div>
+    </div>
+  </div>
+
+  {
+    posdatas.length > 0 && (
+      <div class="row row--flush block">
+        <div class="row__body post__pd">
+          {posdatas.map((pd) => (
+            <p>
+              {pd.marca} <Fragment set:html={pd.html} />
+            </p>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  <SubscribeForm lang={lang} id={ANCLA} flush />
+  {
+    fino && fino.k === 'fine' && (
+      <div class="row row--flush post__fino">
+        <div class="row__body">
+          <p class="mono soft">{fino.text}</p>
+        </div>
+      </div>
+    )
+  }
+
+  {
+    siguientes.length > 0 && (
+      <nav class="row row--flush block" aria-labelledby="sigue-h">
+        <div class="row__body">
+          <h2 class="mono soft post__sigue-h" id="sigue-h">
+            {t('nl.sigue')}
+          </h2>
+          <ul class="post__sigue" role="list">
+            {siguientes.map((x) => (
+              <li>
+                <a class="post__otra" href={newsletterPath(x)}>
+                  <span class="post__otra-t">{x.titulo}</span>
+                  <span class="mono post__leer">{t('nl.leer')} →</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </nav>
+    )
+  }
+</article>
+
+<style>
+  /* El título, separado del bloque del newsletter por una regla. */
+  .post__entrada {
+    margin-top: var(--space-8);
+  }
+
+  .post__entrada .row__body {
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--rule);
+  }
+
+  .post__title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--text-anchor);
+    line-height: var(--leading-anchor);
+    letter-spacing: var(--tracking-section);
+    text-wrap: balance;
+  }
+
+  .post__fecha {
+    margin-top: var(--space-2);
+  }
+
+  .post__cuerpo {
+    margin-top: var(--space-6);
+  }
+
+  /* El cuerpo lo escribe Emi en el panel: las listas, con la ropa del sitio;
+     las negritas, en la de cuerpo, como las frases destacadas. */
+  .post__cuerpo :global(ol),
+  .post__cuerpo :global(ul) {
+    margin: 0 0 var(--space-3);
+    padding-left: 1.25em;
+  }
+
+  .post__cuerpo :global(li + li) {
+    margin-top: var(--space-1);
+  }
+
+  .post__cuerpo :global(strong) {
+    font-weight: 600;
+  }
+
+  .post__firma {
+    margin-top: var(--space-4);
+  }
+
+  .post__pd p {
+    font-size: var(--text-small);
+    line-height: 1.5;
+    font-style: italic;
+    color: var(--ink-soft);
+    text-wrap: pretty;
+  }
+
+  .post__pd p + p {
+    margin-top: var(--space-2);
+  }
+
+  .post__pd :global(a) {
+    color: var(--ink);
+  }
+
+  .post__fino {
+    margin-top: var(--space-1);
+  }
+
+  .post__sigue-h {
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .post__sigue {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .post__sigue li {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .post__otra {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding-block: var(--space-3);
+    border-bottom: 0;
+  }
+
+  .post__otra-t {
+    font-family: var(--font-display);
+    font-size: var(--text-section);
+    line-height: var(--leading-section);
+    text-wrap: balance;
+  }
+
+  @media (hover: hover) {
+    .post__otra:hover .post__leer {
+      text-decoration: underline;
+      text-underline-offset: 0.3em;
+    }
+  }
+</style>

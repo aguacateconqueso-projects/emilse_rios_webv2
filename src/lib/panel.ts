@@ -24,6 +24,7 @@ export type Pestana =
   | 'cursos'
   | 'tienda'
   | 'ventas'
+  | 'newsletters'
   | 'personas'
   | 'mensajes';
 
@@ -35,6 +36,7 @@ export const PESTANAS: Pestana[] = [
   'cursos',
   'tienda',
   'ventas',
+  'newsletters',
   'personas',
   'mensajes',
 ];

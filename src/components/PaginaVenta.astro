@@ -13,6 +13,7 @@ import CartaVenta from './CartaVenta.astro';
 import { type Lang, productPath } from '../i18n/ui';
 import type { Ficha } from '../lib/tienda';
 import type { Carta } from '../data/cartas';
+import { metaFormaciones, datosFormacion } from '../data/seo';
 
 interface Props {
   lang: Lang;
@@ -21,7 +22,7 @@ interface Props {
   /** La vista previa del panel: sin buscadores y con un aviso arriba. */
   borrador?: boolean;
 }
-const { lang, producto, c, borrador = false } = Astro.props;
+const { lang, producto, c, borrador = false } = Astro.props as Props;
 
 const SITE = Astro.site?.origin ?? 'https://www.emilserios.com';
 const canonical = `${SITE}${productPath(producto.slug, lang)}`;
@@ -31,63 +32,51 @@ const ogImage = producto.foto
   ? new URL(typeof producto.foto === 'string' ? producto.foto : producto.foto.src, SITE).href
   : undefined;
 
-/* Lo que Google necesita para entender la página: qué es, de quién, y las
-   preguntas frecuentes con el mismo texto que se ve —si no coincide, Google
-   las descarta—. A propósito sin precio (Product/Offer): un importe horneado
-   acá se desfasa el día que cambie en Stripe. */
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'WebPage',
-      '@id': `${canonical}#webpage`,
-      url: canonical,
-      name: c.metaTitle,
-      description: c.metaDesc,
-      inLanguage: lang,
-      publisher: { '@id': `${SITE}/#emilse` },
-    },
-    {
-      '@type': 'Person',
-      '@id': `${SITE}/#emilse`,
-      name: 'Emilse Rios',
-      jobTitle: lang === 'en' ? 'Double bassist and teacher' : 'Contrabajista y profesora',
-      url: 'https://emilserios.com',
-      sameAs: ['https://emilserios.com'],
-    },
-    /* Sin preguntas no hay FAQPage: Google la da por inválida vacía. */
-    ...(c.faq?.length
-      ? [
-          {
-            '@type': 'FAQPage',
-            '@id': `${canonical}#faq`,
-            inLanguage: lang,
-            mainEntity: c.faq.map((f) => ({
-              '@type': 'Question',
-              name: f.q,
-              acceptedAnswer: { '@type': 'Answer', text: [f.a, f.correo, f.a2].filter(Boolean).join('') },
-            })),
-          },
-        ]
-      : []),
-  ],
-};
+/* El título y la descripción: los del pedido de SEO de Emi (11 oct 2026),
+   que mandan sobre los de la carta; una carta que no esté en la tabla usa
+   los suyos. Ver `src/data/seo.ts`. */
+const meta = metaFormaciones[producto.slug]?.[lang] ?? { title: c.metaTitle, description: c.metaDesc };
+
+/* Lo que Google necesita para entender la página, además de Emi y la página
+   (los pone `Base.astro`): qué se vende —un curso, la membresía o las clases,
+   con su precio— y las preguntas frecuentes con el mismo texto que se ve —si
+   no coincide, Google las descarta—. El precio del diapasón cambia solo al
+   abrir las puertas. */
+const formacion = datosFormacion(producto.slug, lang, canonical);
+const jsonLd = [
+  ...(formacion ? [{ ...formacion, mainEntityOfPage: { '@id': `${canonical}#webpage` } }] : []),
+  /* Sin preguntas no hay FAQPage: Google la da por inválida vacía. */
+  ...(c.faq?.length
+    ? [
+        {
+          '@type': 'FAQPage',
+          '@id': `${canonical}#faq`,
+          inLanguage: lang,
+          mainEntity: c.faq.map((f) => ({
+            '@type': 'Question',
+            name: f.q,
+            acceptedAnswer: { '@type': 'Answer', text: [f.a, f.correo, f.a2].filter(Boolean).join('') },
+          })),
+        },
+      ]
+    : []),
+];
 ---
 
 <Base
   lang={lang}
-  title={`${c.metaTitle}`}
-  description={c.metaDesc}
+  title={meta.title}
+  description={meta.description}
   route="products"
   entrada={false}
   pathEs={productPath(producto.slug, 'es')}
   pathEn={productPath(producto.slug, 'en')}
   noindex={borrador}
+  jsonLd={jsonLd}
 >
   <Fragment slot="head">
     {ogImage && <meta property="og:image" content={ogImage} />}
     {ogImage && <meta property="og:image:alt" content={c.photoAlt} />}
-    {!borrador && <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />}
   </Fragment>
   {
     borrador && (

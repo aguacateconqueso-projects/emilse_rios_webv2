@@ -1,0 +1,15 @@
+# emilserios.com — pedido de SEO de Emi (11 oct 2026).
+# Fuera de los buscadores: el aula, el acceso, el panel, el cobro y las
+# páginas de «gracias». Esas páginas llevan además <meta name="robots"
+# content="noindex">.
+User-agent: *
+Allow: /
+Disallow: /aulavirtual/
+Disallow: /en/classroom/
+Disallow: /panel/
+Disallow: /gracias/
+Disallow: /en/thank-you/
+Disallow: /api/
+Disallow: /cortina/
+
+Sitemap: https://www.emilserios.com/sitemap.xml

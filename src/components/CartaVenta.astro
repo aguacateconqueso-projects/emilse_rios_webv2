@@ -26,7 +26,7 @@
  */
 import { type Lang, useTranslations, routePath } from '../i18n/ui';
 import { FOTOS_A_COLOR, type Product } from '../data/aula';
-import { type Carta, type Bloque, NEWS_POR_DEFECTO, NEWSLETTER, AVISO_FORMACION } from '../data/cartas';
+import { type Carta, type Bloque, NEWS_POR_DEFECTO, NEWSLETTER } from '../data/cartas';
 import { CLOSES_AT, REOPENS_AT, INVITE_PARAM, doorsClosed } from '../lib/membership';
 import MediaSlot from './MediaSlot.astro';
 import BotonVenta from './BotonVenta.astro';
@@ -92,14 +92,12 @@ const clase = (b: Bloque) => (typeof b === 'string' ? '' : `venta__${b.k}`);
 const news = c.news?.pre ? c.news : NEWS_POR_DEFECTO[lang as Lang];
 
 /**
- * Si el botón de la carta es «Avísame cuando abra» (un curso que todavía no
- * se vende), el campo del final es ese aviso: lo dice con el nombre de la
- * formación, y el alta lleva el slug para que Klaviyo guarde el interés (9 oct
- * 2026, Emi: «¿qué pasa cuando le das al botón? Así tengo referencia de
- * quiénes se interesan por los cursos»).
+ * Si el botón de la carta baja al newsletter (un curso que todavía no se
+ * vende), el campo del final repite su frase: «Suscríbete a mi newsletter y
+ * entérate cuando abra». Es una suscripción normal (11 oct 2026).
  */
 const esAviso = producto.tipo === 'curso' && c.boton.href === NEWSLETTER;
-const newsPre = esAviso ? AVISO_FORMACION[lang as Lang].replace('{nombre}', c.title) : news.pre;
+const newsPre = esAviso ? `${c.boton.texto}.` : news.pre;
 ---
 
 {/*
@@ -376,7 +374,7 @@ const newsPre = esAviso ? AVISO_FORMACION[lang as Lang].replace('{nombre}', c.ti
         <p class="venta__news-pre">{newsPre}</p>
       </div>
     </div>
-    <SubscribeForm lang={lang} id="suscribete-carta" flush interes={esAviso ? producto.slug : undefined} />
+    <SubscribeForm lang={lang} id="suscribete-carta" flush />
   </section>
 </article>
 

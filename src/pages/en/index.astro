@@ -1,12 +1,19 @@
 ---
 import Base from '../../layouts/Base.astro';
 import Home from '../../components/Home.astro';
-import { useTranslations } from '../../i18n/ui';
+import { metaPaginas } from '../../data/seo';
 
 const lang = 'en' as const;
-const t = useTranslations(lang);
 ---
 
-<Base lang={lang} title={t('site.title')} description={t('site.description')} intro backdrop entrada={false}>
+<Base
+  lang={lang}
+  title={metaPaginas[lang].home.title}
+  description={metaPaginas[lang].home.description}
+  intro
+  backdrop
+  entrada={false}
+  ogImagen
+>
   <Home lang={lang} />
 </Base>

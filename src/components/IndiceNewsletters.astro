@@ -1,0 +1,144 @@
+---
+/**
+ * El índice de los newsletters pasados: `/newsletters/` y `/en/newsletters/`,
+ * y sus páginas siguientes (`/newsletters/pagina/2/`, `/en/newsletters/page/2/`).
+ *
+ * **El punto 5.2 del pedido de SEO de Emi** (11 oct 2026): el bloque fijo del
+ * newsletter —el de la Home, sin H1—, el H1 «Algunos newsletters pasados» y
+ * la lista, la más reciente primero, cada una con su título, su extracto y
+ * «Leer más →». Sin fotos. **Una lista y no un carrusel**: lo pidió así,
+ * porque en un carrusel casi nadie pasa de la segunda tarjeta y Google lee
+ * mal lo que queda oculto.
+ *
+ * A partir de 10 entradas, «Ver más» lleva a la página siguiente, con su
+ * dirección de verdad: así Google llega a todas siguiendo enlaces.
+ */
+import { type Lang, useTranslations } from '../i18n/ui';
+import { type Newsletter, newsletterPath, indicePath } from '../data/newsletters';
+import { extracto } from '../lib/newsletters';
+import BloqueNewsletter from './BloqueNewsletter.astro';
+import Boton from './Boton.astro';
+
+interface Props {
+  lang: Lang;
+  entradas: Newsletter[];
+  /** La página que se ve: 1 es la primera. */
+  numero: number;
+  hayMas: boolean;
+}
+const { lang, entradas, numero, hayMas } = Astro.props as Props;
+const t = useTranslations(lang);
+---
+
+<BloqueNewsletter lang={lang} id="suscribete" />
+
+<section class="row row--flush indice" aria-labelledby="indice-h">
+  <div class="row__body">
+    <h1 class="indice__h" id="indice-h">
+      {t('nl.h1')}
+      {numero > 1 && <span class="mono soft indice__pag">{t('nl.pagina')} {numero}</span>}
+    </h1>
+    <ul class="indice__lista" role="list">
+      {
+        entradas.map((n) => (
+          <li class="indice__item">
+            <a class="indice__link" href={newsletterPath(n)}>
+              <h2 class="indice__nombre">{n.titulo}</h2>
+              <p class="indice__extracto soft">{extracto(n)}</p>
+              <span class="mono indice__leer">{t('nl.leer')} →</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    {
+      hayMas && (
+        <p class="indice__mas">
+          <Boton href={indicePath(lang, numero + 1)}>{t('nl.verMas')}</Boton>
+        </p>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  /* El H1, separado del bloque del newsletter por una regla, como el título
+     de cada entrada. */
+  .indice {
+    margin-top: var(--space-8);
+  }
+
+  .indice .row__body {
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--rule);
+  }
+
+  .indice__h {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--text-anchor);
+    line-height: var(--leading-anchor);
+    letter-spacing: var(--tracking-section);
+    text-wrap: balance;
+  }
+
+  .indice__pag {
+    display: block;
+    margin-top: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-mono);
+    letter-spacing: var(--tracking-mono);
+    line-height: 1.4;
+  }
+
+  .indice__lista {
+    margin: var(--space-6) 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--rule);
+  }
+
+  .indice__item {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  /* Cada entrada es un enlace entero, sin la regla de los enlaces de texto:
+     la regla la pone la lista. */
+  .indice__link {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding-block: var(--space-4);
+    border-bottom: 0;
+  }
+
+  .indice__nombre {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--text-section);
+    line-height: var(--leading-section);
+    letter-spacing: var(--tracking-section);
+    text-wrap: balance;
+  }
+
+  .indice__extracto {
+    font-size: var(--text-small);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  .indice__leer {
+    margin-top: var(--space-1);
+  }
+
+  @media (hover: hover) {
+    .indice__link:hover .indice__leer {
+      text-decoration: underline;
+      text-underline-offset: 0.3em;
+    }
+  }
+
+  .indice__mas {
+    margin-top: var(--space-6);
+  }
+</style>

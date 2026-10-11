@@ -158,6 +158,22 @@ const SLUGS_EN = {
   'clases-online': 'online-lessons',
 };
 
+/**
+ * Los newsletters pasados vivieron en `/newsletter/`, en singular, del 9 al 11
+ * oct 2026, con otras direcciones. Desde el pedido de SEO de Emi viven en
+ * `/newsletters/` y cada entrada tiene la suya nueva (ver
+ * `src/data/newsletters-anexo.ts`, donde también están en
+ * `slugs_anteriores`). **Permanentes**: hay correos enviados con las viejas.
+ */
+const NEWSLETTERS_VIEJOS = {
+  '/newsletter/como-ganar-fuerza-en-la-mano-izquierda-contrabajo': '/newsletters/fuerza-mano-izquierda-contrabajo',
+  '/newsletter/tipos-de-vibrato-en-el-contrabajo': '/newsletters/como-usar-vibrato-contrabajo',
+  '/newsletter/error-mas-comun-al-aprender-vibrato-contrabajo': '/newsletters/vibrato-contrabajo-mano-tensa',
+  '/en/newsletter/how-to-build-left-hand-strength-double-bass': '/en/newsletters/left-hand-strength-double-bass',
+  '/en/newsletter/types-of-vibrato-on-the-double-bass': '/en/newsletters/how-to-use-vibrato-double-bass',
+  '/en/newsletter/most-common-vibrato-mistake-double-bass': '/en/newsletters/double-bass-vibrato-tense-hand',
+};
+
 /** @returns {import('astro').AstroIntegration} */
 function laAcademiaRedirige() {
   /** @type {URL | undefined} */
@@ -298,6 +314,18 @@ export default defineConfig({
     ),
     '/en/products/[producto]': '/en/programs/[producto]',
     '/en/courses/[producto]': '/en/programs/[producto]',
+
+    /*
+     * Los newsletters pasados, de `/newsletter/` a `/newsletters/` (11 oct
+     * 2026): el índice y cada entrada conocida, **directo** a su dirección
+     * nueva (`NEWSLETTERS_VIEJOS`, arriba). El patrón recoge lo demás, y la
+     * página de la entrada termina el viaje si la dirección es una vieja.
+     */
+    '/newsletter': '/newsletters',
+    '/en/newsletter': '/en/newsletters',
+    ...NEWSLETTERS_VIEJOS,
+    '/newsletter/[slug]': '/newsletters/[slug]',
+    '/en/newsletter/[slug]': '/en/newsletters/[slug]',
 
     /*
      * La membresía tiene dirección propia en español desde el 1 oct 2026

@@ -1,14 +1,19 @@
 # Progreso — Contrabajo en la Ciudad
 
-Sitio de **Emilse Ríos**, contrabajista y docente. Su newsletter, su aula, su
+Sitio de **Emilse Rios** (sin tilde: lo pidió Emi el 11 oct 2026), contrabajista y docente. Su newsletter, su aula, su
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
 **Última actualización:** 11 de octubre de 2026 —**la web está en vivo**—.
-**Los enlaces de después de la preventa, puestos** (PR #65): 240 € el
-diapasón y 87 € las escalas, desde el viernes 16 a las 23:59 (punto 29 de
-📋). Queda pendiente el SEO que pidió Emi —ver **El pedido de SEO de Emi**, en
-📋—. Lo que sigue es el 9 oct.
+**El SEO de Emi, hecho** (PR #66; recuadro 🧵 de abajo, el primero, y la
+sección **El SEO de Emi**): `sitemap.xml`, `robots.txt`, la 404 con la ropa
+del sitio, «Emilse Rios» sin tilde, los títulos y descripciones de sus
+tablas, los datos para Google y la imagen al compartir, y **«Algunos
+newsletters pasados»** en `/newsletters/`, que **Emi publica sola desde el
+panel**. Lo que le toca a Adrián: puntos 38 a 44 de 📋 —**pegar la migración
+0013** y dar de alta Search Console—. Antes, el mismo día, **los enlaces de
+después de la preventa** (PR #65): 240 € el diapasón y 87 € las escalas,
+desde el viernes 16 a las 23:59 (punto 29 de 📋). Lo que sigue es el 9 oct.
 **La tanda de correcciones de Emi del 9 oct** (un PDF con catorce pedidos):
 **la preventa de «Todo el diapasón»** —195 € con los 240 € tachados hasta el
 viernes 16 de octubre a las 23:59, cuando abren las puertas—, **pagar con
@@ -54,6 +59,61 @@ suscribió desde la Home el 24 sep y funcionó. ⚠️ **El proyecto de Vercel e
 `emilse-rios-webv2_1`**: las vistas previas buenas empiezan por
 `emilse-rios-webv21-git-…` (ver la regla de trabajo, justo abajo). El detalle de cada cosa está en las secciones que siguen a **La
 cortina**, de la más nueva a la más vieja.
+
+> **🧵 11 oct 2026: el SEO de Emi** (rama `claude/nifty-darwin-2apqzg`,
+> rearrancada desde `main` después del #65; **PR #66**). Su vista previa:
+> **https://emilse-rios-webv21-git-claude-8a85ec-adrians-projects-594b3131.vercel.app**
+> Emi mandó, desde su Claude, el «Prompt SEO de emilserios.com — versión
+> única», que reemplaza a los documentos de SEO anteriores. Su regla de oro:
+> **no se toca ningún texto visible de las páginas**; esto cambia lo que lee
+> Google, y suma una sección. Confirmado antes de empezar: Emi —«HER-MO-SO»
+> se queda y en la entrada 2 en inglés va «BEAU-TI-FUL.» como en el
+> documento; las entradas con **la fecha del día en que se publican** y en el
+> orden **3, 2, 1**—; Adrián —la imagen al compartir es la foto de la Home
+> recortada; la foto del mar del vibrato la manda después; mandan los títulos
+> del documento sobre los del panel—. El detalle, en **El SEO de Emi**, justo
+> debajo de **La cortina**:
+>
+> 1. **`/sitemap.xml`** (todas las páginas públicas en los dos idiomas, con
+>    `hreflang`, y cada newsletter publicado entra solo) y **`/robots.txt`**
+>    (fuera el aula, el panel, «gracias», la API y la cortina).
+> 2. **La 404 con la ropa del sitio**: «Esta página no existe. O ya no
+>    existe.» y el enlace al inicio. **El texto es provisional**: lo escribe
+>    Emi.
+> 3. **«Emilse Rios», sin tilde**, en todo el sitio: cabecera, pie, textos
+>    alternativos, correos, panel. Lo que venga de la base de datos con tilde
+>    se corrige al leerlo.
+> 4. **Títulos y descripciones** de las 18 páginas, los de sus tablas.
+> 5. **Los datos para Google** (JSON-LD): Emi como `Person` —la misma en todas
+>    las páginas—, el sitio, cada página, y cada formación como `Course`,
+>    `Product` (la membresía, 65 €/mes) o `Service` (las clases, 70 € y 60 €),
+>    con su precio. **El del diapasón cambia solo**: 195 € hasta el 16 a las
+>    23:59 y 240 € desde entonces (el recordatorio del 17 de su documento no
+>    hace falta).
+> 6. **La imagen al compartir** (`emilse-rios-contrabajo-og.jpg`, 1200×630)
+>    en Inicio, *Sobre mí*, Formaciones y los newsletters, y los `alt` de sus
+>    tablas.
+> 7. **«Avísame cuando abra»** pasa a decir **«Suscríbete a mi newsletter y
+>    entérate cuando abra»** y es una suscripción normal: fuera la
+>    propiedad `interes_<slug>` de Klaviyo (el punto 37 ya no hace falta).
+> 8. **«Algunos newsletters pasados»**: `/newsletters/` y
+>    `/en/newsletters/`, con el bloque del newsletter de la Home arriba (sin
+>    H1), el H1, la lista y, en cada entrada, la fecha, el correo, la firma,
+>    las posdatas, el formulario otra vez y «Sigue leyendo». **Las seis del
+>    anexo** de su documento (3 en cada idioma). **«Newsletter» sale del menú
+>    y del pie**: se llega por un enlace al final del inicio. Las direcciones
+>    del 9 oct (`/newsletter/…`) llevan a las nuevas con un 301.
+> 9. **Panel → Newsletters pasados**: la lista, «Nueva entrada» y las
+>    casillas de su documento (título, cuerpo con negrita, cursiva, listas y
+>    enlaces —se puede pegar desde el correo—, firma, PD, PD2, PD3, «Sigue
+>    leyendo», traducción; y para Google, título y descripción con contador,
+>    slug, extracto y fecha). Se guarda solo como borrador; «Vista previa» y
+>    «Publicar», y en un minuto está en la web.
+>
+> **Lo que le toca a Adrián** (puntos 38 a 44 de 📋): **pegar
+> `supabase/migrations/0013_newsletters.sql`** —sin ella la web enseña igual
+> las seis entradas, pero el panel no puede publicar—, mergear, **Search
+> Console** con la cuenta de Google de Emi, y mandar la foto del mar.
 
 > **🧵 9 oct 2026: la tanda de Emi —la preventa, el inglés, las entradas y
 > el aula—** (rama `claude/nifty-darwin-2apqzg`, desde `main`; **PR #64**).
@@ -623,7 +683,7 @@ cortina**, de la más nueva a la más vieja.
 > **E. La preventa de octubre (9 oct 2026) — antes del viernes 16 a las
 > 23:59.** Todo en **La tanda del 9 de octubre**.
 >
-> 28. [ ] **Mergear el PR #64** y mirarlo en vivo: Formaciones con la fecha,
+> 28. [x] *(Mergeado el 11 oct 2026.)* **Mergear el PR #64** y mirarlo en vivo: Formaciones con la fecha,
 >     la ficha de precio del diapasón con 240 € tachado y 195 €, y el botón
 >     que lleva al enlace de Stripe de cada idioma.
 > 29. [x] *(Hecho el 11 oct 2026, PR #65: Adrián pasó los cuatro —240 € del
@@ -668,31 +728,57 @@ cortina**, de la más nueva a la más vieja.
 > 35. [ ] **Que Emi renombre «Clase nueva»** en Panel → Cursos: es el nombre
 >     que el panel le pone a una clase recién creada, y era lo que se leía
 >     en «Sigue por donde ibas».
-> 36. [ ] **Que Emi lea lo que se tradujo acá**: las tres entradas del
->     newsletter en el idioma que no escribió (`traducida: true` en
->     `src/content/entradas/`), los títulos de las tres, el texto de
->     «Avísame» (`AVISO_FORMACION` en `src/data/cartas.ts`) y el correo de la
->     compra (`correoCompra()` en `src/lib/correo.ts`). Y una duda de la
->     entrada 3: «eso es bueno y no tanto, ¿je?» quedó tal cual; si era
->     «¿eh?», es una letra.
-> 37. [ ] **En Klaviyo, un segmento por formación** para avisar cuando abra:
->     «Properties about someone → `interes_todas-las-escalas` is true» (o
->     `interes_contrabajo-desde-cero`, etc.). Lo escribe «Avísame» desde el
->     9 oct; las altas de antes no lo tienen.
+> 36. [ ] **Que Emi lea el correo de la compra** (`correoCompra()` en
+>     `src/lib/correo.ts`), que se escribió acá. *(11 oct: las entradas del
+>     newsletter ya no son traducciones nuestras —las seis son las del anexo
+>     de su documento de SEO— y el texto de «Avísame» es el suyo; «¿je?» lo
+>     dejó así en el anexo.)*
+> 37. [x] ~~**En Klaviyo, un segmento por formación**~~ —*ya no hace falta
+>     (11 oct 2026): el documento de SEO de Emi pide que «Avísame» sea una
+>     suscripción normal al newsletter, «sin etiquetas ni listas aparte», y
+>     el sitio dejó de escribir `interes_<slug>`. Las propiedades que ya
+>     quedaron en algunos perfiles no molestan.*
 >
-> **F. El pedido de SEO de Emi (11 oct 2026, sin empezar).** Emi mandó, desde
-> su Claude, un documento de SEO: `sitemap.xml`, `robots.txt`, una 404 con
-> la ropa del sitio, «Emilse Rios» sin tilde en todo el sitio, datos
-> estructurados (Person, WebSite, Course/Product/Service con precios),
-> títulos y descripciones nuevos para las 18 páginas, `og:image` y `alt`, y
-> una sección «Algunos newsletters pasados» en `/newsletters/` con editor en
-> el panel. Las direcciones en inglés ya estaban (PR #64). **Su punto de los
-> newsletters choca con lo que pidió el PDF del 9 oct** —`/newsletter/` en el
-> menú, el bloque del newsletter arriba de cada entrada—: Adrián se lo pasó a
-> Emi para que decida, y queda en espera. Del resto faltaba confirmar: la
-> foto `emilse-rios-contrabajo-og.jpg` (1200×630; no llegó) y que los
-> títulos del código manden sobre los de «Págs. de ventas».
+> **F. El SEO de Emi (11 oct 2026, PR #66).** Hecho en el código; ver **El
+> SEO de Emi**. Lo de fuera:
 >
+> 38. [ ] **Pegar `supabase/migrations/0013_newsletters.sql` en el SQL
+>     Editor** (Adrián), antes o después de mergear. Crea las tablas de los
+>     newsletters y siembra las seis entradas del anexo con la fecha de ese
+>     día; al final enseña seis filas, la 3 primero en cada idioma. **Sin
+>     ella la web enseña igual las seis** (las del código), pero el panel
+>     dice «Falta un paso» y no puede publicar. Aditiva e idempotente.
+> 39. [ ] **Mergear el PR #66** y mirarlo en vivo: `/sitemap.xml` y
+>     `/robots.txt` con 200, `/newsletters/` y una entrada, la 404 (cualquier
+>     dirección que no exista), y los 301:
+>     `curl -sI https://www.emilserios.com/newsletter/` →
+>     `/newsletters/`, y los seis de `/en/courses/…` → `/en/programs/…`.
+> 40. [ ] **Google Search Console, con la cuenta de Google de Emi** (Emi
+>     propietaria; Adrián, usuario): propiedad de tipo **Dominio**
+>     `emilserios.com`, verificada con el registro **TXT** que da Google, en
+>     Cloudflare → DNS (*DNS only*). Después: **Sitemaps → enviar
+>     `https://www.emilserios.com/sitemap.xml`**; e **Inspección de URLs →
+>     Solicitar indexación**, en este orden: `/`, `/sobre-mi/`,
+>     `/formaciones/`, `/en/`, `/en/about/` y la de cada formación.
+>     Opcional: importar la propiedad en Bing Webmaster Tools (dos clics).
+> 41. [ ] **Validar los datos para Google** en vivo: `validator.schema.org` y
+>     la Prueba de resultados enriquecidos con `/`, una carta (la del
+>     diapasón) y un newsletter. Desde esta sesión no se llega a esas
+>     herramientas; acá se comprobó la forma de cada uno. Y **compartir el
+>     inicio por WhatsApp**: tiene que salir la foto nueva (si sale la
+>     vieja, es la caché de WhatsApp: probar con `/?v=2`).
+> 42. [ ] **La foto del mar** («Tu vibrato como un cantante»): Adrián la
+>     manda; se cambia y se actualiza su texto alternativo (`fotoAlt` en
+>     `src/data/aula.ts` y `photoAlt` en `src/data/cartas.ts`, los dos
+>     idiomas). Si Emi la sube ella desde la Tienda, avisar igual para el
+>     `alt`.
+> 43. [ ] **Emi escribe el texto de la 404** (hoy: «Esta página no existe. O
+>     ya no existe.»). Se cambia en `src/components/Perdida.astro`.
+> 44. [ ] **Emi crea una entrada de prueba desde el panel, sin ayuda** (el
+>     último punto de su documento): rellena las casillas, mira la vista
+>     previa, publica y la encuentra en `/newsletters/`. Después la borra
+>     («Borrar la entrada», abajo en el editor).
+
 > **D. Cabos sueltos, sin prisa.**
 >
 > - [ ] Comprobar en vivo las direcciones viejas (Adrián, en la próxima
@@ -1179,6 +1265,193 @@ no tenía salida a `vercel.app`:
 
 ---
 
+## El SEO de Emi
+
+**11 de octubre de 2026** (PR #66). Emi mandó, hecho con su Claude, el
+«Prompt SEO de emilserios.com — versión única», que reemplaza a los tres
+documentos de SEO de antes (el primero, el complemento de los newsletters y
+la hoja de incongruencias). **La regla de oro: no se cambia ningún texto
+visible del cuerpo de las páginas** —ni historias, ni encabezados, ni el
+orden, ni el diseño—. Se toca lo que lee Google y se suma una sección. Las
+excepciones visibles son las que nombra: «Emilse Rios» sin tilde y su punto
+6 (ver abajo). Tampoco se añaden enlaces ni íconos de redes.
+
+Decidido antes de empezar: los títulos de su documento **mandan sobre los de
+«Págs. de ventas»** del panel (Adrián); la imagen al compartir es **la foto de
+la Home recortada** a 1200×630, también para los newsletters (Adrián); las
+entradas llevan **la fecha del día en que se publican** y van en el orden
+**3, 2, 1** (Emi); y en la entrada 2 en inglés va **«BEAU-TI-FUL.»**, como en
+el anexo (Emi: «sigue el documento»).
+
+### Lo técnico: sitemap, robots y la 404
+
+- **`/sitemap.xml`** (`src/pages/sitemap.xml.ts`): se arma **en el servidor**
+  y no en el build, porque las fichas de Formaciones y los newsletters los
+  publica Emi desde el panel; una hora de caché. Cada página con sus
+  `hreflang` (es, en, x-default); un newsletter sin traducción, solo con el
+  suyo. Las entradas llevan `lastmod` (su última publicación).
+- **`/robots.txt`** (`public/robots.txt`): fuera `/aulavirtual/`,
+  `/en/classroom/`, `/panel/`, `/gracias/`, `/en/thank-you/`, `/api/` y
+  `/cortina/`, y la línea del sitemap.
+- **La 404** (`src/components/Perdida.astro`): una página del sitio, con su
+  menú y su pie: «Esta página no existe. O ya no existe.», «Volver al inicio»
+  y la línea en inglés. **Texto provisional** (punto 43). Es un componente
+  porque la usan `src/pages/404.astro` y las páginas del servidor (cartas y
+  newsletters) cuando piden algo que no hay: Astro no deja reescribir de una
+  página del servidor a una estática (`Astro.rewrite('/404')` da un 500), así
+  que pintan `<Perdida />` con `status = 404`.
+
+### Quién es Emi para Google
+
+- **«Emilse Rios», sin tilde, en todo el sitio**: el código entero, y lo que
+  venga de la base de datos con tilde se corrige al leerlo (`sinTilde` en
+  `src/lib/tienda.ts`; la Tienda y las cartas publicadas pueden tenerla).
+- **Los datos estructurados** viven en `src/data/seo.ts` y los pone
+  `Base.astro` en un solo `@graph`: **Emi como `Person`** con un único `@id`
+  (`https://www.emilserios.com/#emilse`) en todas las páginas —cargo,
+  descripción, Venezuela, Madrid, la foto, `sameAs` con su Instagram y su
+  YouTube (solo para Google: en la página no hay enlaces a redes)—; **el
+  sitio** (`WebSite`) en el inicio; **cada página** (`WebPage`, con el mismo
+  nombre que su `<title>`). Las páginas `noindex` no llevan nada.
+- **Cada formación** (`datosFormacion()`): la membresía es un `Product` con
+  65 €/mes (`UnitPriceSpecification`), las clases 1:1 un `Service` con dos
+  ofertas (70 € la primera, 60 € las siguientes) y los cursos `Course`, con
+  Emi de profesora. **El precio del diapasón sale de
+  `src/data/lanzamientos.ts`**, el mismo reloj de la carta: 195 € en
+  `PreOrder` con `priceValidUntil` 2026-10-16 hasta las 23:59 del 16, y 240 €
+  desde entonces, **sin tocar nada el 17** (su documento pedía cambiarlo a
+  mano ese día). Las escalas, 87 €. «Desde cero» y el vibrato, cerrados, sin
+  oferta. La carta añade sus preguntas (`FAQPage`).
+- **Títulos y descripciones** de las 18 páginas: `metaPaginas` y
+  `metaFormaciones` en `src/data/seo.ts`, los de sus tablas tal cual. Una
+  carta que no esté ahí —una nueva del panel— usa los suyos.
+- **La imagen al compartir**: `public/emilse-rios-contrabajo-og.jpg`, la foto
+  de la Home recortada a 1200×630 (con `og:image:width`, `height` y `alt`), en
+  Inicio, *Sobre mí*, Formaciones y los newsletters (`ogImagen` en `Base`).
+  Las cartas siguen con la de su ficha.
+- **Los `alt`**: la lámina de la Home, el retrato de *Sobre mí* y la foto de
+  la membresía, con los textos del documento.
+
+### Su punto 6, lo visible que pidió
+
+- «BEAU-TI-FUL.» y las fechas de apertura ya estaban (PR #64).
+- **«Avísame cuando abra» → «Suscríbete a mi newsletter y entérate cuando
+  abra»** (EN «Subscribe to my newsletter and find out when it opens»),
+  `AVISAME` en `src/data/cartas.ts`, con la misma frase encima del campo del
+  final de la carta. **Es una suscripción normal**: «sin etiquetas ni listas
+  aparte». Fuera `AVISO_FORMACION`, `marcarInteres()` y el `interes` de
+  `/api/suscribir` (el punto 37 ya no hace falta).
+- La foto del mar: cuando llegue, se cambia su `alt` (punto 42).
+
+### Los newsletters pasados
+
+**El punto 5 de su documento**, «el motor de tráfico orgánico»: correos de Emi
+publicados como entradas, que llevan siempre a la suscripción. **Reemplaza a
+las entradas del 9 oct** (`/newsletter/`, ficheros Markdown, «Newsletter» en
+el menú).
+
+- **Dónde:** `/newsletters/` y `/en/newsletters/`; cada entrada en
+  `/newsletters/<slug>/`. **Solo se llega desde el final del inicio**: un
+  enlace de texto, «Algunos newsletters pasados» / «Some past newsletters»
+  (bloque `pasados` en `src/data/home.ts`), y desde Google. **Ni en el menú
+  ni en el pie.** Las seis direcciones del 9 oct y las portadas llevan a las
+  nuevas con un 301 directo (`NEWSLETTERS_VIEJOS` en `astro.config.mjs`);
+  cualquier otra de `/newsletter/…` va a la misma en `/newsletters/`.
+- **El índice** (`IndiceNewsletters.astro`): el bloque del newsletter de la
+  Home, el H1, y la lista —título, extracto, «Leer más →»—, la más reciente
+  primero, sin fotos. **Una lista, no un carrusel** (lo pidió así). A partir
+  de 10, «Ver más» lleva a `/newsletters/pagina/2/` (`/en/newsletters/page/2/`):
+  direcciones de verdad, para que Google llegue a todas.
+- **Cada entrada** (`EntradaNewsletter.astro`), siempre en este orden: **el
+  bloque del newsletter de la Home** (`BloqueNewsletter.astro`: el mismo
+  texto, sacado de `home.ts`, y el mismo formulario; se ve igual pero **no es
+  un H1**), el título (el único H1), la fecha pequeña, el correo, la firma
+  («Un abrazo,» / «Emilse», siempre en español), PD, PD2 y PD3 si la hay, el
+  formulario otra vez con el ancla `#suscribete` (la del «aquí» de la PD) y la
+  línea de la Home, y «Sigue leyendo» (las que eligió Emi o, si no eligió, las
+  más recientes). Sin fotos, comentarios, barra lateral ni botones de
+  compartir. La ropa es la de las entradas del 9 oct.
+- **Para Google, solo:** `<title>` y descripción desde sus casillas (vacías,
+  el título de la entrada y el extracto), `canonical`, `og:type` `article` con
+  la imagen del sitio, `hreflang` **solo si tiene traducción vinculada**, y un
+  `BlogPosting` con autora y editora Emi (`#emilse`) y el sitio (`#website`).
+- **Viven en Supabase** (migración `0013_newsletters.sql`, punto 38):
+  `newsletters`, las publicadas, que lee cualquiera; `newsletter_drafts`, los
+  borradores, que solo ve Emi —separadas por lo mismo que las páginas de
+  ventas—. La base de datos pone la hora de cada publicación y **apunta el
+  slug viejo** cuando cambia (`slugs_anteriores`), y la página lo lleva al
+  nuevo con un 301. «Sigue leyendo» y la traducción no tienen clave foránea:
+  si Emi borra una entrada, la web ignora el enlace.
+- **Las seis del anexo** (`src/data/newsletters-anexo.ts`, con `id` fijos):
+  la migración las siembra con la fecha del día en que se pega, y **son lo que
+  enseña la web mientras la tabla no exista**, para que no haya un hueco entre
+  el despliegue y el pegado. Con la tabla manda la tabla, aunque esté vacía.
+  El SQL de la siembra sale de ese fichero
+  (`npx tsx scripts/semilla-newsletters.mts`). Los textos son los del anexo
+  tal cual, con las comillas y los apóstrofos tipográficos del sitio; «El
+  ejercicio:» / «The exercise:» en negrita, como en su documento.
+- **Se resuelven en el servidor**, con un minuto de caché, como las cartas:
+  Emi publica y al minuto está, sin desplegar (`src/lib/newsletters.ts`).
+- **Lo que escribe Emi se limpia al pintarlo** (`limpiarHtml` en
+  `src/data/newsletters.ts`): solo párrafos, saltos, negrita, cursiva, listas
+  y enlaces a `https://`, `mailto:`, el propio sitio o un ancla.
+
+### El panel: Newsletters pasados
+
+Una pestaña nueva, **«Newsletters»** en la barra (el nombre entero no cabía
+sin tapar «Mensajes») y «Newsletters pasados» en la vista general
+(`src/components/panel/Newsletters.astro`). Las casillas son las de su
+documento, en su orden:
+
+- **Contenido:** idioma, título, **cuerpo** (un editor con Negrita, Cursiva,
+  Lista, Lista numerada, Enlace y Quitar enlace, sin tamaños ni colores; **al
+  pegar desde el correo** se quedan párrafos, negritas, cursivas, listas y
+  enlaces y se va todo lo demás —Gmail, Google Docs, texto plano—), firma, PD
+  y PD2 precargadas («aquí»/«here» ya enlaza a `#suscribete`), PD3 vacía,
+  «Sigue leyendo» (hasta 3 del mismo idioma) y «Traducción vinculada» (basta
+  con elegirla en una de las dos: al publicar, la otra queda vinculada si no
+  tenía ninguna).
+- **Para Google:** título con contador (60), descripción con contador (155),
+  slug (sale solo del título hasta que se toca; no puede ser «pagina» ni
+  «page»; si se cambia en una publicada, avisa del 301), extracto (sale solo
+  de las primeras 200 letras del cuerpo hasta que se toca) y fecha (hoy, en
+  Madrid).
+- **Abajo:** el estado, «Borrar la entrada», «Descartar el borrador» (si hay
+  cambios sin publicar), «Vista previa ↗» (`/panel/vista-previa-newsletter/`,
+  igual que la de las cartas: POST con el token, solo para admin, `noindex`),
+  «Guardar borrador» y «Publicar» (revisa título, cuerpo, slug y fecha).
+  Además se guarda solo, 2,5 s después de dejar de escribir.
+
+### Cómo se probó
+
+- **La migración, en un Postgres 16 de verdad** (con `is_admin()` y
+  `auth.uid()` simulados): se pega dos veces sin error; seis filas en el
+  orden 3, 2, 1; el slug viejo se apunta al cambiarlo; `anon` lee las
+  publicadas y no los borradores, y no puede escribir; un slug mal escrito no
+  entra.
+- **El panel, de punta a punta en Chromium**, contra esa base con PostgREST
+  (la RLS de verdad) y una autenticación simulada: la lista, abrir una
+  publicada (contadores, traducción y «Sigue leyendo» marcados), una nueva
+  con el slug y el extracto solos, **pegar el HTML de un correo de Gmail con
+  estilos, una imagen y un `<script>`** (quedan solo párrafos, negrita,
+  cursiva, la lista y el enlace), negrita y enlace con los botones, el
+  guardado solo, la vista previa, publicar (sale primera en el índice),
+  cambiar el slug y volver a publicar (el viejo da 301), los errores
+  (título vacío, slug «pagina») y borrar.
+- **Las páginas:** un solo H1 en cada una (el título; «Algunos newsletters
+  pasados» en el índice), `title`, descripción, `canonical`, `hreflang` y
+  `BlogPosting` de las seis; la paginación con 12 entradas; las 404; el
+  sitemap; sin «Ríos» en ningún HTML; sin «Newsletter» en el menú ni en el
+  pie; el enlace solo al final del inicio. Capturas a 1280 y 390 px, sin
+  scroll horizontal.
+- `npm run audit` en el inicio, el índice y dos entradas: 0 contrastes, 0
+  espaciados fuera de la rejilla. `npm run audit:menu`: bien.
+- `npm run build` y `npm run audit:redirecciones`: **116 de 116**.
+- `astro check`: 12 errores, todos de antes (en `main` hay 17; ninguno
+  nuevo).
+
+---
+
 ## La tanda del 9 de octubre
 
 **9 de octubre de 2026** (PR #64). Emi mandó un PDF con catorce pedidos;
@@ -1312,6 +1585,11 @@ Pedido de Emi: «los slugs en inglés están en español, y la membresía está 
 
 ### Las entradas del newsletter
 
+> *Reemplazadas el 11 oct 2026* por **«Algunos newsletters pasados»** (ver
+> **El SEO de Emi**): otras direcciones (`/newsletters/`), los textos del
+> anexo de su documento, fuera del menú y publicadas desde el panel. Lo que
+> sigue queda como historia.
+
 Emi mandó **tres correos suyos para publicar en la web**, cada uno con su
 forma: arriba, «Double Bass in the City — The newsletter», su texto y el botón
 para suscribirse; el título de la entrada en grande, «ajustado a lo que la
@@ -1340,6 +1618,10 @@ video de bienvenida—.
   newsletter**.
 
 ### «Avísame cuando abra»
+
+> *Cambiado el 11 oct 2026* (documento de SEO de Emi, punto 6): dice
+> «Suscríbete a mi newsletter y entérate cuando abra» y ya no guarda
+> `interes_<slug>` en Klaviyo. Ver **El SEO de Emi**.
 
 Emi preguntó: «¿qué pasa cuando le das al botón? ¿Debe llegarme un aviso? Así
 lo invito al news y yo tengo referencia de quiénes se interesan por los
@@ -5337,28 +5619,20 @@ scripts/redirecciones.mjs  Recorre las direcciones viejas contra la salida de
 
 ### Publicar una entrada del newsletter
 
-Dejar caer dos ficheros en `src/content/entradas/`, uno por idioma, con el
-mismo `par` (9 oct 2026):
+**Desde el panel, sin código** (11 oct 2026): Panel → **Newsletters** →
+«Nueva entrada». Las casillas son las del documento de SEO de Emi; el
+cuerpo se puede pegar desde el correo (se quedan párrafos, negritas,
+cursivas, listas y enlaces). Se guarda solo como borrador; «Vista previa»
+abre la página tal cual; «Publicar» la pone en `/newsletters/<slug>/` (o
+`/en/newsletters/<slug>/`) en un minuto, en el índice y en el sitemap. Para
+que una entrada y su traducción se enlacen, basta con elegirla en
+«Traducción vinculada» en una de las dos. Si se cambia el slug de una
+publicada, la dirección vieja lleva a la nueva con un 301 (lo apunta la base
+de datos, `slugs_anteriores`). Ver **El SEO de Emi → Los newsletters
+pasados**.
 
-```markdown
----
-lang: es
-par: mi-entrada
-orden: 4
-direccion: lo-que-alguien-buscaria-en-google
-titulo: El título, tal cual lo buscaría alguien
-descripcion: Una línea: la de la portada del newsletter y la del buscador.
----
-
-El correo, en Markdown. Las listas con `1.` o `-`, la negrita con `**…**`,
-una cita con `*«…»*`. Al final, la firma: `Un abrazo,<br />` y `Emilse`.
-```
-
-Y su gemelo `lang: en` con su `direccion` en inglés (si es traducción
-nuestra, `traducida: true`). **No hay que tocar código**: la portada la lista
-por `orden`, la página sale en `/newsletter/<direccion>/` y el conmutador de
-idioma lleva a la gemela. Las dos posdatas y los dos campos del newsletter
-los pone la página: no van en el fichero.
+Hasta el 11 oct eran ficheros Markdown en `src/content/entradas/` (en
+`/newsletter/`); ya no existen.
 
 ### Abrir un curso con fecha, y preventa
 
@@ -5538,7 +5812,11 @@ no bajarla: se ve más campo y cada píxel de la foto rinde menos.
 
 1. Añadirla al mapa `routes` de `src/i18n/ui.ts`, con su slug en cada idioma.
 2. Crear los dos ficheros en `src/pages/` (español en la raíz, inglés bajo `en/`).
-3. Pasarle `route="loQueSea"` al layout `Base`.
+3. Pasarle `route="loQueSea"` al layout `Base`, con su `title` y su
+   `description` (los de las páginas del sitio viven en `src/data/seo.ts`).
+4. **Añadirla al sitemap** (`gruposDelSitio()` en `src/pages/sitemap.xml.ts`)
+   si es pública; si no lo es, `noindex` en `Base` y una línea en
+   `public/robots.txt`.
 
 De ahí salen solos los enlaces, el `canonical` y las alternativas `hreflang`.
 

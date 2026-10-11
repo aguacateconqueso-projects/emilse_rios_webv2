@@ -14,14 +14,14 @@ export type CortinaCopy = {
 
 export const cortina: Record<Lang, CortinaCopy> = {
   es: {
-    title: 'Emilse Ríos · Estamos trabajando en la web',
-    description: 'Estamos trabajando en la web de Emilse Ríos. Volvemos muy pronto.',
+    title: 'Emilse Rios · Estamos trabajando en la web',
+    description: 'Estamos trabajando en la web de Emilse Rios. Volvemos muy pronto.',
     heading: 'Estamos trabajando en la web.',
     line: 'Volvemos muy pronto',
   },
   en: {
-    title: 'Emilse Ríos · We’re working on the site',
-    description: 'We’re working on Emilse Ríos’s website. Back very soon.',
+    title: 'Emilse Rios · We’re working on the site',
+    description: 'We’re working on Emilse Rios’s website. Back very soon.',
     heading: 'We’re working on the site.',
     line: 'Back very soon',
   },

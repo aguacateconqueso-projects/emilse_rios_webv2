@@ -11,8 +11,8 @@ export const ui = {
   es: {
     'site.title': 'Contrabajo en la Ciudad',
     'site.description':
-      'El newsletter de Emilse Ríos. Cada semana, los errores que estancan tu progreso con el contrabajo — y cómo salir de ellos.',
-    'site.name': 'Emilse Ríos',
+      'El newsletter de Emilse Rios. Cada semana, los errores que estancan tu progreso con el contrabajo — y cómo salir de ellos.',
+    'site.name': 'Emilse Rios',
 
     'nav.about': 'Sobre mí',
     'nav.products': 'Formaciones',
@@ -44,7 +44,7 @@ export const ui = {
 
     'media.portrait': 'Retrato de Emi con el contrabajo — blanco y negro',
     'media.portraitAlt':
-      'Emilse Ríos en una calle arbolada, abrazada a su contrabajo, lanzando un beso con una pierna en alto',
+      'Emilse Rios, contrabajista, abrazada a su contrabajo en una calle de Madrid',
     'about.description':
       'Le dijeron que el contrabajo no era para ella. Esta es la historia de por qué se equivocaron: veinte años tocando y formando contrabajistas, de El Sistema a Madrid.',
 
@@ -55,7 +55,7 @@ export const ui = {
        abajo. */
     'products.title': 'Formaciones',
     'products.description':
-      'Los cursos y la membresía de Emilse Ríos. Aprende contrabajo a tu ritmo, con acompañamiento de verdad.',
+      'Los cursos y la membresía de Emilse Rios. Aprende contrabajo a tu ritmo, con acompañamiento de verdad.',
     'products.heading': 'Tú también puedes lograrlo',
     'products.lead':
       'Cada formación de contrabajo nace de una historia: una profesora que odiaba las escalas, un estudiante que después de año y medio no conocía ninguna obra para contrabajo, una contrabajista con vibrato de cabra. Entra y te la cuento. Tal vez te funcione a ti también.',
@@ -67,32 +67,25 @@ export const ui = {
     /* El remate de cada ficha que lleva a su página (27 sep 2026, Emi). */
     'products.more': 'Leer más',
 
-    /* --- Las entradas del newsletter (9 oct 2026) ------------------------
-       `/newsletter/`. El texto de arriba y la segunda posdata son los de Emi
-       en la Home (`src/data/home.ts`); la primera posdata es la suya,
-       reescrita «de manera natural», como pidió. */
-    'nav.newsletter': 'Newsletter',
-    'news.title': 'Contrabajo en la Ciudad',
-    'news.kicker': 'El newsletter',
-    'news.eyebrow': 'Contrabajo en la Ciudad — El newsletter',
-    'news.lead':
-      'Cada semana envío correos donde explico errores que estancan tu progreso con el contrabajo. Son tan obvios que parecen tontos, pero son tan comunes que tal vez los estés cometiendo a diario — sin saberlo.',
-    'news.entries': 'Entradas',
-    'news.read': 'Leer la entrada',
-    'news.more': 'Más entradas',
-    'news.ps1': 'PD: ¿Todavía no estás en mi newsletter? ',
-    'news.ps1Link': 'Suscríbete aquí',
-    'news.ps1End': '. Entrar es gratis, y salir también.',
-    'news.ps2':
-      'PD 2: Al suscribirte recibes un correo de bienvenida con un video. Se trata de un ejercicio donde te explico un concepto que va a cambiar tu forma de producir el sonido. El video dura 4:04 y el ejercicio seguro lo conoces — no hay contrabajista que no lo haya practicado. Pero el 90% lo hace mal, JA. Casi nadie sabe de dónde viene realmente ese movimiento, pero en ese 90% no vas a estar tú, tú no, no después de ver el video. Ya me contarás.',
+    /* --- Los newsletters pasados (11 oct 2026, pedido de SEO de Emi) -----
+       `/newsletters/`. El bloque del newsletter de arriba es el de la Home
+       (`src/data/home.ts`); las posdatas las escribe Emi en cada entrada. */
+    'nl.h1': 'Algunos newsletters pasados',
+    'nl.leer': 'Leer más',
+    'nl.sigue': 'Sigue leyendo',
+    'nl.verMas': 'Ver más',
+    'nl.pagina': 'Página',
+    'nl.indiceTitle': 'Algunos newsletters pasados · Contrabajo en la Ciudad',
+    'nl.indiceDesc':
+      'Algunos correos de Contrabajo en la Ciudad, el newsletter de Emilse Rios: técnica, vibrato y estudio del contrabajo, contados con historias.',
 
     'footer.email': 'info@emilserios.com',
   },
   en: {
     'site.title': 'Double Bass in the City',
     'site.description':
-      "Emilse Ríos's newsletter. Every week, the mistakes that stall your progress on the double bass — and how to get past them.",
-    'site.name': 'Emilse Ríos',
+      "Emilse Rios's newsletter. Every week, the mistakes that stall your progress on the double bass — and how to get past them.",
+    'site.name': 'Emilse Rios',
 
     'nav.about': 'About',
     /* «Programs» desde el 9 oct 2026, como la dirección (`/en/programs/`) y
@@ -123,14 +116,14 @@ export const ui = {
 
     'media.portrait': 'Portrait of Emi with the double bass — black and white',
     'media.portraitAlt':
-      'Emilse Ríos on a tree-lined street, hugging her double bass and blowing a kiss, one leg kicked up behind her',
+      'Emilse Rios, double bassist, hugging her double bass on a street in Madrid',
     'about.description':
       'They told her the double bass wasn\'t for her. This is the story of why they were wrong: twenty years playing and training bassists, from El Sistema to Madrid.',
 
     /* --- La tienda, que está afuera y no pide nada ---------------------- */
     'products.title': 'Programs',
     'products.description':
-      "Emilse Ríos's programs and membership. Learn double bass at your own pace, with real guidance.",
+      "Emilse Rios's programs and membership. Learn double bass at your own pace, with real guidance.",
     'products.heading': 'You can do it too',
     'products.lead':
       "Every double bass course was born from a story: a teacher who hated scales, a student who, after a year and a half, didn't know a single piece for double bass, a bassist with a goat vibrato. Come in and I'll tell you. Maybe it'll work for you too.",
@@ -141,21 +134,15 @@ export const ui = {
     'products.enrolled': 'Already have a program? The classroom is this way',
     'products.more': 'Read more',
 
-    /* --- Las entradas del newsletter (9 oct 2026) ------------------------ */
-    'nav.newsletter': 'Newsletter',
-    'news.title': 'Double Bass in the City',
-    'news.kicker': 'The newsletter',
-    'news.eyebrow': 'Double Bass in the City — The newsletter',
-    'news.lead':
-      "Every week I send out emails where I break down the mistakes that are stalling your progress on the double bass. They're so obvious they sound silly, but they're so common you might be making them every single day — without knowing it.",
-    'news.entries': 'Posts',
-    'news.read': 'Read the post',
-    'news.more': 'More posts',
-    'news.ps1': 'P.S. Not on my newsletter yet? ',
-    'news.ps1Link': 'Sign up here',
-    'news.ps1End': '. It’s free to get in, and just as free to get out.',
-    'news.ps2':
-      'P.S. 2: When you sign up you get a welcome email with a video. It’s an exercise where I explain one concept that’s going to change the way you produce sound. The video runs 4:04 and you almost certainly know the exercise — there isn’t a bass player alive who hasn’t practiced it. But 90% do it wrong, HA! Hardly anyone knows where that movement actually comes from. You won’t be in that 90% though. Not you. Not after you watch the video. You’ll have to let me know.',
+    /* --- Los newsletters pasados (11 oct 2026) --------------------------- */
+    'nl.h1': 'Some past newsletters',
+    'nl.leer': 'Read more',
+    'nl.sigue': 'Keep reading',
+    'nl.verMas': 'See more',
+    'nl.pagina': 'Page',
+    'nl.indiceTitle': 'Some past newsletters · Double Bass in the City',
+    'nl.indiceDesc':
+      'Some emails from Double Bass in the City, Emilse Rios’s newsletter: technique, vibrato and double bass practice, told through stories.',
 
     'footer.email': 'info@emilserios.com',
   },
@@ -190,8 +177,9 @@ export const routes = {
   home: { es: '/', en: '/' },
   about: { es: '/sobre-mi', en: '/about' },
   products: { es: '/formaciones', en: '/programs' },
-  /* Las entradas del newsletter, desde el 9 oct 2026. */
-  newsletter: { es: '/newsletter', en: '/newsletter' },
+  /* Los newsletters pasados (11 oct 2026). Del 9 al 11 oct fue
+     `/newsletter/`, en singular: lo redirige `astro.config.mjs`. */
+  newsletters: { es: '/newsletters', en: '/newsletters' },
   aula: { es: '/aulavirtual', en: '/classroom' },
 } as const satisfies Record<string, Record<Lang, string>>;
 
