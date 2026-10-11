@@ -64,14 +64,27 @@ export const lanzamientos: Record<string, Lanzamiento> = {
         en: 'https://buy.stripe.com/00weVdfrD14Rfb54IV73G0A',
       },
     },
-    /* Los de 240 € todavía no existen (9 oct 2026): Adrián los pasa. */
-    venta: { precio: { es: '240 €', en: '€240' }, enlaces: { es: '', en: '' } },
+    /* Los de 240 €, desde que abren las puertas (Adrián, 11 oct 2026). */
+    venta: {
+      precio: { es: '240 €', en: '€240' },
+      enlaces: {
+        es: 'https://buy.stripe.com/14AfZh7Zb3cZaUPgrD73G0B',
+        en: 'https://buy.stripe.com/9B69AT2ERcNzaUP5MZ73G0C',
+      },
+    },
     incluye: ['todas-las-escalas'],
   },
   'todas-las-escalas': {
     abre: PUERTAS_OCTUBRE,
-    /* Sus enlaces de 87 €, cuando existan. Hasta entonces, «Avísame». */
-    venta: { precio: { es: '87 €', en: '€87' }, enlaces: { es: '', en: '' } },
+    /* 87 €, precio final, sin preventa (Adrián, 11 oct 2026): hasta que
+       abren las puertas, la fecha y «Avísame»; desde entonces, estos. */
+    venta: {
+      precio: { es: '87 €', en: '€87' },
+      enlaces: {
+        es: 'https://buy.stripe.com/cNieVdfrD7tfaUP7V773G0D',
+        en: 'https://buy.stripe.com/fZu6oHbbn5l7bYT5MZ73G0E',
+      },
+    },
   },
 };
 
