@@ -1,9 +1,10 @@
 import type { APIRoute } from 'astro';
 import { adminDeLaPeticion } from '../../../lib/supabase-admin';
 import { BUNNY_CURSOS_LIBRARY } from '../../../lib/video';
+import { clavesBunny, listarBibliotecas, leerBiblioteca, ErrorBunny, type Biblioteca } from '../../../lib/bunny';
 
 /**
- * La biblioteca de Bunny Stream de Emi, para el panel.
+ * Las bibliotecas de Bunny Stream de Emi, para el panel.
  *
  * Existe para que Emi **elija los videos de una lista** —con su título y su
  * duración— en vez de ir a Bunny, abrir cada uno, copiar su «Embed» y pegarlo.
@@ -11,25 +12,30 @@ import { BUNNY_CURSOS_LIBRARY } from '../../../lib/video';
  * de setenta. Y de paso trae la duración exacta de cada uno, que a mano nadie
  * escribiría bien.
  *
- *   GET /api/panel/bunny                     las colecciones y los videos
- *   GET /api/panel/bunny?coleccion=<guid>    solo los de una colección
- *   GET /api/panel/bunny?q=<texto>           buscando por título
+ *   GET /api/panel/bunny                         las bibliotecas, y las
+ *                                                colecciones y los videos de
+ *                                                la de los cursos
+ *   GET /api/panel/bunny?biblioteca=<id>         los de esa biblioteca
+ *   GET /api/panel/bunny?biblioteca=<id>&solo=1  sin volver a listar las
+ *                                                bibliotecas (al cambiar)
+ *   &coleccion=<guid>, &q=<texto>                filtrar en Bunny
  *
- * ⚠️ **La clave de Bunny no puede ir al navegador**: con ella se borran videos.
- * Por eso esto es una ruta de servidor y la clave vive en Vercel como
- * `BUNNY_STREAM_API_KEY`, sin `PUBLIC_`. Es la «API Key» de la biblioteca
- * de los cursos (Bunny → Stream → la biblioteca → API), no la de la cuenta
- * ni la de la biblioteca de la membresía.
+ * **Desde el 15 oct 2026, todas las bibliotecas** —Emi tiene un curso por
+ * biblioteca— si en Vercel está la clave de la cuenta, `BUNNY_API_KEY`. Sin
+ * ella, como antes: solo la de los cursos, con `BUNNY_STREAM_API_KEY`. Ver
+ * `src/lib/bunny.ts`.
+ *
+ * ⚠️ **Las claves de Bunny no pueden ir al navegador**: con ellas se borran
+ * videos (y con la de la cuenta, todo). Viven en Vercel sin `PUBLIC_` y esta
+ * ruta no las devuelve nunca: solo nombres, títulos y duraciones.
  *
  * ⚠️ **Solo para el panel**: empieza por `adminDeLaPeticion()`, que corre en el
  * servidor y lee el rol de la base de datos. Sin sesión de admin, 401.
  *
- * Sin la clave, contesta `{ configurado: false }` y el panel dice que falta y
- * deja pegar el enlace a mano, como siempre.
+ * Sin ninguna clave, contesta `{ configurado: false }` y el panel dice que
+ * falta y deja pegar el enlace a mano, como siempre.
  */
 export const prerender = false;
-
-const API = 'https://video.bunnycdn.com';
 
 const json = (cuerpo: unknown, status = 200) =>
   new Response(JSON.stringify(cuerpo), {
@@ -37,76 +43,50 @@ const json = (cuerpo: unknown, status = 200) =>
     headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
   });
 
-type VideoBunny = {
-  guid: string;
-  title: string;
-  length: number;
-  status: number;
-  collectionId: string;
-  thumbnailFileName?: string;
-  dateUploaded?: string;
-};
-
-type ColeccionBunny = { guid: string; name: string; videoCount: number };
-
 export const GET: APIRoute = async ({ request, url }) => {
   const admin = await adminDeLaPeticion(request);
   if (!admin) return json({ error: 'no_autorizado' }, 401);
 
-  const clave = process.env.BUNNY_STREAM_API_KEY?.trim();
-  /* La biblioteca de los CURSOS, que es la de la clave: en Bunny cada
-     biblioteca tiene la suya. No la de la membresía (`PUBLIC_BUNNY_LIBRARY`):
-     con esa, Bunny contesta 401 a esta clave. Ver `BUNNY_CURSOS_LIBRARY`. */
-  const biblioteca = (process.env.PUBLIC_BUNNY_CURSOS_LIBRARY || BUNNY_CURSOS_LIBRARY).trim();
-  if (!clave) return json({ configurado: false, biblioteca });
+  /* La biblioteca de los CURSOS por defecto: no la de la membresía
+     (`PUBLIC_BUNNY_LIBRARY`). Ver `BUNNY_CURSOS_LIBRARY`. */
+  const claves = clavesBunny(BUNNY_CURSOS_LIBRARY);
+  if (!claves.cuenta && !claves.biblioteca) return json({ configurado: false, biblioteca: claves.cursos });
 
-  /* Opcional: el host del CDN de la biblioteca (`vz-xxxx.b-cdn.net`), para
-     enseñar la miniatura de cada video. Sin él, la lista va sin fotos. */
-  const cdn = process.env.BUNNY_CDN_HOST?.trim().replace(/^https?:\/\//, '').replace(/\/+$/, '');
-
-  const pedir = async (ruta: string) => {
-    const r = await fetch(`${API}${ruta}`, {
-      headers: { AccessKey: clave, accept: 'application/json' },
-    });
-    if (!r.ok) throw new Error(`Bunny contestó ${r.status}`);
-    return r.json();
+  const pedida = url.searchParams.get('biblioteca')?.trim() || '';
+  if (pedida && !/^\d{1,12}$/.test(pedida)) return json({ error: 'biblioteca_invalida' }, 400);
+  const solo = url.searchParams.get('solo') === '1';
+  const filtro = {
+    q: url.searchParams.get('q')?.trim() || undefined,
+    coleccion: url.searchParams.get('coleccion')?.trim() || undefined,
   };
 
   try {
-    const q = new URLSearchParams({ itemsPerPage: '1000', orderBy: 'title' });
-    const buscar = url.searchParams.get('q')?.trim();
-    const coleccion = url.searchParams.get('coleccion')?.trim();
-    if (buscar) q.set('search', buscar);
-    if (coleccion) q.set('collection', coleccion);
-
-    const [videos, colecciones] = await Promise.all([
-      pedir(`/library/${biblioteca}/videos?page=1&${q}`),
-      pedir(`/library/${biblioteca}/collections?page=1&itemsPerPage=1000&orderBy=name`),
-    ]);
-
+    let bibliotecas: Biblioteca[] | undefined;
+    let elegida = pedida;
+    if (!solo || !pedida) {
+      bibliotecas = claves.cuenta
+        ? await listarBibliotecas(claves.cuenta)
+        : [{ id: claves.cursos, nombre: 'Cursos', videos: null }];
+      /* La pedida si es de la cuenta; si no, la de los cursos; si no, la primera. */
+      if (!bibliotecas.some((b) => b.id === elegida)) {
+        elegida = bibliotecas.find((b) => b.id === claves.cursos)?.id ?? bibliotecas[0]?.id ?? '';
+      }
+    }
+    if (!elegida) {
+      return json({ configurado: true, cuenta: Boolean(claves.cuenta), bibliotecas: [], biblioteca: null, colecciones: [], videos: [] });
+    }
+    const contenido = await leerBiblioteca(elegida, claves, filtro);
     return json({
       configurado: true,
-      biblioteca,
-      colecciones: ((colecciones.items ?? []) as ColeccionBunny[]).map((c) => ({
-        guid: c.guid,
-        nombre: c.name,
-        videos: c.videoCount,
-      })),
-      videos: ((videos.items ?? []) as VideoBunny[])
-        /* 4 = terminado de procesar. Los que se están subiendo todavía no se
-           pueden reproducir: se enseñan, pero marcados. */
-        .map((v) => ({
-          guid: v.guid,
-          titulo: v.title,
-          segundos: Math.round(v.length || 0),
-          coleccion: v.collectionId || null,
-          listo: v.status === 4,
-          miniatura:
-            cdn && v.thumbnailFileName ? `https://${cdn}/${v.guid}/${v.thumbnailFileName}` : null,
-        })),
+      /* Con la clave de la cuenta se ven todas; sin ella, solo la de los cursos. */
+      cuenta: Boolean(claves.cuenta),
+      ...(bibliotecas ? { bibliotecas } : {}),
+      biblioteca: elegida,
+      ...contenido,
     });
   } catch (e) {
     console.error('[bunny]', e);
-    return json({ configurado: true, error: (e as Error).message }, 502);
+    const status = e instanceof ErrorBunny && e.status === 400 ? 400 : 502;
+    return json({ configurado: true, error: (e as Error).message }, status);
   }
 };

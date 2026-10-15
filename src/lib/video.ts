@@ -39,8 +39,10 @@ export const BUNNY_LIBRARY_ID = String(
 // Biblioteca de los CURSOS, que NO es la de arriba (24 sep 2026: los videos del
 // primer curso viven en la 754051; la 741634 es la de la membresía y la carta).
 // La leen el selector de Bunny del panel —la `BUNNY_STREAM_API_KEY` de Vercel es
-// la de ESTA biblioteca: en Bunny cada biblioteca tiene su clave— y lo que se
-// pega en una clase sin biblioteca (el GUID pelado, el enlace del CDN).
+// la de ESTA biblioteca: en Bunny cada biblioteca tiene su clave; desde el 15
+// oct 2026, con la clave de la cuenta, el selector abre por esta pero deja
+// elegir cualquier otra (`src/lib/bunny.ts`)— y lo que se pega en una clase sin
+// biblioteca (el GUID pelado, el enlace del CDN).
 //
 // ⚠️ No se arregla cambiando `PUBLIC_BUNNY_LIBRARY`: esa la usa también la
 //    pestaña Membresía, y un GUID pelado de un video semanal se guardaría con la
