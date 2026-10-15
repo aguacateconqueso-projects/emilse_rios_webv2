@@ -4,8 +4,12 @@ Sitio de **Emilse Rios** (sin tilde: lo pidió Emi el 11 oct 2026), contrabajist
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 11 de octubre de 2026 —**la web está en vivo**—.
-**El SEO de Emi, hecho** (PR #66; recuadro 🧵 de abajo, el primero, y la
+**Última actualización:** 15 de octubre de 2026 —**la web está en vivo**—.
+**El selector de Bunny lee todas las bibliotecas** (PR #67; recuadro 🧵 de
+abajo, el primero): Emi creaba un curso nuevo y «+ Desde Bunny» solo le
+enseñaba los videos del diapasón, porque el panel leía una sola biblioteca.
+Falta **una variable en Vercel, `BUNNY_API_KEY`** (punto 45 de 📋). Antes, el
+11 oct, **el SEO de Emi** (PR #66, mergeado; recuadro 🧵 de abajo, el primero, y la
 sección **El SEO de Emi**): `sitemap.xml`, `robots.txt`, la 404 con la ropa
 del sitio, «Emilse Rios» sin tilde, los títulos y descripciones de sus
 tablas, los datos para Google y la imagen al compartir, y **«Algunos
@@ -59,6 +63,30 @@ suscribió desde la Home el 24 sep y funcionó. ⚠️ **El proyecto de Vercel e
 `emilse-rios-webv2_1`**: las vistas previas buenas empiezan por
 `emilse-rios-webv21-git-…` (ver la regla de trabajo, justo abajo). El detalle de cada cosa está en las secciones que siguen a **La
 cortina**, de la más nueva a la más vieja.
+
+> **🧵 15 oct 2026: «+ Desde Bunny» con todas las bibliotecas** (rama
+> `claude/nifty-darwin-2apqzg`, rearrancada desde `main` después del #66;
+> **PR #67**). Su vista previa:
+> **https://emilse-rios-webv21-git-claude-8a85ec-adrians-projects-594b3131.vercel.app/panel/#cursos**
+> Adrián, con una captura del panel: Emi crea un curso nuevo, «+ Desde
+> Bunny», y solo ve las colecciones del diapasón (Nivel 1, 2 y 3). **Emi
+> tiene una biblioteca de Bunny por curso**, y el selector leía una sola —la
+> 754051— porque la clave que tenía (`BUNNY_STREAM_API_KEY`) es de esa
+> biblioteca y de ninguna otra. Ahora:
+>
+> 1. Con **la clave de la cuenta de Bunny** (`BUNNY_API_KEY`), el selector
+>    tiene arriba una lista **«Biblioteca»** con todas, y debajo las
+>    colecciones y los videos de la que elija. Abre por la del curso (la de
+>    sus clases), o la última que eligió, o la de los cursos.
+> 2. Cada video se guarda **con su biblioteca**, así que el aula lo
+>    reproduce aunque no sea la 754051.
+> 3. Si una biblioteca no deja reproducir sus videos en `emilserios.com`
+>    (token o dominios permitidos), el selector lo avisa.
+> 4. **Sin `BUNNY_API_KEY` no cambia nada**: la biblioteca de los cursos,
+>    como hasta hoy, y una nota de que falta la clave.
+>
+> **Lo que le toca a Adrián** (punto 45): poner `BUNNY_API_KEY` en Vercel y
+> redesplegar.
 
 > **🧵 11 oct 2026: el SEO de Emi** (rama `claude/nifty-darwin-2apqzg`,
 > rearrancada desde `main` después del #65; **PR #66**). Su vista previa:
@@ -750,7 +778,7 @@ cortina**, de la más nueva a la más vieja.
 >     día; al final enseña seis filas, la 3 primero en cada idioma. **Sin
 >     ella la web enseña igual las seis** (las del código), pero el panel
 >     dice «Falta un paso» y no puede publicar. Aditiva e idempotente.
-> 39. [ ] **Mergear el PR #66** y mirarlo en vivo: `/sitemap.xml` y
+> 39. [~] *(Mergeado el 11 oct 2026; falta mirarlo en vivo.)* **Mergear el PR #66** y mirarlo en vivo: `/sitemap.xml` y
 >     `/robots.txt` con 200, `/newsletters/` y una entrada, la 404 (cualquier
 >     dirección que no exista), y los 301:
 >     `curl -sI https://www.emilserios.com/newsletter/` →
@@ -780,6 +808,20 @@ cortina**, de la más nueva a la más vieja.
 >     último punto de su documento): rellena las casillas, mira la vista
 >     previa, publica y la encuentra en `/newsletters/`. Después la borra
 >     («Borrar la entrada», abajo en el editor).
+
+> **G. «+ Desde Bunny» con todas las bibliotecas (15 oct 2026, PR #67).**
+> Ver **Las dos bibliotecas de Bunny → 15 oct**.
+>
+> 45. [ ] **`BUNNY_API_KEY` en Vercel** (Adrián): la clave de la **cuenta** de
+>     Bunny —bunny.net → *Account settings* → *API* → *API Key*—, en
+>     Production y en Preview, y **redesplegar**. Sin ella el selector solo
+>     enseña la biblioteca del diapasón (y lo dice). Es una clave de servidor:
+>     **sin `PUBLIC_`**, nunca en el código. Probarlo: Panel → Cursos → un
+>     curso → «+ Desde Bunny» → la lista «Biblioteca» trae todas.
+> 46. [ ] **Que cada biblioteca deje reproducir en la web** (Adrián o Emi, en
+>     Bunny → cada biblioteca → *Security*): `emilserios.com` en *Allowed
+>     domains* (o la lista vacía) y sin *Embed view token authentication*.
+>     Si una no lo cumple, el selector lo avisa al abrirla.
 
 > **D. Cabos sueltos, sin prisa.**
 >
@@ -2359,6 +2401,38 @@ paga. Se separaron:
 un curso futuro vive en otra, Emi puede pegar su «Embed» —trae la biblioteca—,
 pero para elegirlo de la lista hará falta la clave de la cuenta de Bunny (que
 lista las bibliotecas) o una clave por biblioteca.
+
+**15 oct 2026: pasó.** Emi tiene **una biblioteca por curso**, y al crear el
+segundo «+ Desde Bunny» solo le enseñaba el diapasón (captura de Adrián). Se
+hizo lo de la clave de la cuenta (PR #67, `src/lib/bunny.ts`):
+
+- **`BUNNY_API_KEY`** (la de la cuenta) → `GET api.bunny.net/videolibrary`
+  lista las bibliotecas; de la elegida, `GET api.bunny.net/videolibrary/<id>`
+  da su clave (la de solo lectura, `ReadOnlyApiKey`, y si Bunny no la acepta,
+  `ApiKey`) y su zona, de donde sale el host de las miniaturas; con esa clave,
+  `video.bunnycdn.com` da sus colecciones y sus videos. Es lo mismo que hace
+  el proveedor de Terraform del propio Bunny. **Ninguna clave sale de la ruta**:
+  al navegador solo van nombres, títulos y duraciones.
+- **El selector** tiene arriba la lista «Biblioteca». Abre por la de las clases
+  del curso; si no tiene, la última elegida (en el navegador); si no, la 754051.
+  Lo leído de cada biblioteca se guarda mientras el panel está abierto. Al
+  cambiar de biblioteca se desmarca lo marcado.
+- Cada video se guarda con `bunnyUrl(guid, <su biblioteca>)`: el aula lee la
+  biblioteca del enlace (`videoEmbed`), así que no hay que tocar nada más.
+- **El aviso**: si la biblioteca pide token para el reproductor
+  (`PlayerTokenAuthenticationEnabled`) o tiene *Allowed domains* sin
+  `emilserios.com`, el selector lo dice (punto 46).
+- **Sin `BUNNY_API_KEY`**, como antes: la 754051 con `BUNNY_STREAM_API_KEY` y
+  `BUNNY_CDN_HOST`, con la lista desactivada y una nota de que falta la clave.
+- **Cómo se probó:** con un Bunny simulado de tres bibliotecas dentro del
+  servidor de desarrollo, y el panel en Chromium contra Postgres + PostgREST
+  con la RLS de verdad: la lista de las tres; cambiar a otra y crear dos
+  clases de cuatro videos (se guardan con `/embed/812345/…`); volver a abrir
+  el mismo curso (abre por su biblioteca y marca «ya está en este curso»);
+  otro curso abre por la suya; el aviso de dominios; la clave de solo lectura
+  rechazada (pasa a la otra); una biblioteca que no es de la cuenta (502), un
+  id que no es un número (400), sin sesión (401); que ninguna clave aparezca
+  en la respuesta; y sin la clave de la cuenta, el modo de antes.
 
 ### Lo que queda abierto
 

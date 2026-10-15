@@ -280,7 +280,16 @@ const deCatalogo = catalogo
   <dialog class="dialogo bunny" data-bunny aria-labelledby="bunny-h">
     <div class="dialogo__cuerpo">
       <p class="eyebrow" data-bunny-para></p>
-      <h2 class="app-h2" id="bunny-h">Tu biblioteca de Bunny</h2>
+      <h2 class="app-h2" id="bunny-h">Tus videos de Bunny</h2>
+      {/* Una biblioteca por curso (15 oct 2026): primero se elige cuál. */}
+      <label class="campo bunny__biblioteca">
+        <span class="campo__t">Biblioteca</span>
+        <select data-bunny-biblioteca disabled>
+          <option value="">Cargando…</option>
+        </select>
+        <span class="campo__ayuda" data-bunny-biblioteca-nota hidden></span>
+      </label>
+      <p class="aviso bunny__aviso" data-bunny-aviso hidden></p>
       <div class="bunny__filtros">
         <label class="campo">
           <span class="campo__t">Colección</span>
@@ -818,6 +827,14 @@ const deCatalogo = catalogo
   /* --- Bunny ----------------------------------------------------------------- */
   .bunny {
     width: min(48rem, calc(100vw - 2 * var(--space-3)));
+  }
+
+  .bunny__biblioteca {
+    margin-top: var(--space-3);
+  }
+
+  .bunny__aviso {
+    margin-top: var(--space-2);
   }
 
   .bunny__filtros {

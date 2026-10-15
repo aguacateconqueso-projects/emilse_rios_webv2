@@ -1327,7 +1327,9 @@ accesoForm.addEventListener('submit', async (e) => {
    BUNNY: elegir un video, o crear clases a partir de varios
 
    Emi graba cada clase dos veces, en español y en inglés, y sube los dos
-   videos a la misma biblioteca. El selector lee el idioma de cada uno —de su
+   videos a la misma biblioteca —una por curso: desde el 15 oct 2026 el
+   selector deja elegir cuál (`src/lib/bunny.ts`)—. El selector lee el
+   idioma de cada uno —de su
    título, o del nombre de su colección: `lib/bunny-idioma.ts`— para que cada
    video caiga en su hueco: al elegir uno, enseña los del idioma del hueco y
    pone también su versión en el otro si ese está vacío; al crear clases de
@@ -1340,6 +1342,12 @@ let bunnyVideos: VideoBunny[] = [];
 let bunnyCargado = false;
 /* La biblioteca que leyó el selector: con ella se guarda cada video elegido. */
 let bunnyBiblioteca = BUNNY_CURSOS_LIBRARY;
+/* Lo ya leído de cada biblioteca, para no volver a pedirlo al cambiar. */
+type LeidoBunny = { videos: VideoBunny[]; colecciones: { guid: string; nombre: string; videos: number }[]; aviso: string | null };
+const porBiblioteca = new Map<string, LeidoBunny>();
+const selBiblioteca = $<HTMLSelectElement>('[data-bunny-biblioteca]', dlg);
+/* La última que eligió Emi, para la próxima vez. */
+const ULTIMA_BIBLIOTECA = 'panel:bunny-biblioteca';
 /* El nombre de cada colección, para el idioma de los videos que no lo dicen. */
 const bunnyColecciones = new Map<string, string>();
 /* Lo que Emi corrige pulsando la etiqueta del idioma. Vale hasta recargar el
@@ -1375,36 +1383,112 @@ async function token() {
   return session?.access_token ?? '';
 }
 
-async function cargarBunny() {
+/** La biblioteca de un enlace de Bunny guardado: `/embed/<biblioteca>/<guid>`. */
+const bibliotecaDe = (url: string | null | undefined) => String(url ?? '').match(/\/(?:embed|play)\/(\d{3,12})\//)?.[1] ?? null;
+
+/**
+ * Con qué biblioteca abrir: la de los videos que el curso ya tiene; si no
+ * tiene, la última que eligió Emi; si no, la que diga el servidor.
+ */
+function bibliotecaPreferida(): string | null {
+  for (const l of todasLasClases()) {
+    const b = bibliotecaDe(l.video_es) ?? bibliotecaDe(l.video_en);
+    if (b) return b;
+  }
+  try {
+    return localStorage.getItem(ULTIMA_BIBLIOTECA);
+  } catch {
+    return null;
+  }
+}
+
+/** Pinta lo leído de una biblioteca: sus colecciones, su aviso y sus videos. */
+function ponerBiblioteca(id: string, leido: LeidoBunny) {
+  bunnyBiblioteca = id;
+  selBiblioteca.value = id;
+  /* En orden natural: «2 …» antes que «10 …». Bunny ordena letra a letra. */
+  bunnyVideos = [...leido.videos].sort((a, b) => ordenNatural(a.titulo, b.titulo));
+  const sel = $<HTMLSelectElement>('[data-bunny-coleccion]', dlg);
+  sel.textContent = '';
+  sel.append(el('option', { value: '', text: `Todas (${bunnyVideos.length})` }));
+  bunnyColecciones.clear();
+  leido.colecciones.forEach((col) => {
+    bunnyColecciones.set(col.guid, col.nombre);
+    sel.append(el('option', { value: col.guid, text: `${col.nombre} (${col.videos})` }));
+  });
+  const aviso = $('[data-bunny-aviso]', dlg);
+  aviso.textContent = leido.aviso ?? '';
+  aviso.hidden = !leido.aviso;
+  prepararFiltroIdioma();
+  pintarBunny();
+  contarElegidos();
+}
+
+/**
+ * Lee una biblioteca (sin `id`, la que prefiera: ver `bibliotecaPreferida`).
+ * La primera vez trae también la lista de bibliotecas de la cuenta.
+ */
+async function cargarBunny(id?: string | null) {
   const estado = $('[data-bunny-estado]', dlg);
   estado.textContent = 'Leyendo tu biblioteca…';
+  $('[data-bunny-lista]', dlg).textContent = '';
   try {
-    const r = await fetch('/api/panel/bunny', { headers: { Authorization: `Bearer ${await token()}` } });
+    const q = new URLSearchParams();
+    if (id) q.set('biblioteca', id);
+    if (id && bunnyCargado) q.set('solo', '1');
+    const r = await fetch(`/api/panel/bunny${q.toString() ? `?${q}` : ''}`, {
+      headers: { Authorization: `Bearer ${await token()}` },
+    });
     const j = await r.json().catch(() => ({}));
     if (r.status === 401) throw new Error('El servidor no reconoce tu sesión de admin.');
-    if (j.biblioteca) bunnyBiblioteca = String(j.biblioteca);
     if (j.configurado === false) {
+      if (j.biblioteca) bunnyBiblioteca = String(j.biblioteca);
+      selBiblioteca.textContent = '';
+      selBiblioteca.append(el('option', { value: '', text: 'Sin conectar' }));
       estado.textContent =
-        'Falta la clave de la biblioteca de Bunny en Vercel (BUNNY_STREAM_API_KEY). Mientras tanto, pega el «Embed» de cada video a mano: funciona igual.';
+        'Falta la clave de Bunny en Vercel (BUNNY_API_KEY, la de la cuenta). Mientras tanto, pega el «Embed» de cada video a mano: funciona igual.';
       return;
     }
     if (!r.ok || j.error) throw new Error(j.error || `Error ${r.status}`);
-    /* En orden natural: «2 …» antes que «10 …». Bunny ordena letra a letra. */
-    bunnyVideos = ((j.videos ?? []) as VideoBunny[]).sort((a, b) => ordenNatural(a.titulo, b.titulo));
-    const sel = $<HTMLSelectElement>('[data-bunny-coleccion]', dlg);
-    sel.textContent = '';
-    sel.append(el('option', { value: '', text: `Todas (${bunnyVideos.length})` }));
-    bunnyColecciones.clear();
-    (j.colecciones ?? []).forEach((col: { guid: string; nombre: string; videos: number }) => {
-      bunnyColecciones.set(col.guid, col.nombre);
-      sel.append(el('option', { value: col.guid, text: `${col.nombre} (${col.videos})` }));
-    });
+    if (Array.isArray(j.bibliotecas)) {
+      selBiblioteca.textContent = '';
+      (j.bibliotecas as { id: string; nombre: string; videos: number | null }[]).forEach((b) =>
+        selBiblioteca.append(el('option', { value: b.id, text: b.videos === null ? b.nombre : `${b.nombre} (${b.videos})` })),
+      );
+      selBiblioteca.disabled = j.bibliotecas.length < 2;
+      const nota = $('[data-bunny-biblioteca-nota]', dlg);
+      nota.hidden = Boolean(j.cuenta);
+      nota.textContent = j.cuenta
+        ? ''
+        : 'Solo veo la biblioteca de los cursos. Para elegir entre todas tus bibliotecas falta la clave de la cuenta de Bunny en Vercel (BUNNY_API_KEY).';
+    }
+    if (!j.biblioteca) {
+      estado.textContent = 'Tu cuenta de Bunny no tiene ninguna biblioteca de video.';
+      return;
+    }
+    const leido: LeidoBunny = { videos: j.videos ?? [], colecciones: j.colecciones ?? [], aviso: j.aviso ?? null };
+    porBiblioteca.set(String(j.biblioteca), leido);
     bunnyCargado = true;
-    prepararFiltroIdioma();
-    pintarBunny();
+    ponerBiblioteca(String(j.biblioteca), leido);
   } catch (e) {
     estado.textContent = `No se pudo leer la biblioteca: ${(e as Error).message}`;
+    /* La lista vuelve a decir la que de verdad está cargada. */
+    if (bunnyCargado) selBiblioteca.value = bunnyBiblioteca;
   }
+}
+
+/** Al elegir otra biblioteca: lo marcado era de la otra, así que se desmarca. */
+async function cambiarBiblioteca(id: string) {
+  if (!id || id === bunnyBiblioteca) return;
+  elegidos.clear();
+  try {
+    localStorage.setItem(ULTIMA_BIBLIOTECA, id);
+  } catch {
+    /* sin almacenamiento, se elige otra vez la próxima */
+  }
+  const leido = porBiblioteca.get(id);
+  if (leido) ponerBiblioteca(id, leido);
+  else await cargarBunny(id);
 }
 
 /**
@@ -1568,8 +1652,11 @@ function abrirBunny(m: NonNullable<typeof bunnyModo>) {
   contarElegidos();
   dlg.showModal();
   armarBotones();
-  if (!bunnyCargado) void cargarBunny();
-  else {
+  const preferida = bibliotecaPreferida();
+  if (!bunnyCargado) void cargarBunny(preferida);
+  else if (preferida && preferida !== bunnyBiblioteca && [...selBiblioteca.options].some((o) => o.value === preferida)) {
+    void cambiarBiblioteca(preferida);
+  } else {
     prepararFiltroIdioma();
     pintarBunny();
   }
@@ -1666,6 +1753,7 @@ importarBtn.addEventListener('click', async () => {
 });
 
 $('[data-bunny-cerrar]', dlg).addEventListener('click', () => dlg.close());
+selBiblioteca.addEventListener('change', () => void cambiarBiblioteca(selBiblioteca.value));
 $('[data-bunny-coleccion]', dlg).addEventListener('change', () => pintarBunny());
 filtroIdioma.addEventListener('change', () => pintarBunny());
 $('[data-bunny-buscar]', dlg).addEventListener('input', () => pintarBunny());
