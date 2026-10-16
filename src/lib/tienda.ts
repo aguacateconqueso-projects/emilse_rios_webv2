@@ -48,7 +48,7 @@ export type Ficha = Product & {
   conPagina: boolean;
   /**
    * Lo que dice la ficha en vez de «Próximamente» —«Abrimos puertas el
-   * viernes 16…»—, cuando tiene fecha de apertura (`src/data/lanzamientos.ts`).
+   * lunes 19…»—, cuando tiene fecha de apertura (`src/data/lanzamientos.ts`).
    */
   aviso?: Record<Lang, string>;
 };

@@ -4,7 +4,13 @@ Sitio de **Emilse Rios** (sin tilde: lo pidió Emi el 11 oct 2026), contrabajist
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 15 de octubre de 2026 —**la web está en vivo**—.
+**Última actualización:** 16 de octubre de 2026 —**la web está en vivo**—.
+**⚠️ Las puertas de octubre pasan al lunes 19 a las 23:59** (Emi, el mismo
+16 por la tarde; PR #68): el diapasón y las escalas abren el **19**, no el 16,
+y **la preventa de 195 € dura hasta entonces**. Todo sale de
+`PUERTAS_OCTUBRE` en `src/data/lanzamientos.ts`: Formaciones, las cartas, la
+ficha de precio, los datos para Google, el aula y el correo de la compra. Los
+enlaces de 195 € se desactivan el **martes 20** (punto 34). Antes, el 15:
 **El selector de Bunny lee todas las bibliotecas** (PR #67; recuadro 🧵 de
 abajo, el primero): Emi creaba un curso nuevo y «+ Desde Bunny» solo le
 enseñaba los videos del diapasón, porque el panel leía una sola biblioteca.
@@ -752,7 +758,8 @@ cortina**, de la más nueva a la más vieja.
 >     Tiene que llegar «Tu acceso a «Todo el diapasón»» y, en el aula, verse
 >     la formación cerrada con la fecha. Si no, buscar `[compras]` y
 >     `[stripe-webhook]` en Vercel → Logs.
-> 34. [ ] **⚠️ El sábado 17: desactivar los dos enlaces de 195 € en Stripe.**
+> 34. [ ] **⚠️ El martes 20 (era el sábado 17: las puertas pasaron al lunes 19
+>     a las 23:59): desactivar los dos enlaces de 195 € en Stripe.**
 >     Un enlace de pago no caduca solo; quien lo tenga guardado seguiría
 >     pagando 195 € y el webhook le daría acceso igual.
 > 35. [ ] **Que Emi renombre «Clase nueva»** en Panel → Cursos: es el nombre
