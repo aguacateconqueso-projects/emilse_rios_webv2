@@ -195,7 +195,7 @@ const ORGANIZACION: Nodo = { '@type': 'Organization', name: 'Contrabajo en la Ci
 /** «240 €» → 240. */
 const importe = (precio: string) => Number(precio.replace(/[^\d.,]/g, '').replace(',', '.'));
 
-/** La fecha (en Madrid) de un instante ISO: «2026-10-16». */
+/** La fecha (en Madrid) de un instante ISO: «2026-10-19». */
 const diaMadrid = (iso: string) =>
   new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid', year: 'numeric', month: '2-digit', day: '2-digit' }).format(
     Date.parse(iso),

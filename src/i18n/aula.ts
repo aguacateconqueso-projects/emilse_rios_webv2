@@ -124,7 +124,7 @@ export const aulaUi = {
     'course.draft': 'Este curso está en borrador: solo lo ves tú. Las alumnas lo verán cuando lo publiques desde el panel.',
     'course.editInPanel': 'Editar en el panel',
     /* Una formación que todavía no abrió (9 oct 2026, la preventa). {fecha}:
-       «viernes 16 de octubre a las 23:59»; {huso}: «hora de España». */
+       «lunes 19 de octubre a las 23:59»; {huso}: «hora de España». */
     'course.opensChip': 'Abre el {fecha}',
     'course.opensTitle': 'Abro las puertas el {fecha} ({huso})',
     'course.opensLead': 'Tu formación ya está a tu nombre: ese día la encuentras acá, completa. Te espero dentro.',

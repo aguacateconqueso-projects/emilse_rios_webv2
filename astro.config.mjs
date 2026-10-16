@@ -174,6 +174,26 @@ const NEWSLETTERS_VIEJOS = {
   '/en/newsletter/most-common-vibrato-mistake-double-bass': '/en/newsletters/double-bass-vibrato-tense-hand',
 };
 
+/**
+ * La web vieja de Emi (WordPress), antes de esta: las direcciones que pidió
+ * redirigir el 16 oct 2026, **exactamente estas**, con un 301 permanente —hay
+ * enlaces en Google y en correos—. **No hay una redirección general de los
+ * 404 al inicio, a propósito** (lo pidió así): lo que no está acá da la 404,
+ * que enseña el inicio con su aviso de la mudanza (`src/components/Perdida.astro`).
+ * `npm run audit:redirecciones` comprueba cada una.
+ */
+const WEB_VIEJA = {
+  '/cursos': '/formaciones',
+  '/cursos-contrabajo': '/formaciones',
+  '/contactame': '/',
+  '/fuerza-mano-izquierda-contrabajo': '/newsletters/fuerza-mano-izquierda-contrabajo',
+  '/vibrato-contrabajo-control': '/newsletters/vibrato-contrabajo-mano-tensa',
+  '/spiccato-contrabajo-conciencia-corporal': '/formaciones/membresia-contrabajo',
+  '/cruces-de-cuerda-contrabajo': '/formaciones/membresia-contrabajo',
+  '/en/left-hand-double-bass-technique': '/en/newsletters/left-hand-strength-double-bass',
+  '/en/spiccato-double-bass': '/en/programs/double-bass-membership',
+};
+
 /** @returns {import('astro').AstroIntegration} */
 function laAcademiaRedirige() {
   /** @type {URL | undefined} */
@@ -314,6 +334,9 @@ export default defineConfig({
     ),
     '/en/products/[producto]': '/en/programs/[producto]',
     '/en/courses/[producto]': '/en/programs/[producto]',
+
+    /* La web vieja de Emi, de antes de esta (16 oct 2026): `WEB_VIEJA`, arriba. */
+    ...WEB_VIEJA,
 
     /*
      * Los newsletters pasados, de `/newsletter/` a `/newsletters/` (11 oct

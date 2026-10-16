@@ -220,7 +220,7 @@ const deSupabase = {
   /**
    * Los cursos que tiene a su nombre, publicados o no (9 oct 2026). Un curso
    * sin publicar no se deja leer, pero su acceso sí: así el escritorio puede
-   * decir «abre el viernes 16» a quien lo compró en preventa.
+   * decir «abre el lunes 19» a quien lo compró en preventa.
    */
   async misAccesos(): Promise<string[]> {
     const id = await uid();

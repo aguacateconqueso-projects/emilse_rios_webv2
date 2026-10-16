@@ -1,6 +1,19 @@
 ---
-/** Lo que no existe (11 oct 2026). Ver `src/components/Perdida.astro`. */
+/**
+ * Lo que no existe: el inicio con el aviso de la mudanza (16 oct 2026). Ver
+ * `src/components/Perdida.astro`.
+ *
+ * **En el servidor** (`prerender = false`) y no en el build: una sola página
+ * estática no sabe desde qué dirección llegó cada quien, y el idioma sale de
+ * ella (`/en/…`, en inglés). Contesta siempre **404**.
+ */
 import Perdida from '../components/Perdida.astro';
+
+export const prerender = false;
+
+Astro.response.status = 404;
+/* Un rato en la caché de Vercel, como Formaciones: cada despliegue la renueva. */
+Astro.response.headers.set('Cache-Control', 'public, max-age=0, s-maxage=600, stale-while-revalidate=3600');
 ---
 
 <Perdida />

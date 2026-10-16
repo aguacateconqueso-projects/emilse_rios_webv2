@@ -5,14 +5,16 @@ import type { Lang } from '../i18n/ui';
  * enlaces de pago de Stripe.
  *
  * **9 de octubre de 2026, pedido de Emi.** «Todo el diapasón» y «Todas las
- * escalas» abren el **viernes 16 de octubre a las 23:59** (hora de Madrid).
+ * escalas» abren el **lunes 19 de octubre a las 23:59** (hora de Madrid).
+ * Iba a ser el viernes 16; **Emi movió la fecha al 19 el mismo 16 de
+ * octubre**, con la preventa todavía abierta: la preventa dura hasta el 19.
  * Hasta ese momento el diapasón se vende en **preventa a 195 €**, con los
  * 240 € tachados; ese día abren las puertas y el precio sube. Las escalas
  * dicen la fecha, sin precio especial.
  *
  * **Todo cambia solo con la hora**, sin que nadie toque nada esa noche:
  *
- *   · Formaciones dice «Abrimos puertas el viernes 16…» en vez de
+ *   · Formaciones dice «Abrimos puertas el lunes 19…» en vez de
  *     «Próximamente» (`avisoFicha`).
  *   · La carta pinta la ficha de precio y el botón que tocan en cada momento
  *     (`aplicarLanzamiento` en `src/lib/tienda.ts`).
@@ -34,8 +36,12 @@ import type { Lang } from '../i18n/ui';
  * pagando 195 €, y el webhook le daría acceso igual (es un pago de verdad).
  */
 
-/** Las puertas de octubre de 2026: viernes 16, 23:59, hora de Madrid (CEST). */
-export const PUERTAS_OCTUBRE = '2026-10-16T23:59:00+02:00';
+/**
+ * Las puertas de octubre de 2026: **lunes 19, 23:59, hora de Madrid** (CEST:
+ * el horario de verano acaba el domingo 25). Hasta el 16 oct 2026 fue el
+ * viernes 16 a la misma hora.
+ */
+export const PUERTAS_OCTUBRE = '2026-10-19T23:59:00+02:00';
 
 export type Precio = Record<Lang, string>;
 export type Enlaces = Record<Lang, string>;
@@ -102,8 +108,8 @@ export const yaAbrio = (abre: string, ahora = Date.now()): boolean => ahora >= D
 const MADRID = 'Europe/Madrid';
 
 /**
- * La fecha de las puertas, dicha como la dice Emi: «viernes 16 de octubre a
- * las 23:59» / «Friday, October 16 at 11:59 PM». Siempre en la hora de Madrid.
+ * La fecha de las puertas, dicha como la dice Emi: «lunes 19 de octubre a
+ * las 23:59» / «Monday, October 19 at 11:59 PM». Siempre en la hora de Madrid.
  */
 export function fechaPuertas(abre: string, lang: Lang): string {
   const ms = Date.parse(abre);

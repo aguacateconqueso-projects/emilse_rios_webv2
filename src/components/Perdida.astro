@@ -1,54 +1,83 @@
 ---
 /**
- * La página que no existe (11 oct 2026, pedido de SEO de Emi): hasta ese día
- * era la 404 de Astro, de fondo oscuro y fuera de la marca. Ahora es una
- * página del sitio, con su menú y su pie: una línea y el enlace al inicio.
+ * La página que no existe: **el inicio, con un aviso de la mudanza arriba**.
  *
- * ⚠️ **El texto es provisional**: lo redacta Emi. Se cambia acá y nada más.
- * Es una sola página para los dos idiomas —no sabe desde dónde llegó cada
- * quien—, así que dice el español en grande y el inglés debajo.
+ * **16 de octubre de 2026, pedido de Emi** («mi web cambió de estructura»):
+ * quien llegue a una dirección que ya no existe —un enlace de la web vieja,
+ * un correo antiguo— ve **el mismo inicio, con su formulario**, y encima
+ * unas líneas suyas: «¿Alguna vez te has mudado? Agobia un montón…». Del 11
+ * al 16 oct fue una página propia con «Esta página no existe. O ya no
+ * existe.» (provisional, en los dos idiomas a la vez).
  *
- * Es un componente porque la usan dos: `src/pages/404.astro` (lo que no
- * existe) y las páginas de ventas del servidor, cuando piden una carta que no
- * hay —Astro no deja reescribir de una página del servidor a una estática—.
+ * Lo que pidió, y cómo se cumple:
+ *
+ *   · **Sigue siendo un 404**: no redirige ni contesta 200. Lo pone
+ *     `src/pages/404.astro` (que va en el servidor para poder leer la
+ *     dirección) y las páginas del servidor que piden algo que no hay (una
+ *     carta, un newsletter), que fijan `Astro.response.status = 404` antes de
+ *     pintar esto.
+ *   · **Es el inicio de verdad, no una copia**: el mismo `Home.astro` con los
+ *     bloques de `src/data/home.ts`. Si Emi cambia el inicio, esto cambia solo.
+ *   · **Un idioma por vez**: lo que empieza por `/en/` (o es `/en`), en
+ *     inglés, con el inicio en inglés; todo lo demás, en español.
+ *
+ * Fuera de Google (`noindex`) y sin la firma de la entrada del inicio: lo
+ * primero que hay que leer es el aviso.
  */
 import Base from '../layouts/Base.astro';
+import Home from './Home.astro';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  /** Si no se dice, sale de la dirección: `/en/…` es inglés. */
+  lang?: Lang;
+}
+const ruta = Astro.url.pathname;
+const lang: Lang = (Astro.props as Props).lang ?? (ruta === '/en' || ruta.startsWith('/en/') ? 'en' : 'es');
+
+/* El texto de Emi, tal cual, un renglón por línea. */
+const aviso: Record<Lang, { title: string; lineas: string[] }> = {
+  es: {
+    title: 'Esta página ya no existe · Contrabajo en la Ciudad',
+    lineas: [
+      '¿Alguna vez te has mudado? Agobia un montón.',
+      'Yo acabo de mudar mi web, así que la página que buscabas ya no existe.',
+      'Pero estás en el lugar correcto.',
+    ],
+  },
+  en: {
+    title: 'This page doesn’t exist anymore · Double Bass in the City',
+    lineas: [
+      'Have you ever moved? It’s overwhelming.',
+      'I just moved my website, so the page you were looking for doesn’t exist anymore.',
+      'But you’re in the right place.',
+    ],
+  },
+};
+const a = aviso[lang];
 ---
 
-<Base lang="es" title="Esta página no existe · Emilse Rios" description="Esta página no existe." noindex>
-  <section class="row row--flush perdida">
-    <div class="row__body">
-      <p class="mono soft">404</p>
-      <h1 class="perdida__h">Esta página no existe. O ya no existe.</h1>
-      <p class="perdida__ir"><a href="/">Volver al inicio</a></p>
-      <p class="perdida__en soft" lang="en">
-        This page doesn’t exist, or it doesn’t anymore. <a href="/en/">Back to the home page</a>
-      </p>
-    </div>
+<Base lang={lang} title={a.title} description={a.lineas.join(' ')} backdrop entrada={false} noindex>
+  <section class="mudanza" aria-label={lang === 'en' ? 'Page not found' : 'Página no encontrada'}>
+    {a.lineas.map((l) => <p>{l}</p>)}
   </section>
+  <Home lang={lang} />
 </Base>
 
 <style>
-  .perdida {
-    padding-block: var(--space-12);
-  }
-
-  .perdida__h {
-    margin-top: var(--space-2);
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-size: var(--text-anchor);
-    line-height: var(--leading-anchor);
-    letter-spacing: var(--tracking-section);
+  /* Arriba de la portada, centrado como ella y a la medida de su entradilla.
+     Con la letra del cuerpo: es Emi hablando, no un titular. Debajo, la
+     portada pone sus 64 px de siempre. */
+  .mudanza {
+    max-width: var(--measure);
+    margin-inline: auto;
+    padding-block-start: var(--space-8);
+    padding-inline: var(--space-3);
+    text-align: center;
     text-wrap: balance;
   }
 
-  .perdida__ir {
-    margin-top: var(--space-4);
-  }
-
-  .perdida__en {
-    margin-top: var(--space-6);
-    font-size: var(--text-small);
+  .mudanza p + p {
+    margin-top: var(--space-1);
   }
 </style>

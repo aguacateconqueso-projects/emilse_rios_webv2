@@ -335,7 +335,7 @@ export function correoCompra(
     formacion: string;
     /** Las que vienen dentro: «Todas las escalas», con el diapasón. */
     incluidas: string[];
-    /** La fecha de las puertas, si todavía no abrieron: «viernes 16 de…». */
+    /** La fecha de las puertas, si todavía no abrieron: «lunes 19 de…». */
     abre: string | null;
     huso: string;
     /** El enlace para poner la contraseña, si la cuenta es nueva. */

@@ -4,7 +4,16 @@ Sitio de **Emilse Rios** (sin tilde: lo pidió Emi el 11 oct 2026), contrabajist
 membresía y sus cursos. Este documento es la memoria del proyecto: quien lo lea
 de cero debería poder seguir trabajando sin preguntar nada.
 
-**Última actualización:** 15 de octubre de 2026 —**la web está en vivo**—.
+**Última actualización:** 16 de octubre de 2026 —**la web está en vivo**—.
+**⚠️ Las puertas de octubre pasan al lunes 19 a las 23:59** (Emi, el mismo
+16 por la tarde; PR #68): el diapasón y las escalas abren el **19**, no el 16,
+y **la preventa de 195 € dura hasta entonces**. Todo sale de
+`PUERTAS_OCTUBRE` en `src/data/lanzamientos.ts`: Formaciones, las cartas, la
+ficha de precio, los datos para Google, el aula y el correo de la compra. Los
+enlaces de 195 € se desactivan el **martes 20** (punto 34). En el mismo PR,
+**las nueve redirecciones 301 de su web vieja** y **la 404 nueva: el inicio,
+con su aviso de la mudanza arriba** (recuadro 🧵 de abajo, el primero). Antes,
+el 15:
 **El selector de Bunny lee todas las bibliotecas** (PR #67; recuadro 🧵 de
 abajo, el primero): Emi creaba un curso nuevo y «+ Desde Bunny» solo le
 enseñaba los videos del diapasón, porque el panel leía una sola biblioteca.
@@ -63,6 +72,22 @@ suscribió desde la Home el 24 sep y funcionó. ⚠️ **El proyecto de Vercel e
 `emilse-rios-webv2_1`**: las vistas previas buenas empiezan por
 `emilse-rios-webv21-git-…` (ver la regla de trabajo, justo abajo). El detalle de cada cosa está en las secciones que siguen a **La
 cortina**, de la más nueva a la más vieja.
+
+> **🧵 16 oct 2026: la fecha, la web vieja y la 404** (rama
+> `claude/nifty-darwin-2apqzg`, rearrancada desde `main` después del #67;
+> **PR #68**). Emi, por escrito («mi web cambió de estructura»):
+>
+> 1. **Las puertas, al lunes 19 a las 23:59** (eran el viernes 16), en todas
+>    las páginas y en los dos idiomas. Es `PUERTAS_OCTUBRE`; la preventa dura
+>    hasta entonces. **Urgente**: llegó el 16 a las 18:00 de Madrid.
+> 2. **Nueve redirecciones 301 de su web vieja** (WordPress), exactamente
+>    las que pidió, y **ninguna redirección general de los 404 al inicio**
+>    (`WEB_VIEJA` en `astro.config.mjs`; ver **El SEO de Emi → La web vieja y
+>    la 404, desde el 16 de octubre**).
+> 3. **La 404 es el inicio**, el de verdad (`Home.astro`), con tres líneas
+>    suyas arriba —«¿Alguna vez te has mudado? Agobia un montón…»— en el
+>    idioma de la dirección (`/en/…`, en inglés), y **sigue contestando 404**.
+> 4. **La foto de la ola**: no llegó con el pedido. Queda en el punto 42.
 
 > **🧵 15 oct 2026: «+ Desde Bunny» con todas las bibliotecas** (rama
 > `claude/nifty-darwin-2apqzg`, rearrancada desde `main` después del #66;
@@ -752,7 +777,8 @@ cortina**, de la más nueva a la más vieja.
 >     Tiene que llegar «Tu acceso a «Todo el diapasón»» y, en el aula, verse
 >     la formación cerrada con la fecha. Si no, buscar `[compras]` y
 >     `[stripe-webhook]` en Vercel → Logs.
-> 34. [ ] **⚠️ El sábado 17: desactivar los dos enlaces de 195 € en Stripe.**
+> 34. [ ] **⚠️ El martes 20 (era el sábado 17: las puertas pasaron al lunes 19
+>     a las 23:59): desactivar los dos enlaces de 195 € en Stripe.**
 >     Un enlace de pago no caduca solo; quien lo tenga guardado seguiría
 >     pagando 195 € y el webhook le daría acceso igual.
 > 35. [ ] **Que Emi renombre «Clase nueva»** en Panel → Cursos: es el nombre
@@ -797,13 +823,17 @@ cortina**, de la más nueva a la más vieja.
 >     herramientas; acá se comprobó la forma de cada uno. Y **compartir el
 >     inicio por WhatsApp**: tiene que salir la foto nueva (si sale la
 >     vieja, es la caché de WhatsApp: probar con `/?v=2`).
-> 42. [ ] **La foto del mar** («Tu vibrato como un cantante»): Adrián la
->     manda; se cambia y se actualiza su texto alternativo (`fotoAlt` en
->     `src/data/aula.ts` y `photoAlt` en `src/data/cartas.ts`, los dos
->     idiomas). Si Emi la sube ella desde la Tienda, avisar igual para el
->     `alt`.
-> 43. [ ] **Emi escribe el texto de la 404** (hoy: «Esta página no existe. O
->     ya no existe.»). Se cambia en `src/components/Perdida.astro`.
+> 42. [ ] **La foto del mar, «la ola»** («Tu vibrato como un cantante»; Emi
+>     lo volvió a pedir el 16 oct, sin la foto): Adrián la manda; se cambia y
+>     se actualiza su texto alternativo (`fotoAlt` en `src/data/aula.ts` y
+>     `photoAlt` en `src/data/cartas.ts`, los dos idiomas). **En la web la foto
+>     sale de la Tienda** (Panel → Tienda → la ficha → foto): Emi la puede
+>     subir ella misma desde ahí; el archivo del código
+>     (`src/assets/img/curso-vibrato.jpg`) es solo el respaldo. Avisar igual
+>     para el `alt`.
+> 43. [x] ~~**Emi escribe el texto de la 404**~~ —*hecho el 16 oct 2026: la
+>     404 es el inicio con su aviso de la mudanza (ver **El SEO de Emi → La
+>     web vieja y la 404, desde el 16 de octubre**)*.
 > 44. [ ] **Emi crea una entrada de prueba desde el panel, sin ayuda** (el
 >     último punto de su documento): rellena las casillas, mira la vista
 >     previa, publica y la encuentra en `/newsletters/`. Después la borra
@@ -1337,13 +1367,68 @@ el anexo (Emi: «sigue el documento»).
 - **`/robots.txt`** (`public/robots.txt`): fuera `/aulavirtual/`,
   `/en/classroom/`, `/panel/`, `/gracias/`, `/en/thank-you/`, `/api/` y
   `/cortina/`, y la línea del sitemap.
-- **La 404** (`src/components/Perdida.astro`): una página del sitio, con su
-  menú y su pie: «Esta página no existe. O ya no existe.», «Volver al inicio»
-  y la línea en inglés. **Texto provisional** (punto 43). Es un componente
-  porque la usan `src/pages/404.astro` y las páginas del servidor (cartas y
-  newsletters) cuando piden algo que no hay: Astro no deja reescribir de una
-  página del servidor a una estática (`Astro.rewrite('/404')` da un 500), así
-  que pintan `<Perdida />` con `status = 404`.
+- **La 404** (`src/components/Perdida.astro`): del 11 al 16 oct, una página
+  propia, «Esta página no existe. O ya no existe.» en los dos idiomas a la
+  vez (provisional). **Desde el 16 oct, el inicio con el aviso de la
+  mudanza**: ver **La web vieja y la 404, desde el 16 de octubre**, justo
+  abajo. Es un
+  componente porque la usan `src/pages/404.astro` y las páginas del servidor
+  (cartas y newsletters) cuando piden algo que no hay: Astro no deja
+  reescribir de una página del servidor a una estática (`Astro.rewrite('/404')`
+  da un 500), así que pintan `<Perdida />` con `status = 404`.
+
+### La web vieja y la 404, desde el 16 de octubre
+
+**Lo pidió Emi el 16 oct 2026**, por escrito: «mi web cambió de estructura».
+
+**Las redirecciones de su web vieja** (WordPress), **exactamente estas**, 301
+permanentes, en `WEB_VIEJA` de `astro.config.mjs` (Vercel las aplica antes que
+nada, con y sin barra final, en un solo salto):
+
+| Dirección vieja | Va a |
+| --- | --- |
+| `/cursos/` | `/formaciones/` |
+| `/cursos-contrabajo/` | `/formaciones/` |
+| `/contactame/` | `/` |
+| `/fuerza-mano-izquierda-contrabajo/` | `/newsletters/fuerza-mano-izquierda-contrabajo/` |
+| `/vibrato-contrabajo-control/` | `/newsletters/vibrato-contrabajo-mano-tensa/` |
+| `/spiccato-contrabajo-conciencia-corporal/` | `/formaciones/membresia-contrabajo/` |
+| `/cruces-de-cuerda-contrabajo/` | `/formaciones/membresia-contrabajo/` |
+| `/en/left-hand-double-bass-technique/` | `/en/newsletters/left-hand-strength-double-bass/` |
+| `/en/spiccato-double-bass/` | `/en/programs/double-bass-membership/` |
+
+**No hay una redirección general de los 404 al inicio**, a propósito (lo
+pidió así): una dirección que no está en la tabla da la 404. Pidió «el plugin
+Redirection, o el método que ya tenga la web»: este sitio no es WordPress, y
+su método son las redirecciones de Astro hacia Vercel.
+
+**La 404 es el inicio**, con tres líneas suyas arriba:
+
+- ES: «¿Alguna vez te has mudado? Agobia un montón. / Yo acabo de mudar mi
+  web, así que la página que buscabas ya no existe. / Pero estás en el lugar
+  correcto.» EN: «Have you ever moved? It’s overwhelming. / I just moved my
+  website, so the page you were looking for doesn’t exist anymore. / But
+  you’re in the right place.»
+- **Es el mismo `Home.astro`**, con los bloques de `src/data/home.ts`: si Emi
+  cambia el inicio, la 404 cambia sola. Con sus dos formularios y el fondo del
+  contrabajo; sin la firma de la entrada (lo primero que hay que leer es el
+  aviso) y fuera de Google (`noindex`).
+- **Un idioma por vez**: `/en` y lo que empieza por `/en/`, en inglés con el
+  inicio en inglés; todo lo demás, en español.
+- **Sigue contestando 404**, no redirige. Para saber el idioma tiene que ver
+  la dirección, así que **`src/pages/404.astro` va en el servidor**
+  (`prerender = false`): Vercel manda todo lo que no es un fichero ni una
+  página a la función, con `status: 404` (la última ruta de
+  `.vercel/output/config.json`). Diez minutos de caché.
+
+**Cómo se probó:** `npm run audit:redirecciones` (136 de 136: las nueve, con
+y sin barra, en un salto, y `/prueba-404/` y `/en/prueba-404/` sin redirigir);
+el `config.json` del build (las nueve, 301); **la función de producción
+compilada**, llamada como la llama Vercel: `/prueba-404/`, `/en/prueba-404/`,
+`/wp-login.php`, `/en/algo/mas/hondo`, `/formaciones/no-existe/` y
+`/en/programs/no-existe/` dan 404, cada una en su idioma, con el aviso, el H1
+del inicio, sus dos formularios y sin una palabra del otro idioma; capturas a
+1280 y 390 px sin scroll de lado.
 
 ### Quién es Emi para Google
 
