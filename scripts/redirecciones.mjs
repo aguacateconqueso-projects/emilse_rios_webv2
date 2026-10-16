@@ -20,7 +20,9 @@
  * `/en/programs/double-bass-membership/`. Y desde el 9 oct 2026, que todo el
  * inglés viva en `/en/programs/` con el slug en inglés: cada carta, desde
  * `/en/courses/` y `/en/products/`, en un salto. Y desde el 11 oct 2026, que
- * los newsletters de `/newsletter/` lleguen a `/newsletters/`, en un salto.
+ * los newsletters de `/newsletter/` lleguen a `/newsletters/`, en un salto. Y
+ * desde el 16 oct 2026, las de la web vieja de Emi (WordPress), y que una
+ * dirección inventada no la redirija nadie: da la 404.
  *
  * «Aterrizar» es llegar a una página que contesta: un fichero del build o una
  * función —Formaciones y las páginas de ventas se resuelven en el servidor
@@ -178,6 +180,25 @@ for (const [vieja, nueva] of Object.entries(newsletters)) {
 }
 // Una que no está en la tabla —una entrada nueva— va igual, a la misma dirección.
 casos.push({ ruta: '/newsletter/otra-entrada/', llega: '/newsletters/otra-entrada/' });
+
+// La web vieja de Emi (16 oct 2026): exactamente las que pidió, en un salto.
+// Lo mismo que `WEB_VIEJA` en `astro.config.mjs`.
+const webVieja = {
+  '/cursos': '/formaciones/',
+  '/cursos-contrabajo': '/formaciones/',
+  '/contactame': '/',
+  '/fuerza-mano-izquierda-contrabajo': '/newsletters/fuerza-mano-izquierda-contrabajo/',
+  '/vibrato-contrabajo-control': '/newsletters/vibrato-contrabajo-mano-tensa/',
+  '/spiccato-contrabajo-conciencia-corporal': '/formaciones/membresia-contrabajo/',
+  '/cruces-de-cuerda-contrabajo': '/formaciones/membresia-contrabajo/',
+  '/en/left-hand-double-bass-technique': '/en/newsletters/left-hand-strength-double-bass/',
+  '/en/spiccato-double-bass': '/en/programs/double-bass-membership/',
+};
+for (const [vieja, nueva] of Object.entries(webVieja)) {
+  casos.push({ ruta: vieja, llega: nueva, directo: true }, { ruta: `${vieja}/`, llega: nueva, directo: true });
+}
+// Y ninguna redirección general: lo que no existe se queda donde está (la 404).
+casos.push({ ruta: '/prueba-404/', queda: true }, { ruta: '/en/prueba-404/', queda: true });
 
 // `emilseriosacademy.com` redirige entero (27 sep 2026): su portada, a la carta
 // de la membresía, directo; `/api/` no se toca —lo contesta este proyecto—.
